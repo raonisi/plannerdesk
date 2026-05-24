@@ -54,8 +54,8 @@ export const spacing = {
 
 export const verificationLabels: Record<VerificationStatus, string> = {
   draft: "초안",
-  verified: "검증 완료",
-  needs_review: "재검토 필요"
+  verified: "검수 완료",
+  needs_review: "검수 필요"
 };
 
 export const statusBadgeClasses: Record<VerificationStatus, string> = {
