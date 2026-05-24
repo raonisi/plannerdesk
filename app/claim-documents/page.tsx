@@ -1,124 +1,82 @@
+import { ContentSection, PageFrame, PageHero, RelatedPageLinks } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import {
-  ContentSection,
-  ContentGrid,
-  ExternalSourceLink,
-  LastVerified,
-  PageFrame,
-  PageHero,
-  PremiumCard,
-  RelatedPageLinks,
-  SafetyNotice,
-  StatusBadge
-} from "@/components/content-page";
-import {
-  claimDocumentEntries,
-  insurerDirectoryEntries,
-  type ClaimDocumentEntry,
-  type ClaimType
-} from "@/lib/content";
+import { claimDocumentEntries, insurerDirectoryEntries } from "@/lib/content";
+import { ClaimDocumentExplorer } from "./claim-document-explorer";
 
-const claimTypeLabels: Record<ClaimType, string> = {
-  actual_medical: "실손의료",
-  hospitalization: "입원",
-  surgery: "수술",
-  diagnosis: "진단",
-  fracture: "골절",
-  medication: "약제",
-  common: "공통"
-};
-
-const claimTypeOrder: ClaimType[] = [
-  "common",
-  "actual_medical",
-  "hospitalization",
-  "surgery",
-  "diagnosis",
-  "fracture",
-  "medication"
+const workflowSteps = [
+  "먼저 청구 유형을 확인합니다.",
+  "보험사별 공식 출처가 있는지 확인합니다.",
+  "공식 보험사 서류 기준을 다시 검증합니다.",
+  "고객에게는 단정하지 않는 안전한 문구로 안내합니다."
 ];
 
-const insurerNameById = new Map(
-  insurerDirectoryEntries.map((insurer) => [insurer.id, insurer.name])
-);
-
 export default function ClaimDocumentsPage() {
-  const groups = claimTypeOrder
-    .map((claimType) => ({
-      claimType,
-      entries: claimDocumentEntries.filter((entry) => entry.claimType === claimType)
-    }))
-    .filter((group) => group.entries.length > 0);
-
   return (
     <PageFrame>
       <Header />
       <PageHero
-        eyebrow="Claim Document Library"
-        title="청구 서류 라이브러리"
-        description="보험금 청구 전 필요한 서류명과 공식 출처를 확인하기 위한 정적 페이지입니다. 현재 데이터는 구조 검증용 초안입니다."
+        eyebrow="Claim Document Desk"
+        title="청구서류 창고"
+        description="보험설계사가 청구 유형과 보험사 맥락에 맞춰 필요한 서류 참고 정보를 빠르게 확인하기 위한 실무형 문서 라이브러리입니다."
       />
       <RelatedPageLinks />
       <ContentSection>
-        <SafetyNotice variant="claim" />
-        <div className="mt-8 space-y-8">
-          {groups.map((group) => (
-            <section key={group.claimType}>
-              <h2 className="text-2xl font-semibold text-[#102235]">
-                {claimTypeLabels[group.claimType]}
-              </h2>
-              <div className="mt-4">
-                <ContentGrid>
-                  {group.entries.map((entry) => (
-                    <ClaimDocumentCard entry={entry} key={entry.id} />
-                  ))}
-                </ContentGrid>
-              </div>
-            </section>
-          ))}
+        <div className="border border-[#d9c9a8] bg-[#fbf7ee] p-5">
+          <p className="text-sm font-semibold text-[#102235]">검수 안내</p>
+          <p className="mt-2 text-sm leading-6 text-[#4f5661]">
+            현재 일부 정보는 검수 전 샘플 데이터입니다. 실제 고객 안내 또는 제출
+            전 공식 보험사 기준 확인이 필요합니다.
+          </p>
         </div>
+
+        <ClaimDocumentExplorer
+          documents={claimDocumentEntries}
+          insurers={insurerDirectoryEntries}
+        />
+
+        <section className="mt-10 grid gap-4 border-y border-[#d9c9a8] py-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]">
+              Planner Workflow
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-[#102235]">
+              고객 안내 전, 공식 기준을 다시 확인하는 흐름
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-[#4f5661]">
+              이 페이지는 청구 성공을 보장하지 않습니다. 보험사 심사 결과에 따라
+              달라질 수 있으며 전문가 검토가 필요한 사례가 있을 수 있습니다.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {workflowSteps.map((step, index) => (
+              <div className="border border-[#e3d5b8] bg-white p-4" key={step}>
+                <p className="text-sm font-semibold text-[#7a612d]">
+                  Step {index + 1}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#4f5661]">{step}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10 border border-[#d9c9a8] bg-[#fbf7ee] p-5">
+          <p className="text-sm font-semibold text-[#102235]">안전 및 업무 경계</p>
+          <ul className="mt-4 grid gap-2 text-sm leading-6 text-[#4f5661] sm:grid-cols-2">
+            <li>PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.</li>
+            <li>PlannerDesk는 보험금 액수를 추정하지 않습니다.</li>
+            <li>PlannerDesk는 손해사정 업무를 수행하지 않습니다.</li>
+            <li>PlannerDesk는 이 MVP에서 고객 의료 문서를 처리하지 않습니다.</li>
+            <li>청구 관련 정보는 실무 참고용입니다.</li>
+            <li>최종 청구 심사는 보험사가 수행합니다.</li>
+          </ul>
+          <p className="mt-4 text-sm leading-6 text-[#7a612d]">
+            공식 보험사 요구사항은 상품, 약관, 청구 유형, 심사 절차에 따라
+            달라질 수 있습니다.
+          </p>
+        </section>
       </ContentSection>
       <Footer />
     </PageFrame>
-  );
-}
-
-function ClaimDocumentCard({ entry }: { entry: ClaimDocumentEntry }) {
-  const insurerName = entry.insurerId
-    ? insurerNameById.get(entry.insurerId) ?? "보험사 확인 필요"
-    : "공통 기준";
-
-  return (
-    <PremiumCard>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-[#7a612d]">{insurerName}</p>
-          <h3 className="mt-2 text-2xl font-semibold text-[#102235]">
-            {entry.title}
-          </h3>
-        </div>
-        <StatusBadge status={entry.verificationStatus} />
-      </div>
-      <dl className="mt-5 grid gap-3 text-sm">
-        <div className="border border-[#e3d5b8] bg-white px-3 py-3">
-          <dt className="font-semibold text-[#303845]">서류명</dt>
-          <dd className="mt-1 break-keep text-[#4f5661]">{entry.documentName}</dd>
-        </div>
-        <div className="border border-[#e3d5b8] bg-white px-3 py-3">
-          <dt className="font-semibold text-[#303845]">출처</dt>
-          <dd className="mt-1">
-            <ExternalSourceLink href={entry.sourceUrl} />
-          </dd>
-        </div>
-      </dl>
-      <p className="mt-5 text-base leading-7 text-[#4f5661]">{entry.description}</p>
-      <p className="mt-4 border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
-        {entry.cautionNote}
-      </p>
-      <div className="mt-6 border-t border-[#d9c9a8] pt-4">
-        <LastVerified value={entry.lastVerifiedAt} />
-      </div>
-    </PremiumCard>
   );
 }
