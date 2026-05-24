@@ -2,10 +2,12 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import {
   ContentSection,
+  ContentGrid,
   ExternalSourceLink,
   LastVerified,
   PageFrame,
   PageHero,
+  PremiumCard,
   RelatedPageLinks,
   SafetyNotice,
   StatusBadge
@@ -66,10 +68,12 @@ export default function ClaimDocumentsPage() {
               <h2 className="text-2xl font-semibold text-[#102235]">
                 {claimTypeLabels[group.claimType]}
               </h2>
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                {group.entries.map((entry) => (
-                  <ClaimDocumentCard entry={entry} key={entry.id} />
-                ))}
+              <div className="mt-4">
+                <ContentGrid>
+                  {group.entries.map((entry) => (
+                    <ClaimDocumentCard entry={entry} key={entry.id} />
+                  ))}
+                </ContentGrid>
               </div>
             </section>
           ))}
@@ -86,7 +90,7 @@ function ClaimDocumentCard({ entry }: { entry: ClaimDocumentEntry }) {
     : "공통 기준";
 
   return (
-    <article className="border border-[#d9c9a8] bg-[#fbf7ee] p-6 shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
+    <PremiumCard>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[#7a612d]">{insurerName}</p>
@@ -115,6 +119,6 @@ function ClaimDocumentCard({ entry }: { entry: ClaimDocumentEntry }) {
       <div className="mt-6 border-t border-[#d9c9a8] pt-4">
         <LastVerified value={entry.lastVerifiedAt} />
       </div>
-    </article>
+    </PremiumCard>
   );
 }
