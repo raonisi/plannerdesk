@@ -43,6 +43,48 @@ Current MVP excludes:
 - Avoid patterns that make the product feel like an insurance link farm or sales flyer.
 - Run `npm run typecheck`, `npm run lint`, and `npm run build` before release changes.
 
+## Codex Git Workflow
+
+For PR-scoped PlannerDesk tasks, Codex should handle the full low-risk Git workflow unless the user asks otherwise.
+
+Default workflow:
+
+- Start from the latest `main`.
+- Create a feature branch for every PR-scoped task.
+- Use clear branch names that describe the scope.
+- Implement only the requested scope.
+- Run available checks before commit, including `npm run typecheck`, `npm run lint`, and `npm run build` when available.
+- Commit with a clear message.
+- Push the branch to GitHub.
+- Open a pull request into `main`.
+- Include `Summary`, `Changed files`, `Tests`, `Risk level`, `Security/privacy impact`, `User-facing changes`, `Admin-facing changes`, and `Follow-up` in the PR body.
+- Codex may merge low-risk PRs after checks pass.
+- Codex must not auto-merge high-risk work.
+
+High-risk work includes:
+
+- Database migrations
+- Auth changes
+- RBAC changes
+- Admin role changes
+- Billing or payment changes
+- File upload
+- Customer medical data
+- Sensitive data processing
+- Secrets, environment variables, or API keys
+- BOA CRM connection
+- Aiven connection
+- Destructive changes
+- Production data access
+- Legal, privacy, terms, or refund policy decisions
+
+For high-risk work, do not merge. Stop and report:
+
+- Risk
+- Required decision
+- Safer alternative
+- Recommended next step
+
 ## Stop Conditions
 
 Stop and report before continuing if a task requires:
