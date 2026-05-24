@@ -2,8 +2,10 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import {
   ContentSection,
+  ContentGrid,
   PageFrame,
   PageHero,
+  PremiumCard,
   RelatedPageLinks,
   SafetyNotice
 } from "@/components/content-page";
@@ -32,42 +34,41 @@ export default function MessageTemplatesPage() {
       <RelatedPageLinks />
       <ContentSection>
         <SafetyNotice variant="message" />
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          {customerMessageTemplates.map((template) => (
-            <article
-              className="border border-[#d9c9a8] bg-[#fbf7ee] p-6 shadow-[0_18px_40px_rgba(16,34,53,0.05)]"
-              key={template.id}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-[#7a612d]">
-                    {toneLabels[template.tone]}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-[#102235]">
-                    {template.title}
-                  </h2>
+        <div className="mt-8">
+          <ContentGrid>
+            {customerMessageTemplates.map((template) => (
+              <PremiumCard key={template.id}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[#7a612d]">
+                      {toneLabels[template.tone]}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[#102235]">
+                      {template.title}
+                    </h2>
+                  </div>
+                  <span className="whitespace-nowrap border border-[#d9c9a8] bg-[#f7f1e5] px-2.5 py-1 text-xs font-semibold text-[#7a612d]">
+                    초안
+                  </span>
                 </div>
-                <span className="whitespace-nowrap border border-[#d9c9a8] bg-[#f7f1e5] px-2.5 py-1 text-xs font-semibold text-[#7a612d]">
-                  초안
-                </span>
-              </div>
-              <p className="mt-5 text-sm font-semibold text-[#303845]">상황</p>
-              <p className="mt-1 text-base leading-7 text-[#4f5661]">
-                {template.situation}
-              </p>
-              <div className="mt-5 border border-[#e3d5b8] bg-white p-4">
-                <p className="whitespace-pre-wrap break-keep text-base leading-8 text-[#303845]">
-                  {template.body}
+                <p className="mt-5 text-sm font-semibold text-[#303845]">상황</p>
+                <p className="mt-1 text-base leading-7 text-[#4f5661]">
+                  {template.situation}
                 </p>
-              </div>
-              <p className="mt-4 border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
-                {template.safetyNote}
-              </p>
-              <p className="mt-5 whitespace-nowrap text-sm text-[#5f6670]">
-                최종 수정: {template.lastUpdatedAt}
-              </p>
-            </article>
-          ))}
+                <div className="mt-5 border border-[#e3d5b8] bg-white p-4">
+                  <p className="whitespace-pre-wrap break-keep text-base leading-8 text-[#303845]">
+                    {template.body}
+                  </p>
+                </div>
+                <p className="mt-4 border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
+                  {template.safetyNote}
+                </p>
+                <p className="mt-5 whitespace-nowrap text-sm text-[#5f6670]">
+                  최종 수정: {template.lastUpdatedAt}
+                </p>
+              </PremiumCard>
+            ))}
+          </ContentGrid>
         </div>
       </ContentSection>
       <Footer />

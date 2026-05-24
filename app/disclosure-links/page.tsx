@@ -2,10 +2,12 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import {
   ContentSection,
+  ContentGrid,
   ExternalSourceLink,
   LastVerified,
   PageFrame,
   PageHero,
+  PremiumCard,
   RelatedPageLinks,
   SafetyNotice,
   StatusBadge
@@ -39,37 +41,36 @@ export default function DisclosureLinksPage() {
           현재 항목은 공개 전 구조 확인용입니다. 공식 링크는 원문 출처 기준으로
           검증한 뒤에만 사용자 안내에 활용해야 합니다.
         </p>
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          {disclosureLinkEntries.map((entry) => (
-            <article
-              className="border border-[#d9c9a8] bg-[#fbf7ee] p-6 shadow-[0_18px_40px_rgba(16,34,53,0.05)]"
-              key={entry.id}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-[#7a612d]">
-                    {categoryLabels[entry.category]}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-[#102235]">
-                    {entry.title}
-                  </h2>
+        <div className="mt-8">
+          <ContentGrid>
+            {disclosureLinkEntries.map((entry) => (
+              <PremiumCard key={entry.id}>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[#7a612d]">
+                      {categoryLabels[entry.category]}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-[#102235]">
+                      {entry.title}
+                    </h2>
+                  </div>
+                  <StatusBadge status={entry.verificationStatus} />
                 </div>
-                <StatusBadge status={entry.verificationStatus} />
-              </div>
-              <p className="mt-5 text-base leading-7 text-[#4f5661]">
-                {entry.description}
-              </p>
-              <div className="mt-5 border border-[#e3d5b8] bg-white px-3 py-3 text-sm">
-                <p className="font-semibold text-[#303845]">출처 링크</p>
-                <p className="mt-1">
-                  <ExternalSourceLink href={entry.sourceUrl} />
+                <p className="mt-5 text-base leading-7 text-[#4f5661]">
+                  {entry.description}
                 </p>
-              </div>
-              <div className="mt-6 border-t border-[#d9c9a8] pt-4">
-                <LastVerified value={entry.lastVerifiedAt} />
-              </div>
-            </article>
-          ))}
+                <div className="mt-5 border border-[#e3d5b8] bg-white px-3 py-3 text-sm">
+                  <p className="font-semibold text-[#303845]">출처 링크</p>
+                  <p className="mt-1">
+                    <ExternalSourceLink href={entry.sourceUrl} />
+                  </p>
+                </div>
+                <div className="mt-6 border-t border-[#d9c9a8] pt-4">
+                  <LastVerified value={entry.lastVerifiedAt} />
+                </div>
+              </PremiumCard>
+            ))}
+          </ContentGrid>
         </div>
       </ContentSection>
       <Footer />
