@@ -91,3 +91,9 @@ Excluded from the first release:
 - Loss-adjusting workflow
 - Real file upload
 - Database migrations
+
+## Content Architecture
+
+Phase 1 static content models are documented in `docs/CONTENT_ARCHITECTURE.md` and typed under `lib/content`.
+
+All official insurer links, document references, contact details, and policy resources must be verified before public release.
