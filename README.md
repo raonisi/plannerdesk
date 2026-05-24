@@ -30,6 +30,15 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Run the production build locally:
+
+```bash
+npm run build
+npm run start
+```
+
+The production server uses `PORT` when it is set and falls back to `3000`.
+
 ## Quality Checks
 
 ```bash
@@ -42,7 +51,13 @@ npm run build
 
 Copy `.env.example` to `.env.local` for local development if needed.
 
-Do not commit real `.env` files. The initial build does not require `DATABASE_URL`.
+Do not commit real `.env` files. `.env.example` must contain placeholders only.
+
+The initial build and Railway deployment do not require `DATABASE_URL`.
+
+Neon PostgreSQL will be connected only when database-backed features begin. Do not add Neon credentials, Prisma migrations, database tables, authentication, billing, community features, or file upload in the foundation PR.
+
+PlannerDesk must not connect to BOA CRM data, BOA CRM databases, or Aiven.
 
 ## Railway Deployment
 
@@ -55,6 +70,8 @@ Recommended Railway settings:
 - Node version: use the `engines.node` value from `package.json`
 
 No Railway credentials, Neon credentials, or production secrets are required for the initial landing page deployment.
+
+See `docs/DEPLOYMENT.md` for deployment readiness notes.
 
 ## Product Boundary
 
