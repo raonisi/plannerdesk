@@ -14,9 +14,10 @@ export type ClaimType =
 export type DisclosureCategory =
   | "product_disclosure"
   | "policy_terms"
-  | "claim_guidance"
-  | "consumer_notice"
-  | "regulatory_reference";
+  | "insurance_association"
+  | "insurer_official_materials"
+  | "claim_compensation_reference"
+  | "education_practice_reference";
 
 export type MessageTone =
   | "professional"
@@ -59,6 +60,7 @@ export interface DisclosureLinkEntry {
   category: DisclosureCategory;
   sourceUrl: string | null;
   description: string;
+  notes?: string;
   lastVerifiedAt: string | null;
   verificationStatus: VerificationStatus;
 }
