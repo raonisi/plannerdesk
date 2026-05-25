@@ -12,6 +12,7 @@ export type {
   DisclosureLinkEntry,
   InsurerCategory,
   InsurerDirectoryEntry,
+  MessageSituation,
   MessageTone,
   VerificationStatus
 } from "./types";
