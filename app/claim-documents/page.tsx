@@ -15,21 +15,21 @@ export const dynamic = "force-dynamic";
 const t = {
   eyebrow: "Claim Document Desk",
   title: "청구서류 라이브러리",
-  description: "청구 유형별 필요서류와 공식 출처를 한 곳에서 확인하세요.",
+  description: "청구 유형별 필요서류와 공식 출처를 한 곳에서 확인해 주세요.",
   subcopy:
-    "보험금 지급 여부나 지급 금액을 판단하는 내용이 아니며, 보험사와 약관 기준 확인이 필요합니다.",
+    "보험금 지급 여부나 지급 금액을 판단하는 내용이 아닙니다. 청구 전 보험사 또는 약관 확인이 필요합니다.",
   workflowTitle: "고객 안내 전 공식 기준을 다시 확인하는 흐름",
   directory: "보험사 바로가기",
   message: "고객 문구 확인",
   footerNote:
-    "청구서류와 필요 기준은 보험사 및 약관에 따라 달라질 수 있습니다. 공개 정보는 공식 출처 확인 후 순차적으로 업데이트됩니다.",
+    "필요서류는 보험사 및 약관에 따라 달라질 수 있습니다. 공개 정보는 공식 확인 후 업데이트 예정 상태를 포함할 수 있으므로 청구 전 다시 확인해 주세요.",
 };
 
 const workflowSteps = [
-  "청구 유형 및 카테고리를 먼저 확인합니다.",
-  "보험사별 공식 안내 및 제출 경로를 대조합니다.",
-  "상품별 필수 서류와 선택/추가 서류 목록을 검토합니다.",
-  "보험금 지급을 보장하거나 예단하는 확정적 표현을 지양합니다.",
+  "청구 유형과 카테고리를 먼저 확인합니다.",
+  "보험사 공식 안내와 제출 경로를 함께 검토합니다.",
+  "필수 서류와 선택 또는 추가 서류 목록을 구분해 안내합니다.",
+  "보험금 지급 여부나 지급 금액을 판단하는 표현은 사용하지 않습니다.",
 ];
 
 export default async function ClaimDocumentsPage() {
@@ -72,8 +72,8 @@ export default async function ClaimDocumentsPage() {
                 {t.workflowTitle}
               </h2>
               <p className="mt-4 break-keep text-sm leading-6 text-[#4f5661]">
-                이 안내서류 정보는 참고용이며, 실제 보험금 지급 여부나 세부 금액은
-                보험사의 약관 및 최종 심사 결과가 우선합니다.
+                이 안내 서류 정보는 실무 참고용이며, 실제 보험금 지급 여부나
+                지급 금액은 보험사 기준과 최종 심사 결과가 우선합니다.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -95,7 +95,7 @@ export default async function ClaimDocumentsPage() {
           </p>
 
           <MvpModuleLinks
-            description="청구 필요서류 확인 완료 후 보험사 공식 채널 및 고객용 안내 메시지 템플릿 화면으로 연결하여 사용 가능합니다."
+            description="청구 필요서류 확인 후에는 보험사 공식 채널과 고객 안내 메시지 템플릿 화면으로 연결해 사용할 수 있습니다."
             items={[
               {
                 href: "/directory",
@@ -107,7 +107,7 @@ export default async function ClaimDocumentsPage() {
                 href: "/message-templates",
                 label: t.message,
                 description:
-                  "고객에게 서류를 요청하기 전 안전성이 검증된 상황별 문구 템플릿을 참고합니다.",
+                  "고객에게 서류를 요청하기 전 차분한 상황별 문구 템플릿을 참고합니다.",
               },
             ]}
           />
