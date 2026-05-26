@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { EmptyState } from "@/components/content-page";
+import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 import { useFavorites } from "@/hooks/useFavorites";
+import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
 type CategoryFilter = "all" | PublicInsurer["category"];
@@ -45,6 +47,16 @@ export function DirectoryExplorer({
   const [view, setView] = useState<ViewMode>("all");
 
   const { isFavorite, toggle, count: favoriteCount } = useFavorites();
+
+  const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [correctionPreselectedId, setCorrectionPreselectedId] = useState<
+    string | null
+  >(null);
+
+  const openCorrectionRequest = useCallback((insurerId?: string) => {
+    setCorrectionPreselectedId(insurerId ?? null);
+    setCorrectionOpen(true);
+  }, []);
 
   // Apply the standard filters first. Favorites view then filters this set.
   // Crucially, the favorites view operates on the already-published insurer
@@ -148,6 +160,7 @@ export function DirectoryExplorer({
               insurer={insurer}
               isFavorite={isFavorite(insurer.id)}
               key={insurer.id}
+              onRequestCorrection={openCorrectionRequest}
               onToggleFavorite={toggle}
             />
           ))}
@@ -158,6 +171,36 @@ export function DirectoryExplorer({
           description="\uac80\uc0c9\uc5b4\ub97c \uc904\uc774\uac70\ub098 \ud544\ud130\ub97c \ubcc0\uacbd\ud574 \uc8fc\uc138\uc694."
         />
       )}
+
+      <section className="rounded-2xl border border-[#d9c9a8] bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a612d]">
+              FEEDBACK
+            </p>
+            <h3 className="mt-1 text-lg font-semibold text-[#102235]">
+              {CORRECTION_REQUEST_COPY.triggerLabel}
+            </h3>
+            <p className="mt-1 text-sm leading-6 text-[#4f5661]">
+              {CORRECTION_REQUEST_COPY.triggerHint} {CORRECTION_REQUEST_COPY.reviewNoticeBody}
+            </p>
+          </div>
+          <button
+            className="inline-flex min-h-11 items-center justify-center self-start rounded-full border border-[#aa8137] bg-[#fff7e6] px-4 py-2 text-sm font-semibold text-[#7a612d] transition hover:border-[#7a612d] hover:bg-[#fbf0d4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:self-auto"
+            onClick={() => openCorrectionRequest()}
+            type="button"
+          >
+            {CORRECTION_REQUEST_COPY.triggerLabel}
+          </button>
+        </div>
+      </section>
+
+      <CorrectionRequestDialog
+        insurers={insurers}
+        onOpenChange={setCorrectionOpen}
+        open={correctionOpen}
+        preselectedInsurerId={correctionPreselectedId}
+      />
     </div>
   );
 }

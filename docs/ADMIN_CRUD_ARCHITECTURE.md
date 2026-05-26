@@ -76,13 +76,16 @@ Recommended future sequence:
 18. PR-31 Public insurer action card UI, manual approval required (Done)
 19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices (Done)
 20. PR-33 Verification/publish workflow polish, manual approval required (Done)
-21. PR-34 Correction request planning, documentation only (Current)
+21. PR-34 Correction request planning, documentation only (Done)
     - See [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md)
-22. PR-35 Correction request MVP (CorrectionRequest model + migration + protected admin queue + public submission action), manual approval required
-23. PR-36 ClaimDocument model planning, documentation only
+22. PR-35 Correction request MVP (no-DB clipboard flow; client-only dialog from public `/directory`) (Current)
+    - No Prisma model, no migration, no server action, no admin queue, no automatic `Insurer` update.
+    - See [docs/CORRECTION_REQUEST_PLAN.md ?L](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for shipped scope.
+23. PR-36 ClaimDocument model planning, documentation only (Done)
 24. PR-37 ClaimDocument model + migration, manual approval required
 25. PR-38 ClaimDocument admin CRUD, manual approval required
-26. Audit log foundation, manual approval required (sequence number deferred until correction request + claim document tracks land)
+26. PR-39 Correction request DB-backed flow (CorrectionRequest Prisma model + migration + protected admin queue + server-side validation + abuse boundaries from PR-34 Sections E/F/H), manual approval required (deferred from the PR-35 plan)
+27. Audit log foundation, manual approval required (sequence number deferred until correction request + claim document tracks land)
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 
@@ -163,17 +166,17 @@ These are conceptual future models only. Do not treat this section as a Prisma s
 
 Verification statuses:
 
-- `draft` = `Ï¥àÏïà`
-- `needs_review` = `Í≤Ä???ÑÏöî`
-- `verified` = `Í≤Ä???ÑÎ£å`
+- `draft` = `?????`
+- `needs_review` = `?????????`
+- `verified` = `????????`
 
 Rules:
 
 - New records default to `draft`.
-- `draft` records are never publicly visible, even if `isPublished` is true. PR-33 enforces this server-side: both `parseInsurerForm` and `setInsurerPublished` reject the `isPublished=true + verificationStatus=draft` combination with the calm Korean error "Ï¥àÏïà ?ÅÌÉú??Î≥¥Ìóò?¨Îäî Í≥µÍ∞ú?????ÜÏäµ?àÎã§. Í≤Ä???ÑÏöî ?êÎäî Í≤Ä???ÑÎ£å ?ÅÌÉúÎ°?Î≥ÄÍ≤ΩÌïú ??Í≥µÍ∞ú??Ï£ºÏÑ∏??" The list UI also disables the publish toggle for draft rows.
+- `draft` records are never publicly visible, even if `isPublished` is true. PR-33 enforces this server-side: both `parseInsurerForm` and `setInsurerPublished` reject the `isPublished=true + verificationStatus=draft` combination with the calm Korean error "????? ???????????????? ?????????????????. ????????? ????? ???????? ????????????? ?????????????" The list UI also disables the publish toggle for draft rows.
 - `verified` status requires manual operator review against an official source.
 - Do not create fake `lastVerifiedAt` dates.
-- Missing official URL on the public surface should display `Í≥µÏãù ?ïÏù∏ ???ÖÎç∞?¥Ìä∏ ?àÏ†ï`.
+- Missing official URL on the public surface should display `???? ??? ?????????? ????`.
 
 ### Public visibility policy (canonical)
 
@@ -187,8 +190,8 @@ This rule lives in `lib/public/insurers.ts` (`PUBLIC_VERIFICATION_STATUSES`, `is
 Governance notes:
 
 - `verified` means the record was reviewed against the insurer's official source (website, official disclosure, planner portal announcement).
-- `needs_review` may surface publicly only with a clear "Í≤Ä???ÑÏöî" badge so planners know to reconfirm before acting on the data.
-- Missing operational fields keep the safe fallback copy from `lib/directory/formatting.ts` (`Í≥µÏãù ?ïÏù∏ ???ÖÎç∞?¥Ìä∏ ?àÏ†ï` / `?¥Îãπ?¨Ìï≠ ?ÜÏùå` / `ÏΩúÏÑº??Í∞úÎ≥Ñ?ëÏàò` / `Ï°∞Í±¥ ?ïÏù∏ ?ÑÏöî`). Never render raw nulls.
+- `needs_review` may surface publicly only with a clear "?????????" badge so planners know to reconfirm before acting on the data.
+- Missing operational fields keep the safe fallback copy from `lib/directory/formatting.ts` (`???? ??? ?????????? ????` / `?????????? ????` / `????????????????` / `?? ??? ?????`). Never render raw nulls.
 
 ## G. Admin Roles Planning
 
@@ -291,11 +294,13 @@ PR-27 plans the expansion of the `Insurer` model into a practical insurer action
 
 The schema and migration for those action fields land in PR-28 under manual approval. PR-28 does not update admin forms or public runtime behavior.
 
-PR-29 surfaces those fields in the protected admin create/edit forms with grouped sections (A. Basic Info / B. Access / C. Support / D. Claim / E. Policy or Disclosure / F. Payment / G. Governance), tri-state controls for nullable payment booleans, and the required Korean operator copy ("Í≥µÏãù ?ïÏù∏ ???ÖÎç∞?¥Ìä∏ ?àÏ†ï", "?¥Îãπ?¨Ìï≠ ?ÜÏùå", "ÏΩúÏÑº??Í∞úÎ≥Ñ?ëÏàò", "Ï°∞Í±¥ ?ïÏù∏ ?ÑÏöî"). PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior. The admin list view in PR-29 also flags records with three or more missing core operational fields under a "?¥ÏòÅ ?ïÎ≥¥ Î≥¥Í∞ï ?ÑÏöî" badge so operators can prioritize follow-up verification before public read-through ships.
+PR-29 surfaces those fields in the protected admin create/edit forms with grouped sections (A. Basic Info / B. Access / C. Support / D. Claim / E. Policy or Disclosure / F. Payment / G. Governance), tri-state controls for nullable payment booleans, and the required Korean operator copy ("???? ??? ?????????? ????", "?????????? ????", "????????????????", "?? ??? ?????"). PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior. The admin list view in PR-29 also flags records with three or more missing core operational fields under a "????? ??? ??? ?????" badge so operators can prioritize follow-up verification before public read-through ships.
 
-PR-30 switches the public `/directory` page from static sample data to a DB read of published `Insurer` records via a new `lib/public/insurers.ts` helper. The helper restricts the query to `isPublished = true` AND `verificationStatus IN ('verified', 'needs_review')`, orders by `isFeatured desc, sortOrder asc, name asc`, and projects only public-safe columns (admin governance fields such as `notes`, `sourceNote`, `createdById`, and `updatedById` are excluded). The page is rendered as an async Server Component with `dynamic = "force-dynamic"` so admin publish toggles propagate immediately, and unexpected DB failures surface as the calm "?†Ïãú ???§Ïãú ?ïÏù∏??Ï£ºÏÑ∏?? notice without exposing raw errors. PR-30 does not change `prisma/schema.prisma`, does not add migrations, and does not change the admin CRUD surface. The public insurer action card visual polish ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
+PR-30 switches the public `/directory` page from static sample data to a DB read of published `Insurer` records via a new `lib/public/insurers.ts` helper. The helper restricts the query to `isPublished = true` AND `verificationStatus IN ('verified', 'needs_review')`, orders by `isFeatured desc, sortOrder asc, name asc`, and projects only public-safe columns (admin governance fields such as `notes`, `sourceNote`, `createdById`, and `updatedById` are excluded). The page is rendered as an async Server Component with `dynamic = "force-dynamic"` so admin publish toggles propagate immediately, and unexpected DB failures surface as the calm "????? ??????? ??????????? notice without exposing raw errors. PR-30 does not change `prisma/schema.prisma`, does not add migrations, and does not change the admin CRUD surface. The public insurer action card visual polish ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
 
 PR-34 plans the future correction request feature so the public directory can stay fresh without weakening the verification or publish guardrails. It is documentation only ??no runtime code, no schema, no migration, no admin form, no public form. The plan keeps user submissions in a queueing surface that requires manual admin review against an official source before any `Insurer` field is edited, and never collects customer or medical data. See [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for the full plan.
+
+PR-35 ships the smallest public correction-request entry point. It is a client-only, no-DB MVP: a dialog opened from each public `/directory` insurer card or from a footer panel below the card grid lets a user prepare a structured "?? ?? ??" payload (target insurer, request type, message, optional source URL, optional name/email) and copy it to the clipboard. PR-35 deliberately ships no Prisma model, no migration, no server action, no API route, no admin queue, no email notification, and no automatic update of any `Insurer` field. Inline Korean warnings instruct users not to enter personal, identification, policy, medical, or claim-document data, and the submission channel is documented as a future announcement. The DB-backed flow drafted in [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) Sections D?I remains a *plan* and now belongs to a separate, manually approved follow-up PR (provisionally PR-39). See [docs/CORRECTION_REQUEST_PLAN.md ßL](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for the shipped scope.
 
 ## M. Manual Approval Required
 
