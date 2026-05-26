@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
+import { canAccessAdmin } from "@/lib/auth/rbac";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminShell from "@/components/admin/AdminShell";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +16,10 @@ export default async function AdminPage() {
 
   if (!session) {
     return <AdminLockedState />;
+  }
+
+  if (!canAccessAdmin(session)) {
+    return <AdminAccessDeniedState />;
   }
 
   return <AdminShell session={session} />;

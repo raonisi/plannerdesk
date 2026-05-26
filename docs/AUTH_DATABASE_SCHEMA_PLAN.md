@@ -175,8 +175,8 @@ Any future PR containing code in these categories must undergo manual review:
 
 ## O. Recommended Future Implementation Order
 1. ~~**PR-22**: Auth DB schema + adapter implementation~~ ✅ Done
-2. **PR-23**: Minimal RBAC helper implementation, manual approval required (Current)
-3. **PR-24**: Admin route server-side role protection, manual approval required
+2. ~~**PR-23**: Minimal RBAC helper implementation~~ ✅ Done
+3. **PR-24**: Admin route server-side role protection, manual approval required (Current)
 4. **PR-25**: Insurer model + migration, manual approval required
 5. **PR-26**: Insurer admin CRUD, manual approval required
 6. **PR-27**: Audit log planning or foundation, manual approval required
