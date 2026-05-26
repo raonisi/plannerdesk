@@ -100,6 +100,8 @@ Future roles:
 - User roles must be checked server-side.
 - Admin status must not rely only on frontend hiding.
 
+See `docs/RBAC_FOUNDATION_PLAN.md` for the comprehensive RBAC foundation plan including role permissions matrix and hierarchy.
+
 ## G. Protected Route Planning
 Future protected routes may include:
 - `/admin`

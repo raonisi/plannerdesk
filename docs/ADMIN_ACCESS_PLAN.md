@@ -38,7 +38,7 @@ The codebase is currently structured under the following constraints:
 
 ## C. Future Admin Roles
 
-To govern access control, we conceptually plan the following administrative and consumer roles:
+To govern access control, we conceptually plan the following administrative and consumer roles. See `docs/RBAC_FOUNDATION_PLAN.md` for the full RBAC layout.
 
 ### 1. `super_admin`
 - **Scope**: Full system-level configuration and access.
