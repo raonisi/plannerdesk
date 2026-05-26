@@ -17,6 +17,7 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 - Insurer action-field schema foundation
 - Public insurer action card UI
 - Local-only favorites for the public insurer directory (no server persistence, no analytics)
+- Verification + publish workflow guardrails (draft records are never publicly visible; admin UI and server actions enforce the same rule)
 - Claim document library content model
 - Customer message template library
 - Editorial review workflow for public information

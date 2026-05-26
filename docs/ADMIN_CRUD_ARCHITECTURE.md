@@ -74,9 +74,10 @@ Recommended future sequence:
 16. PR-29 Admin form update for insurer action fields, manual approval required (Done)
 17. PR-30 Public directory DB read integration, manual approval required (Done)
 18. PR-31 Public insurer action card UI, manual approval required (Done)
-19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices (Current)
-20. PR-33 Verification/publish workflow polish, manual approval required
-21. PR-34 Audit log planning or foundation, manual approval required
+19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices (Done)
+20. PR-33 Verification/publish workflow polish, manual approval required (Current)
+21. PR-34 Correction request planning, documentation only
+22. PR-35 Audit log planning or foundation, manual approval required
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 
@@ -155,20 +156,34 @@ These are conceptual future models only. Do not treat this section as a Prisma s
 
 ## F. Verification Workflow
 
-Future verification statuses:
+Verification statuses:
 
-- `draft` = `&#52488;&#50504;`
-- `needs_review` = `&#44160;&#49688; &#54596;&#50836;`
-- `verified` = `&#44160;&#49688; &#50756;&#47308;`
+- `draft` = `초안`
+- `needs_review` = `검수 필요`
+- `verified` = `검수 완료`
 
 Rules:
 
-- New records should default to `draft`.
-- Public pages should show only published records later.
-- `draft` and `needs_review` records may be visible only in admin preview later.
-- `verified` status requires manual operator review.
+- New records default to `draft`.
+- `draft` records are never publicly visible, even if `isPublished` is true. PR-33 enforces this server-side: both `parseInsurerForm` and `setInsurerPublished` reject the `isPublished=true + verificationStatus=draft` combination with the calm Korean error "초안 상태의 보험사는 공개할 수 없습니다. 검수 필요 또는 검수 완료 상태로 변경한 뒤 공개해 주세요." The list UI also disables the publish toggle for draft rows.
+- `verified` status requires manual operator review against an official source.
 - Do not create fake `lastVerifiedAt` dates.
-- Missing official URL should display `&#44277;&#49885; &#54869;&#51064; &#54980; &#50629;&#45936;&#51060;&#53944; &#50696;&#51221;`.
+- Missing official URL on the public surface should display `공식 확인 후 업데이트 예정`.
+
+### Public visibility policy (canonical)
+
+A record is visible on `/directory` if and only if both conditions hold:
+
+- `isPublished === true`
+- `verificationStatus ∈ { verified, needs_review }`
+
+This rule lives in `lib/public/insurers.ts` (`PUBLIC_VERIFICATION_STATUSES`, `isInsurerPubliclyVisible`). Both the Prisma read query in `getPublicInsurers` and the admin-side publish guard (`app/admin/insurers/visibility.ts`, `actions.ts`) read from the same export so the policy cannot drift.
+
+Governance notes:
+
+- `verified` means the record was reviewed against the insurer's official source (website, official disclosure, planner portal announcement).
+- `needs_review` may surface publicly only with a clear "검수 필요" badge so planners know to reconfirm before acting on the data.
+- Missing operational fields keep the safe fallback copy from `lib/directory/formatting.ts` (`공식 확인 후 업데이트 예정` / `해당사항 없음` / `콜센터 개별접수` / `조건 확인 필요`). Never render raw nulls.
 
 ## G. Admin Roles Planning
 

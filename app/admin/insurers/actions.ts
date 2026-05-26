@@ -15,6 +15,7 @@ import {
   requireInsurerContentManager,
   requireInsurerPublisher,
 } from "./access";
+import { ADMIN_VISIBILITY_COPY, wouldPublishDraft } from "./visibility";
 
 const CATEGORY_VALUES = new Set<string>([
   InsurerCategory.life,
@@ -192,6 +193,19 @@ function parseInsurerForm(formData: FormData): FormResult {
   const sortOrder = optionalSortOrder(formData, "sortOrder");
   if (typeof sortOrder !== "number") return sortOrder;
 
+  const isPublished = formData.get("isPublished") === "on";
+
+  // Draft + published is the forbidden combination. Reject before we hit the
+  // DB so an operator cannot accidentally surface unreviewed content.
+  if (
+    wouldPublishDraft({
+      isPublished,
+      verificationStatus: verificationStatus as VerificationStatus,
+    })
+  ) {
+    return { ok: false, message: ADMIN_VISIBILITY_COPY.draftPublishBlocked };
+  }
+
   return {
     ok: true,
     data: {
@@ -219,7 +233,7 @@ function parseInsurerForm(formData: FormData): FormResult {
       notes: textValue(formData, "notes"),
       verificationStatus: verificationStatus as VerificationStatus,
       lastVerifiedAt,
-      isPublished: formData.get("isPublished") === "on",
+      isPublished,
       sortOrder,
       isFeatured: formData.get("isFeatured") === "on",
     },
@@ -309,6 +323,33 @@ export async function setInsurerPublished(id: string, isPublished: boolean) {
     session = await requireInsurerPublisher();
   } catch (error) {
     handleUnauthorized("/admin/insurers", error);
+  }
+
+  // When the toggle would publish a record, read the existing verification
+  // status and reject draft rows server-side. This is the authoritative guard;
+  // the list UI also disables the affordance for drafts, but never depend on
+  // the client to enforce visibility rules.
+  if (isPublished) {
+    let existing: { verificationStatus: VerificationStatus } | null;
+    try {
+      existing = await prisma.insurer.findUnique({
+        where: { id },
+        select: { verificationStatus: true },
+      });
+    } catch {
+      redirectWithError("/admin/insurers", "Unable to update publication state.");
+    }
+
+    if (!existing) {
+      redirectWithError("/admin/insurers", ADMIN_VISIBILITY_COPY.insurerNotFound);
+    }
+
+    if (existing.verificationStatus === VerificationStatus.draft) {
+      redirectWithError(
+        "/admin/insurers",
+        ADMIN_VISIBILITY_COPY.draftPublishBlocked,
+      );
+    }
   }
 
   try {
