@@ -52,11 +52,12 @@ Neon PostgreSQL is not connected at runtime. PR-14 adds only the Prisma foundati
 - `prisma:generate`, `prisma:validate`, and `prisma:studio` npm scripts.
 - A `lib/prisma.ts` helper that is not imported by any route in the current static MVP.
 
-The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL`. Railway Variables may already contain `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL`, but no code path reads them yet.
+The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL`. Railway Variables may already contain `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL`. The Auth.js foundation (PR-17) is installed and can read `AUTH_SECRET` and `AUTH_URL` automatically, but no routes or database-backed features use them yet.
 
 Connect Neon at runtime only when the first database-backed feature ships. That future PR must include its own security review, migration plan, and rollback notes.
 
 See `docs/NEON_CONNECTION_PLAN.md` for the full Neon, Railway Variables, and Prisma rollout sequence.
+See `docs/AUTH_FOUNDATION_PLAN.md` for the Auth.js foundation details.
 
 ## Explicit Non-Goals For This PR
 
