@@ -187,7 +187,7 @@ Migration considerations for PR-35 (when the model is actually added):
 
 Recommended follow-up sequence after PR-34. Each step should keep scope narrow, document its own security review, and require its own approval where applicable.
 
-- **PR-35 Correction request MVP** — implement the smallest public-safe correction request flow. New `CorrectionRequest` Prisma model + migration (manual approval required), a protected admin queue under `/admin/correction-requests`, and a public submission action under `/directory` that creates `pending` rows only. Server-side validation, rate limiting, and PII scrubbing per Sections E, F, and H. No public listing of requests.
+- **PR-35 Correction request MVP** — *shipped as a no-DB clipboard MVP, see Section L below.* The DB-backed variant originally drafted in this section is deferred to a follow-up PR (provisionally PR-39 / PR-40) and still requires manual approval before any `CorrectionRequest` Prisma model or migration is introduced.
 - **PR-36 ClaimDocument model planning** — documentation only. Plan the data model for the Claim Document Library content hub (referenced in `docs/PRODUCT_ROADMAP.md`). No schema, no migration, no runtime change.
 - **PR-37 ClaimDocument model + migration** — manual approval required. Adds the Prisma model and migration for `ClaimDocument` per PR-36. No admin form, no public read-through.
 - **PR-38 ClaimDocument admin CRUD** — manual approval required. Adds the protected admin CRUD surface for `ClaimDocument` following the same publish guard pattern PR-33 documented for the `Insurer` model.
@@ -218,3 +218,53 @@ If any of these are required during review, stop and report:
 - Required decision
 - Safer alternative
 - Recommended next step
+
+## L. PR-35 MVP Shipped (No-DB Clipboard Flow)
+
+PR-35 ships the smallest possible correction-request surface. It deliberately does **not** introduce a `CorrectionRequest` Prisma model, migration, server action, API route, or admin queue. The DB-backed workflow described in Sections D–I and originally drafted in Section J remains a *plan* and still requires a separate, manually approved follow-up PR before any storage or server-side handling lands.
+
+### What shipped
+
+- `lib/directory/correction-request.ts` — pure helpers: the `CORRECTION_REQUEST_TYPES` enum, `MESSAGE_MIN_LENGTH` / `MESSAGE_MAX_LENGTH` bounds, `validateCorrectionRequest`, `formatCorrectionRequest`, and the `CORRECTION_REQUEST_COPY` Korean strings. No I/O, no network, no storage.
+- `components/directory/correction-request-dialog.tsx` — a client-only modal built on the native `<dialog>` element. The user fills in target insurer, request type, message, optional source URL, and optional name/email. On submit, the form runs the validator from the helper module and copies a structured plain-text payload to the clipboard via `navigator.clipboard.writeText`. If the Clipboard API is unavailable (insecure context, older browsers), the dialog falls back to selecting a read-only preview textarea so the user can copy manually.
+- `components/directory/insurer-action-card.tsx` — a small "정보 수정 요청" link in the lower-right of each card, only rendered when the parent passes an `onRequestCorrection` handler. The card itself does not own dialog state.
+- `app/directory/directory-explorer.tsx` — owns a single `CorrectionRequestDialog` instance. Each card calls `onRequestCorrection(insurer.id)` to open the dialog with that insurer preselected. A footer panel below the card grid offers an unscoped entry that opens the dialog without a preselection so the user can pick from the published list.
+
+### What PR-35 does not do
+
+- **No Prisma schema change.** `prisma/schema.prisma` is untouched.
+- **No migration.** No new `prisma/migrations/*` directories. None of the destructive Prisma CLI commands were run.
+- **No server action and no API route.** The dialog never posts to the server. Nothing leaves the user's browser unless the user themselves chooses to paste the copied payload elsewhere.
+- **No automatic `Insurer` update.** Submitting a request cannot and does not change `isPublished`, `verificationStatus`, or any other field on `Insurer`.
+- **No file upload.** The form contains no `<input type="file">`. The clipboard payload is plain text only.
+- **No public listing of submitted requests.** Public `/directory` continues to render only published `Insurer` records as before (see PR-30 and PR-33). Submissions are not surfaced anywhere on the site.
+- **No customer or medical data collection.** Inline warnings inside the dialog ("개인정보, 주민등록번호, 증권번호, 진료기록, 보험금 청구서류는 입력하지 마세요.") tell the user not to enter sensitive identifiers; the payload format never asks for them.
+- **No analytics, no cookies, no tracking.** Favorites continue to live only in `localStorage` (PR-32). The correction request dialog stores nothing.
+
+### Sensitive-data wording (canonical)
+
+Both the dialog and the formatted clipboard payload must reproduce the following Korean copy verbatim (defined in `CORRECTION_REQUEST_COPY`):
+
+- "개인정보, 주민등록번호, 증권번호, 진료기록, 보험금 청구서류는 입력하지 마세요."
+- "수정 요청은 즉시 반영되지 않으며, 관리자 검토 후 반영됩니다."
+
+### Validation rules (client-side, MVP)
+
+- `insurerId` required, must be a member of the public published list.
+- `requestType` required, must be one of the values in `CORRECTION_REQUEST_TYPES`.
+- `message` required, trimmed length must satisfy `MESSAGE_MIN_LENGTH ≤ length ≤ MESSAGE_MAX_LENGTH`.
+- `sourceUrl` optional. If provided, must parse as a URL with `http:` or `https:` protocol.
+- `requesterEmail` optional. If provided, must match a conservative "looks like an email" pattern.
+
+These rules are intentionally also documented here so a future server-side validator can mirror them exactly when the DB-backed flow lands.
+
+### Future DB-backed flow (still requires a separate PR)
+
+When the team is ready to ship the DB-backed flow described in Sections D–I, that work belongs to a future, manually approved PR. That PR must:
+
+- Add the `CorrectionRequest` Prisma model and a single, additive migration.
+- Add a server action under `app/directory/*` or a route handler under `app/api/*` that re-validates every field server-side using `validateCorrectionRequest` from `lib/directory/correction-request.ts`.
+- Add admin CRUD under `app/admin/correction-requests/*` for triage, following the same publish-guard pattern used by `app/admin/insurers/*` after PR-33.
+- Re-confirm Sections E (data collection rules), F (privacy and safety), H (abuse prevention), and the canonical Korean warning copy from `CORRECTION_REQUEST_COPY`.
+
+Until that PR ships, the user-visible behavior remains: the dialog prepares a structured payload, copies it to the clipboard, and tells the user that the submission channel will be announced later. No customer or medical data is ever collected.

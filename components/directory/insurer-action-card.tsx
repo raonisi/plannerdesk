@@ -58,12 +58,14 @@ export interface InsurerActionCardProps {
   insurer: PublicInsurer;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  onRequestCorrection?: (id: string) => void;
 }
 
 export function InsurerActionCard({
   insurer,
   isFavorite = false,
   onToggleFavorite,
+  onRequestCorrection,
 }: InsurerActionCardProps) {
   const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
   const claimFax = claimFaxDisplay(insurer);
@@ -191,6 +193,20 @@ export function InsurerActionCard({
               ) : null}
             </ActionGroup>
           </div>
+
+          {onRequestCorrection ? (
+            <div className="flex justify-end pt-1">
+              <button
+                aria-label={`${insurer.name} \uc218\uc815 \uc694\uccad`}
+                className="inline-flex min-h-9 items-center gap-1 rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-[#7a612d] underline-offset-4 transition hover:bg-[#fff7e6] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+                onClick={() => onRequestCorrection(insurer.id)}
+                type="button"
+              >
+                <span aria-hidden="true">{"\u270e"}</span>
+                <span>{"\uc815\ubcf4 \uc218\uc815 \uc694\uccad"}</span>
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </article>

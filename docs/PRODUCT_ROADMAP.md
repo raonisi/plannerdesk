@@ -19,6 +19,7 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 - Local-only favorites for the public insurer directory (no server persistence, no analytics)
 - Verification + publish workflow guardrails (draft records are never publicly visible; admin UI and server actions enforce the same rule)
 - Correction request planning (queueing surface for editorial review; never mutates published data directly)
+- Correction request MVP (no-DB, client-only): public users can prepare a structured correction request from the `/directory` insurer cards or directory footer and copy it to the clipboard. PR-35 ships no Prisma model, no migration, no server action, no admin queue, and no automatic Insurer update. See [docs/CORRECTION_REQUEST_PLAN.md §L](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for shipped scope and the future DB-backed flow.
 - Claim document library content model
 - Customer message template library
 - Editorial review workflow for public information
