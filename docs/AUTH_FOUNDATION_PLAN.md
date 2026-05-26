@@ -14,7 +14,12 @@ Authentication will later protect:
 - Public MVP exists.
 - Prisma foundation exists.
 - Neon is prepared but public pages do not depend on DB queries yet.
-- Auth is not implemented.
+- **Auth.js v5 foundation is installed** (PR-17): `next-auth@5.0.0-beta.31`.
+- Auth.js config exists at `auth.ts` with JWT session strategy and no providers.
+- Route handler exists at `app/api/auth/[...nextauth]/route.ts`.
+- No real login providers are configured yet.
+- No Prisma Adapter is connected.
+- No database-backed auth tables exist.
 - RBAC is not implemented.
 - Admin UI is not implemented.
 - Admin CRUD is not implemented.
@@ -157,7 +162,7 @@ Future PRs must not be auto-merged if they include:
 
 ## K. Recommended Future Implementation Order
 Recommend:
-1. **PR-17** Auth.js foundation implementation, manual approval required
+1. ~~**PR-17** Auth.js foundation implementation~~ ✅ Done
 2. **PR-18** Minimal protected admin shell, manual approval required
 3. **PR-19** Admin role/RBAC foundation, manual approval required
 4. **PR-20** Insurer model + migration, manual approval required
