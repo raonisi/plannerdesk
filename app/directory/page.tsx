@@ -21,6 +21,8 @@ const t = {
     "\uacf5\uc2dd \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8\ub418\ub294 \uc815\ubcf4\ubd80\ud130 \uc21c\ucc28\uc801\uc73c\ub85c \ubc18\uc601\ub429\ub2c8\ub2e4.",
   footerNote:
     "\ubcf4\ud5d8\uc0ac\ubcc4 \ub9c1\ud06c\uc640 \uc5f0\ub77d\ucc98\ub294 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8\ub429\ub2c8\ub2e4.",
+  verificationNote:
+    "\u201c\uac80\uc218 \uc644\ub8cc\u201d \ubc30\uc9c0\ub294 \uacf5\uc2dd \ucd9c\ucc98 \uac80\uc218\uac00 \ub05d\ub09c \uc815\ubcf4\uc785\ub2c8\ub2e4. \u201c\uac80\uc218 \ud544\uc694\u201d \ubc30\uc9c0\uac00 \ubd99\uc740 \ubcf4\ud5d8\uc0ac\ub294 \ud589\ub3d9 \uc804 \uacf5\uc2dd \ucd9c\ucc98\ub97c \ub2e4\uc2dc \ud655\uc778\ud574 \uc8fc\uc138\uc694.",
   emptyTitle: "\uacf5\uac1c\ub41c \ubcf4\ud5d8\uc0ac \uc815\ubcf4\uac00 \uc544\uc9c1 \uc5c6\uc2b5\ub2c8\ub2e4.",
   emptyDescription:
     "\uad00\ub9ac\uc790 \uac80\uc218 \ud6c4 \uc21c\ucc28\uc801\uc73c\ub85c \uc5c5\ub370\uc774\ud2b8\ub429\ub2c8\ub2e4.",
@@ -69,6 +71,9 @@ export default async function DirectoryPage() {
 
           <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
             {t.footerNote}
+          </p>
+          <p className="break-keep border-l border-[#c8d2dc] pl-4 text-sm leading-6 text-[#5f6670]">
+            {t.verificationNote}
           </p>
 
           <MvpModuleLinks

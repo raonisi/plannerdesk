@@ -7,6 +7,7 @@ import {
   VerificationStatus,
   type Insurer,
 } from "@prisma/client";
+import { ADMIN_VISIBILITY_COPY } from "./visibility";
 
 const fieldClass =
   "mt-1 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm text-[#102235] outline-none transition focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15";
@@ -137,7 +138,7 @@ export default function InsurerForm({
             <option value={VerificationStatus.verified}>\uac80\uc218 \uc644\ub8cc (Verified)</option>
           </select>
           <span className={hintClass}>
-            \uacf5\uc2dd \ucd9c\ucc98\ub85c \uc0ac\ub78c\uc774 \uac80\uc218\ud55c \ub808\ucf54\ub4dc\ub9cc &quot;\uac80\uc218 \uc644\ub8cc&quot;\ub85c \ud45c\uc2dc\ud558\uc138\uc694.
+            \uacf5\uc2dd \ucd9c\ucc98\ub85c \uc0ac\ub78c\uc774 \uac80\uc218\ud55c \ub808\ucf54\ub4dc\ub9cc &quot;\uac80\uc218 \uc644\ub8cc&quot;\ub85c \ud45c\uc2dc\ud558\uc138\uc694. {ADMIN_VISIBILITY_COPY.governanceRule}
           </span>
         </label>
 
@@ -154,15 +155,22 @@ export default function InsurerForm({
           </span>
         </label>
 
-        <label className="flex items-center gap-3 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-3 text-sm font-semibold text-[#102235] md:col-span-2">
-          <input
-            name="isPublished"
-            type="checkbox"
-            defaultChecked={insurer?.isPublished ?? false}
-            className="h-4 w-4 accent-[#1f6b55]"
-          />
-          \uacf5\uac1c (Published)
-        </label>
+        <div className="md:col-span-2 space-y-3 rounded-md border border-[#c8d2dc] bg-[#eef3f7] p-4 text-sm leading-relaxed text-[#102235]">
+          <p className="font-semibold">{ADMIN_VISIBILITY_COPY.policySummary}</p>
+          <p className="text-[#4f5661]">{ADMIN_VISIBILITY_COPY.draftRule}</p>
+          <label className="flex items-center gap-3 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-3 text-sm font-semibold text-[#102235]">
+            <input
+              name="isPublished"
+              type="checkbox"
+              defaultChecked={insurer?.isPublished ?? false}
+              className="h-4 w-4 accent-[#1f6b55]"
+            />
+            \uacf5\uac1c (Published)
+          </label>
+          <p className="text-xs text-[#5f6875]">
+            {ADMIN_VISIBILITY_COPY.draftPublishBlocked}
+          </p>
+        </div>
       </Section>
 
       <Section

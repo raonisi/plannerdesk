@@ -1,8 +1,8 @@
-import type {
-  CardPaymentStatus,
-  ClaimFaxHandlingType,
-  InsurerCategory,
+import {
   VerificationStatus,
+  type CardPaymentStatus,
+  type ClaimFaxHandlingType,
+  type InsurerCategory,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
@@ -41,12 +41,42 @@ export type PublicInsurersResult =
   | { status: "ok"; insurers: PublicInsurer[] }
   | { status: "error" };
 
-// Public verification statuses that may surface on /directory. Draft, pending,
-// or unverified rows must never appear publicly, even if isPublished is true.
-const PUBLIC_VERIFICATION_STATUSES = [
-  "verified",
-  "needs_review",
+// Canonical public visibility rule for the Insurer surface.
+//
+// A record is visible on /directory if and only if:
+//   - isPublished === true
+//   - verificationStatus ∈ PUBLIC_VERIFICATION_STATUSES
+//
+// Draft, pending, unverified, and unpublished rows must never appear publicly.
+// Both the Prisma query in `getPublicInsurers` below and the admin-side
+// `app/admin/insurers/visibility.ts` helpers read from this list so the rule
+// can never drift between the read path and the publish guard.
+export const PUBLIC_VERIFICATION_STATUSES = [
+  VerificationStatus.verified,
+  VerificationStatus.needs_review,
 ] as const satisfies readonly VerificationStatus[];
+
+export type PublicVerificationStatus =
+  (typeof PUBLIC_VERIFICATION_STATUSES)[number];
+
+export function isPublicVerificationStatus(
+  status: VerificationStatus,
+): status is PublicVerificationStatus {
+  return (PUBLIC_VERIFICATION_STATUSES as readonly VerificationStatus[]).includes(
+    status,
+  );
+}
+
+export interface InsurerVisibilityFlags {
+  verificationStatus: VerificationStatus;
+  isPublished: boolean;
+}
+
+export function isInsurerPubliclyVisible(
+  flags: InsurerVisibilityFlags,
+): boolean {
+  return flags.isPublished && isPublicVerificationStatus(flags.verificationStatus);
+}
 
 function toIsoDate(value: Date | null): string | null {
   if (!value) return null;

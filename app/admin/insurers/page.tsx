@@ -13,6 +13,14 @@ import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import { getInsurerAdminAccess } from "./access";
 import { setInsurerPublished } from "./actions";
+import {
+  ADMIN_VISIBILITY_COPY,
+  PUBLICATION_LABEL,
+  VERIFICATION_STATUS_LABEL,
+  VISIBILITY_LABEL,
+  isInsurerPubliclyVisible,
+  wouldPublishDraft,
+} from "./visibility";
 
 export const dynamic = "force-dynamic";
 
@@ -52,18 +60,18 @@ interface SearchParams {
 }
 
 function formatDate(value: Date | null) {
-  if (!value) return "Not verified";
+  if (!value) return "\uac80\uc218 \uc774\ub825 \uc5c6\uc74c";
   return value.toISOString().slice(0, 10);
 }
 
 function categoryLabel(category: string) {
-  return category === "life" ? "Life" : "Non-life";
+  if (category === InsurerCategory.life) return "\uc0dd\uba85\ubcf4\ud5d8";
+  if (category === InsurerCategory.non_life) return "\uc190\ud574\ubcf4\ud5d8";
+  return category;
 }
 
-function statusLabel(status: string) {
-  if (status === "verified") return "Verified";
-  if (status === "needs_review") return "Needs review";
-  return "Draft";
+function statusLabel(status: VerificationStatus) {
+  return VERIFICATION_STATUS_LABEL[status];
 }
 
 function optionalValue(value: string | null) {
@@ -106,9 +114,9 @@ function badgeClass(tone: "green" | "gold" | "gray" | "navy") {
   return `${badgeBase} border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]`;
 }
 
-function statusTone(status: string): "green" | "gold" | "gray" {
-  if (status === "verified") return "green";
-  if (status === "needs_review") return "gold";
+function statusTone(status: VerificationStatus): "green" | "gold" | "gray" {
+  if (status === VerificationStatus.verified) return "green";
+  if (status === VerificationStatus.needs_review) return "gold";
   return "gray";
 }
 
@@ -191,7 +199,7 @@ export default async function AdminInsurersPage({
             href="/admin/insurers/new"
             className="inline-flex items-center justify-center rounded-md bg-[#102235] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
           >
-            Add insurer
+            \uc0c8 \ubcf4\ud5d8\uc0ac \ub4f1\ub85d
           </Link>
         </div>
 
@@ -205,13 +213,21 @@ export default async function AdminInsurersPage({
           {SAFETY_NOTICE}
         </div>
 
+        <div className="mb-5 rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-sm leading-relaxed text-[#102235]">
+          <p className="font-semibold">{ADMIN_VISIBILITY_COPY.policySummary}</p>
+          <p className="mt-1 text-[#4f5661]">{ADMIN_VISIBILITY_COPY.draftRule}</p>
+          <p className="mt-1 text-[#4f5661]">
+            {ADMIN_VISIBILITY_COPY.governanceRule}
+          </p>
+        </div>
+
         <form
           className={`${surfaces.card} ${borders.default} ${shadows.card} mb-5 grid gap-3 rounded-lg p-4 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto]`}
         >
           <input
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
             name="q"
-            placeholder="Search insurer name"
+            placeholder="\ubcf4\ud5d8\uc0ac \uc774\ub984 \uac80\uc0c9"
             defaultValue={resolvedSearchParams.q ?? ""}
           />
           <select
@@ -219,43 +235,51 @@ export default async function AdminInsurersPage({
             name="category"
             defaultValue={resolvedSearchParams.category ?? "all"}
           >
-            <option value="all">All categories</option>
-            <option value={InsurerCategory.life}>Life</option>
-            <option value={InsurerCategory.non_life}>Non-life</option>
+            <option value="all">\ubd84\ub958 \uc804\uccb4</option>
+            <option value={InsurerCategory.life}>\uc0dd\uba85\ubcf4\ud5d8</option>
+            <option value={InsurerCategory.non_life}>\uc190\ud574\ubcf4\ud5d8</option>
           </select>
           <select
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
             name="status"
             defaultValue={resolvedSearchParams.status ?? "all"}
           >
-            <option value="all">All statuses</option>
-            <option value={VerificationStatus.draft}>Draft</option>
-            <option value={VerificationStatus.needs_review}>Needs review</option>
-            <option value={VerificationStatus.verified}>Verified</option>
+            <option value="all">\uac80\uc218 \uc0c1\ud0dc \uc804\uccb4</option>
+            <option value={VerificationStatus.draft}>
+              {VERIFICATION_STATUS_LABEL[VerificationStatus.draft]}
+            </option>
+            <option value={VerificationStatus.needs_review}>
+              {VERIFICATION_STATUS_LABEL[VerificationStatus.needs_review]}
+            </option>
+            <option value={VerificationStatus.verified}>
+              {VERIFICATION_STATUS_LABEL[VerificationStatus.verified]}
+            </option>
           </select>
           <select
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
             name="published"
             defaultValue={resolvedSearchParams.published ?? "all"}
           >
-            <option value="all">All publication states</option>
-            <option value="true">Published</option>
-            <option value="false">Unpublished</option>
+            <option value="all">\uac8c\uc2dc \uc0c1\ud0dc \uc804\uccb4</option>
+            <option value="true">{PUBLICATION_LABEL.published}</option>
+            <option value="false">{PUBLICATION_LABEL.unpublished}</option>
           </select>
           <button
             type="submit"
             className="min-h-11 rounded-md bg-[#102235] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
           >
-            Filter
+            \ud544\ud130 \uc801\uc6a9
           </button>
         </form>
 
         <section className={`${surfaces.card} ${borders.default} ${shadows.card} overflow-hidden rounded-lg`}>
           {insurers.length === 0 ? (
             <div className="p-8 text-center">
-              <h2 className="text-lg font-semibold text-[#102235]">No insurer records found.</h2>
+              <h2 className="text-lg font-semibold text-[#102235]">
+                \ud544\ud130 \uc870\uac74\uc5d0 \ub9de\ub294 \ubcf4\ud5d8\uc0ac\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.
+              </h2>
               <p className={`${textStyles.body} mt-2`}>
-                Add a draft insurer record or adjust the filters.
+                \ucd08\uc548 \ubcf4\ud5d8\uc0ac\ub97c \ub4f1\ub85d\ud558\uac70\ub098 \ud544\ud130 \uc870\uac74\uc744 \ub2e4\uc2dc \ud655\uc778\ud574 \uc8fc\uc138\uc694.
               </p>
             </div>
           ) : (
@@ -263,11 +287,11 @@ export default async function AdminInsurersPage({
               <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
                 <thead className="bg-[#f7f1e5] text-left text-xs font-semibold uppercase tracking-wide text-[#4f5661]">
                   <tr>
-                    <th className="px-4 py-3">Insurer desk</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Last verified</th>
-                    <th className="px-4 py-3">Updated</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-3">\ubcf4\ud5d8\uc0ac \uc6b4\uc601 \uc815\ubcf4</th>
+                    <th className="px-4 py-3">\uc0c1\ud0dc</th>
+                    <th className="px-4 py-3">\ucd5c\uc885 \uac80\uc218\uc77c</th>
+                    <th className="px-4 py-3">\uc218\uc815\uc77c</th>
+                    <th className="px-4 py-3 text-right">\uc791\uc5c5</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e7ddc9]">
@@ -275,29 +299,42 @@ export default async function AdminInsurersPage({
                     const missingOperational = countMissingOperational(insurer);
                     const needsOperationalUpdate =
                       missingOperational >= MISSING_FIELD_THRESHOLD;
+                    const publiclyVisible = isInsurerPubliclyVisible({
+                      isPublished: insurer.isPublished,
+                      verificationStatus: insurer.verificationStatus,
+                    });
+                    // The publish toggle button below would attempt to publish
+                    // this record on click. Disable it when that target state
+                    // is the forbidden draft+published combination so admins
+                    // see the constraint up front. Server still enforces it.
+                    const togglePublishTarget = !insurer.isPublished;
+                    const publishWouldBeBlocked = wouldPublishDraft({
+                      isPublished: togglePublishTarget,
+                      verificationStatus: insurer.verificationStatus,
+                    });
                     return (
                     <tr key={insurer.id} className="align-top">
                       <td className="px-4 py-4">
                         <div className="font-semibold text-[#102235]">{insurer.name}</div>
                         <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-                          <DetailItem label="Official website" value={insurer.officialWebsiteUrl} />
-                          <DetailItem label="Planner portal" value={insurer.plannerPortalUrl} />
-                          <DetailItem label="System (planner)" value={insurer.systemUrl} />
-                          <DetailItem label="Helpdesk phone" value={insurer.helpdeskPhone} />
-                          <DetailItem label="Customer center" value={insurer.customerCenterPhone} />
-                          <DetailItem label="Claim page" value={insurer.claimPageUrl} />
-                          <DetailItem label="Claim fax" value={insurer.claimFaxNumber} />
+                          <DetailItem label="\uacf5\uc2dd \uc6f9\uc0ac\uc774\ud2b8" value={insurer.officialWebsiteUrl} />
+                          <DetailItem label="\uc124\uacc4\uc0ac \ud3ec\ud138" value={insurer.plannerPortalUrl} />
+                          <DetailItem label="\uc804\uc0b0 \uc811\uc18d" value={insurer.systemUrl} />
+                          <DetailItem label="\uc804\uc0b0 \ud5ec\ud504\ub370\uc2a4\ud06c" value={insurer.helpdeskPhone} />
+                          <DetailItem label="\uace0\uac1d\uc13c\ud130" value={insurer.customerCenterPhone} />
+                          <DetailItem label="\uccad\uad6c \uc548\ub0b4 \ud398\uc774\uc9c0" value={insurer.claimPageUrl} />
+                          <DetailItem label="\uccad\uad6c \ud329\uc2a4" value={insurer.claimFaxNumber} />
                           <DetailItem
-                            label="Claim fax handling"
+                            label="\uccad\uad6c \ud329\uc2a4 \ucc98\ub9ac"
                             value={claimFaxHandlingLabel(insurer.claimFaxHandlingType)}
                           />
-                          <DetailItem label="Claim form" value={insurer.claimFormUrl} />
-                          <DetailItem label="Terms" value={insurer.termsUrl} />
+                          <DetailItem label="\uccad\uad6c \uc591\uc2dd" value={insurer.claimFormUrl} />
+                          <DetailItem label="\uc57d\uad00" value={insurer.termsUrl} />
                           <DetailItem
-                            label="Card payment"
+                            label="\uce74\ub4dc\ub0a9 \uc885\ud569 \uc0c1\ud0dc"
                             value={cardPaymentStatusLabel(insurer.cardPaymentStatus)}
                           />
-                          <DetailItem label="Mailing address" value={insurer.mailingAddress} />
+                          <DetailItem label="\uc6b0\ud3b8 \uc8fc\uc18c" value={insurer.mailingAddress} />
                         </dl>
                       </td>
                       <td className="px-4 py-4">
@@ -309,10 +346,24 @@ export default async function AdminInsurersPage({
                             {statusLabel(insurer.verificationStatus)}
                           </span>
                           <span className={badgeClass(insurer.isPublished ? "green" : "gray")}>
-                            {insurer.isPublished ? "Published" : "Unpublished"}
+                            {insurer.isPublished
+                              ? PUBLICATION_LABEL.published
+                              : PUBLICATION_LABEL.unpublished}
+                          </span>
+                          <span
+                            className={badgeClass(publiclyVisible ? "green" : "gray")}
+                            title={
+                              publiclyVisible
+                                ? ADMIN_VISIBILITY_COPY.policySummary
+                                : `${ADMIN_VISIBILITY_COPY.policySummary} ${ADMIN_VISIBILITY_COPY.draftRule}`
+                            }
+                          >
+                            {publiclyVisible
+                              ? VISIBILITY_LABEL.visible
+                              : VISIBILITY_LABEL.hidden}
                           </span>
                           {insurer.isFeatured ? (
-                            <span className={badgeClass("green")}>Featured</span>
+                            <span className={badgeClass("green")}>\ud2b9\ubcc4 \ud45c\uae30</span>
                           ) : null}
                           {needsOperationalUpdate ? (
                             <span
@@ -336,14 +387,22 @@ export default async function AdminInsurersPage({
                             href={`/admin/insurers/${insurer.id}/edit`}
                             className="rounded-md border border-[#d9c9a8] px-3 py-1.5 text-center text-xs font-semibold text-[#102235] transition hover:bg-[#f7f1e5]"
                           >
-                            Edit
+                            \uc218\uc815
                           </Link>
-                          <form action={setInsurerPublished.bind(null, insurer.id, !insurer.isPublished)}>
+                          <form action={setInsurerPublished.bind(null, insurer.id, togglePublishTarget)}>
                             <button
                               type="submit"
-                              className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] transition hover:bg-[#f7f1e5]"
+                              disabled={publishWouldBeBlocked}
+                              title={
+                                publishWouldBeBlocked
+                                  ? ADMIN_VISIBILITY_COPY.draftPublishBlocked
+                                  : undefined
+                              }
+                              className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] transition hover:bg-[#f7f1e5] disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a] disabled:hover:bg-[#f4f5f6]"
                             >
-                              {insurer.isPublished ? "Unpublish" : "Publish"}
+                              {insurer.isPublished
+                                ? "\ube44\uac8c\uc2dc\ub85c \uc804\ud658"
+                                : "\uacf5\uac1c\ub85c \uc804\ud658"}
                             </button>
                           </form>
                         </div>
