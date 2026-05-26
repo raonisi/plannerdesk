@@ -1,48 +1,67 @@
-import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
+import {
+  ContentSection,
+  EmptyState,
+  PageFrame,
+  PageHero,
+} from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import {
-  MvpDraftNotice,
-  MvpModuleLinks,
-  MvpSafetyNotice
-} from "@/components/mvp-navigation";
-import { claimDocumentEntries, insurerDirectoryEntries } from "@/lib/content";
+import { MvpModuleLinks, MvpSafetyNotice } from "@/components/mvp-navigation";
+import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { ClaimDocumentExplorer } from "./claim-document-explorer";
 
+export const dynamic = "force-dynamic";
+
 const t = {
-  title: "\uccad\uad6c\uc11c\ub958",
-  draft:
-    "\ud604\uc7ac \uccad\uad6c\uc11c\ub958 \uc815\ubcf4\ub294 \uac80\uc218 \uc804 \uc0d8\ud50c \ub370\uc774\ud130\uac00 \ud3ec\ud568\ub420 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \uc2e4\uc81c \uace0\uac1d \uc548\ub0b4 \ub610\ub294 \uc81c\ucd9c \uc804 \uacf5\uc2dd \ubcf4\ud5d8\uc0ac \uae30\uc900\uacfc \ucd5c\uc2e0 \uc548\ub0b4\ub97c \ud655\uc778\ud574\uc57c \ud569\ub2c8\ub2e4.",
-  workflowTitle:
-    "\uace0\uac1d \uc548\ub0b4 \uc804 \uacf5\uc2dd \uae30\uc900\uc744 \ub2e4\uc2dc \ud655\uc778\ud558\ub294 \ud750\ub984",
-  directory: "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30",
-  message: "\uace0\uac1d \ubb38\uad6c \ud655\uc778"
+  eyebrow: "Claim Document Desk",
+  title: "청구서류 라이브러리",
+  description: "청구 유형별 필요서류와 공식 출처를 한 곳에서 확인하세요.",
+  subcopy:
+    "보험금 지급 여부나 지급 금액을 판단하는 내용이 아니며, 보험사와 약관 기준 확인이 필요합니다.",
+  workflowTitle: "고객 안내 전 공식 기준을 다시 확인하는 흐름",
+  directory: "보험사 바로가기",
+  message: "고객 문구 확인",
+  footerNote:
+    "청구서류와 필요 기준은 보험사 및 약관에 따라 달라질 수 있습니다. 공개 정보는 공식 출처 확인 후 순차적으로 업데이트됩니다.",
 };
 
 const workflowSteps = [
-  "Confirm the claim type first.",
-  "Check the insurer's official guidance path.",
-  "Review document requirements by product and claim type.",
-  "Use calm wording that does not imply a claim result."
+  "청구 유형 및 카테고리를 먼저 확인합니다.",
+  "보험사별 공식 안내 및 제출 경로를 대조합니다.",
+  "상품별 필수 서류와 선택/추가 서류 목록을 검토합니다.",
+  "보험금 지급을 보장하거나 예단하는 확정적 표현을 지양합니다.",
 ];
 
-export default function ClaimDocumentsPage() {
+export default async function ClaimDocumentsPage() {
+  const result = await getPublicClaimDocuments();
+
   return (
     <PageFrame>
       <Header />
       <PageHero
-        eyebrow="Claim Document Desk"
+        eyebrow={t.eyebrow}
         title={t.title}
-        description="A mobile-friendly working library for checking claim document references by claim type and insurer context."
+        description={t.description}
       />
       <ContentSection>
         <div className="space-y-8">
-          <MvpDraftNotice>{t.draft}</MvpDraftNotice>
+          <p className="break-keep text-sm leading-6 text-[#5f6670]">
+            {t.subcopy}
+          </p>
 
-          <ClaimDocumentExplorer
-            documents={claimDocumentEntries}
-            insurers={insurerDirectoryEntries}
-          />
+          {result.status === "error" ? (
+            <EmptyState
+              title="청구서류 정보를 불러오지 못했습니다."
+              description="잠시 후 다시 확인해 주세요."
+            />
+          ) : result.data.length === 0 ? (
+            <EmptyState
+              title="공개된 청구서류 안내가 아직 없습니다."
+              description="관리자 검수 후 순차적으로 업데이트됩니다."
+            />
+          ) : (
+            <ClaimDocumentExplorer documents={result.data} />
+          )}
 
           <section className="grid gap-4 border-y border-[#d9c9a8] py-8 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
@@ -53,8 +72,8 @@ export default function ClaimDocumentsPage() {
                 {t.workflowTitle}
               </h2>
               <p className="mt-4 break-keep text-sm leading-6 text-[#4f5661]">
-                This page does not guarantee claim results. Official insurer
-                review and current guidance remain the source of truth.
+                이 안내서류 정보는 참고용이며, 실제 보험금 지급 여부나 세부 금액은
+                보험사의 약관 및 최종 심사 결과가 우선합니다.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -71,21 +90,25 @@ export default function ClaimDocumentsPage() {
             </div>
           </section>
 
+          <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
+            {t.footerNote}
+          </p>
+
           <MvpModuleLinks
-            description="After checking claim documents, continue to insurer channels and customer-facing draft messages."
+            description="청구 필요서류 확인 완료 후 보험사 공식 채널 및 고객용 안내 메시지 템플릿 화면으로 연결하여 사용 가능합니다."
             items={[
               {
                 href: "/directory",
                 label: t.directory,
                 description:
-                  "Open insurer official websites, customer center paths, and claim pages."
+                  "보험사 공식 웹사이트, 콜센터, 팩스 및 청구 접수 페이지 정보를 확인합니다.",
               },
               {
                 href: "/message-templates",
                 label: t.message,
                 description:
-                  "Review safe draft messages before requesting documents or follow-up details."
-              }
+                  "고객에게 서류를 요청하기 전 안전성이 검증된 상황별 문구 템플릿을 참고합니다.",
+              },
             ]}
           />
 

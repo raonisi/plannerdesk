@@ -349,3 +349,16 @@ The two notices below are surfaced verbatim on both the list page and the form. 
 
 - **PR-39 ClaimDocument public DB read** must switch `/claim-documents` from static to a published-only DB read via a new `lib/public/claimDocuments.ts`, consuming `PUBLIC_VERIFICATION_STATUSES` from `lib/public/insurers.ts`. PR-39 must not bring back the prohibited phrases via "draft preview" or similar; the public surface only ever renders records whose admin write went through PR-38's deny-list.
 - **PR-40 Correction request DB-backed flow** remains an independent track. ClaimDocument admin CRUD does not depend on it.
+
+## N. PR-39 Shipped (Public DB Read Integration)
+
+PR-39 converts the public `/claim-documents` route from static mock data to a database-backed dynamic render of published and verified `ClaimDocument` records.
+
+### Implementation details
+
+- **Public DB Read Helper**: Created `getPublicClaimDocuments` in `lib/public/claim-documents.ts` to fetch records with `isPublished: true` and verification status in `[verified, needs_review]`, ordered by `sortOrder asc, title asc`.
+- **Public-Safe Projection**: Projects only public-safe fields (id, title, slug, category, insurerId, insurerName, summary, requiredDocuments, optionalDocuments, claimFormUrl, officialSourceUrl, customerMessageTemplate, cautionNote, verificationStatus, lastVerifiedAt). Admin metadata (createdById, updatedById, createdAt, updatedAt) is omitted.
+- **Client Explorer Component**: Updated `ClaimDocumentExplorer` to map database category enums to Korean labels, display verification badges, implement insurer filters, search fields, and handle fallback copy ("공식 확인 후 업데이트 예정", "해당사항 없음").
+- **Login-Free Access**: Page remains accessible to the public without authentication.
+- **Excluded Features**: No public claim submission, OCR, file uploads, payout estimation, or medical/customer data storage. The Prisma schema is unchanged.
+
