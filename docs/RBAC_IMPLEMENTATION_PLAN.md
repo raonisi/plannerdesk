@@ -7,7 +7,7 @@ This ensures we map database relationships, server actions, route middleware, an
 ## B. Current State
 - **Auth.js v5 Foundation**: Installed and configured with Prisma Adapter (`@auth/prisma-adapter`) and a JWT session strategy.
 - **`/admin` Shell**: Minimal server-side protected route exists (gated by Auth.js session existence).
-- **RBAC**: Still not implemented.
+- **RBAC**: Centralized role helper utilities (`lib/auth/rbac.ts`) are implemented (PR-23). Broad route protection and runtime checks are still not implemented.
 - **Admin CRUD**: Still not implemented.
 - **Prisma Foundation**: Prisma is configured with active `User`, `Account`, `Session`, and `VerificationToken` models (PR-22).
 - **Neon PostgreSQL**: Connected and database-backed auth schema applied via migration (PR-22).
@@ -17,7 +17,7 @@ This ensures we map database relationships, server actions, route middleware, an
 1. **Auth Database Schema Planning**: Plan `User`, `Account`, `Session`, and `VerificationToken` tables. See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md).
 2. **Auth Database Schema Migration**: Execute migrations to configure these tables in Neon PostgreSQL.
 3. **Minimal Role Field Design**: Introduce `role` and `status` properties to the `User` schema.
-4. **Centralized Authorization Helper Planning**: Plan and draft server-side auth validators.
+4. **Centralized Authorization Helper Planning**: Centralized auth helpers are implemented in [lib/auth/rbac.ts](file:///c:/work/plannerdesk/plannerdesk-main/lib/auth/rbac.ts).
 5. **Server-Side Admin Route Protection**: Gate admin shell layout and inner routes `/admin/*`.
 6. **Admin CRUD Write Protection**: Apply role checking directly to Next.js Server Actions and APIs.
 7. **Audit Log Foundation**: Build the schema and hook validation actions for logging admin writes.
@@ -52,47 +52,16 @@ Planned string values for roles:
 - `anonymous_public` is blocked from `/admin` and API write actions.
 
 ## F. Authorization Helper Design
-Centralized auth helpers will live in `lib/auth/rbac.ts` conceptually:
-
-```typescript
-// Conceptual outline (Do not implement in this PR)
-import { auth } from "@/auth";
-
-export async function getCurrentUser() {
-  const session = await auth();
-  return session?.user ?? null;
-}
-
-export async function requireSession() {
-  const user = await getCurrentUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
-export async function requireRole(role: string) {
-  const user = await requireSession();
-  if (user.role !== role) throw new Error("Forbidden");
-  return user;
-}
-
-export async function requireAnyRole(roles: string[]) {
-  const user = await requireSession();
-  if (!roles.includes(user.role)) throw new Error("Forbidden");
-  return user;
-}
-
-export function canManageContent(user: any): boolean {
-  return ["super_admin", "content_admin"].includes(user?.role);
-}
-
-export function canPublishContent(user: any): boolean {
-  return ["super_admin", "content_admin"].includes(user?.role);
-}
-
-export function canManageUsers(user: any): boolean {
-  return user?.role === "super_admin";
-}
-```
+Centralized auth helpers are implemented in [lib/auth/rbac.ts](file:///c:/work/plannerdesk/plannerdesk-main/lib/auth/rbac.ts).
+They define role constants (`ROLE_SUPER_ADMIN`, `ROLE_CONTENT_ADMIN`, etc.), type definitions (`PlannerDeskRole`, `AdminRole`, `NonAdminRole`), and pure validator functions:
+- `normalizeRole(role)`: Normalizes dynamic role strings into valid role types with fallback.
+- `isAdminRole(role)`: Validates if a role belongs to the administrative set.
+- `isSuperAdmin(role)`: Confirms if a role matches the super administrator.
+- `isContentAdmin(role)`: Confirms if a role matches the content manager.
+- `canAccessAdmin(userOrSession)`: Evaluates general access to the administrative module.
+- `canManageContent(userOrSession)`: Evaluates read/write capabilities on directory schemas.
+- `canPublishContent(userOrSession)`: Validates publishing access for directories.
+- `canManageUsers(userOrSession)`: Validates user directory creation and permissions.
 
 ## G. Server-Side Enforcement Rules
 - **Never rely on UI hiding**: Frontend checks (hiding menus or tabs) are solely for UI/UX. The backend APIs, Server Actions, and dynamic server components must independently check active roles.
@@ -170,8 +139,8 @@ Future PRs containing code in these categories require manual review:
 ## O. Recommended Next PRs
 1. ~~**PR-21**: Auth database schema planning~~ ✅ Done
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
-2. **PR-22**: Auth DB schema + adapter implementation, manual approval required (Current)
-3. **PR-23**: Minimal RBAC helper implementation, manual approval required
+2. ~~**PR-22**: Auth DB schema + adapter implementation~~ ✅ Done
+3. **PR-23**: Minimal RBAC helper implementation, manual approval required (Current)
 4. **PR-24**: Admin route server-side role protection, manual approval required
 5. **PR-25**: Insurer model + migration, manual approval required
 6. **PR-26**: Insurer admin CRUD, manual approval required

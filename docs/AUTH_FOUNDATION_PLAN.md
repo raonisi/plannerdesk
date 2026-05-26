@@ -160,8 +160,8 @@ Recommend:
 4. ~~**PR-20** RBAC implementation planning~~ ✅ Done
 5. ~~**PR-21** Auth database schema planning~~ ✅ Done
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
-6. **PR-22** Auth DB schema + adapter implementation, manual approval required (Current)
-7. **PR-23** Minimal RBAC helper implementation, manual approval required
+6. ~~**PR-22** Auth DB schema + adapter implementation~~ ✅ Done
+7. **PR-23** Minimal RBAC helper implementation, manual approval required (Current)
 8. **PR-24** Admin route server-side role protection, manual approval required
 9. **PR-25** Insurer model + migration, manual approval required
 10. **PR-26** Insurer admin CRUD, manual approval required
