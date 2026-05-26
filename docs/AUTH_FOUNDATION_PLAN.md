@@ -21,7 +21,7 @@ Authentication will later protect:
 - No Prisma Adapter is connected.
 - No database-backed auth tables exist.
 - RBAC is not implemented.
-- Admin UI is not implemented.
+- **Admin UI / Admin Shell**: Minimal server-side protected `/admin` shell implemented (PR-18) using server-side session checks.
 - Admin CRUD is not implemented.
 - No customer data is stored.
 - No customer medical documents are processed.
@@ -163,7 +163,7 @@ Future PRs must not be auto-merged if they include:
 ## K. Recommended Future Implementation Order
 Recommend:
 1. ~~**PR-17** Auth.js foundation implementation~~ ✅ Done
-2. **PR-18** Minimal protected admin shell, manual approval required
+2. ~~**PR-18** Minimal protected admin shell~~ ✅ Done
 3. **PR-19** Admin role/RBAC foundation, manual approval required
 4. **PR-20** Insurer model + migration, manual approval required
 5. **PR-21** Insurer directory admin CRUD, manual approval required
