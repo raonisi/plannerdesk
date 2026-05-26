@@ -54,11 +54,13 @@ Recommended future sequence:
 
 1. PR-14 Neon setup and Prisma foundation
 2. PR-15 Minimal admin auth planning or protected admin access planning (see [ADMIN_ACCESS_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/ADMIN_ACCESS_PLAN.md))
-3. PR-16 Insurer directory admin CRUD
-4. PR-17 Claim document admin CRUD
-5. PR-18 Disclosure link admin CRUD
-6. PR-19 Message template admin CRUD
-7. PR-20 Audit logs for admin changes
+3. PR-16 Auth foundation planning (see `AUTH_FOUNDATION_PLAN.md`)
+4. PR-17 Auth.js foundation implementation
+5. PR-18 Minimal protected admin shell
+6. PR-19 Admin role/RBAC foundation
+7. PR-20 Insurer model + migration
+8. PR-21 Insurer directory admin CRUD
+9. PR-22 Audit logs for admin changes
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 

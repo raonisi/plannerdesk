@@ -242,8 +242,9 @@ To prevent unauthorized merge changes, **any PR containing code in the following
 
 To incrementally implement PlannerDesk content management features:
 
-1. **PR-16**: Auth Foundation Planning & Setup (Introduce Auth.js dependencies, environment configurations, and server blockages).
-2. **PR-17**: Minimal Protected Admin Shell (Create route protection checks and layout shell under `/admin`).
-3. **PR-18**: Insurer Model & Prisma Migration (Draft the Insurer schema and deploy the migrations under manual approval).
-4. **PR-19**: Insurer Directory Admin CRUD (Build the forms, actions, and audit log hooks for insurer models).
-5. **PR-20**: Audit Log Infrastructure (Create the global logging schema and database triggers).
+1. **PR-16**: Auth Foundation Planning (Document the auth strategy and environment variables, see `AUTH_FOUNDATION_PLAN.md`).
+2. **PR-17**: Auth.js Foundation Implementation (Introduce Auth.js dependencies, environment configurations, and server blockages).
+3. **PR-18**: Minimal Protected Admin Shell (Create route protection checks and layout shell under `/admin`).
+4. **PR-19**: Insurer Model & Prisma Migration (Draft the Insurer schema and deploy the migrations under manual approval).
+5. **PR-20**: Insurer Directory Admin CRUD (Build the forms, actions, and audit log hooks for insurer models).
+6. **PR-21**: Audit Log Infrastructure (Create the global logging schema and database triggers).
