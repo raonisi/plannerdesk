@@ -221,10 +221,10 @@ The following changes are excluded from auto-merges:
 
 ## O. Recommended Future Implementation Order
 1. ~~**PR-20**: RBAC implementation planning~~ ✅ Done
-2. **PR-21**: Auth database schema planning, manual approval required (Current)
+2. ~~**PR-21**: Auth database schema planning~~ ✅ Done
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
-3. **PR-22**: Auth DB schema + adapter implementation, manual approval required
-4. **PR-23**: Minimal RBAC helper implementation, manual approval required
+3. ~~**PR-22**: Auth DB schema + adapter implementation~~ ✅ Done
+4. **PR-23**: Minimal RBAC helper implementation, manual approval required (Current)
 5. **PR-24**: Admin route server-side role protection, manual approval required
 6. **PR-25**: Insurer model + migration, manual approval required
 7. **PR-26**: Insurer admin CRUD, manual approval required
