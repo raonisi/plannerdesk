@@ -18,12 +18,13 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 - Public insurer action card UI
 - Local-only favorites for the public insurer directory (no server persistence, no analytics)
 - Verification + publish workflow guardrails (draft records are never publicly visible; admin UI and server actions enforce the same rule)
+- Correction request planning (queueing surface for editorial review; never mutates published data directly)
 - Claim document library content model
 - Customer message template library
 - Editorial review workflow for public information
 - Admin-only content update process
 
-See [docs/ADMIN_CRUD_ARCHITECTURE.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/ADMIN_CRUD_ARCHITECTURE.md) for the future Admin CRUD architecture plan, [docs/ADMIN_ACCESS_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/ADMIN_ACCESS_PLAN.md) for the minimal admin access plan, [docs/RBAC_FOUNDATION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/RBAC_FOUNDATION_PLAN.md) for the planned Role-Based Access Control rules, [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md) for the Auth database schema plan, and [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the planned evolution of the basic insurer directory into a practical insurer action center. These documents outline the structural layout for the data layer and routing shells.
+See [docs/ADMIN_CRUD_ARCHITECTURE.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/ADMIN_CRUD_ARCHITECTURE.md) for the future Admin CRUD architecture plan, [docs/ADMIN_ACCESS_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/ADMIN_ACCESS_PLAN.md) for the minimal admin access plan, [docs/RBAC_FOUNDATION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/RBAC_FOUNDATION_PLAN.md) for the planned Role-Based Access Control rules, [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md) for the Auth database schema plan, [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the planned evolution of the basic insurer directory into a practical insurer action center, and [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for the future correction request feature plan. These documents outline the structural layout for the data layer and routing shells.
 
 ## Phase 3: Accounts And Verification
 
