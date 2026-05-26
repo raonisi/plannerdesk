@@ -45,16 +45,14 @@ When secrets are needed in a later PR, configure them through Railway Variables.
 
 ## Neon PostgreSQL
 
-Neon PostgreSQL is not connected at runtime. PR-14 adds only the Prisma foundation:
+Neon PostgreSQL is now connected at runtime for the Auth.js persistence layer (PR-22):
 
-- `prisma/schema.prisma` with `provider = "postgresql"` and `url = env("DATABASE_URL")`, `directUrl = env("DIRECT_URL")`.
-- `prisma` dev dependency and `@prisma/client` runtime dependency.
-- `prisma:generate`, `prisma:validate`, and `prisma:studio` npm scripts.
-- A `lib/prisma.ts` helper that is not imported by any route in the current static MVP.
+- `prisma/schema.prisma` contains the standard NextAuth models (`User`, `Account`, `Session`, `VerificationToken`) and custom fields/enums.
+- Database schema applied via the `init_auth` migration.
+- Prisma Adapter `@auth/prisma-adapter` is introduced to bind NextAuth to the Neon database.
+- A `lib/prisma.ts` helper is now imported in `auth.ts` to manage database client connections.
 
-The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL`. Railway Variables may already contain `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL`. The Auth.js foundation (PR-17) is installed and can read `AUTH_SECRET` and `AUTH_URL` automatically, but no routes or database-backed features use them yet.
-
-Connect Neon at runtime only when the first database-backed feature ships. That future PR must include its own security review, migration plan, and rollback notes.
+The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL` during static generation, but runtime auth routes will require Railway Variables `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` to be correctly configured.
 
 See `docs/NEON_CONNECTION_PLAN.md` for the full Neon, Railway Variables, and Prisma rollout sequence.
 See `docs/AUTH_FOUNDATION_PLAN.md` for the Auth.js foundation details.

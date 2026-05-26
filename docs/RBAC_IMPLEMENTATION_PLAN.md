@@ -5,12 +5,12 @@ PlannerDesk requires a detailed implementation plan before writing any Role-Base
 This ensures we map database relationships, server actions, route middleware, and helpers accurately, preventing security bypasses or authorization leakage.
 
 ## B. Current State
-- **Auth.js v5 Foundation**: Installed and configured (`next-auth@5.0.0-beta.31`) with a JWT session strategy.
+- **Auth.js v5 Foundation**: Installed and configured with Prisma Adapter (`@auth/prisma-adapter`) and a JWT session strategy.
 - **`/admin` Shell**: Minimal server-side protected route exists (gated by Auth.js session existence).
-- **RBAC**: Not implemented.
-- **Admin CRUD**: Not implemented.
-- **Prisma Foundation**: Prisma is configured with no active user or role models.
-- **Neon PostgreSQL**: Planned and prepared but not queried by runtime components yet.
+- **RBAC**: Still not implemented.
+- **Admin CRUD**: Still not implemented.
+- **Prisma Foundation**: Prisma is configured with active `User`, `Account`, `Session`, and `VerificationToken` models (PR-22).
+- **Neon PostgreSQL**: Connected and database-backed auth schema applied via migration (PR-22).
 - **Public MVP Surface**: Fully operational and static. Public pages must remain completely accessible.
 
 ## C. Recommended Implementation Order
@@ -168,9 +168,9 @@ Future PRs containing code in these categories require manual review:
 - BOA CRM connections.
 
 ## O. Recommended Next PRs
-1. **PR-21**: Auth database schema planning, manual approval required (Current)
+1. ~~**PR-21**: Auth database schema planning~~ ✅ Done
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
-2. **PR-22**: Auth DB schema + adapter implementation, manual approval required
+2. **PR-22**: Auth DB schema + adapter implementation, manual approval required (Current)
 3. **PR-23**: Minimal RBAC helper implementation, manual approval required
 4. **PR-24**: Admin route server-side role protection, manual approval required
 5. **PR-25**: Insurer model + migration, manual approval required
