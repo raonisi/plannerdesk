@@ -321,7 +321,7 @@ function ExternalAction({
   if (!href) {
     return (
       <span className="inline-flex items-center justify-center border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-2 text-center text-sm font-semibold text-[#8b7660]">
-        {label} \uc900\ube44 \uc911
+        {label} {MISSING_TEXT}
       </span>
     );
   }
