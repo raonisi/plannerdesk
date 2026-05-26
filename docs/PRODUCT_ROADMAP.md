@@ -19,6 +19,8 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 - Editorial review workflow for public information
 - Admin-only content update process
 
+See `docs/ADMIN_CRUD_ARCHITECTURE.md` for the future Admin CRUD architecture plan. It is documentation only and does not add Neon, Prisma, auth, admin UI, or database behavior.
+
 ## Phase 3: Accounts And Verification
 
 - Planner account model
