@@ -72,8 +72,8 @@ Recommended future sequence:
     - See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md)
 15. PR-28 Insurer action fields migration, manual approval required (Done)
 16. PR-29 Admin form update for insurer action fields, manual approval required (Done)
-17. PR-30 Public directory DB read integration, manual approval required (Current)
-18. PR-31 Public insurer action card UI, manual approval required
+17. PR-30 Public directory DB read integration, manual approval required (Done)
+18. PR-31 Public insurer action card UI, manual approval required (Current)
 19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices
 20. PR-33 Verification/publish workflow polish, manual approval required
 21. PR-34 Audit log planning or foundation, manual approval required
