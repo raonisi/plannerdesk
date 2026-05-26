@@ -75,6 +75,8 @@ See `docs/DEPLOYMENT.md` for deployment readiness notes.
 
 See `docs/NEON_CONNECTION_PLAN.md` for the planned Neon PostgreSQL connection sequence. Neon is not connected and `DATABASE_URL` is not required for the current static MVP.
 
+See `docs/ADMIN_ACCESS_PLAN.md` for the conceptual minimal admin access plan, role definitions, and access control principles.
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:

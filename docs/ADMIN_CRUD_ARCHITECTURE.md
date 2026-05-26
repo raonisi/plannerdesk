@@ -53,7 +53,7 @@ Out of scope for the first Admin CRUD work:
 Recommended future sequence:
 
 1. PR-14 Neon setup and Prisma foundation
-2. PR-15 Minimal admin auth planning or protected admin access planning
+2. PR-15 Minimal admin auth planning or protected admin access planning (see [ADMIN_ACCESS_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/ADMIN_ACCESS_PLAN.md))
 3. PR-16 Insurer directory admin CRUD
 4. PR-17 Claim document admin CRUD
 5. PR-18 Disclosure link admin CRUD
