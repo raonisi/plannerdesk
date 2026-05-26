@@ -164,31 +164,31 @@ These are conceptual future models only. Do not treat this section as a Prisma s
 Verification statuses:
 
 - `draft` = `초안`
-- `needs_review` = `검수 필요`
-- `verified` = `검수 완료`
+- `needs_review` = `검???�요`
+- `verified` = `검???�료`
 
 Rules:
 
 - New records default to `draft`.
-- `draft` records are never publicly visible, even if `isPublished` is true. PR-33 enforces this server-side: both `parseInsurerForm` and `setInsurerPublished` reject the `isPublished=true + verificationStatus=draft` combination with the calm Korean error "초안 상태의 보험사는 공개할 수 없습니다. 검수 필요 또는 검수 완료 상태로 변경한 뒤 공개해 주세요." The list UI also disables the publish toggle for draft rows.
+- `draft` records are never publicly visible, even if `isPublished` is true. PR-33 enforces this server-side: both `parseInsurerForm` and `setInsurerPublished` reject the `isPublished=true + verificationStatus=draft` combination with the calm Korean error "초안 ?�태??보험?�는 공개?????�습?�다. 검???�요 ?�는 검???�료 ?�태�?변경한 ??공개??주세??" The list UI also disables the publish toggle for draft rows.
 - `verified` status requires manual operator review against an official source.
 - Do not create fake `lastVerifiedAt` dates.
-- Missing official URL on the public surface should display `공식 확인 후 업데이트 예정`.
+- Missing official URL on the public surface should display `공식 ?�인 ???�데?�트 ?�정`.
 
 ### Public visibility policy (canonical)
 
 A record is visible on `/directory` if and only if both conditions hold:
 
 - `isPublished === true`
-- `verificationStatus ∈ { verified, needs_review }`
+- `verificationStatus ??{ verified, needs_review }`
 
 This rule lives in `lib/public/insurers.ts` (`PUBLIC_VERIFICATION_STATUSES`, `isInsurerPubliclyVisible`). Both the Prisma read query in `getPublicInsurers` and the admin-side publish guard (`app/admin/insurers/visibility.ts`, `actions.ts`) read from the same export so the policy cannot drift.
 
 Governance notes:
 
 - `verified` means the record was reviewed against the insurer's official source (website, official disclosure, planner portal announcement).
-- `needs_review` may surface publicly only with a clear "검수 필요" badge so planners know to reconfirm before acting on the data.
-- Missing operational fields keep the safe fallback copy from `lib/directory/formatting.ts` (`공식 확인 후 업데이트 예정` / `해당사항 없음` / `콜센터 개별접수` / `조건 확인 필요`). Never render raw nulls.
+- `needs_review` may surface publicly only with a clear "검???�요" badge so planners know to reconfirm before acting on the data.
+- Missing operational fields keep the safe fallback copy from `lib/directory/formatting.ts` (`공식 ?�인 ???�데?�트 ?�정` / `?�당?�항 ?�음` / `콜센??개별?�수` / `조건 ?�인 ?�요`). Never render raw nulls.
 
 ## G. Admin Roles Planning
 
@@ -291,11 +291,11 @@ PR-27 plans the expansion of the `Insurer` model into a practical insurer action
 
 The schema and migration for those action fields land in PR-28 under manual approval. PR-28 does not update admin forms or public runtime behavior.
 
-PR-29 surfaces those fields in the protected admin create/edit forms with grouped sections (A. Basic Info / B. Access / C. Support / D. Claim / E. Policy or Disclosure / F. Payment / G. Governance), tri-state controls for nullable payment booleans, and the required Korean operator copy ("공식 확인 후 업데이트 예정", "해당사항 없음", "콜센터 개별접수", "조건 확인 필요"). PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior. The admin list view in PR-29 also flags records with three or more missing core operational fields under a "운영 정보 보강 필요" badge so operators can prioritize follow-up verification before public read-through ships.
+PR-29 surfaces those fields in the protected admin create/edit forms with grouped sections (A. Basic Info / B. Access / C. Support / D. Claim / E. Policy or Disclosure / F. Payment / G. Governance), tri-state controls for nullable payment booleans, and the required Korean operator copy ("공식 ?�인 ???�데?�트 ?�정", "?�당?�항 ?�음", "콜센??개별?�수", "조건 ?�인 ?�요"). PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior. The admin list view in PR-29 also flags records with three or more missing core operational fields under a "?�영 ?�보 보강 ?�요" badge so operators can prioritize follow-up verification before public read-through ships.
 
-PR-30 switches the public `/directory` page from static sample data to a DB read of published `Insurer` records via a new `lib/public/insurers.ts` helper. The helper restricts the query to `isPublished = true` AND `verificationStatus IN ('verified', 'needs_review')`, orders by `isFeatured desc, sortOrder asc, name asc`, and projects only public-safe columns (admin governance fields such as `notes`, `sourceNote`, `createdById`, and `updatedById` are excluded). The page is rendered as an async Server Component with `dynamic = "force-dynamic"` so admin publish toggles propagate immediately, and unexpected DB failures surface as the calm "잠시 후 다시 확인해 주세요" notice without exposing raw errors. PR-30 does not change `prisma/schema.prisma`, does not add migrations, and does not change the admin CRUD surface. The public insurer action card visual polish ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
+PR-30 switches the public `/directory` page from static sample data to a DB read of published `Insurer` records via a new `lib/public/insurers.ts` helper. The helper restricts the query to `isPublished = true` AND `verificationStatus IN ('verified', 'needs_review')`, orders by `isFeatured desc, sortOrder asc, name asc`, and projects only public-safe columns (admin governance fields such as `notes`, `sourceNote`, `createdById`, and `updatedById` are excluded). The page is rendered as an async Server Component with `dynamic = "force-dynamic"` so admin publish toggles propagate immediately, and unexpected DB failures surface as the calm "?�시 ???�시 ?�인??주세?? notice without exposing raw errors. PR-30 does not change `prisma/schema.prisma`, does not add migrations, and does not change the admin CRUD surface. The public insurer action card visual polish ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
 
-PR-34 plans the future correction request feature so the public directory can stay fresh without weakening the verification or publish guardrails. It is documentation only — no runtime code, no schema, no migration, no admin form, no public form. The plan keeps user submissions in a queueing surface that requires manual admin review against an official source before any `Insurer` field is edited, and never collects customer or medical data. See [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for the full plan.
+PR-34 plans the future correction request feature so the public directory can stay fresh without weakening the verification or publish guardrails. It is documentation only ??no runtime code, no schema, no migration, no admin form, no public form. The plan keeps user submissions in a queueing surface that requires manual admin review against an official source before any `Insurer` field is edited, and never collects customer or medical data. See [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for the full plan.
 
 ## M. Manual Approval Required
 
@@ -319,3 +319,4 @@ If any of these are required, stop and report:
 - Required decision
 - Safer alternative
 - Recommended next step
+

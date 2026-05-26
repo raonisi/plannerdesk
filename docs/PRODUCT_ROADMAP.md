@@ -58,3 +58,4 @@ See [docs/ADMIN_CRUD_ARCHITECTURE.md](file:///c:/work/plannerdesk/plannerdesk-ma
 - Loss-adjusting workflow
 - Replacing licensed professional judgment
 - Processing customer medical documents in the MVP
+
