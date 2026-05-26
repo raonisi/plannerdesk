@@ -40,6 +40,20 @@ enum InsurerCategory {
   non_life
 }
 
+enum ClaimFaxHandlingType {
+  fax
+  call_center_individual
+  unavailable
+  unknown
+}
+
+enum CardPaymentStatus {
+  available
+  unavailable
+  conditional
+  unknown
+}
+
 model User {
   id                 String             @id @default(cuid())
   name               String?
@@ -96,14 +110,29 @@ model Insurer {
   category           InsurerCategory
   officialWebsiteUrl String?
   plannerPortalUrl   String?
+  systemUrl          String?
   claimPageUrl       String?
   customerCenterPhone String?
+  callMonitoringPhone String?
+  helpdeskPhone      String?
   faxNumber          String?
   mailingAddress     String?
+  cardPaymentInitialAvailable Boolean?
+  cardPaymentRecurringAvailable Boolean?
+  cardPaymentStatus  CardPaymentStatus  @default(unknown)
+  cardPaymentNote    String?
+  claimFaxNumber     String?
+  claimFaxHandlingType ClaimFaxHandlingType @default(unknown)
+  registeredMailAddress String?
+  claimFormUrl       String?
+  termsUrl           String?
+  sourceNote         String?
   notes              String?
   verificationStatus VerificationStatus @default(draft)
   lastVerifiedAt     DateTime?
   isPublished        Boolean            @default(false)
+  sortOrder          Int                @default(0)
+  isFeatured         Boolean            @default(false)
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   createdById        String?
@@ -113,4 +142,8 @@ model Insurer {
   @@index([verificationStatus])
   @@index([isPublished])
   @@index([name])
+  @@index([sortOrder])
+  @@index([isFeatured])
+  @@index([cardPaymentStatus])
+  @@index([claimFaxHandlingType])
 }

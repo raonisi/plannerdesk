@@ -1,8 +1,8 @@
 # PlannerDesk Insurer Action Field Expansion Plan
 
-This document is a plan, not an implementation.
+This document started as the PR-27 plan. PR-28 implements only the approved Prisma schema and migration foundation for the action fields documented here.
 
-Do not add schema changes, Prisma migrations, admin form updates, public directory database reads, favorites, click tracking, PWA, real insurer data, customer data, medical data, BOA CRM connections, or Aiven connections in this PR. This document only outlines the future direction for evolving the existing `Insurer` model into a practical insurer action center for Korean insurance planners.
+Do not add admin form updates, public directory database reads, favorites, click tracking, PWA, real insurer data, customer data, medical data, BOA CRM connections, or Aiven connections in PR-28. PR-28 only adds the approved action-field schema and migration.
 
 ## A. Purpose
 
@@ -20,7 +20,7 @@ This is the gap PlannerDesk should close after PR-26.
 
 PlannerDesk will therefore evolve the `Insurer` model from a basic contact/link record into a **standardized operational action card**. Each insurer will expose the same workflow-aligned action slots, and PlannerDesk will own the verification, governance, and premium presentation layer that planner-facing data deserves. The goal is to become the premium daily workdesk that Korean insurance planners trust, not another insurer link farm.
 
-This document defines the conceptual future surface only. Schema changes, migrations, admin forms, and public UI work all happen in later, separately reviewed PRs.
+This document defines the conceptual surface. PR-28 adds the schema and migration foundation only; admin forms and public UI work happen in later, separately reviewed PRs.
 
 ## B. Current Insurer Model Boundary
 
@@ -57,7 +57,7 @@ They are **not** enough for:
 - Curated claim-form deep links.
 - Per-card favorite, sorting, and featured controls.
 
-PR-27 plans the field expansion that closes this gap, but does not implement it.
+PR-27 planned the field expansion that closes this gap. PR-28 adds the approved fields to the Prisma schema without changing admin forms or public runtime behavior.
 
 ## C. Benchmark Insight
 
@@ -128,7 +128,7 @@ Operational data is frequently incomplete, channel-specific, or in transition. B
 
 ### D-3. Not in this PR
 
-Do not add any of the above fields, enums, indices, or migrations in this PR. PR-28 will plan and implement the schema migration.
+PR-28 adds the approved fields, enums, and practical indexes in `prisma/schema.prisma` and the accompanying migration. It does not wire those fields into admin forms or public pages.
 
 ## E. Field Grouping
 
@@ -256,7 +256,7 @@ Favorites, recents, and popularity should be planned in a later, separately revi
 
 Recommended future PR sequence after PR-27. Each PR should keep scope narrow and include its own security review, migration plan, test plan, and rollback notes where applicable.
 
-- **PR-28 Insurer action fields migration** — add the new fields and enums from Section D under a Prisma migration. Manual approval required.
+- **PR-28 Insurer action fields migration** — add the new fields and enums from Section D under a Prisma migration. Manual approval required. (Current)
 - **PR-29 Admin form update for action fields** — extend the protected admin CRUD UI to the grouped sections from Section H. Manual approval required.
 - **PR-30 Public directory DB read integration** — switch `/directory` to read published insurer records from the database. Manual approval required. This replaces the older PR-27 placement of public DB read integration that appeared in `docs/ADMIN_CRUD_ARCHITECTURE.md`.
 - **PR-31 Public insurer action card UI** — implement the one-tap action card per Section G, replacing the placeholder directory layout.
@@ -279,10 +279,8 @@ The action-card surface increases PlannerDesk's exposure to a few specific risks
 
 ## M. Out of Scope
 
-This PR does not implement, and does not require approval for, any of the following:
+PR-28 does not implement, and does not require approval for, any of the following:
 
-- Schema changes (no edits to `prisma/schema.prisma`)
-- Database migrations (no `prisma/migrations` changes)
 - Admin form updates (no edits under `app/admin/insurers`)
 - Public directory database reads (no edits under `app/directory`)
 - API route changes (no edits under `app/api`)
@@ -296,4 +294,4 @@ This PR does not implement, and does not require approval for, any of the follow
 - Payment, billing, or subscription work
 - File upload or storage
 
-The next implementation work happens in PR-28 (Insurer action fields migration), which is the first PR that should actually touch `prisma/schema.prisma` for action fields, and which must keep manual approval gating per `AGENTS.md`.
+The next implementation work after PR-28 is PR-29 (Admin form update for action fields). PR-29 should expose the new fields in grouped admin form sections while preserving the PR-26 server-side auth/RBAC model.

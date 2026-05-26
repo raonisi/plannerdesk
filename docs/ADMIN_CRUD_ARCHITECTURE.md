@@ -70,7 +70,7 @@ Recommended future sequence:
 13. PR-26 Insurer directory admin CRUD, manual approval required (Done)
 14. PR-27 Insurer action field expansion planning, documentation only (Current)
     - See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md)
-15. PR-28 Insurer action fields migration, manual approval required
+15. PR-28 Insurer action fields migration, manual approval required (Current)
 16. PR-29 Admin form update for insurer action fields, manual approval required
 17. PR-30 Public directory DB read integration, manual approval required
 18. PR-31 Public insurer action card UI, manual approval required
@@ -269,7 +269,7 @@ PR-26 implements this first protected CRUD surface for the `Insurer` model only.
 
 PR-27 plans the expansion of the `Insurer` model into a practical insurer action center (planner system access, helpdesk phone, call monitoring phone, card payment status, terms URL, claim form URL, claim fax handling type, and related governance fields). PR-27 is documentation only.
 
-The actual schema and migration for those action fields land in PR-28 under manual approval. Public directory reads then migrate to database records in PR-30 (renumbered from the previous PR-27 placement), and the public insurer action card UI ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
+The schema and migration for those action fields land in PR-28 under manual approval. PR-28 does not update admin forms or public runtime behavior. Public directory reads then migrate to database records in PR-30 (renumbered from the previous PR-27 placement), and the public insurer action card UI ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
 
 ## M. Manual Approval Required
 
