@@ -14,6 +14,7 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 ## Phase 2: Practical Content Hubs
 
 - Insurer directory content model
+- Insurer action-field schema foundation
 - Claim document library content model
 - Customer message template library
 - Editorial review workflow for public information
