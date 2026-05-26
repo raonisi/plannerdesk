@@ -220,12 +220,13 @@ The following changes are excluded from auto-merges:
 - Direct DB queries by public components
 
 ## O. Recommended Future Implementation Order
-1. **PR-20**: RBAC implementation planning or minimal implementation, manual approval required
+1. ~~**PR-20**: RBAC implementation planning~~ ✅ Done
 2. **PR-21**: Auth database schema planning, manual approval required
-3. **PR-22**: Insurer model + migration, manual approval required
-4. **PR-23**: Insurer admin CRUD, manual approval required
-5. **PR-24**: Audit log foundation, manual approval required
-6. **PR-25**: Role management planning, manual approval required
+3. **PR-22**: Auth DB schema + migration, manual approval required
+4. **PR-23**: Minimal RBAC helper implementation, manual approval required
+5. **PR-24**: Admin route server-side role protection, manual approval required
+6. **PR-25**: Insurer model + migration, manual approval required
+7. **PR-26**: Insurer admin CRUD, manual approval required
 
 ## P. Out of Scope
 This planning PR does not implement:

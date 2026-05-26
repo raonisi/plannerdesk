@@ -81,6 +81,8 @@ See `docs/AUTH_FOUNDATION_PLAN.md` for the auth strategy before any DB or Auth.j
 
 See `docs/RBAC_FOUNDATION_PLAN.md` for the planned Role-Based Access Control (RBAC) foundation rules and server-side authorization principles.
 
+See `docs/RBAC_IMPLEMENTATION_PLAN.md` for the planned Role-Based Access Control (RBAC) implementation steps and authorization helper design.
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:
