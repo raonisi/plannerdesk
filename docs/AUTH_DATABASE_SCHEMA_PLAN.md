@@ -11,15 +11,15 @@ The future auth database layer will eventually support:
 - Future verified planner accounts
 
 ## B. Current Status
-- **Auth.js v5 Foundation**: Installed (`next-auth@5.0.0-beta.31`) with JWT strategy and no providers yet.
+- **Auth.js v5 Foundation**: Installed and configured with Prisma Adapter (`@auth/prisma-adapter`).
 - **`/admin` Protected Shell**: Minimal server-side protected route implemented (gated by session existence).
-- **Prisma Foundation**: Prisma configured but with no active user or role models.
-- **Neon PostgreSQL**: Planned and prepared.
-- **Auth DB Schema**: Not implemented.
-- **Prisma Adapter**: Not installed.
-- **User/Account/Session/VerificationToken Models**: Do not exist in `schema.prisma`.
-- **RBAC Runtime**: Not implemented.
-- **Admin CRUD**: Not implemented.
+- **Prisma Foundation**: Prisma configured with active `User`, `Account`, `Session`, and `VerificationToken` models.
+- **Neon PostgreSQL**: Connected and schema applied via migration (`20260526045824_init_auth`).
+- **Auth DB Schema**: Implemented.
+- **Prisma Adapter**: Installed and configured.
+- **User/Account/Session/VerificationToken Models**: Defined in `schema.prisma`.
+- **RBAC Runtime**: Still not implemented.
+- **Admin CRUD**: Still not implemented.
 - **Customer Data**: No customer data is stored, processed, or handled.
 - **Customer Medical Documents**: No medical files, OCR workflows, or sensitive customer claims exist.
 - **System Separation**: PlannerDesk is completely separate from BOA CRM. No connection to Aiven or the BOA CRM database exists.

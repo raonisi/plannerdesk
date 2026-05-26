@@ -23,8 +23,15 @@
  */
 
 import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  /**
+   * Use the Prisma Adapter to persist user, account, and verification tokens.
+   */
+  adapter: PrismaAdapter(prisma),
+
   /**
    * Providers will be added in a future PR.
    * An empty array means no login method is available yet.
@@ -33,9 +40,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [],
 
   /**
-   * Use JWT strategy so no database session table is required.
-   * This allows the auth foundation to exist without Prisma Adapter
-   * or auth-specific database migrations.
+   * Use JWT strategy for session token resolution to minimize database-backed
+   * session validation traffic on every request, as planned.
    */
   session: {
     strategy: "jwt",
@@ -46,17 +52,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
    * Route handler is at app/api/auth/[...nextauth]/route.ts.
    */
   basePath: "/api/auth",
-
-  /**
-   * Future callbacks for role injection, admin checks, and
-   * audit logging will be added here after RBAC design approval.
-   */
-  // callbacks: {},
-
-  /**
-   * Custom pages will be added in a future PR when login UI is needed.
-   * For now, Auth.js default pages are sufficient (they will show
-   * "no providers configured" which is expected).
-   */
-  // pages: {},
 });

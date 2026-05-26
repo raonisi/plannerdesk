@@ -15,11 +15,11 @@ Authentication will later protect:
 - Prisma foundation exists.
 - Neon is prepared but public pages do not depend on DB queries yet.
 - **Auth.js v5 foundation is installed** (PR-17): `next-auth@5.0.0-beta.31`.
-- Auth.js config exists at `auth.ts` with JWT session strategy and no providers.
+- Auth.js config exists at `auth.ts` and uses `@auth/prisma-adapter` with a JWT session strategy (no providers yet).
 - Route handler exists at `app/api/auth/[...nextauth]/route.ts`.
 - No real login providers are configured yet.
-- No Prisma Adapter is connected.
-- No database-backed auth tables exist.
+- **Prisma Adapter is connected** (PR-22).
+- **Database-backed auth tables exist** (PR-22) under the `init_auth` migration.
 - RBAC is not implemented.
 - **Admin UI / Admin Shell**: Minimal server-side protected `/admin` shell implemented (PR-18) using server-side session checks.
 - Admin CRUD is not implemented.
@@ -158,9 +158,9 @@ Recommend:
 2. ~~**PR-18** Minimal protected admin shell~~ ✅ Done
 3. ~~**PR-19** RBAC foundation planning~~ ✅ Done
 4. ~~**PR-20** RBAC implementation planning~~ ✅ Done
-5. **PR-21** Auth database schema planning, manual approval required (Current)
+5. ~~**PR-21** Auth database schema planning~~ ✅ Done
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
-6. **PR-22** Auth DB schema + adapter implementation, manual approval required
+6. **PR-22** Auth DB schema + adapter implementation, manual approval required (Current)
 7. **PR-23** Minimal RBAC helper implementation, manual approval required
 8. **PR-24** Admin route server-side role protection, manual approval required
 9. **PR-25** Insurer model + migration, manual approval required
