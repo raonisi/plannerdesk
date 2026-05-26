@@ -160,20 +160,19 @@ If any of these are required, stop and report:
 
 ## I. Current Status
 
-- Neon: not connected at runtime (foundation only)
-- Prisma: foundation added in PR-14 (schema with no models, client helper, scripts)
-- Database: not required to build or run the current static MVP
-- Railway: should still deploy without runtime DB access; `DATABASE_URL` / `DIRECT_URL` may be set as Railway Variables ahead of the first DB-backed feature
-- Data: static placeholder only
-- Auth: not implemented
-- Admin CRUD: not implemented
-- BOA CRM: not connected
-- Aiven: not connected
+- Neon: connected at runtime for Auth.js and Insurer models (PR-22, PR-25).
+- Prisma: schema includes Auth.js models (`User`, `Account`, `Session`, `VerificationToken`) and the `Insurer` model (PR-22, PR-25).
+- Database: required for auth and admin routes at runtime; public MVP pages remain static and don't query the database yet.
+- Railway: requires `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` variables.
+- Data: static placeholders for public MVP, database backing configured.
+- Auth: Auth.js and Prisma Adapter implemented with server-side role gating (PR-22, PR-24).
+- Admin CRUD: not implemented yet.
+- BOA CRM: not connected.
+- Aiven: not connected.
 
 ## J. Next Recommended PRs
 
-- PR-15: First minimal business model and migration, for example an `Insurer` directory
-- PR-16: Insurer directory admin CRUD (auth and RBAC gated separately)
-- PR-17: Claim document admin CRUD
+- PR-26: Insurer directory admin CRUD
+- PR-27: Claim document model + migration
 
 Each next PR should keep scope narrow and include its own security review, migration plan, test plan, and rollback notes where applicable.

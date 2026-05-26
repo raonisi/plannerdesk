@@ -45,14 +45,14 @@ When secrets are needed in a later PR, configure them through Railway Variables.
 
 ## Neon PostgreSQL
 
-Neon PostgreSQL is now connected at runtime for the Auth.js persistence layer (PR-22):
+Neon PostgreSQL is now connected at runtime for the Auth.js persistence layer (PR-22) and holds the first business model (PR-25):
 
-- `prisma/schema.prisma` contains the standard NextAuth models (`User`, `Account`, `Session`, `VerificationToken`) and custom fields/enums.
-- Database schema applied via the `init_auth` migration.
-- Prisma Adapter `@auth/prisma-adapter` is introduced to bind NextAuth to the Neon database.
+- `prisma/schema.prisma` contains the standard NextAuth models, custom fields, and the new `Insurer` model with its categories and verification states.
+- Database schemas are applied via migrations (`init_auth` and `add_insurer_model`).
+- Prisma Adapter `@auth/prisma-adapter` binds NextAuth to the Neon database.
 - A `lib/prisma.ts` helper is now imported in `auth.ts` to manage database client connections.
 
-The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL` during static generation, but runtime auth routes will require Railway Variables `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` to be correctly configured.
+The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL` during static generation, but runtime auth routes and future admin pages will require Railway Variables `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` to be correctly configured.
 
 See `docs/NEON_CONNECTION_PLAN.md` for the full Neon, Railway Variables, and Prisma rollout sequence.
 See `docs/AUTH_FOUNDATION_PLAN.md` for the Auth.js foundation details.

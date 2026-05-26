@@ -20,11 +20,10 @@ Future Admin CRUD should allow approved operators to update public resource data
 ## B. Current Status
 
 - Static content exists in `lib/content`.
-- Neon is not connected.
-- Prisma is not added.
-- Auth is not implemented.
-- Admin CRUD is not implemented.
-- Railway deploys without `DATABASE_URL`.
+- Neon PostgreSQL connection and Prisma foundation are configured.
+- Auth DB schema, Prisma Adapter, and minimal RBAC helpers are implemented (PR-22, PR-23, PR-24).
+- The `Insurer` model and its database migration are defined in Prisma (PR-25).
+- Admin CRUD is still not implemented.
 - PlannerDesk is separate from BOA CRM.
 - Aiven is not used for PlannerDesk MVP.
 
@@ -62,9 +61,9 @@ Recommended future sequence:
 8. PR-21 Auth database schema planning, manual approval required (Done)
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
 9. PR-22 Auth DB schema + adapter implementation, manual approval required (Done)
-10. PR-23 Minimal RBAC helper implementation, manual approval required (Current)
-11. PR-24 Admin route server-side role protection, manual approval required
-12. PR-25 Insurer model + migration, manual approval required
+10. PR-23 Minimal RBAC helper implementation, manual approval required (Done)
+11. PR-24 Admin route server-side role protection, manual approval required (Done)
+12. PR-25 Insurer model + migration, manual approval required (Current)
 13. PR-26 Insurer directory admin CRUD, manual approval required
 14. PR-27 Audit log planning or foundation, manual approval required
 

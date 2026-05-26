@@ -1,10 +1,6 @@
-// PlannerDesk Prisma schema foundation for Auth.js.
+// PlannerDesk Prisma schema for Auth.js and Insurer Directory.
 //
-// This file contains the Auth.js schema configuration.
-// Business tables, customer data, file storage, and any BOA CRM or Aiven connections
-// are out of scope for this PR.
-//
-// Refer to docs/AUTH_DATABASE_SCHEMA_PLAN.md for details.
+// Refer to docs/AUTH_DATABASE_SCHEMA_PLAN.md and docs/ADMIN_CRUD_ARCHITECTURE.md for details.
 
 generator client {
   provider = "prisma-client-js"
@@ -35,6 +31,13 @@ enum VerificationStatus {
   unverified
   pending
   verified
+  draft
+  needs_review
+}
+
+enum InsurerCategory {
+  life
+  non_life
 }
 
 model User {
@@ -85,4 +88,29 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Insurer {
+  id                 String             @id @default(cuid())
+  name               String
+  category           InsurerCategory
+  officialWebsiteUrl String?
+  plannerPortalUrl   String?
+  claimPageUrl       String?
+  customerCenterPhone String?
+  faxNumber          String?
+  mailingAddress     String?
+  notes              String?
+  verificationStatus VerificationStatus @default(draft)
+  lastVerifiedAt     DateTime?
+  isPublished        Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  createdById        String?
+  updatedById        String?
+
+  @@index([category])
+  @@index([verificationStatus])
+  @@index([isPublished])
+  @@index([name])
 }
