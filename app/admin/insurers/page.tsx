@@ -1,7 +1,10 @@
 import Link from "next/link";
 import {
+  CardPaymentStatus,
+  ClaimFaxHandlingType,
   InsurerCategory,
   VerificationStatus,
+  type Insurer,
   type Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -15,11 +18,27 @@ export const dynamic = "force-dynamic";
 
 const PAGE_TITLE = "\ubcf4\ud5d8\uc0ac \ub514\ub809\ud1a0\ub9ac \uad00\ub9ac";
 const PAGE_DESCRIPTION =
-  "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30\uc640 \uccad\uad6c \uad00\ub828 \uae30\ubcf8 \uc815\ubcf4\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4.";
+  "\ubcf4\ud5d8\uc0ac \uc811\uc18d/\uc9c0\uc6d0/\uccad\uad6c/\uce74\ub4dc\ub0a9 \uc6b4\uc601 \uc815\ubcf4\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4. \uacf5\uac1c \ub514\ub809\ud1a0\ub9ac DB \uc77d\uae30\ub294 PR-30\uc5d0\uc11c \uc5f0\uacb0\ub429\ub2c8\ub2e4.";
 const SAFETY_NOTICE =
   "\uacf5\uc2dd \ub9c1\ud06c\uc640 \uc5f0\ub77d\ucc98\ub294 \uacf5\uac1c \uc804 \ubc18\ub4dc\uc2dc \ubcf4\ud5d8\uc0ac \uacf5\uc2dd \ucd9c\ucc98 \uae30\uc900\uc73c\ub85c \uac80\uc218\ud574 \uc8fc\uc138\uc694.";
 const MISSING_TEXT =
   "\uacf5\uc2dd \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8 \uc608\uc815";
+const UNAVAILABLE_TEXT = "\ud574\ub2f9\uc0ac\ud56d \uc5c6\uc74c";
+const CALL_CENTER_INDIVIDUAL_TEXT = "\ucf5c\uc13c\ud130 \uac1c\ubcc4\uc811\uc218";
+const CONDITIONAL_TEXT = "\uc870\uac74 \ud655\uc778 \ud544\uc694";
+const NEEDS_UPDATE_TEXT = "\uc6b4\uc601 \uc815\ubcf4 \ubcf4\uac15 \ud544\uc694";
+
+// Core operational fields. If too many are missing, the list page flags the
+// record with the gold "운영 정보 보강 필요" badge so operators can prioritize
+// follow-up verification before public surface read-through ships in PR-30.
+const CORE_OPERATIONAL_FIELDS = [
+  "systemUrl",
+  "helpdeskPhone",
+  "claimFaxNumber",
+  "termsUrl",
+  "claimFormUrl",
+] as const satisfies readonly (keyof Insurer)[];
+const MISSING_FIELD_THRESHOLD = 3;
 
 const badgeBase =
   "inline-flex min-h-7 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold";
@@ -49,6 +68,29 @@ function statusLabel(status: string) {
 
 function optionalValue(value: string | null) {
   return value && value.trim().length > 0 ? value : MISSING_TEXT;
+}
+
+function cardPaymentStatusLabel(status: CardPaymentStatus): string {
+  if (status === CardPaymentStatus.available) return "\uc0ac\uc6a9 \uac00\ub2a5";
+  if (status === CardPaymentStatus.conditional) return CONDITIONAL_TEXT;
+  if (status === CardPaymentStatus.unavailable) return UNAVAILABLE_TEXT;
+  return MISSING_TEXT;
+}
+
+function claimFaxHandlingLabel(value: ClaimFaxHandlingType): string {
+  if (value === ClaimFaxHandlingType.fax) return "\ud329\uc2a4 \uc0ac\uc6a9";
+  if (value === ClaimFaxHandlingType.call_center_individual)
+    return CALL_CENTER_INDIVIDUAL_TEXT;
+  if (value === ClaimFaxHandlingType.unavailable) return UNAVAILABLE_TEXT;
+  return MISSING_TEXT;
+}
+
+function countMissingOperational(insurer: Insurer): number {
+  return CORE_OPERATIONAL_FIELDS.reduce((acc, key) => {
+    const raw = insurer[key];
+    const value = typeof raw === "string" ? raw.trim() : "";
+    return acc + (value.length === 0 ? 1 : 0);
+  }, 0);
 }
 
 function badgeClass(tone: "green" | "gold" | "gray" | "navy") {
@@ -131,7 +173,7 @@ export default async function AdminInsurersPage({
   const resolvedSearchParams = await searchParams;
   const insurers = await prisma.insurer.findMany({
     where: buildWhere(resolvedSearchParams),
-    orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+    orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }, { name: "asc" }],
   });
 
   return (
@@ -229,16 +271,32 @@ export default async function AdminInsurersPage({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e7ddc9]">
-                  {insurers.map((insurer) => (
+                  {insurers.map((insurer) => {
+                    const missingOperational = countMissingOperational(insurer);
+                    const needsOperationalUpdate =
+                      missingOperational >= MISSING_FIELD_THRESHOLD;
+                    return (
                     <tr key={insurer.id} className="align-top">
                       <td className="px-4 py-4">
                         <div className="font-semibold text-[#102235]">{insurer.name}</div>
                         <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
                           <DetailItem label="Official website" value={insurer.officialWebsiteUrl} />
                           <DetailItem label="Planner portal" value={insurer.plannerPortalUrl} />
-                          <DetailItem label="Claim page" value={insurer.claimPageUrl} />
+                          <DetailItem label="System (planner)" value={insurer.systemUrl} />
+                          <DetailItem label="Helpdesk phone" value={insurer.helpdeskPhone} />
                           <DetailItem label="Customer center" value={insurer.customerCenterPhone} />
-                          <DetailItem label="Fax" value={insurer.faxNumber} />
+                          <DetailItem label="Claim page" value={insurer.claimPageUrl} />
+                          <DetailItem label="Claim fax" value={insurer.claimFaxNumber} />
+                          <DetailItem
+                            label="Claim fax handling"
+                            value={claimFaxHandlingLabel(insurer.claimFaxHandlingType)}
+                          />
+                          <DetailItem label="Claim form" value={insurer.claimFormUrl} />
+                          <DetailItem label="Terms" value={insurer.termsUrl} />
+                          <DetailItem
+                            label="Card payment"
+                            value={cardPaymentStatusLabel(insurer.cardPaymentStatus)}
+                          />
                           <DetailItem label="Mailing address" value={insurer.mailingAddress} />
                         </dl>
                       </td>
@@ -253,6 +311,17 @@ export default async function AdminInsurersPage({
                           <span className={badgeClass(insurer.isPublished ? "green" : "gray")}>
                             {insurer.isPublished ? "Published" : "Unpublished"}
                           </span>
+                          {insurer.isFeatured ? (
+                            <span className={badgeClass("green")}>Featured</span>
+                          ) : null}
+                          {needsOperationalUpdate ? (
+                            <span
+                              className={badgeClass("gold")}
+                              title={`${missingOperational}/${CORE_OPERATIONAL_FIELDS.length} \uc6b4\uc601 \ud544\ub4dc \ubbf8\uc785\ub825`}
+                            >
+                              {NEEDS_UPDATE_TEXT}
+                            </span>
+                          ) : null}
                         </div>
                       </td>
                       <td className="px-4 py-4 text-[#4f5661]">
@@ -280,7 +349,8 @@ export default async function AdminInsurersPage({
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

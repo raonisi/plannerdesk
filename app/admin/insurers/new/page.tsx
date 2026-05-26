@@ -37,7 +37,8 @@ export default async function NewInsurerPage({
             Add insurer
           </h1>
           <p className={`${textStyles.body} mt-3`}>
-            Create a draft insurer record. Public directory reads remain static until PR-27.
+            Create a draft insurer record. Operational action fields can be edited here.
+            Public directory reads remain static until PR-30; the public action card UI ships in PR-31.
           </p>
         </div>
 

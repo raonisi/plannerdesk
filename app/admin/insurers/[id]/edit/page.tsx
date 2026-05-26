@@ -49,7 +49,8 @@ export default async function EditInsurerPage({
             Edit insurer
           </h1>
           <p className={`${textStyles.body} mt-3`}>
-            Update insurer directory details. Hard delete is not supported.
+            Update insurer access, support, claim, payment, and governance fields. Hard delete is not supported.
+            Public directory still reads static data until PR-30; the public action card UI ships in PR-31.
           </p>
         </div>
 
