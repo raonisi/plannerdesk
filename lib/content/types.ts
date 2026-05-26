@@ -24,7 +24,20 @@ export type MessageTone =
   | "warm"
   | "concise"
   | "careful"
-  | "formal";
+  | "formal"
+  | "calm"
+  | "trustworthy";
+
+export type MessageSituation =
+  | "claim_documents_request"
+  | "claim_received_notice"
+  | "supplement_request"
+  | "claim_completed_notice"
+  | "consultation_schedule"
+  | "coverage_review"
+  | "cancellation_concern"
+  | "referral_response"
+  | "long_time_no_contact";
 
 export interface InsurerDirectoryEntry {
   id: string;
@@ -68,6 +81,7 @@ export interface DisclosureLinkEntry {
 export interface CustomerMessageTemplate {
   id: string;
   title: string;
+  situationCategory: MessageSituation;
   situation: string;
   tone: MessageTone;
   body: string;
