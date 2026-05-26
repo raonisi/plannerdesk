@@ -26,9 +26,9 @@ The codebase is currently structured under the following constraints:
 - **Public MVP Surface**: Active and composed primarily of static or client-side placeholder directories.
 - **Prisma Foundation**: Configured (from PR-14) in `prisma/schema.prisma` with no active business or user models.
 - **Neon PostgreSQL**: Planned and prepared, but **not utilized** by public runtime pages yet.
-- **Authentication**: Not implemented.
+- **Authentication**: Auth.js v5 foundation is installed (PR-17) using `next-auth@5.0.0-beta.31` and JWT strategy. No real providers or DB adapters are connected yet.
 - **Role-Based Access Control (RBAC)**: Not implemented.
-- **Admin UI / Admin Shell**: Not implemented.
+- **Admin UI / Admin Shell**: Minimal server-side protected `/admin` shell implemented (PR-18) using server-side session checks.
 - **Admin CRUD Operations**: Not implemented.
 - **Customer Data**: No customer data is stored, processed, or handled.
 - **Customer Medical Documents**: No medical files, OCR workflows, or sensitive customer claims exist.
@@ -243,8 +243,8 @@ To prevent unauthorized merge changes, **any PR containing code in the following
 To incrementally implement PlannerDesk content management features:
 
 1. **PR-16**: Auth Foundation Planning (Document the auth strategy and environment variables, see `AUTH_FOUNDATION_PLAN.md`).
-2. **PR-17**: Auth.js Foundation Implementation (Introduce Auth.js dependencies, environment configurations, and server blockages).
-3. **PR-18**: Minimal Protected Admin Shell (Create route protection checks and layout shell under `/admin`).
+2. ~~**PR-17**: Auth.js Foundation Implementation~~ ✅ Done
+3. ~~**PR-18**: Minimal Protected Admin Shell~~ ✅ Done
 4. **PR-19**: Insurer Model & Prisma Migration (Draft the Insurer schema and deploy the migrations under manual approval).
 5. **PR-20**: Insurer Directory Admin CRUD (Build the forms, actions, and audit log hooks for insurer models).
 6. **PR-21**: Audit Log Infrastructure (Create the global logging schema and database triggers).
