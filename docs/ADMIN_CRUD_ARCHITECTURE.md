@@ -57,10 +57,14 @@ Recommended future sequence:
 3. PR-16 Auth foundation planning (see `AUTH_FOUNDATION_PLAN.md`)
 4. PR-17 Auth.js foundation implementation
 5. PR-18 Minimal protected admin shell
-6. PR-19 Admin role/RBAC foundation
-7. PR-20 Insurer model + migration
-8. PR-21 Insurer directory admin CRUD
-9. PR-22 Audit logs for admin changes
+6. PR-19 RBAC foundation planning (see `RBAC_FOUNDATION_PLAN.md`)
+7. PR-20 RBAC implementation planning (see `RBAC_IMPLEMENTATION_PLAN.md`)
+8. PR-21 Auth database schema planning
+9. PR-22 Auth DB schema + migration
+10. PR-23 Minimal RBAC helper implementation
+11. PR-24 Admin route server-side role protection
+12. PR-25 Insurer model + migration
+13. PR-26 Insurer directory admin CRUD
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 

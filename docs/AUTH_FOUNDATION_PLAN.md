@@ -166,10 +166,10 @@ Future PRs must not be auto-merged if they include:
 Recommend:
 1. ~~**PR-17** Auth.js foundation implementation~~ ✅ Done
 2. ~~**PR-18** Minimal protected admin shell~~ ✅ Done
-3. **PR-19** Admin role/RBAC foundation, manual approval required
-4. **PR-20** Insurer model + migration, manual approval required
-5. **PR-21** Insurer directory admin CRUD, manual approval required
-6. **PR-22** Audit log foundation, manual approval required
+3. ~~**PR-19** RBAC foundation planning~~ ✅ Done
+4. ~~**PR-20** RBAC implementation planning~~ ✅ Done
+5. **PR-21** Auth database schema planning, manual approval required
+6. **PR-22** Auth DB schema + migration, manual approval required
 
 ## L. Out of Scope
 This planning PR does not implement:
