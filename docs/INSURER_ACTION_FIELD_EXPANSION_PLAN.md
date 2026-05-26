@@ -256,8 +256,8 @@ Favorites, recents, and popularity should be planned in a later, separately revi
 
 Recommended future PR sequence after PR-27. Each PR should keep scope narrow and include its own security review, migration plan, test plan, and rollback notes where applicable.
 
-- **PR-28 Insurer action fields migration** — add the new fields and enums from Section D under a Prisma migration. Manual approval required. (Current)
-- **PR-29 Admin form update for action fields** — extend the protected admin CRUD UI to the grouped sections from Section H. Manual approval required.
+- **PR-28 Insurer action fields migration** — add the new fields and enums from Section D under a Prisma migration. Manual approval required. **Done.**
+- **PR-29 Admin form update for action fields** — extend the protected admin CRUD UI to the grouped sections from Section H. Manual approval required. **In flight.** Adds tri-state controls for `cardPaymentInitialAvailable` / `cardPaymentRecurringAvailable`, `CardPaymentStatus` / `ClaimFaxHandlingType` enum selects with Korean labels ("사용 가능" / "조건부 사용" / "해당사항 없음" / "확인 필요" / "팩스 사용" / "콜센터 개별접수"), URL validation for `systemUrl` / `termsUrl` / `claimFormUrl`, integer-clamped `sortOrder`, and an `isFeatured` checkbox. PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior.
 - **PR-30 Public directory DB read integration** — switch `/directory` to read published insurer records from the database. Manual approval required. This replaces the older PR-27 placement of public DB read integration that appeared in `docs/ADMIN_CRUD_ARCHITECTURE.md`.
 - **PR-31 Public insurer action card UI** — implement the one-tap action card per Section G, replacing the placeholder directory layout.
 - **PR-32 Favorites localStorage MVP** — ship local-only favorites and recent insurers per Section J.
@@ -294,4 +294,4 @@ PR-28 does not implement, and does not require approval for, any of the followin
 - Payment, billing, or subscription work
 - File upload or storage
 
-The next implementation work after PR-28 is PR-29 (Admin form update for action fields). PR-29 should expose the new fields in grouped admin form sections while preserving the PR-26 server-side auth/RBAC model.
+PR-29 implements the admin form expansion described in Section H using the grouped form sections (Basic Info / Access / Support / Claim / Policy or Disclosure / Payment / Governance), preserves the PR-26 server-side auth/RBAC model, and stays within the data-governance labelling rules from Section F. The next implementation work after PR-29 is PR-30 (Public directory DB read integration).

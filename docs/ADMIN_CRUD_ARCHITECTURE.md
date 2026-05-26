@@ -68,10 +68,10 @@ Recommended future sequence:
 11. PR-24 Admin route server-side role protection, manual approval required (Done)
 12. PR-25 Insurer model + migration, manual approval required (Done)
 13. PR-26 Insurer directory admin CRUD, manual approval required (Done)
-14. PR-27 Insurer action field expansion planning, documentation only (Current)
+14. PR-27 Insurer action field expansion planning, documentation only (Done)
     - See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md)
-15. PR-28 Insurer action fields migration, manual approval required (Current)
-16. PR-29 Admin form update for insurer action fields, manual approval required
+15. PR-28 Insurer action fields migration, manual approval required (Done)
+16. PR-29 Admin form update for insurer action fields, manual approval required (Current)
 17. PR-30 Public directory DB read integration, manual approval required
 18. PR-31 Public insurer action card UI, manual approval required
 19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices
@@ -269,7 +269,11 @@ PR-26 implements this first protected CRUD surface for the `Insurer` model only.
 
 PR-27 plans the expansion of the `Insurer` model into a practical insurer action center (planner system access, helpdesk phone, call monitoring phone, card payment status, terms URL, claim form URL, claim fax handling type, and related governance fields). PR-27 is documentation only.
 
-The schema and migration for those action fields land in PR-28 under manual approval. PR-28 does not update admin forms or public runtime behavior. Public directory reads then migrate to database records in PR-30 (renumbered from the previous PR-27 placement), and the public insurer action card UI ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
+The schema and migration for those action fields land in PR-28 under manual approval. PR-28 does not update admin forms or public runtime behavior.
+
+PR-29 surfaces those fields in the protected admin create/edit forms with grouped sections (A. Basic Info / B. Access / C. Support / D. Claim / E. Policy or Disclosure / F. Payment / G. Governance), tri-state controls for nullable payment booleans, and the required Korean operator copy ("공식 확인 후 업데이트 예정", "해당사항 없음", "콜센터 개별접수", "조건 확인 필요"). PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior. The admin list view in PR-29 also flags records with three or more missing core operational fields under a "운영 정보 보강 필요" badge so operators can prioritize follow-up verification before public read-through ships.
+
+Public directory reads migrate to database records in PR-30 (renumbered from the previous PR-27 placement), and the public insurer action card UI ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
 
 ## M. Manual Approval Required
 

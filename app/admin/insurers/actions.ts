@@ -1,6 +1,8 @@
 "use server";
 
 import {
+  CardPaymentStatus,
+  ClaimFaxHandlingType,
   InsurerCategory,
   VerificationStatus,
   type Prisma,
@@ -25,9 +27,30 @@ const VERIFICATION_STATUS_VALUES = new Set<string>([
   VerificationStatus.verified,
 ]);
 
+const CARD_PAYMENT_STATUS_VALUES = new Set<string>([
+  CardPaymentStatus.available,
+  CardPaymentStatus.unavailable,
+  CardPaymentStatus.conditional,
+  CardPaymentStatus.unknown,
+]);
+
+const CLAIM_FAX_HANDLING_TYPE_VALUES = new Set<string>([
+  ClaimFaxHandlingType.fax,
+  ClaimFaxHandlingType.call_center_individual,
+  ClaimFaxHandlingType.unavailable,
+  ClaimFaxHandlingType.unknown,
+]);
+
+// Conservative bounds: PlannerDesk does not need extreme ordering values for the
+// admin-managed insurer directory. The clamp protects the DB column and the UI
+// from accidental scientific-notation pastes.
+const SORT_ORDER_MIN = -10_000;
+const SORT_ORDER_MAX = 10_000;
+
+type FormError = { ok: false; message: string };
 type FormResult =
   | { ok: true; data: Prisma.InsurerUncheckedCreateInput }
-  | { ok: false; message: string };
+  | FormError;
 
 function textValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -36,7 +59,11 @@ function textValue(formData: FormData, key: string) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function requiredText(formData: FormData, key: string, label: string): FormResult | string {
+function requiredText(
+  formData: FormData,
+  key: string,
+  label: string,
+): FormError | string {
   const value = textValue(formData, key);
   if (!value) {
     return { ok: false, message: `${label} is required.` };
@@ -44,7 +71,10 @@ function requiredText(formData: FormData, key: string, label: string): FormResul
   return value;
 }
 
-function optionalUrl(formData: FormData, key: string): FormResult | string | null {
+function optionalUrl(
+  formData: FormData,
+  key: string,
+): FormError | string | null {
   const value = textValue(formData, key);
   if (!value) return null;
 
@@ -59,7 +89,10 @@ function optionalUrl(formData: FormData, key: string): FormResult | string | nul
   }
 }
 
-function optionalDate(formData: FormData, key: string): FormResult | Date | null {
+function optionalDate(
+  formData: FormData,
+  key: string,
+): FormError | Date | null {
   const value = textValue(formData, key);
   if (!value) return null;
 
@@ -75,6 +108,39 @@ function optionalDate(formData: FormData, key: string): FormResult | Date | null
   return date;
 }
 
+// Nullable booleans render as a three-state select (확인 필요 / 가능 / 해당사항 없음).
+// Anything outside the known string set is treated as "unknown" (null) so an
+// invalid value cannot accidentally publish a definitive yes/no.
+function tristateBoolean(formData: FormData, key: string): boolean | null {
+  const raw = formData.get(key);
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  return null;
+}
+
+function optionalSortOrder(
+  formData: FormData,
+  key: string,
+): FormError | number {
+  const value = textValue(formData, key);
+  if (!value) return 0;
+
+  const parsed = Number.parseInt(value, 10);
+  if (
+    !Number.isInteger(parsed) ||
+    !Number.isSafeInteger(parsed) ||
+    parsed < SORT_ORDER_MIN ||
+    parsed > SORT_ORDER_MAX
+  ) {
+    return {
+      ok: false,
+      message: `\uc815\ub82c \uc21c\uc11c(sortOrder)\ub294 ${SORT_ORDER_MIN}~${SORT_ORDER_MAX} \ubc94\uc704\uc758 \uc815\uc218\uc5ec\uc57c \ud569\ub2c8\ub2e4.`,
+    };
+  }
+
+  return parsed;
+}
+
 function parseInsurerForm(formData: FormData): FormResult {
   const name = requiredText(formData, "name", "Name");
   if (typeof name !== "string") return name;
@@ -84,7 +150,8 @@ function parseInsurerForm(formData: FormData): FormResult {
     return { ok: false, message: "Category is required." };
   }
 
-  const verificationStatus = textValue(formData, "verificationStatus") ?? VerificationStatus.draft;
+  const verificationStatus =
+    textValue(formData, "verificationStatus") ?? VerificationStatus.draft;
   if (!VERIFICATION_STATUS_VALUES.has(verificationStatus)) {
     return { ok: false, message: "Verification status is invalid." };
   }
@@ -95,11 +162,35 @@ function parseInsurerForm(formData: FormData): FormResult {
   const plannerPortalUrl = optionalUrl(formData, "plannerPortalUrl");
   if (plannerPortalUrl && typeof plannerPortalUrl !== "string") return plannerPortalUrl;
 
+  const systemUrl = optionalUrl(formData, "systemUrl");
+  if (systemUrl && typeof systemUrl !== "string") return systemUrl;
+
   const claimPageUrl = optionalUrl(formData, "claimPageUrl");
   if (claimPageUrl && typeof claimPageUrl !== "string") return claimPageUrl;
 
+  const claimFormUrl = optionalUrl(formData, "claimFormUrl");
+  if (claimFormUrl && typeof claimFormUrl !== "string") return claimFormUrl;
+
+  const termsUrl = optionalUrl(formData, "termsUrl");
+  if (termsUrl && typeof termsUrl !== "string") return termsUrl;
+
   const lastVerifiedAt = optionalDate(formData, "lastVerifiedAt");
   if (lastVerifiedAt && !(lastVerifiedAt instanceof Date)) return lastVerifiedAt;
+
+  const cardPaymentStatusRaw =
+    textValue(formData, "cardPaymentStatus") ?? CardPaymentStatus.unknown;
+  if (!CARD_PAYMENT_STATUS_VALUES.has(cardPaymentStatusRaw)) {
+    return { ok: false, message: "Card payment status is invalid." };
+  }
+
+  const claimFaxHandlingTypeRaw =
+    textValue(formData, "claimFaxHandlingType") ?? ClaimFaxHandlingType.unknown;
+  if (!CLAIM_FAX_HANDLING_TYPE_VALUES.has(claimFaxHandlingTypeRaw)) {
+    return { ok: false, message: "Claim fax handling type is invalid." };
+  }
+
+  const sortOrder = optionalSortOrder(formData, "sortOrder");
+  if (typeof sortOrder !== "number") return sortOrder;
 
   return {
     ok: true,
@@ -108,14 +199,29 @@ function parseInsurerForm(formData: FormData): FormResult {
       category: category as InsurerCategory,
       officialWebsiteUrl,
       plannerPortalUrl,
+      systemUrl,
       claimPageUrl,
       customerCenterPhone: textValue(formData, "customerCenterPhone"),
+      callMonitoringPhone: textValue(formData, "callMonitoringPhone"),
+      helpdeskPhone: textValue(formData, "helpdeskPhone"),
       faxNumber: textValue(formData, "faxNumber"),
       mailingAddress: textValue(formData, "mailingAddress"),
+      cardPaymentInitialAvailable: tristateBoolean(formData, "cardPaymentInitialAvailable"),
+      cardPaymentRecurringAvailable: tristateBoolean(formData, "cardPaymentRecurringAvailable"),
+      cardPaymentStatus: cardPaymentStatusRaw as CardPaymentStatus,
+      cardPaymentNote: textValue(formData, "cardPaymentNote"),
+      claimFaxNumber: textValue(formData, "claimFaxNumber"),
+      claimFaxHandlingType: claimFaxHandlingTypeRaw as ClaimFaxHandlingType,
+      registeredMailAddress: textValue(formData, "registeredMailAddress"),
+      claimFormUrl,
+      termsUrl,
+      sourceNote: textValue(formData, "sourceNote"),
       notes: textValue(formData, "notes"),
       verificationStatus: verificationStatus as VerificationStatus,
       lastVerifiedAt,
       isPublished: formData.get("isPublished") === "on",
+      sortOrder,
+      isFeatured: formData.get("isFeatured") === "on",
     },
   };
 }
