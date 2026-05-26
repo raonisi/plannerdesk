@@ -176,6 +176,8 @@ Rules:
 - `super_admin` can manage system-level settings.
 - Every admin change should later be audit-logged.
 
+See `docs/RBAC_FOUNDATION_PLAN.md` for the planned Role-Based Access Control (RBAC) details and rules.
+
 ## H. Audit Log Planning
 
 Future audit logs should track:

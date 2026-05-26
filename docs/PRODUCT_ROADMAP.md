@@ -19,7 +19,7 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 - Editorial review workflow for public information
 - Admin-only content update process
 
-See `docs/ADMIN_CRUD_ARCHITECTURE.md` for the future Admin CRUD architecture plan, and `docs/ADMIN_ACCESS_PLAN.md` for the minimal admin access plan. They are documentation only and do not add Neon, Prisma, auth, admin UI, or database behavior.
+See `docs/ADMIN_CRUD_ARCHITECTURE.md` for the future Admin CRUD architecture plan, `docs/ADMIN_ACCESS_PLAN.md` for the minimal admin access plan, and `docs/RBAC_FOUNDATION_PLAN.md` for the planned Role-Based Access Control rules. They are documentation only and do not add Neon, Prisma, auth, admin UI, or database behavior.
 
 ## Phase 3: Accounts And Verification
 

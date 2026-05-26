@@ -79,6 +79,8 @@ See `docs/ADMIN_ACCESS_PLAN.md` for the conceptual minimal admin access plan, ro
 
 See `docs/AUTH_FOUNDATION_PLAN.md` for the auth strategy before any DB or Auth.js implementation.
 
+See `docs/RBAC_FOUNDATION_PLAN.md` for the planned Role-Based Access Control (RBAC) foundation rules and server-side authorization principles.
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:
