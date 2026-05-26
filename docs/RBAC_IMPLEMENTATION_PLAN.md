@@ -79,6 +79,8 @@ We will protect routes under `/admin` using Next.js layouts or middleware checki
 - `/admin/audit-logs` (Audit Viewer) - Requires role `super_admin` only.
 - `/admin/users` (Roles Manager) - Requires role `super_admin` only.
 
+PR-26 adds the first protected Admin CRUD route at `/admin/insurers`. Reads and writes must continue to enforce `auth()` plus centralized RBAC checks server-side; client-only button visibility is not a security boundary.
+
 ## I. Future Permission Matrix Implementation
 Our code should map the permission matrix cleanly:
 - `super_admin` matches wildcard permissions `*` for admin pages and system tools.

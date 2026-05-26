@@ -23,7 +23,10 @@ Future Admin CRUD should allow approved operators to update public resource data
 - Neon PostgreSQL connection and Prisma foundation are configured.
 - Auth DB schema, Prisma Adapter, and minimal RBAC helpers are implemented (PR-22, PR-23, PR-24).
 - The `Insurer` model and its database migration are defined in Prisma (PR-25).
-- Admin CRUD is still not implemented.
+- Protected insurer admin CRUD exists under `/admin/insurers` (PR-26).
+- Public `/directory` still reads static content until a later public DB-read integration PR.
+- Claim document, disclosure link, and message template CRUD are not implemented.
+- Audit logging is not implemented yet.
 - PlannerDesk is separate from BOA CRM.
 - Aiven is not used for PlannerDesk MVP.
 
@@ -63,9 +66,10 @@ Recommended future sequence:
 9. PR-22 Auth DB schema + adapter implementation, manual approval required (Done)
 10. PR-23 Minimal RBAC helper implementation, manual approval required (Done)
 11. PR-24 Admin route server-side role protection, manual approval required (Done)
-12. PR-25 Insurer model + migration, manual approval required (Current)
-13. PR-26 Insurer directory admin CRUD, manual approval required
-14. PR-27 Audit log planning or foundation, manual approval required
+12. PR-25 Insurer model + migration, manual approval required (Done)
+13. PR-26 Insurer directory admin CRUD, manual approval required (Current)
+14. PR-27 Public directory DB read integration, manual approval required
+15. PR-28 Audit log planning or foundation, manual approval required
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 
@@ -253,6 +257,12 @@ Reasons:
 - High product value
 - Good first DB-backed feature
 - Easy to verify public output
+
+PR-26 implements this first protected CRUD surface for the `Insurer` model only. It does not change public `/directory` behavior, does not add hard delete, and does not add audit logging yet.
+
+Future PR-27 should migrate public directory reads to database records only after review. Public reads should use published records and should keep safe fallback handling for missing official data.
+
+Future insurer action fields may include planner system URL, helpdesk phone, call monitoring phone, card payment notes, policy terms URL, and claim form URL. These require a separate schema planning and migration PR.
 
 ## M. Manual Approval Required
 
