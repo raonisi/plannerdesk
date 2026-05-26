@@ -34,7 +34,7 @@ export default function AdminLockedState() {
 
           {/* Description */}
           <p className={`${textStyles.body} text-sm mb-6`}>
-            현재 관리자 기능은 준비 중이며, 승인된 운영자만 접근할 수 있습니다.
+            현재 관리자 기능은 승인된 운영자만 접근할 수 있습니다.
           </p>
 
           {/* Notice Card for Unconfigured Auth */}
@@ -59,7 +59,7 @@ export default function AdminLockedState() {
                   인증 설정 정보
                 </p>
                 <p className="text-xs text-[#4f5661] leading-relaxed">
-                  로그인 제공자(OAuth 등)는 아직 설정되지 않았습니다. 관리자 인증 기능을 테스트하려면 로컬 개발 환경에서 모의 로그인 환경을 구성해야 합니다.
+                  로그인 제공자는 아직 설정되지 않았습니다.
                 </p>
               </div>
             </div>

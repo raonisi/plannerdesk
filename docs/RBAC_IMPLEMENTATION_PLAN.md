@@ -6,8 +6,8 @@ This ensures we map database relationships, server actions, route middleware, an
 
 ## B. Current State
 - **Auth.js v5 Foundation**: Installed and configured with Prisma Adapter (`@auth/prisma-adapter`) and a JWT session strategy.
-- **`/admin` Shell**: Minimal server-side protected route exists (gated by Auth.js session existence).
-- **RBAC**: Centralized role helper utilities (`lib/auth/rbac.ts`) are implemented (PR-23). Broad route protection and runtime checks are still not implemented.
+- **`/admin` Shell**: Server-side role-protected admin shell page implemented (PR-24) using centralized helpers.
+- **RBAC**: Centralized role helper utilities (`lib/auth/rbac.ts`) are implemented (PR-23) and applied to `/admin` shell (PR-24).
 - **Admin CRUD**: Still not implemented.
 - **Prisma Foundation**: Prisma is configured with active `User`, `Account`, `Session`, and `VerificationToken` models (PR-22).
 - **Neon PostgreSQL**: Connected and database-backed auth schema applied via migration (PR-22).
@@ -140,8 +140,8 @@ Future PRs containing code in these categories require manual review:
 1. ~~**PR-21**: Auth database schema planning~~ ✅ Done
    - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
 2. ~~**PR-22**: Auth DB schema + adapter implementation~~ ✅ Done
-3. **PR-23**: Minimal RBAC helper implementation, manual approval required (Current)
-4. **PR-24**: Admin route server-side role protection, manual approval required
+3. ~~**PR-23**: Minimal RBAC helper implementation~~ ✅ Done
+4. **PR-24**: Admin route server-side role protection, manual approval required (Current)
 5. **PR-25**: Insurer model + migration, manual approval required
 6. **PR-26**: Insurer admin CRUD, manual approval required
 7. **PR-27**: Audit log planning or foundation, manual approval required
