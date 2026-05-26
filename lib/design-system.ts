@@ -53,13 +53,13 @@ export const spacing = {
 } as const;
 
 export const verificationLabels: Record<VerificationStatus, string> = {
-  draft: "초안",
-  verified: "검수 완료",
-  needs_review: "검수 필요"
+  draft: "\ucd08\uc548",
+  verified: "\uac80\uc218 \uc644\ub8cc",
+  needs_review: "\uac80\uc218 \ud544\uc694"
 };
 
 export const statusBadgeClasses: Record<VerificationStatus, string> = {
-  draft: "border-[#d9c9a8] bg-[#f7f1e5] text-[#7a612d]",
+  draft: "border-[#d9c9a8] bg-[#f7f1e5] text-[#303845]",
   verified: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-  needs_review: "border-[#c5b08a] bg-[#fbf7ee] text-[#5d4630]"
+  needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]"
 };

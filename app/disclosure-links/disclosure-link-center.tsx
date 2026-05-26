@@ -2,6 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import {
+  LastVerifiedText,
+  MissingFieldText,
+  VerificationStatusBadge
+} from "@/components/content-page";
 import type {
   DisclosureCategory,
   DisclosureLinkEntry,
@@ -11,22 +16,50 @@ import type {
 type CategoryFilter = "all" | DisclosureCategory;
 type StatusFilter = "all" | VerificationStatus;
 
+const text = {
+  all: "\uc804\uccb4",
+  searchLabel: "\uacf5\uc2dc\u00b7\uc57d\uad00 \uac80\uc0c9",
+  searchPlaceholder:
+    "\uc81c\ubaa9, \uce74\ud14c\uace0\ub9ac, \uc124\uba85\uc744 \uc785\ub825\ud574 \uc8fc\uc138\uc694",
+  category: "\uce74\ud14c\uace0\ub9ac",
+  status: "\uac80\uc218 \uc0c1\ud0dc",
+  verified: "\uac80\uc218 \uc644\ub8cc",
+  needsReview: "\uac80\uc218 \ud544\uc694",
+  draft: "\ucd08\uc548",
+  countSuffix: "\uac1c \ub9c1\ud06c",
+  resultSuffix:
+    "\uac1c \ud56d\ubaa9\uc774 \ud45c\uc2dc\ub429\ub2c8\ub2e4. \ud604\uc7ac \uc77c\ubd80 \uc815\ubcf4\ub294 \uac80\uc218 \uc804 \uc0d8\ud50c \ub370\uc774\ud130\uc774\uba70, \uc0c1\ub2f4 \uc804 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
+  lastVerifiedLabel: "\ucd5c\uadfc \uac80\uc218",
+  officialSource: "\uacf5\uc2dd \ucd9c\ucc98",
+  openSource: "\uacf5\uc2dd \ucd9c\ucc98 \uc5f4\uae30",
+  emptyTitle:
+    "\uc870\uac74\uc5d0 \ub9de\ub294 \uacf5\uc2dc\u00b7\uc57d\uad00 \ub9c1\ud06c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  emptyDescription:
+    "\uac80\uc0c9\uc5b4\ub97c \uc904\uc774\uac70\ub098 \uce74\ud14c\uace0\ub9ac \ud544\ud130\ub97c \ubcc0\uacbd\ud574 \uc8fc\uc138\uc694."
+};
+
 const categoryLabels: Record<DisclosureCategory, string> = {
-  product_disclosure: "상품공시",
-  policy_terms: "약관",
-  insurance_association: "보험협회",
-  insurer_official_materials: "보험사 공식자료",
-  claim_compensation_reference: "청구·보상 참고",
-  education_practice_reference: "교육·실무 참고"
+  product_disclosure: "\uc0c1\ud488\uacf5\uc2dc",
+  policy_terms: "\uc57d\uad00",
+  insurance_association: "\ubcf4\ud5d8\ud611\ud68c",
+  insurer_official_materials: "\ubcf4\ud5d8\uc0ac \uacf5\uc2dd\uc790\ub8cc",
+  claim_compensation_reference: "\uccad\uad6c\u00b7\ubcf4\uc0c1 \ucc38\uace0",
+  education_practice_reference: "\uad50\uc721\u00b7\uc2e4\ubb34 \ucc38\uace0"
 };
 
 const categoryDescriptions: Record<DisclosureCategory, string> = {
-  product_disclosure: "상품 구조와 공식 공시자료 확인",
-  policy_terms: "보장 범위와 면책·감액 기준 확인",
-  insurance_association: "공신력 있는 외부 기준 확인",
-  insurer_official_materials: "보험사 공식 안내 경로 확인",
-  claim_compensation_reference: "청구 절차와 보상 안내 참고",
-  education_practice_reference: "상담 준비와 실무 교육 자료 참고"
+  product_disclosure:
+    "\uc0c1\ud488 \uad6c\uc870\uc640 \uacf5\uc2dd \uacf5\uc2dc\uc790\ub8cc \ud655\uc778",
+  policy_terms:
+    "\ubcf4\uc7a5 \ubc94\uc704\uc640 \uba74\ucc45\u00b7\uac10\uc561 \uae30\uc900 \ud655\uc778",
+  insurance_association:
+    "\uacf5\uc2e0\ub825 \uc788\ub294 \uc678\ubd80 \uae30\uc900 \ud655\uc778",
+  insurer_official_materials:
+    "\ubcf4\ud5d8\uc0ac \uacf5\uc2dd \uc548\ub0b4 \uacbd\ub85c \ud655\uc778",
+  claim_compensation_reference:
+    "\uccad\uad6c \uc808\ucc28\uc640 \ubcf4\uc0c1 \uc548\ub0b4 \ucc38\uace0",
+  education_practice_reference:
+    "\uc0c1\ub2f4 \uc900\ube44\uc640 \uc2e4\ubb34 \uad50\uc721 \uc790\ub8cc \ucc38\uace0"
 };
 
 const categoryOrder: DisclosureCategory[] = [
@@ -39,33 +72,16 @@ const categoryOrder: DisclosureCategory[] = [
 ];
 
 const categoryOptions: Array<{ label: string; value: CategoryFilter }> = [
-  { label: "전체", value: "all" },
-  { label: "상품공시", value: "product_disclosure" },
-  { label: "약관", value: "policy_terms" },
-  { label: "보험협회", value: "insurance_association" },
-  { label: "보험사 공식자료", value: "insurer_official_materials" },
-  { label: "청구·보상 참고", value: "claim_compensation_reference" },
-  { label: "교육·실무 참고", value: "education_practice_reference" }
+  { label: text.all, value: "all" },
+  ...categoryOrder.map((value) => ({ label: categoryLabels[value], value }))
 ];
-
-const statusLabels: Record<VerificationStatus, string> = {
-  verified: "검수 완료",
-  needs_review: "검수 필요",
-  draft: "초안"
-};
 
 const statusOptions: Array<{ label: string; value: StatusFilter }> = [
-  { label: "전체", value: "all" },
-  { label: "검수 완료", value: "verified" },
-  { label: "검수 필요", value: "needs_review" },
-  { label: "초안", value: "draft" }
+  { label: text.all, value: "all" },
+  { label: text.verified, value: "verified" },
+  { label: text.needsReview, value: "needs_review" },
+  { label: text.draft, value: "draft" }
 ];
-
-const statusClasses: Record<VerificationStatus, string> = {
-  verified: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-  needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
-  draft: "border-[#d9c9a8] bg-[#f7f1e5] text-[#7a612d]"
-};
 
 export function DisclosureLinkCenter({
   entries
@@ -130,12 +146,13 @@ export function DisclosureLinkCenter({
                   <h2 className="mt-1 break-keep text-2xl font-semibold text-[#102235]">
                     {categoryLabels[group.category]}
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-[#4f5661]">
+                  <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
                     {categoryDescriptions[group.category]}
                   </p>
                 </div>
                 <p className="whitespace-nowrap text-sm text-[#5f6670]">
-                  {group.entries.length}개 링크
+                  {group.entries.length}
+                  {text.countSuffix}
                 </p>
               </div>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -175,12 +192,12 @@ function SearchAndFilters({
       <div className="grid gap-5 lg:grid-cols-[1fr_0.95fr]">
         <label className="block">
           <span className="text-sm font-semibold text-[#303845]">
-            공시·약관 검색
+            {text.searchLabel}
           </span>
           <input
             className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="제목, 카테고리, 설명을 입력해 주세요"
+            placeholder={text.searchPlaceholder}
             type="search"
             value={query}
           />
@@ -188,22 +205,22 @@ function SearchAndFilters({
 
         <div className="grid gap-4">
           <FilterGroup
-            label="카테고리"
+            label={text.category}
             onChange={(value) => onCategoryChange(value as CategoryFilter)}
             options={categoryOptions}
             value={category}
           />
           <FilterGroup
-            label="검수 상태"
+            label={text.status}
             onChange={(value) => onStatusChange(value as StatusFilter)}
             options={statusOptions}
             value={status}
           />
         </div>
       </div>
-      <p className="mt-4 text-sm leading-6 text-[#4f5661]">
-        {resultCount}개 항목이 표시됩니다. 현재 일부 정보는 검수 전 샘플
-        데이터이며, 상담 전 공식 출처 확인이 필요합니다.
+      <p className="mt-4 break-keep text-sm leading-6 text-[#4f5661]">
+        {resultCount}
+        {text.resultSuffix}
       </p>
     </section>
   );
@@ -256,7 +273,7 @@ function DisclosureCard({ entry }: { entry: DisclosureLinkEntry }) {
             <span className="whitespace-nowrap border border-[#d9c9a8] bg-[#f7f1e5] px-2.5 py-1 text-xs font-semibold text-[#7a612d]">
               {categoryLabels[entry.category]}
             </span>
-            <StatusBadge status={entry.verificationStatus} />
+            <VerificationStatusBadge status={entry.verificationStatus} />
           </div>
           <h3 className="mt-3 break-keep text-2xl font-semibold leading-snug text-[#102235]">
             {entry.title}
@@ -269,14 +286,10 @@ function DisclosureCard({ entry }: { entry: DisclosureLinkEntry }) {
       </p>
 
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-        <InfoBlock label="최종 확인일">
-          {entry.lastVerifiedAt ? (
-            <span className="whitespace-nowrap">{entry.lastVerifiedAt}</span>
-          ) : (
-            "검수 전"
-          )}
+        <InfoBlock label={text.lastVerifiedLabel}>
+          <LastVerifiedText value={entry.lastVerifiedAt} />
         </InfoBlock>
-        <InfoBlock label="공식 출처">
+        <InfoBlock label={text.officialSource}>
           <SourceAction href={entry.sourceUrl} />
         </InfoBlock>
       </dl>
@@ -287,16 +300,6 @@ function DisclosureCard({ entry }: { entry: DisclosureLinkEntry }) {
         </div>
       ) : null}
     </article>
-  );
-}
-
-function StatusBadge({ status }: { status: VerificationStatus }) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center whitespace-nowrap border px-2.5 py-1 text-xs font-semibold ${statusClasses[status]}`}
-    >
-      {statusLabels[status]}
-    </span>
   );
 }
 
@@ -311,7 +314,7 @@ function InfoBlock({ children, label }: { children: ReactNode; label: string }) 
 
 function SourceAction({ href }: { href: string | null }) {
   if (!href) {
-    return <span className="text-[#8b7660]">공식 확인 후 업데이트 예정</span>;
+    return <MissingFieldText />;
   }
 
   return (
@@ -321,7 +324,7 @@ function SourceAction({ href }: { href: string | null }) {
       rel="noopener noreferrer"
       target="_blank"
     >
-      공식 출처 열기
+      {text.openSource}
     </a>
   );
 }
@@ -330,10 +333,10 @@ function EmptyState() {
   return (
     <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-8 text-center shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
       <p className="break-keep text-lg font-semibold text-[#102235]">
-        조건에 맞는 공시·약관 링크가 없습니다.
+        {text.emptyTitle}
       </p>
       <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
-        검색어를 줄이거나 카테고리 필터를 변경해 주세요.
+        {text.emptyDescription}
       </p>
     </section>
   );

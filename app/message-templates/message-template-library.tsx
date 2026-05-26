@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { formatVerifiedDate } from "@/components/content-page";
 import type {
   CustomerMessageTemplate,
   MessageSituation,
@@ -287,7 +288,7 @@ function TemplateCard({ template }: { template: CustomerMessageTemplate }) {
 
       <div className="mt-6 flex flex-col gap-3 border-t border-[#d9c9a8] pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="whitespace-nowrap text-sm text-[#5f6670]">
-          최종 수정: {template.lastUpdatedAt}
+          최근 수정: {formatVerifiedDate(template.lastUpdatedAt)}
         </p>
         <div className="flex flex-col gap-2 sm:items-end">
           <button
