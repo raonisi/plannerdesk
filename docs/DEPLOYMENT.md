@@ -45,20 +45,26 @@ When secrets are needed in a later PR, configure them through Railway Variables.
 
 ## Neon PostgreSQL
 
-Neon PostgreSQL is intentionally not connected in this PR.
+Neon PostgreSQL is not connected at runtime. PR-14 adds only the Prisma foundation:
 
-Connect Neon only when database-backed features begin, such as accounts, content management, or workspace data. That future PR should include its own security review, environment variable update, and migration plan.
+- `prisma/schema.prisma` with `provider = "postgresql"` and `url = env("DATABASE_URL")`, `directUrl = env("DIRECT_URL")`.
+- `prisma` dev dependency and `@prisma/client` runtime dependency.
+- `prisma:generate`, `prisma:validate`, and `prisma:studio` npm scripts.
+- A `lib/prisma.ts` helper that is not imported by any route in the current static MVP.
 
-See `docs/NEON_CONNECTION_PLAN.md` for the planned Neon, Railway Variables, and future Prisma introduction sequence.
+The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL`. Railway Variables may already contain `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL`, but no code path reads them yet.
+
+Connect Neon at runtime only when the first database-backed feature ships. That future PR must include its own security review, migration plan, and rollback notes.
+
+See `docs/NEON_CONNECTION_PLAN.md` for the full Neon, Railway Variables, and Prisma rollout sequence.
 
 ## Explicit Non-Goals For This PR
 
-- Prisma or database migrations
-- Database tables
-- Authentication
-- Billing
+- Prisma migrations or business tables
+- Authentication, RBAC, or admin permissions
+- Billing or subscriptions
 - Community implementation
-- File upload
+- File upload or storage
 - Customer medical document upload
 - Claim payout judgment
 - Claim amount estimation

@@ -8,9 +8,13 @@
     "build": "next build",
     "start": "node scripts/start.mjs",
     "lint": "eslint .",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "next": "^16.2.6",
     "react": "latest",
     "react-dom": "latest"
@@ -22,6 +26,7 @@
     "@types/react-dom": "latest",
     "eslint": "latest",
     "eslint-config-next": "^16.2.6",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4.3.0",
     "typescript": "latest"
   },

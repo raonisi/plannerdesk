@@ -1,0 +1,20 @@
+// PlannerDesk Prisma schema foundation.
+//
+// This file intentionally contains no business models.
+// Business tables, migrations, auth, RBAC, admin permissions, customer
+// data, file storage, and any BOA CRM or Aiven connections are
+// out of scope for this PR.
+//
+// Refer to docs/NEON_CONNECTION_PLAN.md for the staged Neon and Prisma
+// introduction plan. Each future schema change should arrive in its
+// own narrowly scoped, reviewed pull request.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
