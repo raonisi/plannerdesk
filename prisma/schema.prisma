@@ -54,6 +54,19 @@ enum CardPaymentStatus {
   unknown
 }
 
+enum ClaimDocumentCategory {
+  actual_expense
+  diagnosis
+  surgery
+  hospitalization
+  outpatient
+  fracture
+  driver
+  death
+  disability
+  other
+}
+
 model User {
   id                 String             @id @default(cuid())
   name               String?
@@ -138,6 +151,8 @@ model Insurer {
   createdById        String?
   updatedById        String?
 
+  claimDocuments     ClaimDocument[]
+
   @@index([category])
   @@index([verificationStatus])
   @@index([isPublished])
@@ -146,4 +161,34 @@ model Insurer {
   @@index([isFeatured])
   @@index([cardPaymentStatus])
   @@index([claimFaxHandlingType])
+}
+
+model ClaimDocument {
+  id                      String                @id @default(cuid())
+  title                   String
+  slug                    String                @unique
+  category                ClaimDocumentCategory
+  insurerId               String?
+  insurer                 Insurer?              @relation(fields: [insurerId], references: [id], onDelete: SetNull)
+  summary                 String?
+  requiredDocuments       String?
+  optionalDocuments       String?
+  claimFormUrl            String?
+  officialSourceUrl       String?
+  customerMessageTemplate String?
+  cautionNote             String?
+  verificationStatus      VerificationStatus    @default(draft)
+  lastVerifiedAt          DateTime?
+  isPublished             Boolean               @default(false)
+  sortOrder               Int                   @default(0)
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+  createdById             String?
+  updatedById             String?
+
+  @@index([category])
+  @@index([insurerId])
+  @@index([verificationStatus])
+  @@index([isPublished])
+  @@index([sortOrder])
 }

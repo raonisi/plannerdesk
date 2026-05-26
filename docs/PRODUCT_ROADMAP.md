@@ -20,6 +20,7 @@ PlannerDesk will grow from a public product surface into a practical work platfo
 - Verification + publish workflow guardrails (draft records are never publicly visible; admin UI and server actions enforce the same rule)
 - Correction request planning (queueing surface for editorial review; never mutates published data directly)
 - Correction request MVP (no-DB, client-only): public users can prepare a structured correction request from the `/directory` insurer cards or directory footer and copy it to the clipboard. PR-35 ships no Prisma model, no migration, no server action, no admin queue, and no automatic Insurer update. See [docs/CORRECTION_REQUEST_PLAN.md §L](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for shipped scope and the future DB-backed flow.
+- ClaimDocument model + migration foundation: PR-37 adds the `ClaimDocument` Prisma model, the `ClaimDocumentCategory` enum, the optional `Insurer` FK, and a single additive migration. No admin CRUD, no public DB read, no API route, no file upload, no customer/medical data field. See [docs/CLAIM_DOCUMENT_MODEL_PLAN.md §L](file:///c:/work/plannerdesk/plannerdesk-main/docs/CLAIM_DOCUMENT_MODEL_PLAN.md) for shipped scope; admin CRUD ships in PR-38 and public DB read in PR-39.
 - Claim document library content model
 - Customer message template library
 - Editorial review workflow for public information
