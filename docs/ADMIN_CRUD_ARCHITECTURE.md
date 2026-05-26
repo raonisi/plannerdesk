@@ -59,12 +59,14 @@ Recommended future sequence:
 5. PR-18 Minimal protected admin shell
 6. PR-19 RBAC foundation planning (see `RBAC_FOUNDATION_PLAN.md`)
 7. PR-20 RBAC implementation planning (see `RBAC_IMPLEMENTATION_PLAN.md`)
-8. PR-21 Auth database schema planning
-9. PR-22 Auth DB schema + migration
-10. PR-23 Minimal RBAC helper implementation
-11. PR-24 Admin route server-side role protection
-12. PR-25 Insurer model + migration
-13. PR-26 Insurer directory admin CRUD
+8. PR-21 Auth database schema planning, manual approval required (Current)
+   - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
+9. PR-22 Auth DB schema + adapter implementation, manual approval required
+10. PR-23 Minimal RBAC helper implementation, manual approval required
+11. PR-24 Admin route server-side role protection, manual approval required
+12. PR-25 Insurer model + migration, manual approval required
+13. PR-26 Insurer directory admin CRUD, manual approval required
+14. PR-27 Audit log planning or foundation, manual approval required
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 
