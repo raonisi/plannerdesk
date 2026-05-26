@@ -83,6 +83,8 @@ See `docs/RBAC_FOUNDATION_PLAN.md` for the planned Role-Based Access Control (RB
 
 See `docs/RBAC_IMPLEMENTATION_PLAN.md` for the planned Role-Based Access Control (RBAC) implementation steps and authorization helper design.
 
+See `docs/AUTH_DATABASE_SCHEMA_PLAN.md` for the planned database schema and model structure for authentication.
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:

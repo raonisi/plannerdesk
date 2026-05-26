@@ -58,6 +58,7 @@ Connect Neon at runtime only when the first database-backed feature ships. That 
 
 See `docs/NEON_CONNECTION_PLAN.md` for the full Neon, Railway Variables, and Prisma rollout sequence.
 See `docs/AUTH_FOUNDATION_PLAN.md` for the Auth.js foundation details.
+See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md) for the Auth database schema plan.
 
 ## Explicit Non-Goals For This PR
 

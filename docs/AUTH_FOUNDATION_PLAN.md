@@ -66,18 +66,8 @@ Future environment variables (conceptual only):
 - Do not add or inspect actual secrets in this PR.
 
 ## E. Auth Data Model Planning
-If Auth.js database adapter is used later, future schema may need:
-- `User`
-- `Account`
-- `Session`
-- `VerificationToken`
-
-PlannerDesk-specific role fields may need:
-- `role`
-- `status`
-- `verificationStatus`
-- `createdAt`
-- `updatedAt`
+If Auth.js database adapter is used later, future schema will follow the planned structure. 
+See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md) for the detailed Auth database schema and model planning.
 
 **Important:**
 - Do not create these models in this PR.
@@ -168,8 +158,14 @@ Recommend:
 2. ~~**PR-18** Minimal protected admin shell~~ ✅ Done
 3. ~~**PR-19** RBAC foundation planning~~ ✅ Done
 4. ~~**PR-20** RBAC implementation planning~~ ✅ Done
-5. **PR-21** Auth database schema planning, manual approval required
-6. **PR-22** Auth DB schema + migration, manual approval required
+5. **PR-21** Auth database schema planning, manual approval required (Current)
+   - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
+6. **PR-22** Auth DB schema + adapter implementation, manual approval required
+7. **PR-23** Minimal RBAC helper implementation, manual approval required
+8. **PR-24** Admin route server-side role protection, manual approval required
+9. **PR-25** Insurer model + migration, manual approval required
+10. **PR-26** Insurer admin CRUD, manual approval required
+11. **PR-27** Audit log planning or foundation, manual approval required
 
 ## L. Out of Scope
 This planning PR does not implement:

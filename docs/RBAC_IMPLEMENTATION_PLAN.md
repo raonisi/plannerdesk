@@ -14,7 +14,7 @@ This ensures we map database relationships, server actions, route middleware, an
 - **Public MVP Surface**: Fully operational and static. Public pages must remain completely accessible.
 
 ## C. Recommended Implementation Order
-1. **Auth Database Schema Planning**: Plan `User`, `Account`, `Session`, and `VerificationToken` tables.
+1. **Auth Database Schema Planning**: Plan `User`, `Account`, `Session`, and `VerificationToken` tables. See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md).
 2. **Auth Database Schema Migration**: Execute migrations to configure these tables in Neon PostgreSQL.
 3. **Minimal Role Field Design**: Introduce `role` and `status` properties to the `User` schema.
 4. **Centralized Authorization Helper Planning**: Plan and draft server-side auth validators.
@@ -168,9 +168,11 @@ Future PRs containing code in these categories require manual review:
 - BOA CRM connections.
 
 ## O. Recommended Next PRs
-1. **PR-21**: Auth database schema planning (PR-21)
-2. **PR-22**: Auth DB schema + migration (PR-22)
-3. **PR-23**: Minimal RBAC helper implementation (PR-23)
-4. **PR-24**: Admin route server-side role protection (PR-24)
-5. **PR-25**: Insurer model + migration (PR-25)
-6. **PR-26**: Insurer admin CRUD (PR-26)
+1. **PR-21**: Auth database schema planning, manual approval required (Current)
+   - See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md)
+2. **PR-22**: Auth DB schema + adapter implementation, manual approval required
+3. **PR-23**: Minimal RBAC helper implementation, manual approval required
+4. **PR-24**: Admin route server-side role protection, manual approval required
+5. **PR-25**: Insurer model + migration, manual approval required
+6. **PR-26**: Insurer admin CRUD, manual approval required
+7. **PR-27**: Audit log planning or foundation, manual approval required
