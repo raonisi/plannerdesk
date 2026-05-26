@@ -2,7 +2,7 @@
 
 This document is a plan, not an implementation.
 
-Do not add real Neon credentials in this PR. Do not connect Neon in this PR. Do not add Prisma or migrations in this PR. Do not add database-backed features in this PR.
+PR-14 adds the Prisma foundation only: dependencies, a minimal `prisma/schema.prisma` with a PostgreSQL datasource bound to `env("DATABASE_URL")` and `env("DIRECT_URL")`, safe `prisma:*` npm scripts, and an unused-by-default Prisma client helper. PR-14 does not add real Neon credentials, business tables, migrations, auth, admin CRUD, file upload, or any BOA CRM / Aiven connection. Each future schema and migration change must arrive in its own narrowly scoped, reviewed pull request.
 
 ## A. Purpose
 
@@ -69,21 +69,34 @@ Future rules:
 
 ## E. Prisma Introduction Plan
 
-Prisma should be introduced in a later PR only when a database-backed feature is approved.
+PR-14 lands the Prisma foundation only. It introduces:
 
-That future Prisma PR should:
+- `prisma/schema.prisma` with `provider = "postgresql"`, `url = env("DATABASE_URL")`, and `directUrl = env("DIRECT_URL")`.
+- `prisma` as a dev dependency and `@prisma/client` as a runtime dependency.
+- Safe npm scripts: `prisma:generate`, `prisma:validate`, `prisma:studio`.
+- A `lib/prisma.ts` helper that is not imported anywhere in the current static MVP.
+- Placeholders for `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` in `.env.example`.
 
-- Add `prisma/schema.prisma`.
-- Use the PostgreSQL provider.
-- Use `env("DATABASE_URL")`.
-- Use `env("DIRECT_URL")` if migrations need a direct connection.
-- Add the minimal schema needed for the feature being implemented.
+PR-14 must not include:
+
+- Business models or tables.
+- Migrations (no `prisma migrate dev`, no `prisma migrate deploy`, no SQL).
+- Auth, RBAC, or admin permissions.
+- Customer data, claim data, or medical data.
+- File upload or storage.
+- BOA CRM connection.
+- Aiven connection.
+- Any code path that imports `lib/prisma.ts`.
+
+The first business-model Prisma PR must arrive after PR-14, and it should:
+
+- Add the minimal schema needed for one approved feature.
 - Avoid broad premature schema design.
 - Avoid destructive migrations.
-- Run `prisma generate` and build checks.
+- Run `prisma generate`, `prisma validate`, and build checks.
 - Stop and report before production-impacting migrations.
 
-The first Prisma PR must preserve the static MVP build path until the database-backed feature explicitly requires runtime database access.
+The Prisma foundation in PR-14 preserves the static MVP build path. Database-backed features must opt in explicitly when they are introduced in a future reviewed pull request.
 
 ## F. First Database-Backed Feature Recommendation
 
@@ -147,10 +160,10 @@ If any of these are required, stop and report:
 
 ## I. Current Status
 
-- Neon: not connected
-- Prisma: not added
-- Database: not required
-- Railway: should deploy without `DATABASE_URL`
+- Neon: not connected at runtime (foundation only)
+- Prisma: foundation added in PR-14 (schema with no models, client helper, scripts)
+- Database: not required to build or run the current static MVP
+- Railway: should still deploy without runtime DB access; `DATABASE_URL` / `DIRECT_URL` may be set as Railway Variables ahead of the first DB-backed feature
 - Data: static placeholder only
 - Auth: not implemented
 - Admin CRUD: not implemented
@@ -159,9 +172,8 @@ If any of these are required, stop and report:
 
 ## J. Next Recommended PRs
 
-- PR-13: Neon setup and Prisma foundation planning or implementation, only after approval
-- PR-14: Admin CRUD architecture planning
-- PR-15: Insurer directory admin CRUD
-- PR-16: Claim document admin CRUD
+- PR-15: First minimal business model and migration, for example an `Insurer` directory
+- PR-16: Insurer directory admin CRUD (auth and RBAC gated separately)
+- PR-17: Claim document admin CRUD
 
 Each next PR should keep scope narrow and include its own security review, migration plan, test plan, and rollback notes where applicable.
