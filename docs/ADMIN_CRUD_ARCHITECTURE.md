@@ -67,9 +67,16 @@ Recommended future sequence:
 10. PR-23 Minimal RBAC helper implementation, manual approval required (Done)
 11. PR-24 Admin route server-side role protection, manual approval required (Done)
 12. PR-25 Insurer model + migration, manual approval required (Done)
-13. PR-26 Insurer directory admin CRUD, manual approval required (Current)
-14. PR-27 Public directory DB read integration, manual approval required
-15. PR-28 Audit log planning or foundation, manual approval required
+13. PR-26 Insurer directory admin CRUD, manual approval required (Done)
+14. PR-27 Insurer action field expansion planning, documentation only (Current)
+    - See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md)
+15. PR-28 Insurer action fields migration, manual approval required
+16. PR-29 Admin form update for insurer action fields, manual approval required
+17. PR-30 Public directory DB read integration, manual approval required
+18. PR-31 Public insurer action card UI, manual approval required
+19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices
+20. PR-33 Verification/publish workflow polish, manual approval required
+21. PR-34 Audit log planning or foundation, manual approval required
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 
@@ -260,9 +267,9 @@ Reasons:
 
 PR-26 implements this first protected CRUD surface for the `Insurer` model only. It does not change public `/directory` behavior, does not add hard delete, and does not add audit logging yet.
 
-Future PR-27 should migrate public directory reads to database records only after review. Public reads should use published records and should keep safe fallback handling for missing official data.
+PR-27 plans the expansion of the `Insurer` model into a practical insurer action center (planner system access, helpdesk phone, call monitoring phone, card payment status, terms URL, claim form URL, claim fax handling type, and related governance fields). PR-27 is documentation only.
 
-Future insurer action fields may include planner system URL, helpdesk phone, call monitoring phone, card payment notes, policy terms URL, and claim form URL. These require a separate schema planning and migration PR.
+The actual schema and migration for those action fields land in PR-28 under manual approval. Public directory reads then migrate to database records in PR-30 (renumbered from the previous PR-27 placement), and the public insurer action card UI ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
 
 ## M. Manual Approval Required
 

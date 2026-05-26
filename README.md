@@ -85,6 +85,8 @@ See `docs/RBAC_IMPLEMENTATION_PLAN.md` for the planned Role-Based Access Control
 
 See `docs/AUTH_DATABASE_SCHEMA_PLAN.md` for the planned database schema and model structure for authentication.
 
+See `docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md` for the planned evolution of the `Insurer` model from a basic directory record into a practical, premium, verified insurer action center for Korean insurance planners. The plan covers proposed action fields, status enums, field grouping, data governance labeling, public card UI direction, and the recommended follow-up PR sequence.
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:
