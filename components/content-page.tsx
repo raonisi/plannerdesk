@@ -11,6 +11,34 @@ import {
   verificationLabels
 } from "@/lib/design-system";
 
+const uiText = {
+  missing: "\uacf5\uc2dd \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8 \uc608\uc815",
+  emptyTitle: "\uc870\uac74\uc5d0 \ub9de\ub294 \ud56d\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  emptyDescription:
+    "\uac80\uc0c9\uc5b4\ub97c \uc904\uc774\uac70\ub098 \ud544\ud130\ub97c \ubcc0\uacbd\ud574 \uc8fc\uc138\uc694.",
+  officialSource: "\uacf5\uc2dd \ucd9c\ucc98 \uc5f4\uae30",
+  lastVerified: "\ucd5c\uadfc \uac80\uc218",
+  safetyTitle: "\uac80\uc218 \ubc0f \uc548\uc804 \uc548\ub0b4",
+  generalSafety:
+    "\uc774 MVP\ub294 \ud544\uc694\ud55c \uacbd\uc6b0 \ucd08\uc548 placeholder \ub370\uc774\ud130\ub97c \uc0ac\uc6a9\ud569\ub2c8\ub2e4. \uacf5\uc2dd \ub9c1\ud06c, \uc5f0\ub77d\ucc98, \ud329\uc2a4\ubc88\ud638, \uc8fc\uc18c, \uc11c\ub958 \uae30\uc900\uc740 \uacf5\uac1c \uc804 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
+  messageSafety:
+    "\uba54\uc2dc\uc9c0 \ud15c\ud50c\ub9bf\uc740 \uc2e4\ubb34 \ucc38\uace0\uc6a9 \ucd08\uc548\uc785\ub2c8\ub2e4. \ubc1c\uc1a1 \uc804 \uace0\uac1d \uc0c1\ud669, \uc0c1\ud488 \uae30\uc900, \ubcf4\ud5d8\uc0ac \uae30\uc900\uc5d0 \ub9de\uac8c \uac80\ud1a0\ud558\uace0 \uc218\uc815\ud574\uc57c \ud569\ub2c8\ub2e4.",
+  noPayoutJudge:
+    "\ud50c\ub798\ub108\ub370\uc2a4\ud06c\ub294 \ubcf4\ud5d8\uae08 \uc9c0\uae09 \uc5ec\ubd80\ub97c \ud310\ub2e8\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+  noPayoutEstimate:
+    "\ud50c\ub798\ub108\ub370\uc2a4\ud06c\ub294 \ubcf4\ud5d8\uae08 \uc9c0\uae09 \uae08\uc561\uc744 \uc0b0\uc815\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+  noAdjusting:
+    "\ud50c\ub798\ub108\ub370\uc2a4\ud06c\ub294 \uc190\ud574\uc0ac\uc815 \uc5c5\ubb34\ub97c \uc218\ud589\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+  noMedicalDocs:
+    "\ud604\uc7ac MVP\uc5d0\uc11c\ub294 \uace0\uac1d \uc758\ub8cc\uc11c\ub958\ub97c \ucc98\ub9ac\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+  referenceOnly:
+    "\ubcf8 \uc790\ub8cc\ub294 \uc2e4\ubb34 \ucc38\uace0\uc640 \uc5c5\ubb34 \uc815\ub9ac\ub97c \uc704\ud55c \uc6a9\ub3c4\uc785\ub2c8\ub2e4.",
+  directory: "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30",
+  claim: "\uccad\uad6c\uc11c\ub958",
+  disclosure: "\uacf5\uc2dc\u00b7\uc57d\uad00",
+  message: "\uace0\uac1d \ubb38\uad6c"
+};
+
 export function PageHero({
   eyebrow,
   title,
@@ -23,13 +51,11 @@ export function PageHero({
   return (
     <section className={`border-b ${borders.divider} ${surfaces.hero}`}>
       <div className={`mx-auto max-w-7xl ${spacing.pageX} ${spacing.heroY}`}>
-        <p className={textStyles.heroEyebrow}>
-          {eyebrow}
-        </p>
-        <h1 className={`mt-4 max-w-4xl ${textStyles.heroTitle}`}>
+        <p className={textStyles.heroEyebrow}>{eyebrow}</p>
+        <h1 className={`mt-4 max-w-4xl break-keep ${textStyles.heroTitle}`}>
           {title}
         </h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-[#d8d0c3] sm:text-lg">
+        <p className="mt-5 max-w-3xl break-keep text-base leading-7 text-[#d8d0c3] sm:text-lg">
           {description}
         </p>
       </div>
@@ -38,11 +64,7 @@ export function PageHero({
 }
 
 export function PageFrame({ children }: { children: ReactNode }) {
-  return (
-    <main className={`min-h-screen ${surfaces.page}`}>
-      {children}
-    </main>
-  );
+  return <main className={`min-h-screen ${surfaces.page}`}>{children}</main>;
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
@@ -77,9 +99,9 @@ export function SectionHeader({
   return (
     <div className="max-w-3xl">
       {eyebrow ? <p className={textStyles.eyebrow}>{eyebrow}</p> : null}
-      <h2 className={`mt-2 ${textStyles.sectionTitle}`}>{title}</h2>
+      <h2 className={`mt-2 break-keep ${textStyles.sectionTitle}`}>{title}</h2>
       {description ? (
-        <p className={`mt-4 ${textStyles.body}`}>{description}</p>
+        <p className={`mt-4 break-keep ${textStyles.body}`}>{description}</p>
       ) : null}
     </div>
   );
@@ -87,7 +109,9 @@ export function SectionHeader({
 
 export function PremiumCard({ children }: { children: ReactNode }) {
   return (
-    <article className={`${borders.default} ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}>
+    <article
+      className={`${borders.default} ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
+    >
       {children}
     </article>
   );
@@ -98,6 +122,18 @@ export function ContentGrid({ children }: { children: ReactNode }) {
 }
 
 export function StatusBadge({ status }: { status: VerificationStatus }) {
+  return <VerificationStatusBadge status={status} />;
+}
+
+export function VerificationBadge({ status }: { status: VerificationStatus }) {
+  return <VerificationStatusBadge status={status} />;
+}
+
+export function VerificationStatusBadge({
+  status
+}: {
+  status: VerificationStatus;
+}) {
   return (
     <span
       className={`inline-flex shrink-0 items-center whitespace-nowrap border px-2.5 py-1 text-xs font-semibold ${statusBadgeClasses[status]}`}
@@ -107,53 +143,66 @@ export function StatusBadge({ status }: { status: VerificationStatus }) {
   );
 }
 
-export function VerificationBadge({ status }: { status: VerificationStatus }) {
-  return <StatusBadge status={status} />;
+export function LastVerified({ value }: { value: string | null }) {
+  return <LastVerifiedText value={value} />;
 }
 
-export function LastVerified({ value }: { value: string | null }) {
+export function LastVerifiedText({ value }: { value: string | null }) {
   return (
     <span className="whitespace-nowrap text-sm text-[#5f6670]">
-      최종 확인: {value ?? "미검증"}
+      {uiText.lastVerified}: {formatVerifiedDate(value)}
     </span>
   );
 }
 
-export function EmptyValue({ label = "공개 전 확인 필요" }: { label?: string }) {
-  return <span className="text-[#8b7660]">{label}</span>;
+export function formatVerifiedDate(value: string | null | undefined) {
+  if (!value) {
+    return uiText.missing;
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  return match ? `${match[1]}.${match[2]}.${match[3]}` : value;
+}
+
+export function EmptyValue({ label = uiText.missing }: { label?: string }) {
+  return <MissingFieldText label={label} />;
+}
+
+export function MissingFieldText({ label = uiText.missing }: { label?: string }) {
+  return <span className="break-keep text-[#8b7660]">{label}</span>;
 }
 
 export function EmptyState({
-  title = "준비 중입니다",
-  description = "공식 출처 검증 후 공개할 예정입니다."
+  title = uiText.emptyTitle,
+  description = uiText.emptyDescription
 }: {
   title?: string;
   description?: string;
 }) {
   return (
     <div className={`${borders.default} ${surfaces.card} p-6 text-center`}>
-      <p className="text-lg font-semibold text-[#102235]">{title}</p>
-      <p className={`mt-2 ${textStyles.small}`}>{description}</p>
+      <p className="break-keep text-lg font-semibold text-[#102235]">{title}</p>
+      <p className={`mt-2 break-keep ${textStyles.small}`}>{description}</p>
     </div>
   );
 }
 
 export function ExternalSourceLink({
   href,
-  children = "공식 링크"
+  children = uiText.officialSource
 }: {
   href: string | null;
   children?: ReactNode;
 }) {
   if (!href) {
-    return <EmptyValue label="링크 미검증" />;
+    return <MissingFieldText />;
   }
 
   return (
     <a
       className="font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4"
       href={href}
-      rel="noreferrer"
+      rel="noopener noreferrer"
       target="_blank"
     >
       {children}
@@ -172,8 +221,8 @@ export function LinkButton({
 }) {
   const className =
     variant === "solid"
-      ? "inline-flex items-center justify-center bg-[#aa8137] px-4 py-2 text-sm font-semibold text-[#102235] transition hover:bg-[#c19b58]"
-      : "inline-flex items-center justify-center border border-[#102235] px-4 py-2 text-sm font-semibold text-[#102235] transition hover:bg-[#102235] hover:text-[#fbf7ee]";
+      ? "inline-flex min-h-11 items-center justify-center bg-[#aa8137] px-4 py-2 text-sm font-semibold text-[#102235] transition hover:bg-[#c19b58]"
+      : "inline-flex min-h-11 items-center justify-center border border-[#102235] px-4 py-2 text-sm font-semibold text-[#102235] transition hover:bg-[#102235] hover:text-[#fbf7ee]";
 
   return (
     <Link className={className} href={href}>
@@ -198,25 +247,48 @@ export function ActionButton({
   );
 }
 
-export function SafetyNotice({ variant = "general" }: { variant?: "general" | "claim" | "message" }) {
+export function DraftDataNotice({ children }: { children?: ReactNode }) {
+  return (
+    <aside className={`${borders.default} ${surfaces.card} p-5`}>
+      <p className="text-sm font-semibold text-[#102235]">{uiText.safetyTitle}</p>
+      <p className="mt-3 break-keep text-sm leading-6 text-[#4f5661]">
+        {children ?? uiText.generalSafety}
+      </p>
+    </aside>
+  );
+}
+
+export function OfficialSourceNotice({ children }: { children?: ReactNode }) {
+  return (
+    <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
+      {children ?? uiText.generalSafety}
+    </p>
+  );
+}
+
+export function SafetyNotice({
+  variant = "general"
+}: {
+  variant?: "general" | "claim" | "message";
+}) {
   const message =
-    variant === "message"
-      ? "메시지 템플릿은 초안이며 사용 전 상황과 고객 맥락에 맞게 검토해야 합니다. 보장, 승인, 지급 결과를 보장하는 표현은 사용할 수 없습니다."
-      : "이 MVP는 초안 플레이스홀더 데이터를 사용합니다. 공식 링크, 연락처, 팩스번호, 주소, 문서 링크는 공개 전 반드시 검증해야 합니다.";
+    variant === "message" ? uiText.messageSafety : uiText.generalSafety;
 
   return (
     <aside className={`${borders.default} ${surfaces.card} p-5`}>
-      <p className="text-sm font-semibold text-[#102235]">검증 및 안전 안내</p>
-      <p className="mt-3 text-sm leading-6 text-[#4f5661]">{message}</p>
+      <p className="text-sm font-semibold text-[#102235]">{uiText.safetyTitle}</p>
+      <p className="mt-3 break-keep text-sm leading-6 text-[#4f5661]">
+        {message}
+      </p>
       <ul className="mt-4 grid gap-2 text-sm leading-6 text-[#4f5661] sm:grid-cols-2">
-        <li>PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.</li>
-        <li>PlannerDesk는 보험금 액수를 추정하지 않습니다.</li>
-        <li>PlannerDesk는 손해사정 업무를 수행하지 않습니다.</li>
-        <li>PlannerDesk는 이 MVP에서 고객 의료 문서를 처리하지 않습니다.</li>
+        <li>{uiText.noPayoutJudge}</li>
+        <li>{uiText.noPayoutEstimate}</li>
+        <li>{uiText.noAdjusting}</li>
+        <li>{uiText.noMedicalDocs}</li>
       </ul>
       {variant === "claim" ? (
-        <p className="mt-4 text-sm font-medium text-[#7a612d]">
-          청구 관련 정보는 실무 참고용이며 보험사 공식 안내가 우선합니다.
+        <p className="mt-4 break-keep text-sm font-medium text-[#7a612d]">
+          {uiText.referenceOnly}
         </p>
       ) : null}
     </aside>
@@ -225,20 +297,22 @@ export function SafetyNotice({ variant = "general" }: { variant?: "general" | "c
 
 export function RelatedPageLinks() {
   const links = [
-    { href: "/directory", label: "보험사 디렉터리" },
-    { href: "/claim-documents", label: "청구 서류" },
-    { href: "/disclosure-links", label: "공시 링크" },
-    { href: "/message-templates", label: "메시지 템플릿" }
+    { href: "/directory", label: uiText.directory },
+    { href: "/claim-documents", label: uiText.claim },
+    { href: "/disclosure-links", label: uiText.disclosure },
+    { href: "/message-templates", label: uiText.message }
   ];
 
   return (
     <div className={`border-y ${borders.divider} ${surfaces.card}`}>
-      <div className={`mx-auto flex max-w-7xl gap-2 overflow-x-auto ${spacing.pageX} py-4`}>
+      <div
+        className={`mx-auto flex max-w-7xl gap-2 overflow-x-auto ${spacing.pageX} py-4`}
+      >
         {links.map((link) => (
           <Link
-            key={link.href}
-            className="shrink-0 border border-[#d9c9a8] px-3 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] hover:text-[#7a612d]"
+            className="shrink-0 whitespace-nowrap border border-[#d9c9a8] px-3 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] hover:text-[#7a612d]"
             href={link.href}
+            key={link.href}
           >
             {link.label}
           </Link>
