@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import {
@@ -52,7 +54,17 @@ const paymentToneClass: Record<
   },
 };
 
-export function InsurerActionCard({ insurer }: { insurer: PublicInsurer }) {
+export interface InsurerActionCardProps {
+  insurer: PublicInsurer;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
+}
+
+export function InsurerActionCard({
+  insurer,
+  isFavorite = false,
+  onToggleFavorite,
+}: InsurerActionCardProps) {
   const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
   const claimFax = claimFaxDisplay(insurer);
   const registeredMailing =
@@ -70,7 +82,11 @@ export function InsurerActionCard({ insurer }: { insurer: PublicInsurer }) {
       ) : null}
 
       <div className="p-6 sm:p-7">
-        <CardHeader insurer={insurer} />
+        <CardHeader
+          insurer={insurer}
+          isFavorite={isFavorite}
+          onToggleFavorite={onToggleFavorite}
+        />
 
         <div className="mt-6 space-y-5">
           <ActionGroup eyebrow="ACCESS" title="\uc811\uc18d">
@@ -181,7 +197,15 @@ export function InsurerActionCard({ insurer }: { insurer: PublicInsurer }) {
   );
 }
 
-function CardHeader({ insurer }: { insurer: PublicInsurer }) {
+function CardHeader({
+  insurer,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  insurer: PublicInsurer;
+  isFavorite: boolean;
+  onToggleFavorite?: (id: string) => void;
+}) {
   return (
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -195,6 +219,13 @@ function CardHeader({ insurer }: { insurer: PublicInsurer }) {
         </div>
 
         <div className="flex flex-wrap items-start justify-end gap-2">
+          {onToggleFavorite ? (
+            <FavoriteButton
+              id={insurer.id}
+              isFavorite={isFavorite}
+              onToggle={onToggleFavorite}
+            />
+          ) : null}
           <span
             className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold ${verificationBadgeTone[insurer.verificationStatus]}`}
           >
@@ -215,6 +246,39 @@ function CardHeader({ insurer }: { insurer: PublicInsurer }) {
         <span className="break-keep">{lastVerifiedLabel(insurer.lastVerifiedAt)}</span>
       </div>
     </header>
+  );
+}
+
+function FavoriteButton({
+  id,
+  isFavorite,
+  onToggle,
+}: {
+  id: string;
+  isFavorite: boolean;
+  onToggle: (id: string) => void;
+}) {
+  const label = isFavorite
+    ? "\uc990\uaca8\ucc3e\uae30 \ud574\uc81c"
+    : "\uc990\uaca8\ucc3e\uae30 \ucd94\uac00";
+  const toneClass = isFavorite
+    ? "border-[#aa8137] bg-[#fff7e6] text-[#7a612d]"
+    : "border-[#d9c9a8] bg-white text-[#5f6670] hover:border-[#aa8137] hover:text-[#7a612d]";
+
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={isFavorite}
+      className={`inline-flex h-9 min-w-9 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] ${toneClass}`}
+      onClick={() => onToggle(id)}
+      title={label}
+      type="button"
+    >
+      <span aria-hidden="true" className="text-sm leading-none">
+        {isFavorite ? "\u2605" : "\u2606"}
+      </span>
+      <span className="sr-only">{label}</span>
+    </button>
   );
 }
 
