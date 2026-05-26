@@ -75,9 +75,14 @@ Recommended future sequence:
 17. PR-30 Public directory DB read integration, manual approval required (Done)
 18. PR-31 Public insurer action card UI, manual approval required (Done)
 19. PR-32 Favorites localStorage MVP (no server writes), manual approval optional depending on telemetry choices (Done)
-20. PR-33 Verification/publish workflow polish, manual approval required (Current)
-21. PR-34 Correction request planning, documentation only
-22. PR-35 Audit log planning or foundation, manual approval required
+20. PR-33 Verification/publish workflow polish, manual approval required (Done)
+21. PR-34 Correction request planning, documentation only (Current)
+    - See [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md)
+22. PR-35 Correction request MVP (CorrectionRequest model + migration + protected admin queue + public submission action), manual approval required
+23. PR-36 ClaimDocument model planning, documentation only
+24. PR-37 ClaimDocument model + migration, manual approval required
+25. PR-38 ClaimDocument admin CRUD, manual approval required
+26. Audit log foundation, manual approval required (sequence number deferred until correction request + claim document tracks land)
 
 Each PR should include its own scope statement, security review, test plan, and rollback notes where applicable.
 
@@ -289,6 +294,8 @@ The schema and migration for those action fields land in PR-28 under manual appr
 PR-29 surfaces those fields in the protected admin create/edit forms with grouped sections (A. Basic Info / B. Access / C. Support / D. Claim / E. Policy or Disclosure / F. Payment / G. Governance), tri-state controls for nullable payment booleans, and the required Korean operator copy ("공식 확인 후 업데이트 예정", "해당사항 없음", "콜센터 개별접수", "조건 확인 필요"). PR-29 does not change `prisma/schema.prisma`, does not add migrations, and does not change public `/directory` runtime behavior. The admin list view in PR-29 also flags records with three or more missing core operational fields under a "운영 정보 보강 필요" badge so operators can prioritize follow-up verification before public read-through ships.
 
 PR-30 switches the public `/directory` page from static sample data to a DB read of published `Insurer` records via a new `lib/public/insurers.ts` helper. The helper restricts the query to `isPublished = true` AND `verificationStatus IN ('verified', 'needs_review')`, orders by `isFeatured desc, sortOrder asc, name asc`, and projects only public-safe columns (admin governance fields such as `notes`, `sourceNote`, `createdById`, and `updatedById` are excluded). The page is rendered as an async Server Component with `dynamic = "force-dynamic"` so admin publish toggles propagate immediately, and unexpected DB failures surface as the calm "잠시 후 다시 확인해 주세요" notice without exposing raw errors. PR-30 does not change `prisma/schema.prisma`, does not add migrations, and does not change the admin CRUD surface. The public insurer action card visual polish ships in PR-31. See [docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md) for the full expansion plan, including the data governance rules for empty, unavailable, conditional, and unknown states.
+
+PR-34 plans the future correction request feature so the public directory can stay fresh without weakening the verification or publish guardrails. It is documentation only — no runtime code, no schema, no migration, no admin form, no public form. The plan keeps user submissions in a queueing surface that requires manual admin review against an official source before any `Insurer` field is edited, and never collects customer or medical data. See [docs/CORRECTION_REQUEST_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/CORRECTION_REQUEST_PLAN.md) for the full plan.
 
 ## M. Manual Approval Required
 
