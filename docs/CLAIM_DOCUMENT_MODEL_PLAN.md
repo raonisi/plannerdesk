@@ -186,7 +186,7 @@ The future admin form (PR-38) should reject the prohibited phrases server-side v
 
 Recommended PR sequence after PR-36. Each step keeps scope narrow, carries its own security review, and requires explicit approval where applicable.
 
-- **PR-37 ClaimDocument model + migration** — add the Prisma model and migration for `ClaimDocument` per this plan. Manual approval required. No admin form, no public read-through, no API route. Mirrors the PR-25 / PR-28 pattern for the `Insurer` track.
+- **PR-37 ClaimDocument model + migration** — *shipped per Section L below.* Adds the Prisma model and a single additive migration. No admin form, no public read-through, no API route, no runtime behavior change. Antigravity high-risk schema review required.
 - **PR-38 ClaimDocument admin CRUD** — protected admin CRUD under `/admin/claim-documents`. Reuses the publish guard and Korean copy patterns established in PR-33. Includes the deny-list described in Section I. Manual approval required.
 - **PR-39 ClaimDocument public DB read** — switch `/claim-documents` from static placeholder to a published-only DB read via a new `lib/public/claimDocuments.ts` helper. Consume `PUBLIC_VERIFICATION_STATUSES` from `lib/public/insurers.ts` so the visibility rule cannot drift across content hubs. Manual approval required.
 - **PR-40 MVP operating QA / Railway hardening** — operating-readiness pass once the claim document hub is live (publish QA, content audit, Railway deploy hardening, observability defaults). Documentation + small ops changes only; the manual-approval scope is decided when this PR opens.
@@ -220,3 +220,66 @@ If any of these are required during review, stop and report:
 - Required decision
 - Safer alternative
 - Recommended next step
+
+## L. PR-37 Shipped (Model + Migration Foundation)
+
+PR-37 lands the first persistent foundation for the future claim document library: the `ClaimDocument` Prisma model and a single additive migration. It deliberately ships **no admin CRUD, no public DB read, no API route, no file upload, no OCR, no AI claim judgment, and no customer/medical data field**. The runtime surface — both public `/claim-documents` and admin — is unchanged.
+
+### Schema added
+
+`prisma/schema.prisma` adds the following pieces:
+
+- `enum ClaimDocumentCategory` — closed enum with the canonical category set finalized in PR-37: `actual_expense`, `diagnosis`, `surgery`, `hospitalization`, `outpatient`, `fracture`, `driver`, `death`, `disability`, `other`. The `other` value is the safety valve and must not become a silent default in admin UI (PR-38). The Korean label "실손" maps to `actual_expense` (the planning doc used the working title `indemnity`; PR-37 chooses the more operator-friendly `actual_expense`).
+- `model ClaimDocument` — the editorial record. Fields, defaults, and indexes match Sections D and F of this plan:
+  - `id String @id @default(cuid())`
+  - `title String`, `slug String @unique`
+  - `category ClaimDocumentCategory`
+  - `insurerId String?` with optional `insurer Insurer? @relation(... onDelete: SetNull)`
+  - `summary String?`, `requiredDocuments String?`, `optionalDocuments String?` — plain text in the MVP. A future PR may normalize the document checklists into a child table; the current `String?` shape keeps the foundation small and reviewable.
+  - `claimFormUrl String?`, `officialSourceUrl String?` — link fields; URL validation lives at the admin write path that will land in PR-38.
+  - `customerMessageTemplate String?`, `cautionNote String?`
+  - `verificationStatus VerificationStatus @default(draft)` — **reuses** the existing enum, no new visibility states.
+  - `lastVerifiedAt DateTime?`, `isPublished Boolean @default(false)`, `sortOrder Int @default(0)`
+  - `createdAt`, `updatedAt`, `createdById`, `updatedById` for governance.
+  - Indexes: `category`, `insurerId`, `verificationStatus`, `isPublished`, `sortOrder`, plus the unique index on `slug`.
+- `Insurer.claimDocuments ClaimDocument[]` back-relation — required by Prisma for the optional FK; no behavioral change to `Insurer` itself.
+
+### Fields deliberately excluded
+
+Per Section C, this PR must not introduce fields that imply payout judgment or store customer/medical data. The following are explicitly not added in PR-37 and must remain absent unless a future plan + approval explicitly opens them:
+
+- `expectedPayoutAmount`, `payoutProbability`, `coverageDecision`
+- `medicalDiagnosis`, `customerMedicalRecord`, `patientData`
+- `claimApprovalPrediction`, `lossAdjustmentStatus`
+- `uploadedFileUrl` or any attachment/upload field
+
+### Migration
+
+`prisma/migrations/20260526190000_add_claim_document_model/migration.sql` is **additive only**. It contains:
+
+1. `CREATE TYPE "ClaimDocumentCategory"` for the new enum.
+2. `CREATE TABLE "ClaimDocument"` with the columns and defaults described above.
+3. The six indexes (`slug` unique + five secondary indexes).
+4. A single `ADD CONSTRAINT ... FOREIGN KEY ("insurerId") REFERENCES "Insurer"("id") ON DELETE SET NULL ON UPDATE CASCADE`.
+
+The migration file does **not** contain:
+
+- Any `DROP`, `TRUNCATE`, or `DELETE`.
+- Any change to the existing `User`, `Account`, `Session`, `VerificationToken`, or `Insurer` tables (the `Insurer.claimDocuments` back-relation is Prisma-only and does not emit SQL).
+- Any change to `VerificationStatus` or other existing enums.
+- Any `Customer`, `Policy`, `Claim`, `MedicalDocument`, `Upload`, `Payment`, `Subscription`, BOA CRM, or Aiven tables.
+
+The migration was generated by inspection (hand-written in the Prisma migration format) to avoid requiring a live database connection during the PR-37 commit, consistent with AGENTS.md ("Do not require `DATABASE_URL` for the initial public build"). The Antigravity reviewer should compare the SQL to the schema model line-by-line.
+
+### Runtime status (unchanged)
+
+- Public `/claim-documents` remains the static placeholder. No DB read is wired up.
+- No admin route under `/admin/claim-documents` exists. PR-38 is responsible for adding it with the publish guard and deny-list described in Sections G and I.
+- No API route, no server action, no file upload, no OCR.
+- The `Insurer` admin surface, public `/directory`, favorites, and correction-request MVP are untouched.
+
+### Next steps
+
+- **PR-38 ClaimDocument admin CRUD** — protected create/update under `/admin/claim-documents`, the prohibited-phrase deny-list (Section I), publish guard mirroring PR-33.
+- **PR-39 ClaimDocument public DB read** — switch `/claim-documents` from static placeholder to a published-only DB read via `lib/public/claimDocuments.ts`, consuming `PUBLIC_VERIFICATION_STATUSES` from `lib/public/insurers.ts` so the visibility rule stays canonical.
+- The DB-backed correction request flow remains a separate track (provisionally PR-40) and is unaffected by PR-37.
