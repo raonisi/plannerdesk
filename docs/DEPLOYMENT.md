@@ -11,7 +11,7 @@ PlannerDesk deploys to Railway as a standard Next.js application.
 - Start command: `npm run start`
 - Database: not connected yet
 
-The current MVP foundation is a public landing page and does not require `DATABASE_URL`.
+The current static MVP does not require `DATABASE_URL`.
 
 ## Railway
 
@@ -41,11 +41,15 @@ Do not commit:
 - `.env.production`
 - Any file containing real credentials, API keys, database URLs, or tokens
 
+When secrets are needed in a later PR, configure them through Railway Variables. Do not commit real values to GitHub.
+
 ## Neon PostgreSQL
 
 Neon PostgreSQL is intentionally not connected in this PR.
 
 Connect Neon only when database-backed features begin, such as accounts, content management, or workspace data. That future PR should include its own security review, environment variable update, and migration plan.
+
+See `docs/NEON_CONNECTION_PLAN.md` for the planned Neon, Railway Variables, and future Prisma introduction sequence.
 
 ## Explicit Non-Goals For This PR
 
