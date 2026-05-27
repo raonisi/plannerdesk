@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
@@ -53,6 +53,31 @@ const paymentToneClass: Record<
     text: "text-[#4f5661]",
   },
 };
+
+function insurerLogoLabel(name: string) {
+  const compactName = name.replace(/\s+/g, "");
+  const latinMatch = compactName.match(/[A-Za-z]+/);
+
+  if (latinMatch?.[0]) {
+    return latinMatch[0].slice(0, 2).toUpperCase();
+  }
+
+  return compactName.slice(0, 2);
+}
+
+function insurerLogoSrc(insurer: PublicInsurer) {
+  const sourceUrl =
+    insurer.officialWebsiteUrl ?? insurer.systemUrl ?? insurer.plannerPortalUrl;
+
+  if (!sourceUrl) return null;
+
+  try {
+    const hostname = new URL(sourceUrl).hostname;
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
+  } catch {
+    return null;
+  }
+}
 
 export interface InsurerActionCardProps {
   insurer: PublicInsurer;
@@ -232,13 +257,16 @@ function CardHeader({
   return (
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className={sectionEyebrowClass}>
-            {CATEGORY_LABELS[insurer.category]}
-          </p>
-          <h2 className="mt-2 break-keep text-2xl font-semibold leading-snug text-[#102235] sm:text-[1.65rem]">
-            {insurer.name}
-          </h2>
+        <div className="flex min-w-0 items-start gap-3">
+          <InsurerLogo insurer={insurer} />
+          <div className="min-w-0">
+            <p className={sectionEyebrowClass}>
+              {CATEGORY_LABELS[insurer.category]}
+            </p>
+            <h2 className="mt-2 break-keep text-2xl font-semibold leading-snug text-[#102235] sm:text-[1.65rem]">
+              {insurer.name}
+            </h2>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-start justify-end gap-2">
@@ -269,6 +297,33 @@ function CardHeader({
         <span className="break-keep">{lastVerifiedLabel(insurer.lastVerifiedAt)}</span>
       </div>
     </header>
+  );
+}
+
+function InsurerLogo({ insurer }: { insurer: PublicInsurer }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const logoSrc = insurerLogoSrc(insurer);
+
+  return (
+    <span className="grid h-14 w-24 shrink-0 place-items-center rounded-xl border border-[#e7ddc9] bg-white px-3 py-2 shadow-[0_10px_22px_rgba(16,34,53,0.08)] sm:w-28">
+      {logoSrc && !imageFailed ? (
+        // External insurer favicons are small public assets and do not need
+        // Next image optimization or remote image configuration.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt={`${insurer.name} 로고`}
+          className="h-full max-h-9 w-full object-contain"
+          loading="lazy"
+          onError={() => setImageFailed(true)}
+          referrerPolicy="no-referrer"
+          src={logoSrc}
+        />
+      ) : (
+        <span className="text-sm font-black tracking-[0.02em] text-[#102235]">
+          {insurerLogoLabel(insurer.name)}
+        </span>
+      )}
+    </span>
   );
 }
 
@@ -345,7 +400,7 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
 
   const toneClass =
     tone === "primary"
-      ? "border-[#102235] bg-[#102235] text-[#fffaf0] shadow-[0_12px_24px_rgba(16,34,53,0.16)] hover:bg-[#173f36]"
+      ? "border-[#102235] bg-[#102235] !text-[#fffaf0] shadow-[0_12px_24px_rgba(16,34,53,0.16)] hover:bg-[#173f36]"
       : "border-[#173f36] bg-white text-[#173f36] hover:bg-[#173f36] hover:text-[#fbf7ee]";
 
   return (
