@@ -22,10 +22,22 @@
  * @see docs/ADMIN_ACCESS_PLAN.md
  */
 
-import NextAuth from "next-auth";
+import NextAuth, { type DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import Google from "next-auth/providers/google";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      role?: string | null;
+      id?: string | null;
+    } & DefaultSession["user"];
+  }
+  interface User {
+    role?: string | null;
+  }
+}
 
 const googleProviderEnabled =
   Boolean(process.env.AUTH_GOOGLE_ID) &&
@@ -51,6 +63,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         ]
       : []),
   ],
+
+  /**
+   * Custom NextAuth callbacks to map custom DB fields (like user.role)
+   * from the database to the session user object securely.
+   */
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      } else if (token.email) {
+        // Safe database fallback to ensure role changes (e.g. to super_admin)
+        // propagate without requiring a manual user sign-out/sign-in.
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { role: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+          }
+        } catch (err) {
+          console.error("[plannerdesk] Failed to fetch user role in jwt callback", err);
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role as string | null;
+        session.user.id = token.sub as string;
+      }
+      return session;
+    },
+  },
 
   /**
    * Use JWT strategy for session token resolution to minimize database-backed
