@@ -1,31 +1,40 @@
 /**
  * Auth.js (NextAuth v5) foundation configuration for PlannerDesk.
  *
- * This is the minimal Auth.js setup required before implementing
- * real login providers, database adapters, or protected admin routes.
+ * This is the Auth.js setup used by protected admin routes.
  *
  * Current state:
- * - No login providers configured (empty providers array).
- * - JWT session strategy (no database tables required).
- * - No Prisma Adapter (will be added in a future PR after schema review).
+ * - Google provider is conditionally enabled from Railway/local env values.
+ * - JWT session strategy with Prisma Adapter-backed user/account persistence.
+ * - JWT/session callbacks map User.id and User.role into session.user.
  * - No OAuth provider secrets committed.
- * - No middleware blocking public routes.
+ * - No edge middleware blocking public routes.
  * - Public MVP pages remain fully accessible without login.
  *
  * Future PRs will:
- * - Add OAuth providers (Google, Kakao, Naver) with Railway Variables.
- * - Add Prisma Adapter for database-backed sessions.
- * - Add role-based access control (RBAC) callbacks.
- * - Add protected admin shell under /admin.
+ * - Add more providers only after explicit review.
+ * - Keep RBAC deny-by-default and server-side.
  *
  * @see docs/AUTH_FOUNDATION_PLAN.md
  * @see docs/ADMIN_ACCESS_PLAN.md
  */
 
-import NextAuth from "next-auth";
+import NextAuth, { type DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import Google from "next-auth/providers/google";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      role?: string | null;
+      id?: string | null;
+    } & DefaultSession["user"];
+  }
+  interface User {
+    role?: string | null;
+  }
+}
 
 const googleProviderEnabled =
   Boolean(process.env.AUTH_GOOGLE_ID) &&
@@ -51,6 +60,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         ]
       : []),
   ],
+
+  /**
+   * Custom NextAuth callbacks to map custom DB fields (like user.role)
+   * from the database to the session user object securely.
+   */
+  callbacks: {
+    async jwt({ token, user }) {
+      const roleToken = token as typeof token & {
+        id?: string | null;
+        role?: string | null;
+      };
+
+      if (user) {
+        roleToken.id = user.id;
+        roleToken.role = user.role ?? null;
+      }
+
+      if (token.email) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email },
+            select: { id: true, role: true },
+          });
+          roleToken.id = dbUser?.id ?? null;
+          roleToken.role = dbUser?.role ?? null;
+        } catch (err) {
+          roleToken.role = null;
+          console.error("[plannerdesk] Failed to refresh user role in jwt callback", err);
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      const roleToken = token as typeof token & {
+        id?: string | null;
+        role?: string | null;
+      };
+
+      if (session.user) {
+        session.user.role = roleToken.role ?? null;
+        session.user.id = roleToken.id ?? token.sub ?? "";
+      }
+      return session;
+    },
+  },
 
   /**
    * Use JWT strategy for session token resolution to minimize database-backed
