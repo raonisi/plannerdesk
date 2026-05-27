@@ -1,22 +1,19 @@
 /**
  * Auth.js (NextAuth v5) foundation configuration for PlannerDesk.
  *
- * This is the minimal Auth.js setup required before implementing
- * real login providers, database adapters, or protected admin routes.
+ * This is the Auth.js setup used by protected admin routes.
  *
  * Current state:
- * - No login providers configured (empty providers array).
- * - JWT session strategy (no database tables required).
- * - No Prisma Adapter (will be added in a future PR after schema review).
+ * - Google provider is conditionally enabled from Railway/local env values.
+ * - JWT session strategy with Prisma Adapter-backed user/account persistence.
+ * - JWT/session callbacks map User.id and User.role into session.user.
  * - No OAuth provider secrets committed.
- * - No middleware blocking public routes.
+ * - No edge middleware blocking public routes.
  * - Public MVP pages remain fully accessible without login.
  *
  * Future PRs will:
- * - Add OAuth providers (Google, Kakao, Naver) with Railway Variables.
- * - Add Prisma Adapter for database-backed sessions.
- * - Add role-based access control (RBAC) callbacks.
- * - Add protected admin shell under /admin.
+ * - Add more providers only after explicit review.
+ * - Keep RBAC deny-by-default and server-side.
  *
  * @see docs/AUTH_FOUNDATION_PLAN.md
  * @see docs/ADMIN_ACCESS_PLAN.md
@@ -70,29 +67,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
    */
   callbacks: {
     async jwt({ token, user }) {
+      const roleToken = token as typeof token & {
+        id?: string | null;
+        role?: string | null;
+      };
+
       if (user) {
-        token.role = user.role;
-      } else if (token.email) {
-        // Safe database fallback to ensure role changes (e.g. to super_admin)
-        // propagate without requiring a manual user sign-out/sign-in.
+        roleToken.id = user.id;
+        roleToken.role = user.role ?? null;
+      }
+
+      if (token.email) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { email: token.email },
-            select: { role: true },
+            select: { id: true, role: true },
           });
-          if (dbUser) {
-            token.role = dbUser.role;
-          }
+          roleToken.id = dbUser?.id ?? null;
+          roleToken.role = dbUser?.role ?? null;
         } catch (err) {
-          console.error("[plannerdesk] Failed to fetch user role in jwt callback", err);
+          roleToken.role = null;
+          console.error("[plannerdesk] Failed to refresh user role in jwt callback", err);
         }
       }
       return token;
     },
     async session({ session, token }) {
+      const roleToken = token as typeof token & {
+        id?: string | null;
+        role?: string | null;
+      };
+
       if (session.user) {
-        session.user.role = token.role as string | null;
-        session.user.id = token.sub as string;
+        session.user.role = roleToken.role ?? null;
+        session.user.id = roleToken.id ?? token.sub ?? "";
       }
       return session;
     },
