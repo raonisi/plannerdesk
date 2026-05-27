@@ -151,7 +151,7 @@ export default async function AdminClaimDocumentsPage({
           </div>
           <Link
             href="/admin/claim-documents/new"
-            className="inline-flex items-center justify-center rounded-md bg-[#102235] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
+            className="inline-flex items-center justify-center rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
           >
             {"\uc0c8 \uccad\uad6c\uc11c\ub958 \ub4f1\ub85d"}
           </Link>
@@ -228,7 +228,7 @@ export default async function AdminClaimDocumentsPage({
           </select>
           <button
             type="submit"
-            className="min-h-11 rounded-md bg-[#102235] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
+            className="min-h-11 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
           >
             {"\ud544\ud130 \uc801\uc6a9"}
           </button>

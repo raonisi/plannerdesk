@@ -1,4 +1,5 @@
 import { signOut } from "@/auth";
+import Link from "next/link";
 import { surfaces, borders, shadows, textStyles } from "@/lib/design-system";
 
 interface AdminShellProps {
@@ -16,23 +17,31 @@ export default function AdminShell({ session }: AdminShellProps) {
   const placeholders = [
     {
       title: "보험사 디렉토리 관리",
-      status: "준비 중",
+      status: "운영 중",
       description: "보험사 정보, 고객 센터 연락처, 팩스 번호 및 웹사이트 링크를 관리합니다.",
+      enabled: true,
+      link: "/admin/insurers",
     },
     {
       title: "청구서류 창고 관리",
-      status: "준비 중",
+      status: "운영 중",
       description: "보험사별 필요한 청구 서류 서식과 상세 가이드를 관리합니다.",
+      enabled: true,
+      link: "/admin/claim-documents",
     },
     {
       title: "공시·약관 링크 관리",
       status: "준비 중",
       description: "공시실 및 필수 약관 링크의 최신화 상태를 모니터링하고 편집합니다.",
+      enabled: false,
+      link: "#",
     },
     {
       title: "고객 안내 문구 관리",
       status: "준비 중",
       description: "설계사들이 사용하는 상황별/어조별 안내 메세지 템플릿을 관리합니다.",
+      enabled: false,
+      link: "#",
     },
   ];
 
@@ -86,10 +95,16 @@ export default function AdminShell({ session }: AdminShellProps) {
           {placeholders.map((item, index) => (
             <div
               key={index}
-              className={`relative ${surfaces.card} ${borders.default} rounded-lg p-6 transition-all opacity-75 grayscale border-dashed`}
+              className={`relative ${surfaces.card} ${borders.default} rounded-lg p-6 transition-all ${
+                item.enabled ? 'border-solid shadow-sm' : 'opacity-75 grayscale border-dashed'
+              }`}
             >
               {/* Badge */}
-              <span className="absolute top-6 right-6 text-xs font-semibold bg-[#f7f1e5] border border-[#d9c9a8] text-[#4f5661] px-2.5 py-0.5 rounded-full">
+              <span className={`absolute top-6 right-6 text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                item.enabled 
+                  ? 'border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]' 
+                  : 'bg-[#f7f1e5] border border-[#d9c9a8] text-[#4f5661]'
+              }`}>
                 {item.status}
               </span>
 
@@ -116,13 +131,22 @@ export default function AdminShell({ session }: AdminShellProps) {
               {/* Description */}
               <p className="text-sm text-[#4f5661] leading-relaxed">{item.description}</p>
 
-              {/* Disabled Action Button */}
-              <button
-                disabled
-                className="mt-6 w-full py-2 px-4 rounded border border-[#d9c9a8] bg-[#f7f1e5] text-xs font-semibold text-[#4f5661] cursor-not-allowed text-center"
-              >
-                비활성화됨
-              </button>
+              {/* Action Button */}
+              {item.enabled ? (
+                <Link
+                  href={item.link}
+                  className="mt-6 block w-full py-2 px-4 rounded border border-[#10243E] bg-[#10243E] text-xs font-semibold text-[#F7F3E8] hover:bg-[#17324F] transition-colors text-center focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
+                >
+                  관리하기
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="mt-6 w-full py-2 px-4 rounded border border-[#d9c9a8] bg-[#f7f1e5] text-xs font-semibold text-[#4f5661] cursor-not-allowed text-center"
+                >
+                  비활성화됨
+                </button>
+              )}
             </div>
           ))}
         </div>

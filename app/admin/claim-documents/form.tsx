@@ -388,7 +388,7 @@ export default function ClaimDocumentForm({
         </Link>
         <button
           type="submit"
-          className="rounded-md bg-[#102235] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
+          className="rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitLabel}
         </button>
