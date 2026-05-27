@@ -27,10 +27,8 @@ const verificationBadgeTone: Record<
   PublicInsurer["verificationStatus"],
   string
 > = {
-  verified:
-    "border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]",
-  needs_review:
-    "border-[#d9c9a8] bg-[#fff9ed] text-[#7b5b19]",
+  verified: "border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]",
+  needs_review: "border-[#d9c9a8] bg-[#fff9ed] text-[#7b5b19]",
   draft: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
   unverified: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
   pending: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
@@ -54,6 +52,169 @@ const paymentToneClass: Record<
   },
 };
 
+const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
+  {
+    tokens: ["samsung-fire", "samsungfire.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/samsung-fire.png",
+  },
+  {
+    tokens: ["hanwha-general", "hwgeneralins.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/hanhwa-fire.png",
+  },
+  {
+    tokens: ["hyundai-marine", "hi.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/hyundai-fire.png",
+  },
+  {
+    tokens: ["meritz-fire", "meritzfire.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/meritz-fire.png",
+  },
+  {
+    tokens: ["db-general", "db-insurance", "idbins.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/db-fire.png",
+  },
+  {
+    tokens: ["kb-general", "kb-insurance", "kbinsure.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/kb-fire.png",
+  },
+  {
+    tokens: ["heungkuk-fire", "heungkukfire.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/heungkuk-fire.png",
+  },
+  {
+    tokens: ["nh-general", "nhfire.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/nh-fire.png",
+  },
+  {
+    tokens: ["lotte-general", "lotte-fire", "lotteins.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/lotte-fire.png",
+  },
+  {
+    tokens: ["aig-general", "aig.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/aig-fire.png",
+  },
+  {
+    tokens: ["chubb-general", "chubb.com/kr-kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/lina-fire.png",
+  },
+  {
+    tokens: ["yebyeol-general", "yebyeol-insurance", "yebyeol.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/yb-fire.png",
+  },
+  {
+    tokens: ["hana-general", "hanainsure.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/hana-fire.png",
+  },
+  {
+    tokens: ["samsung-life", "samsunglife.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/samsung-life.png",
+  },
+  {
+    tokens: ["hanwha-life", "hanwhalife.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/hanhwa-life.png",
+  },
+  {
+    tokens: ["kyobo-life", "kyobo.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/kyobo-life.png",
+  },
+  {
+    tokens: ["metlife", "metlife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/met-life.png",
+  },
+  {
+    tokens: ["nh-life", "nhlife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/nh-life.png",
+  },
+  {
+    tokens: ["shinhan-life", "shinhanlife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/shinhan-life.png",
+  },
+  {
+    tokens: ["kb-life", "kblife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/kb-life.png",
+  },
+  {
+    tokens: ["heungkuk-life", "heungkuklife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/heungkuk-life.png",
+  },
+  {
+    tokens: ["abl-life", "abllife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/abl-life.png",
+  },
+  {
+    tokens: ["miraeasset-life", "miraeasset.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/miraeasset-life.png",
+  },
+  {
+    tokens: ["tongyang-life", "myangel.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/tongyang-life.png",
+  },
+  {
+    tokens: ["kdb-life", "kdblife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/kdb-life.png",
+  },
+  {
+    tokens: ["db-life", "idblife.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/db-life.png",
+  },
+  {
+    tokens: ["aia-life", "aia.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/aia-life.png",
+  },
+  {
+    tokens: ["im-life", "dgbfnlife.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/im-life.png",
+  },
+  {
+    tokens: ["lina-life", "lina.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/lina-life.png",
+  },
+  {
+    tokens: ["chubb-life", "chubblife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/chubb-life.png",
+  },
+  {
+    tokens: ["hana-life", "hanalife.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/hana-life.png",
+  },
+  {
+    tokens: ["bnp-life", "cardif.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/bnp-life.png",
+  },
+  {
+    tokens: ["fubonhyundai-life", "fubonhyundai.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/fubon-life.png",
+  },
+  {
+    tokens: ["axa-insurance", "axa.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/axa-digital.png",
+  },
+  {
+    tokens: ["samsung-digital", "direct.samsungfire.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/samsung-digital.png",
+  },
+  {
+    tokens: ["kakaopay-digital", "kakaopayinscorp.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/kakao-digital.png",
+  },
+  {
+    tokens: ["kyobo-digital", "lifeplanet.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/kyobo-digital%20(1).png",
+  },
+  {
+    tokens: ["shinhanez-digital", "shinhanez.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/shinhan-digital.png",
+  },
+  {
+    tokens: ["carrot-digital", "carrotins.com"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/carrot-digital.png",
+  },
+  {
+    tokens: ["hanaoneday-digital", "day.hanainsure.co.kr"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/digital/hana-digital.png",
+  },
+];
+
 function insurerLogoLabel(name: string) {
   const compactName = name.replace(/\s+/g, "");
   const latinMatch = compactName.match(/[A-Za-z]+/);
@@ -65,18 +226,34 @@ function insurerLogoLabel(name: string) {
   return compactName.slice(0, 2);
 }
 
+function insurerLogoMatchKey(insurer: PublicInsurer) {
+  const urls = [
+    insurer.officialWebsiteUrl,
+    insurer.systemUrl,
+    insurer.plannerPortalUrl,
+  ];
+  const hostnames = urls.flatMap((url) => {
+    if (!url) return [];
+
+    try {
+      const parsedUrl = new URL(url);
+      return [parsedUrl.hostname.replace(/^www\./, ""), url];
+    } catch {
+      return [url];
+    }
+  });
+
+  return [insurer.id, ...hostnames].join(" ").toLowerCase();
+}
+
 function insurerLogoSrc(insurer: PublicInsurer) {
-  const sourceUrl =
-    insurer.officialWebsiteUrl ?? insurer.systemUrl ?? insurer.plannerPortalUrl;
+  const matchKey = insurerLogoMatchKey(insurer);
 
-  if (!sourceUrl) return null;
-
-  try {
-    const hostname = new URL(sourceUrl).hostname;
-    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
-  } catch {
-    return null;
-  }
+  return (
+    INSURER_LOGO_SOURCES.find(({ tokens }) =>
+      tokens.some((token) => matchKey.includes(token)),
+    )?.src ?? null
+  );
 }
 
 export interface InsurerActionCardProps {
@@ -119,14 +296,14 @@ export function InsurerActionCard({
           <ActionGroup eyebrow="ACCESS" title="접속">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <ActionLink
-                  href={accessHref}
-                  label="전산접속"
-                  tone="primary"
-                />
-                {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 ? (
+                <ActionLink href={accessHref} label="전산접속" tone="primary" />
+                {insurer.supportedBrowsers &&
+                insurer.supportedBrowsers.length > 0 ? (
                   <span className="text-[11px] font-medium text-[#7a612d] pl-1">
-                    권장 브라우저: {insurer.supportedBrowsers.map((b) => b === "chrome" ? "Chrome" : "Edge").join(", ")}
+                    권장 브라우저:{" "}
+                    {insurer.supportedBrowsers
+                      .map((b) => (b === "chrome" ? "Chrome" : "Edge"))
+                      .join(", ")}
                   </span>
                 ) : null}
               </div>
@@ -144,10 +321,7 @@ export function InsurerActionCard({
                   label="고객센터"
                   value={insurer.customerCenterPhone}
                 />
-                <PhoneRow
-                  label="전산 헬프"
-                  value={insurer.helpdeskPhone}
-                />
+                <PhoneRow label="전산 헬프" value={insurer.helpdeskPhone} />
                 <PhoneRow
                   label="인콜 모니터링"
                   value={insurer.callMonitoringPhone}
@@ -159,14 +333,8 @@ export function InsurerActionCard({
           <div className={groupDividerClass}>
             <ActionGroup eyebrow="CLAIM" title="청구">
               <div className="grid gap-3 sm:grid-cols-2">
-                <ActionLink
-                  href={insurer.claimPageUrl}
-                  label="청구 안내"
-                />
-                <ActionLink
-                  href={insurer.claimFormUrl}
-                  label="청구양식"
-                />
+                <ActionLink href={insurer.claimPageUrl} label="청구 안내" />
+                <ActionLink href={insurer.claimFormUrl} label="청구양식" />
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <InfoRow
@@ -208,12 +376,16 @@ export function InsurerActionCard({
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <InfoRow
                   label="초회보험료"
-                  value={cardPaymentLegLabel(insurer.cardPaymentInitialAvailable)}
+                  value={cardPaymentLegLabel(
+                    insurer.cardPaymentInitialAvailable,
+                  )}
                   isFallback={insurer.cardPaymentInitialAvailable === null}
                 />
                 <InfoRow
                   label="계속보험료"
-                  value={cardPaymentLegLabel(insurer.cardPaymentRecurringAvailable)}
+                  value={cardPaymentLegLabel(
+                    insurer.cardPaymentRecurringAvailable,
+                  )}
                   isFallback={insurer.cardPaymentRecurringAvailable === null}
                 />
               </div>
@@ -294,7 +466,9 @@ function CardHeader({
         <span className="rounded-full border border-[#e7ddc9] bg-white px-2.5 py-0.5 font-semibold text-[#7a612d]">
           최근 검수
         </span>
-        <span className="break-keep">{lastVerifiedLabel(insurer.lastVerifiedAt)}</span>
+        <span className="break-keep">
+          {lastVerifiedLabel(insurer.lastVerifiedAt)}
+        </span>
       </div>
     </header>
   );
@@ -305,14 +479,14 @@ function InsurerLogo({ insurer }: { insurer: PublicInsurer }) {
   const logoSrc = insurerLogoSrc(insurer);
 
   return (
-    <span className="grid h-14 w-24 shrink-0 place-items-center rounded-xl border border-[#e7ddc9] bg-white px-3 py-2 shadow-[0_10px_22px_rgba(16,34,53,0.08)] sm:w-28">
+    <span className="grid h-16 w-32 shrink-0 place-items-center rounded-xl border border-[#e7ddc9] bg-white px-4 py-2 shadow-[0_10px_22px_rgba(16,34,53,0.08)] sm:w-36">
       {logoSrc && !imageFailed ? (
-        // External insurer favicons are small public assets and do not need
-        // Next image optimization or remote image configuration.
+        // Public insurer logo assets are rendered directly to avoid remote
+        // image optimization configuration for this static visual polish.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt={`${insurer.name} 로고`}
-          className="h-full max-h-9 w-full object-contain"
+          className="h-full max-h-11 w-full object-contain"
           loading="lazy"
           onError={() => setImageFailed(true)}
           referrerPolicy="no-referrer"
@@ -336,9 +510,7 @@ function FavoriteButton({
   isFavorite: boolean;
   onToggle: (id: string) => void;
 }) {
-  const label = isFavorite
-    ? "즐겨찾기 해제"
-    : "즐겨찾기 추가";
+  const label = isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가";
   const toneClass = isFavorite
     ? "border-[#aa8137] bg-[#fff7e6] text-[#7a612d]"
     : "border-[#d9c9a8] bg-white text-[#5f6670] hover:border-[#aa8137] hover:text-[#7a612d]";
@@ -411,23 +583,14 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
       target="_blank"
     >
       <span className="break-keep">{label}</span>
-      <span
-        aria-hidden="true"
-        className="text-base leading-none"
-      >
+      <span aria-hidden="true" className="text-base leading-none">
         {"\u2197"}
       </span>
     </a>
   );
 }
 
-function PhoneRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null;
-}) {
+function PhoneRow({ label, value }: { label: string; value: string | null }) {
   const href = telHref(value);
   const hasValue = Boolean(value && value.trim().length > 0);
 
