@@ -24,17 +24,17 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const PAGE_TITLE = "\ubcf4\ud5d8\uc0ac \ub514\ub809\ud1a0\ub9ac \uad00\ub9ac";
+const PAGE_TITLE = "보험사 디렉토리 관리";
 const PAGE_DESCRIPTION =
-  "\ubcf4\ud5d8\uc0ac \uc811\uc18d/\uc9c0\uc6d0/\uccad\uad6c/\uce74\ub4dc\ub0a9 \uc6b4\uc601 \uc815\ubcf4\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4. \uacf5\uac1c \ub514\ub809\ud1a0\ub9ac DB \uc77d\uae30\ub294 PR-30\uc5d0\uc11c \uc5f0\uacb0\ub429\ub2c8\ub2e4.";
+  "보험사 접속/지원/청구/카드납 운영 정보를 관리합니다. 공개 디렉토리 DB 읽기는 PR-30에서 연결됩니다.";
 const SAFETY_NOTICE =
-  "\uacf5\uc2dd \ub9c1\ud06c\uc640 \uc5f0\ub77d\ucc98\ub294 \uacf5\uac1c \uc804 \ubc18\ub4dc\uc2dc \ubcf4\ud5d8\uc0ac \uacf5\uc2dd \ucd9c\ucc98 \uae30\uc900\uc73c\ub85c \uac80\uc218\ud574 \uc8fc\uc138\uc694.";
+  "공식 링크와 연락처는 공개 전 반드시 보험사 공식 출처 기준으로 검수해 주세요.";
 const MISSING_TEXT =
-  "\uacf5\uc2dd \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8 \uc608\uc815";
-const UNAVAILABLE_TEXT = "\ud574\ub2f9\uc0ac\ud56d \uc5c6\uc74c";
-const CALL_CENTER_INDIVIDUAL_TEXT = "\ucf5c\uc13c\ud130 \uac1c\ubcc4\uc811\uc218";
-const CONDITIONAL_TEXT = "\uc870\uac74 \ud655\uc778 \ud544\uc694";
-const NEEDS_UPDATE_TEXT = "\uc6b4\uc601 \uc815\ubcf4 \ubcf4\uac15 \ud544\uc694";
+  "공식 확인 후 업데이트 예정";
+const UNAVAILABLE_TEXT = "해당사항 없음";
+const CALL_CENTER_INDIVIDUAL_TEXT = "콜센터 개별접수";
+const CONDITIONAL_TEXT = "조건 확인 필요";
+const NEEDS_UPDATE_TEXT = "운영 정보 보강 필요";
 
 // Core operational fields. If too many are missing, the list page flags the
 // record with the gold "운영 정보 보강 필요" badge so operators can prioritize
@@ -60,13 +60,13 @@ interface SearchParams {
 }
 
 function formatDate(value: Date | null) {
-  if (!value) return "\uac80\uc218 \uc774\ub825 \uc5c6\uc74c";
+  if (!value) return "검수 이력 없음";
   return value.toISOString().slice(0, 10);
 }
 
 function categoryLabel(category: string) {
-  if (category === InsurerCategory.life) return "\uc0dd\uba85\ubcf4\ud5d8";
-  if (category === InsurerCategory.non_life) return "\uc190\ud574\ubcf4\ud5d8";
+  if (category === InsurerCategory.life) return "생명보험";
+  if (category === InsurerCategory.non_life) return "손해보험";
   return category;
 }
 
@@ -79,14 +79,14 @@ function optionalValue(value: string | null) {
 }
 
 function cardPaymentStatusLabel(status: CardPaymentStatus): string {
-  if (status === CardPaymentStatus.available) return "\uc0ac\uc6a9 \uac00\ub2a5";
+  if (status === CardPaymentStatus.available) return "사용 가능";
   if (status === CardPaymentStatus.conditional) return CONDITIONAL_TEXT;
   if (status === CardPaymentStatus.unavailable) return UNAVAILABLE_TEXT;
   return MISSING_TEXT;
 }
 
 function claimFaxHandlingLabel(value: ClaimFaxHandlingType): string {
-  if (value === ClaimFaxHandlingType.fax) return "\ud329\uc2a4 \uc0ac\uc6a9";
+  if (value === ClaimFaxHandlingType.fax) return "팩스 사용";
   if (value === ClaimFaxHandlingType.call_center_individual)
     return CALL_CENTER_INDIVIDUAL_TEXT;
   if (value === ClaimFaxHandlingType.unavailable) return UNAVAILABLE_TEXT;
@@ -197,9 +197,9 @@ export default async function AdminInsurersPage({
           </div>
           <Link
             href="/admin/insurers/new"
-            className="inline-flex items-center justify-center rounded-md bg-[#102235] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
+            className="inline-flex items-center justify-center rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
           >
-            \uc0c8 \ubcf4\ud5d8\uc0ac \ub4f1\ub85d
+            새 보험사 등록
           </Link>
         </div>
 
@@ -227,7 +227,7 @@ export default async function AdminInsurersPage({
           <input
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
             name="q"
-            placeholder="\ubcf4\ud5d8\uc0ac \uc774\ub984 \uac80\uc0c9"
+            placeholder="보험사 이름 검색"
             defaultValue={resolvedSearchParams.q ?? ""}
           />
           <select
@@ -235,16 +235,16 @@ export default async function AdminInsurersPage({
             name="category"
             defaultValue={resolvedSearchParams.category ?? "all"}
           >
-            <option value="all">\ubd84\ub958 \uc804\uccb4</option>
-            <option value={InsurerCategory.life}>\uc0dd\uba85\ubcf4\ud5d8</option>
-            <option value={InsurerCategory.non_life}>\uc190\ud574\ubcf4\ud5d8</option>
+            <option value="all">분류 전체</option>
+            <option value={InsurerCategory.life}>생명보험</option>
+            <option value={InsurerCategory.non_life}>손해보험</option>
           </select>
           <select
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
             name="status"
             defaultValue={resolvedSearchParams.status ?? "all"}
           >
-            <option value="all">\uac80\uc218 \uc0c1\ud0dc \uc804\uccb4</option>
+            <option value="all">검수 상태 전체</option>
             <option value={VerificationStatus.draft}>
               {VERIFICATION_STATUS_LABEL[VerificationStatus.draft]}
             </option>
@@ -260,15 +260,15 @@ export default async function AdminInsurersPage({
             name="published"
             defaultValue={resolvedSearchParams.published ?? "all"}
           >
-            <option value="all">\uac8c\uc2dc \uc0c1\ud0dc \uc804\uccb4</option>
+            <option value="all">게시 상태 전체</option>
             <option value="true">{PUBLICATION_LABEL.published}</option>
             <option value="false">{PUBLICATION_LABEL.unpublished}</option>
           </select>
           <button
             type="submit"
-            className="min-h-11 rounded-md bg-[#102235] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e]"
+            className="min-h-11 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
           >
-            \ud544\ud130 \uc801\uc6a9
+            필터 적용
           </button>
         </form>
 
@@ -276,10 +276,10 @@ export default async function AdminInsurersPage({
           {insurers.length === 0 ? (
             <div className="p-8 text-center">
               <h2 className="text-lg font-semibold text-[#102235]">
-                \ud544\ud130 \uc870\uac74\uc5d0 \ub9de\ub294 \ubcf4\ud5d8\uc0ac\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.
+                필터 조건에 맞는 보험사가 없습니다.
               </h2>
               <p className={`${textStyles.body} mt-2`}>
-                \ucd08\uc548 \ubcf4\ud5d8\uc0ac\ub97c \ub4f1\ub85d\ud558\uac70\ub098 \ud544\ud130 \uc870\uac74\uc744 \ub2e4\uc2dc \ud655\uc778\ud574 \uc8fc\uc138\uc694.
+                초안 보험사를 등록하거나 필터 조건을 다시 확인해 주세요.
               </p>
             </div>
           ) : (
@@ -287,11 +287,11 @@ export default async function AdminInsurersPage({
               <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
                 <thead className="bg-[#f7f1e5] text-left text-xs font-semibold uppercase tracking-wide text-[#4f5661]">
                   <tr>
-                    <th className="px-4 py-3">\ubcf4\ud5d8\uc0ac \uc6b4\uc601 \uc815\ubcf4</th>
-                    <th className="px-4 py-3">\uc0c1\ud0dc</th>
-                    <th className="px-4 py-3">\ucd5c\uc885 \uac80\uc218\uc77c</th>
-                    <th className="px-4 py-3">\uc218\uc815\uc77c</th>
-                    <th className="px-4 py-3 text-right">\uc791\uc5c5</th>
+                    <th className="px-4 py-3">보험사 운영 정보</th>
+                    <th className="px-4 py-3">상태</th>
+                    <th className="px-4 py-3">최종 검수일</th>
+                    <th className="px-4 py-3">수정일</th>
+                    <th className="px-4 py-3 text-right">작업</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e7ddc9]">
@@ -317,24 +317,24 @@ export default async function AdminInsurersPage({
                       <td className="px-4 py-4">
                         <div className="font-semibold text-[#102235]">{insurer.name}</div>
                         <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-                          <DetailItem label="\uacf5\uc2dd \uc6f9\uc0ac\uc774\ud2b8" value={insurer.officialWebsiteUrl} />
-                          <DetailItem label="\uc124\uacc4\uc0ac \ud3ec\ud138" value={insurer.plannerPortalUrl} />
-                          <DetailItem label="\uc804\uc0b0 \uc811\uc18d" value={insurer.systemUrl} />
-                          <DetailItem label="\uc804\uc0b0 \ud5ec\ud504\ub370\uc2a4\ud06c" value={insurer.helpdeskPhone} />
-                          <DetailItem label="\uace0\uac1d\uc13c\ud130" value={insurer.customerCenterPhone} />
-                          <DetailItem label="\uccad\uad6c \uc548\ub0b4 \ud398\uc774\uc9c0" value={insurer.claimPageUrl} />
-                          <DetailItem label="\uccad\uad6c \ud329\uc2a4" value={insurer.claimFaxNumber} />
+                          <DetailItem label="공식 웹사이트" value={insurer.officialWebsiteUrl} />
+                          <DetailItem label="설계사 포털" value={insurer.plannerPortalUrl} />
+                          <DetailItem label="전산 접속" value={insurer.systemUrl} />
+                          <DetailItem label="전산 헬프데스크" value={insurer.helpdeskPhone} />
+                          <DetailItem label="고객센터" value={insurer.customerCenterPhone} />
+                          <DetailItem label="청구 안내 페이지" value={insurer.claimPageUrl} />
+                          <DetailItem label="청구 팩스" value={insurer.claimFaxNumber} />
                           <DetailItem
-                            label="\uccad\uad6c \ud329\uc2a4 \ucc98\ub9ac"
+                            label="청구 팩스 처리"
                             value={claimFaxHandlingLabel(insurer.claimFaxHandlingType)}
                           />
-                          <DetailItem label="\uccad\uad6c \uc591\uc2dd" value={insurer.claimFormUrl} />
-                          <DetailItem label="\uc57d\uad00" value={insurer.termsUrl} />
+                          <DetailItem label="청구 양식" value={insurer.claimFormUrl} />
+                          <DetailItem label="약관" value={insurer.termsUrl} />
                           <DetailItem
-                            label="\uce74\ub4dc\ub0a9 \uc885\ud569 \uc0c1\ud0dc"
+                            label="카드납 종합 상태"
                             value={cardPaymentStatusLabel(insurer.cardPaymentStatus)}
                           />
-                          <DetailItem label="\uc6b0\ud3b8 \uc8fc\uc18c" value={insurer.mailingAddress} />
+                          <DetailItem label="우편 주소" value={insurer.mailingAddress} />
                         </dl>
                       </td>
                       <td className="px-4 py-4">
@@ -363,12 +363,12 @@ export default async function AdminInsurersPage({
                               : VISIBILITY_LABEL.hidden}
                           </span>
                           {insurer.isFeatured ? (
-                            <span className={badgeClass("green")}>\ud2b9\ubcc4 \ud45c\uae30</span>
+                            <span className={badgeClass("green")}>특별 표기</span>
                           ) : null}
                           {needsOperationalUpdate ? (
                             <span
                               className={badgeClass("gold")}
-                              title={`${missingOperational}/${CORE_OPERATIONAL_FIELDS.length} \uc6b4\uc601 \ud544\ub4dc \ubbf8\uc785\ub825`}
+                              title={`${missingOperational}/${CORE_OPERATIONAL_FIELDS.length} 운영 필드 미입력`}
                             >
                               {NEEDS_UPDATE_TEXT}
                             </span>
@@ -387,7 +387,7 @@ export default async function AdminInsurersPage({
                             href={`/admin/insurers/${insurer.id}/edit`}
                             className="rounded-md border border-[#d9c9a8] px-3 py-1.5 text-center text-xs font-semibold text-[#102235] transition hover:bg-[#f7f1e5]"
                           >
-                            \uc218\uc815
+                            수정
                           </Link>
                           <form action={setInsurerPublished.bind(null, insurer.id, togglePublishTarget)}>
                             <button
@@ -401,8 +401,8 @@ export default async function AdminInsurersPage({
                               className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] transition hover:bg-[#f7f1e5] disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a] disabled:hover:bg-[#f4f5f6]"
                             >
                               {insurer.isPublished
-                                ? "\ube44\uac8c\uc2dc\ub85c \uc804\ud658"
-                                : "\uacf5\uac1c\ub85c \uc804\ud658"}
+                                ? "비게시로 전환"
+                                : "공개로 전환"}
                             </button>
                           </form>
                         </div>
