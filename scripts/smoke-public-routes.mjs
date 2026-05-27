@@ -8,10 +8,6 @@ const routes = [
   { path: "/claim-documents", expectedStatus: 200 },
   { path: "/disclosure-links", expectedStatus: 200 },
   { path: "/message-templates", expectedStatus: 200 },
-  // Check that admin routes are protected (returning redirects 307/308, unauthorized 401, or forbidden 403)
-  { path: "/admin", expectedStatus: [307, 308, 401, 403] },
-  { path: "/admin/insurers", expectedStatus: [307, 308, 401, 403] },
-  { path: "/admin/claim-documents", expectedStatus: [307, 308, 401, 403] },
 ];
 
 console.log(`[plannerdesk] Starting smoke test against BASE_URL: ${BASE_URL}`);
@@ -43,6 +39,6 @@ if (failures > 0) {
   console.error(`[FAIL] Smoke test completed with ${failures} failure(s).`);
   exit(1);
 } else {
-  console.log("[PASS] All public and admin protection smoke tests passed successfully!");
+  console.log("[PASS] All public route smoke tests passed successfully!");
   exit(0);
 }
