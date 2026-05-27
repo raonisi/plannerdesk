@@ -12,12 +12,12 @@
 // handlers can reuse it without pulling in Prisma or React.
 
 export const PROHIBITED_PHRASES = [
-  "\ubcf4\ud5d8\uae08 \uc9c0\uae09\ub429\ub2c8\ub2e4",
-  "\ubb34\uc870\uac74 \ubc1b\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4",
-  "\uccad\uad6c\ud558\uba74 \ub098\uc635\ub2c8\ub2e4",
-  "\ud655\uc815",
+  "보험금 지급됩니다",
+  "무조건 받을 수 있습니다",
+  "청구하면 나옵니다",
+  "확정",
   "100%",
-  "\uc9c0\uae08 \uc548 \ud558\uba74 \ubabb \ubc1b\uc2b5\ub2c8\ub2e4",
+  "지금 안 하면 못 받습니다",
 ] as const;
 
 export type ProhibitedPhrase = (typeof PROHIBITED_PHRASES)[number];

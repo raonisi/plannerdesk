@@ -12,31 +12,31 @@ import {
 } from "@/lib/design-system";
 
 const uiText = {
-  missing: "\uacf5\uc2dd \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8 \uc608\uc815",
-  emptyTitle: "\uc870\uac74\uc5d0 \ub9de\ub294 \ud56d\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  missing: "공식 확인 후 업데이트 예정",
+  emptyTitle: "조건에 맞는 항목이 없습니다.",
   emptyDescription:
-    "\uac80\uc0c9\uc5b4\ub97c \uc904\uc774\uac70\ub098 \ud544\ud130\ub97c \ubcc0\uacbd\ud574 \uc8fc\uc138\uc694.",
-  officialSource: "\uacf5\uc2dd \ucd9c\ucc98 \uc5f4\uae30",
-  lastVerified: "\ucd5c\uadfc \uac80\uc218",
-  safetyTitle: "\uac80\uc218 \ubc0f \uc548\uc804 \uc548\ub0b4",
+    "검색어를 줄이거나 필터를 변경해 주세요.",
+  officialSource: "공식 출처 열기",
+  lastVerified: "최근 검수",
+  safetyTitle: "검수 및 안전 안내",
   generalSafety:
-    "\uc774 MVP\ub294 \ud544\uc694\ud55c \uacbd\uc6b0 \ucd08\uc548 placeholder \ub370\uc774\ud130\ub97c \uc0ac\uc6a9\ud569\ub2c8\ub2e4. \uacf5\uc2dd \ub9c1\ud06c, \uc5f0\ub77d\ucc98, \ud329\uc2a4\ubc88\ud638, \uc8fc\uc18c, \uc11c\ub958 \uae30\uc900\uc740 \uacf5\uac1c \uc804 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
+    "이 MVP는 필요한 경우 초안 placeholder 데이터를 사용합니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 공개 전 공식 출처 확인이 필요합니다.",
   messageSafety:
-    "\uba54\uc2dc\uc9c0 \ud15c\ud50c\ub9bf\uc740 \uc2e4\ubb34 \ucc38\uace0\uc6a9 \ucd08\uc548\uc785\ub2c8\ub2e4. \ubc1c\uc1a1 \uc804 \uace0\uac1d \uc0c1\ud669, \uc0c1\ud488 \uae30\uc900, \ubcf4\ud5d8\uc0ac \uae30\uc900\uc5d0 \ub9de\uac8c \uac80\ud1a0\ud558\uace0 \uc218\uc815\ud574\uc57c \ud569\ub2c8\ub2e4.",
+    "메시지 템플릿은 실무 참고용 초안입니다. 발송 전 고객 상황, 상품 기준, 보험사 기준에 맞게 검토하고 수정해야 합니다.",
   noPayoutJudge:
-    "\ud50c\ub798\ub108\ub370\uc2a4\ud06c\ub294 \ubcf4\ud5d8\uae08 \uc9c0\uae09 \uc5ec\ubd80\ub97c \ud310\ub2e8\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "플래너데스크는 보험금 지급 여부를 판단하지 않습니다.",
   noPayoutEstimate:
-    "\ud50c\ub798\ub108\ub370\uc2a4\ud06c\ub294 \ubcf4\ud5d8\uae08 \uc9c0\uae09 \uae08\uc561\uc744 \uc0b0\uc815\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "플래너데스크는 보험금 지급 금액을 산정하지 않습니다.",
   noAdjusting:
-    "\ud50c\ub798\ub108\ub370\uc2a4\ud06c\ub294 \uc190\ud574\uc0ac\uc815 \uc5c5\ubb34\ub97c \uc218\ud589\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "플래너데스크는 손해사정 업무를 수행하지 않습니다.",
   noMedicalDocs:
-    "\ud604\uc7ac MVP\uc5d0\uc11c\ub294 \uace0\uac1d \uc758\ub8cc\uc11c\ub958\ub97c \ucc98\ub9ac\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "현재 MVP에서는 고객 의료서류를 처리하지 않습니다.",
   referenceOnly:
-    "\ubcf8 \uc790\ub8cc\ub294 \uc2e4\ubb34 \ucc38\uace0\uc640 \uc5c5\ubb34 \uc815\ub9ac\ub97c \uc704\ud55c \uc6a9\ub3c4\uc785\ub2c8\ub2e4.",
-  directory: "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30",
-  claim: "\uccad\uad6c\uc11c\ub958",
-  disclosure: "\uacf5\uc2dc\u00b7\uc57d\uad00",
-  message: "\uace0\uac1d \ubb38\uad6c"
+    "본 자료는 실무 참고와 업무 정리를 위한 용도입니다.",
+  directory: "보험사 바로가기",
+  claim: "청구서류",
+  disclosure: "공시·약관",
+  message: "고객 문구"
 };
 
 export function PageHero({

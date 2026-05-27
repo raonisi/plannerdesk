@@ -135,7 +135,7 @@ function optionalSortOrder(
   ) {
     return {
       ok: false,
-      message: `\uc815\ub82c \uc21c\uc11c(sortOrder)\ub294 ${SORT_ORDER_MIN}~${SORT_ORDER_MAX} \ubc94\uc704\uc758 \uc815\uc218\uc5ec\uc57c \ud569\ub2c8\ub2e4.`,
+      message: `정렬 순서(sortOrder)는 ${SORT_ORDER_MIN}~${SORT_ORDER_MAX} 범위의 정수여야 합니다.`,
     };
   }
 

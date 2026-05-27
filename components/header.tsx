@@ -5,17 +5,17 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 const label = {
-  brand: "\ud50c\ub798\ub108\ub370\uc2a4\ud06c",
-  tagline: "\ubcf4\ud5d8\uc124\uacc4\uc0ac\uc758 \uc2e4\ubb34 \ud3ec\ud138",
-  home: "\ud648",
-  directory: "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30",
-  directoryShort: "\ubcf4\ud5d8\uc0ac",
-  claim: "\uccad\uad6c\uc11c\ub958",
-  disclosure: "\uacf5\uc2dc\u00b7\uc57d\uad00",
-  message: "\uace0\uac1d \ubb38\uad6c",
-  findMessage: "\ubb38\uad6c \ucc3e\uae30",
-  mainMenu: "\uc8fc\uc694 \uba54\ub274",
-  mobileMenu: "\ubaa8\ubc14\uc77c \uc8fc\uc694 \uba54\ub274"
+  brand: "플래너데스크",
+  tagline: "보험설계사의 실무 포털",
+  home: "홈",
+  directory: "보험사 바로가기",
+  directoryShort: "보험사",
+  claim: "청구서류",
+  disclosure: "공시·약관",
+  message: "고객 문구",
+  findMessage: "문구 찾기",
+  mainMenu: "주요 메뉴",
+  mobileMenu: "모바일 주요 메뉴"
 };
 
 const navItems = [

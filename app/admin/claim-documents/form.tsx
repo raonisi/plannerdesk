@@ -75,32 +75,26 @@ export default function ClaimDocumentForm({
       </div>
 
       <Section
-        title={"A. \uae30\ubcf8 \uc815\ubcf4"}
-        description={
-          "\uc81c\ubaa9, \uc2ac\ub7ec\uadf8, \uccad\uad6c \uc720\ud615, \uac80\uc218 \uc0c1\ud0dc, \ucd5c\uc885 \uac80\uc218\uc77c\uc744 \uad00\ub9ac\ud569\ub2c8\ub2e4."
-        }
+        title="A. 기본 정보"
+        description="제목, 슬러그, 청구 유형, 검수 상태, 최종 검수일을 관리합니다."
       >
         <label className={`${labelClass} md:col-span-2`}>
-          {"\uc81c\ubaa9"}
+          제목
           <input
             className={fieldClass}
             name="title"
             required
             maxLength={200}
             defaultValue={claimDocument?.title ?? ""}
-            placeholder={
-              "\uc608: \uc2e4\uc190 \uc678\ub798 \uc9c4\ub8cc \uccad\uad6c \uc548\ub0b4"
-            }
+            placeholder="예: 실손 외래 진료 청구 안내"
           />
           <span className={hintClass}>
-            {
-              "\uacf5\uac1c \uc0ac\uc6a9\uc790\uc640 \uc124\uacc4\uc0ac\uac00 \ud55c\ub208\uc5d0 \uc774\ud574\ud560 \uc218 \uc788\ub294 Korean \uc81c\ubaa9\uc785\ub2c8\ub2e4. \uacb0\ub860 \uc5b8\uae09\uc774\ub098 \uc9c0\uae09 \ubcf4\uc7a5 \ud45c\ud604\uc740 \uc0ac\uc6a9\ud558\uc9c0 \ub9c8\uc138\uc694."
-            }
+            공개 사용자와 설계사가 한눈에 이해할 수 있는 Korean 제목입니다. 결론 언급이나 지급 보장 표현은 사용하지 마세요.
           </span>
         </label>
 
         <label className={labelClass}>
-          {"\uc2ac\ub7ec\uadf8 (URL \uacbd\ub85c)"}
+          슬러그 (URL 경로)
           <input
             className={fieldClass}
             name="slug"
@@ -111,14 +105,12 @@ export default function ClaimDocumentForm({
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
           />
           <span className={hintClass}>
-            {
-              "\uc18c\ubb38\uc790, \uc22b\uc790, \ud558\uc774\ud508(-) \ub9cc \uc0ac\uc6a9 \uac00\ub2a5\ud569\ub2c8\ub2e4. \ucd94\ud6c4 \uacf5\uac1c URL\uc758 \uacbd\ub85c\ub85c \uc0ac\uc6a9\ub429\ub2c8\ub2e4."
-            }
+            소문자, 숫자, 하이픈(-) 만 사용 가능합니다. 추후 공개 URL의 경로로 사용됩니다.
           </span>
         </label>
 
         <label className={labelClass}>
-          {"\uccad\uad6c \uc720\ud615"}
+          청구 유형
           <select
             className={fieldClass}
             name="category"
@@ -136,7 +128,7 @@ export default function ClaimDocumentForm({
         </label>
 
         <label className={labelClass}>
-          {"\uac80\uc218 \uc0c1\ud0dc"}
+          검수 상태
           <select
             className={fieldClass}
             name="verificationStatus"
@@ -145,25 +137,23 @@ export default function ClaimDocumentForm({
             }
           >
             <option value={VerificationStatus.draft}>
-              {"\ucd08\uc548 (Draft)"}
+              초안 (Draft)
             </option>
             <option value={VerificationStatus.needs_review}>
-              {"\uac80\uc218 \ud544\uc694 (Needs review)"}
+              검수 필요 (Needs review)
             </option>
             <option value={VerificationStatus.verified}>
-              {"\uac80\uc218 \uc644\ub8cc (Verified)"}
+              검수 완료 (Verified)
             </option>
           </select>
           <span className={hintClass}>
-            {
-              "\uacf5\uc2dd \ucd9c\ucc98\ub85c \uac80\uc218\ub41c \ub808\ucf54\ub4dc\ub9cc \"\uac80\uc218 \uc644\ub8cc\"\ub85c \ud45c\uc2dc\ud558\uc138\uc694. "
-            }
+            {"공식 출처로 검수된 레코드만 '검수 완료'로 표시하세요. "}
             {ADMIN_CLAIM_DOC_COPY.governanceRule}
           </span>
         </label>
 
         <label className={labelClass}>
-          {"\ucd5c\uc885 \uac80\uc218\uc77c"}
+          최종 검수일
           <input
             className={fieldClass}
             name="lastVerifiedAt"
@@ -171,28 +161,24 @@ export default function ClaimDocumentForm({
             defaultValue={formatDateInput(claimDocument?.lastVerifiedAt)}
           />
           <span className={hintClass}>
-            {
-              "\uc218\ub3d9 \uac80\uc218\uac00 \uc2e4\uc81c\ub85c \uc774\ub8e8\uc5b4\uc9c4 \ub0a0\uc9dc\ub9cc \uc785\ub825\ud558\uc138\uc694. \uac00\uc9dc \ub0a0\uc9dc \uc785\ub825 \uae08\uc9c0."
-            }
+            수동 검수가 실제로 이루어진 날짜만 입력하세요. 가짜 날짜 입력 금지.
           </span>
         </label>
       </Section>
 
       <Section
-        title={"B. \ubcf4\ud5d8\uc0ac \uc5f0\uacb0"}
-        description={
-          "\ud2b9\uc815 \ubcf4\ud5d8\uc0ac\uc758 \uccad\uad6c \uc548\ub0b4\uc77c \ub54c\ub9cc \uc120\ud0dd\ud558\uc138\uc694. \uacf5\uac1c\ub3c4 \ub300\uc0c1\uc774 \uc5c6\ub294 \uc77c\ubc18 \uccad\uad6c \uc548\ub0b4\ub294 \uc5f0\uacb0\ud558\uc9c0 \uc54a\uace0 \ub458 \uc218 \uc788\uc2b5\ub2c8\ub2e4."
-        }
+        title="B. 보험사 연결"
+        description="특정 보험사의 청구 안내일 때만 선택하세요. 공개도 대상이 없는 일반 청구 안내는 연결하지 않고 둘 수 있습니다."
       >
         <label className={`${labelClass} md:col-span-2`}>
-          {"\ubcf4\ud5d8\uc0ac"}
+          보험사
           <select
             className={fieldClass}
             name="insurerId"
             defaultValue={claimDocument?.insurerId ?? "none"}
           >
             <option value="none">
-              {"\uc5f0\uacb0 \uc5c6\uc74c (\uc77c\ubc18 \uccad\uad6c \uc548\ub0b4)"}
+              연결 없음 (일반 청구 안내)
             </option>
             {insurers.map((insurer) => (
               <option key={insurer.id} value={insurer.id}>
@@ -201,47 +187,39 @@ export default function ClaimDocumentForm({
             ))}
           </select>
           <span className={hintClass}>
-            {
-              "\ubcf4\ud5d8\uc0ac \uc0ad\uc81c \uc2dc \uc774 \ud544\ub4dc\ub294 \uc790\ub3d9\uc73c\ub85c \ube44\uc6c4\uc73c\ub85c \uc124\uc815\ub429\ub2c8\ub2e4 (ON DELETE SET NULL)."
-            }
+            보험사 삭제 시 이 필드는 자동으로 비움으로 설정됩니다 (ON DELETE SET NULL).
           </span>
         </label>
       </Section>
 
       <Section
-        title={"C. \uc548\ub0b4 \ubcf8\ubb38"}
-        description={
-          "\uacf5\uac1c \uace0\uac1d\uacfc \uc124\uacc4\uc0ac\uac00 \uc77d\ub294 \uc81c\ubaa9 \uc678 \ubcf8\ubb38\uc785\ub2c8\ub2e4. \uacf5\uc2dd \uc57d\uad00\uacfc \uc8fc\uc758 \uc0ac\ud56d\uc744 \ub354\ud574 \uc8fc\uc138\uc694."
-        }
+        title="C. 안내 본문"
+        description="공개 고객과 설계사가 읽는 제목 외 본문입니다. 공식 약관과 주의 사항을 더해 주세요."
       >
         <label className={`${labelClass} md:col-span-2`}>
-          {"\uac1c\uc694 \uc694\uc57d (summary)"}
+          개요 요약 (summary)
           <textarea
             className={`${fieldClass} min-h-20`}
             name="summary"
             maxLength={1000}
             defaultValue={claimDocument?.summary ?? ""}
-            placeholder={
-              "\uc608: \uc678\ub798 \uc9c4\ub8cc\ube44\uc758 \uc77c\ubc18\uc801\uc778 \uccad\uad6c \uc808\ucc28\ub97c \uc548\ub0b4\ud558\ub294 \uc790\ub8cc\uc785\ub2c8\ub2e4."
-            }
+            placeholder="예: 외래 진료비의 일반적인 청구 절차를 안내하는 자료입니다."
           />
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          {"\ud544\uc218 \uc11c\ub958 (requiredDocuments)"}
+          필수 서류 (requiredDocuments)
           <textarea
             className={`${fieldClass} min-h-28`}
             name="requiredDocuments"
             maxLength={4000}
             defaultValue={claimDocument?.requiredDocuments ?? ""}
-            placeholder={
-              "\uac01 \uc904\uc5d0 \ud558\ub098\uc529 \uc801\uc5b4\uc8fc\uc138\uc694. \ud544\uc694\uc11c\ub958\ub294 \ubcf4\ud5d8\uc0ac \ubc0f \uc57d\uad00\uc5d0 \ub530\ub77c \ub2ec\ub77c\uc9c8 \uc218 \uc788\uc2b5\ub2c8\ub2e4."
-            }
+            placeholder="각 줄에 하나씩 적어주세요. 필요서류는 보험사 및 약관에 따라 달라질 수 있습니다."
           />
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          {"\uc120\ud0dd \uc11c\ub958 (optionalDocuments)"}
+          선택 서류 (optionalDocuments)
           <textarea
             className={`${fieldClass} min-h-20`}
             name="optionalDocuments"
@@ -251,32 +229,26 @@ export default function ClaimDocumentForm({
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          {"\uc8fc\uc758 \uc0ac\ud56d (cautionNote)"}
+          주의 사항 (cautionNote)
           <textarea
             className={`${fieldClass} min-h-20`}
             name="cautionNote"
             maxLength={1000}
             defaultValue={claimDocument?.cautionNote ?? ""}
-            placeholder={
-              "\uc608: \ud544\uc694\uc11c\ub958\ub294 \ubcf4\ud5d8\uc0ac \ubc0f \uc57d\uad00\uc5d0 \ub530\ub77c \ub2ec\ub77c\uc9c8 \uc218 \uc788\uc2b5\ub2c8\ub2e4."
-            }
+            placeholder="예: 필요서류는 보험사 및 약관에 따라 달라질 수 있습니다."
           />
           <span className={hintClass}>
-            {
-              "\uc774 \uc548\ub0b4\ub294 \uc77c\ubc18 \uc808\ucc28\ub97c \uc815\ub9ac\ud55c \uac83\uc73c\ub85c, \uac1c\ubcc4 \uccad\uad6c \uacb0\uacfc\ub97c \ubcf4\uc7a5\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4."
-            }
+            이 안내는 일반 절차를 정리한 것으로, 개별 청구 결과를 보장하지 않습니다.
           </span>
         </label>
       </Section>
 
       <Section
-        title={"D. \uacf5\uc2dd \ub9c1\ud06c"}
-        description={
-          "\uccad\uad6c\uc591\uc2dd \ub9c1\ud06c\uc640 \uacf5\uc2dd \ucd9c\ucc98 \ub9c1\ud06c\ub294 \uacf5\uac1c \uc804 \ubc18\ub4dc\uc2dc \uac80\uc218\ub418\uc5c8\ub294\uc9c0 \ud655\uc778\ud574 \uc8fc\uc138\uc694."
-        }
+        title="D. 공식 링크"
+        description="청구양식 링크와 공식 출처 링크는 공개 전 반드시 검수되었는지 확인해 주세요."
       >
         <label className={labelClass}>
-          {"\uccad\uad6c\uc591\uc2dd URL (claimFormUrl)"}
+          청구양식 URL (claimFormUrl)
           <input
             className={fieldClass}
             name="claimFormUrl"
@@ -287,7 +259,7 @@ export default function ClaimDocumentForm({
         </label>
 
         <label className={labelClass}>
-          {"\uacf5\uc2dd \ucd9c\ucc98 URL (officialSourceUrl)"}
+          공식 출처 URL (officialSourceUrl)
           <input
             className={fieldClass}
             name="officialSourceUrl"
@@ -296,41 +268,33 @@ export default function ClaimDocumentForm({
             placeholder={URL_PLACEHOLDER_OPTIONAL}
           />
           <span className={hintClass}>
-            {
-              "\uc774 \ub808\ucf54\ub4dc\ub97c \uac80\uc218\ud55c \ubcf4\ud5d8\uc0ac \uacf5\uc2dd \uc548\ub0b4\u00b7\uc57d\uad00\u00b7\uacf5\uc2dc \ud398\uc774\uc9c0 \ub9c1\ud06c\ub97c \uc785\ub825\ud558\uc138\uc694."
-            }
+            이 레코드를 검수한 보험사 공식 안내·약관·공시 페이지 링크를 입력하세요.
           </span>
         </label>
       </Section>
 
       <Section
-        title={"E. \uace0\uac1d\uc6a9 \uc548\ub0b4 \ud15c\ud50c\ub9bf"}
-        description={
-          "\uc124\uacc4\uc0ac\uac00 \uace0\uac1d\uc5d0\uac8c \ubcf4\ub0bc \uc218 \uc788\ub294 \uc774\ub984\u00b7\uba54\uc2dc\uc9c0 \ud14d\uc2a4\ud2b8\uc785\ub2c8\ub2e4. \uc758\ub8cc \ud574\uc11d\uc774\ub098 \uc9c0\uae09 \uc57d\uc18d \ud45c\ud604\uc740 \uc0ac\uc6a9\ud558\uc9c0 \ub9c8\uc138\uc694."
-        }
+        title="E. 고객용 안내 템플릿"
+        description="설계사가 고객에게 보낼 수 있는 이름·메시지 템플릿입니다. 의료 해석이나 지급 약속 표현은 사용하지 마세요."
       >
         <label className={`${labelClass} md:col-span-2`}>
-          {"\uace0\uac1d\uc6a9 \uba54\uc2dc\uc9c0 \ud15c\ud50c\ub9bf (customerMessageTemplate)"}
+          고객용 메시지 템플릿 (customerMessageTemplate)
           <textarea
             className={`${fieldClass} min-h-24`}
             name="customerMessageTemplate"
             maxLength={2000}
             defaultValue={claimDocument?.customerMessageTemplate ?? ""}
-            placeholder={
-              "\uc608: \uc548\ub155\ud558\uc138\uc694, OO\ub2d8. \uc678\ub798 \uc9c4\ub8cc \uccad\uad6c \uc548\ub0b4\ub4dc\ub9bd\ub2c8\ub2e4..."
-            }
+            placeholder="예: 안녕하세요, OO님. 외래 진료 청구 안내드립니다..."
           />
         </label>
       </Section>
 
       <Section
-        title={"F. \uc6b4\uc601 \uba54\ud0c0\ub370\uc774\ud130 (Governance)"}
-        description={
-          "\uc815\ub82c \uc21c\uc11c\uc640 \uacf5\uac1c \uc5ec\ubd80\ub294 \uc774\uacf3\uc5d0\uc11c \uad00\ub9ac\ud569\ub2c8\ub2e4. \ud558\ub4dc \uc0ad\uc81c\ub294 \uc81c\uacf5\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4."
-        }
+        title="F. 운영 메타데이터 (Governance)"
+        description="정렬 순서와 공개 여부는 이곳에서 관리합니다. 하드 삭제는 제공되지 않습니다."
       >
         <label className={labelClass}>
-          {"\uc815\ub82c \uc21c\uc11c (sortOrder)"}
+          정렬 순서 (sortOrder)
           <input
             className={fieldClass}
             name="sortOrder"
@@ -342,9 +306,7 @@ export default function ClaimDocumentForm({
             defaultValue={claimDocument?.sortOrder ?? 0}
           />
           <span className={hintClass}>
-            {
-              "\uacf5\uac1c \ud654\uba74\uc5d0\uc11c \ub54c\uadf8\ub4e4 \uba74 \ub17c\ub9ac\uc801 \uc21c\uc11c\ub97c \uc870\uc815\ud569\ub2c8\ub2e4. PR-39 \uacf5\uac1c \uc77d\uae30\uc5d0\uc11c \uc774 \uac12\uc744 \ucc38\uc870\ud569\ub2c8\ub2e4."
-            }
+            공개 화면에서 때그들 면 논리적 순서를 조정합니다. PR-39 공개 읽기에서 이 값을 참조합니다.
           </span>
         </label>
 
@@ -358,7 +320,7 @@ export default function ClaimDocumentForm({
               defaultChecked={claimDocument?.isPublished ?? false}
               className="h-4 w-4 accent-[#1f6b55]"
             />
-            {"\uacf5\uac1c (Published)"}
+            공개 (Published)
           </label>
           <p className="text-xs text-[#5f6875]">
             {ADMIN_CLAIM_DOC_COPY.draftPublishBlocked}
@@ -368,9 +330,7 @@ export default function ClaimDocumentForm({
 
       <section className="rounded-md border border-[#d9c9a8] bg-[#f7f1e5] p-4 text-xs leading-relaxed text-[#4f5661]">
         <p className="font-semibold text-[#102235]">
-          {
-            "\uc0ac\uc6a9\uc774 \uae08\uc9c0\ub41c \ud45c\ud604 (\uc11c\ubc84 \uc800\uc7a5 \uc804 \uc790\ub3d9 \uac80\uc0ac\ub429\ub2c8\ub2e4)"
-          }
+          사용이 금지된 표현 (서버 저장 전 자동 검사됩니다)
         </p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           {PROHIBITED_PHRASES.map((phrase) => (
@@ -384,7 +344,7 @@ export default function ClaimDocumentForm({
           href="/admin/claim-documents"
           className="rounded-md border border-[#d9c9a8] px-4 py-2 text-center text-sm font-semibold text-[#4f5661] transition hover:bg-white"
         >
-          {"\ucde8\uc18c"}
+          취소
         </Link>
         <button
           type="submit"

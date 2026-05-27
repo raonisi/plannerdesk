@@ -13,29 +13,29 @@ import { PUBLIC_VERIFICATION_STATUSES } from "@/lib/public/insurers";
 //     claim documents, no customer-specific medical info)
 export const ADMIN_CLAIM_DOC_COPY = {
   policySummary:
-    "\uacf5\uac1c \uc870\uac74: \uac8c\uc2dc \uc911\uc774\uba70, \uac80\uc218 \ud544\uc694 \ub610\ub294 \uac80\uc218 \uc644\ub8cc \uc0c1\ud0dc\uc778 \uccad\uad6c\uc11c\ub958\ub9cc \uacf5\uac1c \ud654\uba74\uc5d0 \ud45c\uc2dc\ub429\ub2c8\ub2e4.",
+    "공개 조건: 게시 중이며, 검수 필요 또는 검수 완료 상태인 청구서류만 공개 화면에 표시됩니다.",
   draftRule:
-    "\ucd08\uc548 \uc0c1\ud0dc\ub294 \uac8c\uc2dc \uc5ec\ubd80\uc640 \uad00\uacc4\uc5c6\uc774 \uacf5\uac1c \ud654\uba74\uc5d0 \ud45c\uc2dc\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "초안 상태는 게시 여부와 관계없이 공개 화면에 표시되지 않습니다.",
   governanceRule:
-    "\uacf5\uac1c \uc804 \ubc18\ub4dc\uc2dc \ubcf4\ud5d8\uc0ac \uacf5\uc2dd \uc57d\uad00\u00b7\uacf5\uc2dd \uccad\uad6c \uc548\ub0b4 \uc790\ub8cc\ub97c \ud655\uc778\ud574 \uc8fc\uc138\uc694.",
+    "공개 전 반드시 보험사 공식 약관·공식 청구 안내 자료를 확인해 주세요.",
   draftPublishBlocked:
-    "\ucd08\uc548 \uc0c1\ud0dc\uc758 \uccad\uad6c\uc11c\ub958\ub294 \uacf5\uac1c\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4. \uac80\uc218 \ud544\uc694 \ub610\ub294 \uac80\uc218 \uc644\ub8cc \uc0c1\ud0dc\ub85c \ubcc0\uacbd\ud55c \ub4a4 \uacf5\uac1c\ud574 \uc8fc\uc138\uc694.",
-  notFound: "\uccad\uad6c\uc11c\ub958 \uad00\ub9ac \ub808\ucf54\ub4dc\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    "초안 상태의 청구서류는 공개할 수 없습니다. 검수 필요 또는 검수 완료 상태로 변경한 뒤 공개해 주세요.",
+  notFound: "청구서류 관리 레코드를 찾을 수 없습니다.",
   duplicateSlug:
-    "\uc774\ubbf8 \uc0ac\uc6a9 \uc911\uc778 \uc2ac\ub7ec\uadf8\uc785\ub2c8\ub2e4. \ub2e4\ub978 \uc2ac\ub7ec\uadf8\ub97c \uc785\ub825\ud574 \uc8fc\uc138\uc694.",
+    "이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해 주세요.",
   insurerNotFound:
-    "\uc120\ud0dd\ud558\uc2e0 \ubcf4\ud5d8\uc0ac\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4. \ud3ec\ub7fc\uc744 \uc0c8\ub85c\uace0\uce68\ud55c \ub4a4 \ub2e4\uc2dc \uc2dc\ub3c4\ud574 \uc8fc\uc138\uc694.",
+    "선택하신 보험사를 찾을 수 없습니다. 포럼을 새로고침한 뒤 다시 시도해 주세요.",
 
   // Verbatim notices required by the PR-38 task specification.
   guidanceNotice:
-    "\uccad\uad6c\uc11c\ub958 \uc548\ub0b4\ub294 \ubcf4\ud5d8\uae08 \uc9c0\uae09 \uc5ec\ubd80\ub098 \uc9c0\uae09 \uae08\uc561\uc744 \ud310\ub2e8\ud558\ub294 \ub0b4\uc6a9\uc774 \uc544\ub2d9\ub2c8\ub2e4. \uacf5\uc2dd \uc57d\uad00\uacfc \ubcf4\ud5d8\uc0ac \uae30\uc900 \ud655\uc778 \ud6c4 \uacf5\uac1c\ud574 \uc8fc\uc138\uc694.",
+    "청구서류 안내는 보험금 지급 여부나 지급 금액을 판단하는 내용이 아닙니다. 공식 약관과 보험사 기준 확인 후 공개해 주세요.",
   sensitiveNotice:
-    "\uc8fc\ubbfc\ub4f1\ub85d\ubc88\ud638, \uc99d\uad8c\ubc88\ud638, \uc9c4\ub8cc\uae30\ub85d, \ubcf4\ud5d8\uae08 \uccad\uad6c\uc11c\ub958, \uace0\uac1d\ubcc4 \uc758\ub8cc\uc815\ubcf4\ub294 \uc785\ub825\ud558\uac70\ub098 \uc800\uc7a5\ud558\uc9c0 \ub9c8\uc138\uc694.",
+    "주민등록번호, 증권번호, 진료기록, 보험금 청구서류, 고객별 의료정보는 입력하거나 저장하지 마세요.",
 
   prohibitedPhraseTitle:
-    "\uc0ac\uc6a9\uc774 \uae08\uc9c0\ub41c \ud45c\ud604\uc774 \ud3ec\ud568\ub418\uc5b4 \uc788\uc2b5\ub2c8\ub2e4.",
+    "사용이 금지된 표현이 포함되어 있습니다.",
   prohibitedPhraseDetail:
-    "\uadfc\uac70 \uc5c6\ub294 \uc9c0\uae09 \uc57d\uc18d, \ud655\uc815 \ud45c\ud604, \uacf5\ud3ec \ub9c8\ucf00\ud305 \ud45c\ud604\uc740 \uac80\ud1a0 \uc804 \uc81c\uac70\ud574 \uc8fc\uc138\uc694.",
+    "근거 없는 지급 약속, 확정 표현, 공포 마케팅 표현은 검토 전 제거해 주세요.",
 } as const;
 
 // The admin form for ClaimDocument only exposes the operational verification
@@ -43,21 +43,21 @@ export const ADMIN_CLAIM_DOC_COPY = {
 // enum because of the User model; the labels below stay exhaustive so
 // TypeScript can guarantee a label for every enum value.
 export const VERIFICATION_STATUS_LABEL: Record<VerificationStatus, string> = {
-  [VerificationStatus.draft]: "\ucd08\uc548",
-  [VerificationStatus.needs_review]: "\uac80\uc218 \ud544\uc694",
-  [VerificationStatus.verified]: "\uac80\uc218 \uc644\ub8cc",
-  [VerificationStatus.unverified]: "\uac80\uc218 \uc774\ub825 \uc5c6\uc74c",
-  [VerificationStatus.pending]: "\uac80\uc218 \ub300\uae30",
+  [VerificationStatus.draft]: "초안",
+  [VerificationStatus.needs_review]: "검수 필요",
+  [VerificationStatus.verified]: "검수 완료",
+  [VerificationStatus.unverified]: "검수 이력 없음",
+  [VerificationStatus.pending]: "검수 대기",
 };
 
 export const PUBLICATION_LABEL = {
-  published: "\uac8c\uc2dc \uc911",
-  unpublished: "\ube44\uac8c\uc2dc",
+  published: "게시 중",
+  unpublished: "비게시",
 } as const;
 
 export const VISIBILITY_LABEL = {
-  visible: "\uacf5\uac1c \ud654\uba74 \ud45c\uc2dc",
-  hidden: "\uacf5\uac1c \uc870\uac74 \ubbf8\ucda9\uc871",
+  visible: "공개 화면 표시",
+  hidden: "공개 조건 미충족",
 } as const;
 
 // Korean labels for the closed enum shipped in PR-37. The PR-36 plan used
@@ -67,16 +67,16 @@ export const CLAIM_DOCUMENT_CATEGORY_LABEL: Record<
   ClaimDocumentCategory,
   string
 > = {
-  [ClaimDocumentCategory.actual_expense]: "\uc2e4\uc190",
-  [ClaimDocumentCategory.diagnosis]: "\uc9c4\ub2e8",
-  [ClaimDocumentCategory.surgery]: "\uc218\uc220",
-  [ClaimDocumentCategory.hospitalization]: "\uc785\uc6d0",
-  [ClaimDocumentCategory.outpatient]: "\ud1b5\uc6d0",
-  [ClaimDocumentCategory.fracture]: "\uacf0\uc808",
-  [ClaimDocumentCategory.driver]: "\uc6b4\uc804\uc790",
-  [ClaimDocumentCategory.death]: "\uc0ac\ub9dd",
-  [ClaimDocumentCategory.disability]: "\ud6c4\uc720\uc7a5\ud574",
-  [ClaimDocumentCategory.other]: "\uae30\ud0c0",
+  [ClaimDocumentCategory.actual_expense]: "실손",
+  [ClaimDocumentCategory.diagnosis]: "진단",
+  [ClaimDocumentCategory.surgery]: "수술",
+  [ClaimDocumentCategory.hospitalization]: "입원",
+  [ClaimDocumentCategory.outpatient]: "통원",
+  [ClaimDocumentCategory.fracture]: "골절",
+  [ClaimDocumentCategory.driver]: "운전자",
+  [ClaimDocumentCategory.death]: "사망",
+  [ClaimDocumentCategory.disability]: "후유장해",
+  [ClaimDocumentCategory.other]: "기타",
 };
 
 // The category options offered in the admin form. Order roughly mirrors the
@@ -85,16 +85,16 @@ export const CLAIM_DOCUMENT_CATEGORY_OPTIONS: {
   value: ClaimDocumentCategory;
   label: string;
 }[] = [
-  { value: ClaimDocumentCategory.actual_expense, label: "\uc2e4\uc190" },
-  { value: ClaimDocumentCategory.diagnosis, label: "\uc9c4\ub2e8" },
-  { value: ClaimDocumentCategory.surgery, label: "\uc218\uc220" },
-  { value: ClaimDocumentCategory.hospitalization, label: "\uc785\uc6d0" },
-  { value: ClaimDocumentCategory.outpatient, label: "\ud1b5\uc6d0" },
-  { value: ClaimDocumentCategory.fracture, label: "\uacf0\uc808" },
-  { value: ClaimDocumentCategory.driver, label: "\uc6b4\uc804\uc790" },
-  { value: ClaimDocumentCategory.death, label: "\uc0ac\ub9dd" },
-  { value: ClaimDocumentCategory.disability, label: "\ud6c4\uc720\uc7a5\ud574" },
-  { value: ClaimDocumentCategory.other, label: "\uae30\ud0c0" },
+  { value: ClaimDocumentCategory.actual_expense, label: "실손" },
+  { value: ClaimDocumentCategory.diagnosis, label: "진단" },
+  { value: ClaimDocumentCategory.surgery, label: "수술" },
+  { value: ClaimDocumentCategory.hospitalization, label: "입원" },
+  { value: ClaimDocumentCategory.outpatient, label: "통원" },
+  { value: ClaimDocumentCategory.fracture, label: "골절" },
+  { value: ClaimDocumentCategory.driver, label: "운전자" },
+  { value: ClaimDocumentCategory.death, label: "사망" },
+  { value: ClaimDocumentCategory.disability, label: "후유장해" },
+  { value: ClaimDocumentCategory.other, label: "기타" },
 ];
 
 // Same forbidden combination as Insurer: a draft record must never publish.

@@ -8,9 +8,9 @@ import { updateInsurer } from "../../actions";
 import InsurerForm from "../../form";
 import { ADMIN_VISIBILITY_COPY } from "../../visibility";
 
-const PAGE_TITLE = "\ubcf4\ud5d8\uc0ac \uc815\ubcf4 \uc218\uc815";
+const PAGE_TITLE = "보험사 정보 수정";
 const PAGE_DESCRIPTION =
-  "\uc811\uc18d\u00b7\uc9c0\uc6d0\u00b7\uccad\uad6c\u00b7\uc57d\uad00\u00b7\uce74\ub4dc\ub0a9\u00b7\uc6b4\uc601 \uba54\ud0c0\ub370\uc774\ud130\ub97c \uc218\uc815\ud569\ub2c8\ub2e4. \ud558\ub4dc \uc0ad\uc81c\ub294 \uc81c\uacf5\ub418\uc9c0 \uc54a\uc73c\uba70, \uacf5\uac1c \uc870\uac74\uc740 \ud558\ub2e8 \uc548\ub0b4\ubb38\uc744 \uc6b0\uc120 \ud655\uc778\ud574 \uc8fc\uc138\uc694.";
+  "접속·지원·청구·약관·카드납·운영 메타데이터를 수정합니다. 하드 삭제는 제공되지 않으며, 공개 조건은 하단 안내문을 우선 확인해 주세요.";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +71,7 @@ export default async function EditInsurerPage({
           <InsurerForm
             action={updateInsurer.bind(null, insurer.id)}
             insurer={insurer}
-            submitLabel="\ubcc0\uacbd \uc0ac\ud56d \uc800\uc7a5"
+            submitLabel="변경 사항 저장"
           />
         </section>
       </div>

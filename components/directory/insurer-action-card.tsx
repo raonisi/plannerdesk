@@ -91,33 +91,33 @@ export function InsurerActionCard({
         />
 
         <div className="mt-6 space-y-5">
-          <ActionGroup eyebrow="ACCESS" title="\uc811\uc18d">
+          <ActionGroup eyebrow="ACCESS" title="접속">
             <div className="grid gap-3 sm:grid-cols-2">
               <ActionLink
                 href={accessHref}
-                label="\uc804\uc0b0\uc811\uc18d"
+                label="전산접속"
                 tone="primary"
               />
               <ActionLink
                 href={insurer.officialWebsiteUrl}
-                label="\uacf5\uc2dd \ud648\ud398\uc774\uc9c0"
+                label="공식 홈페이지"
               />
             </div>
           </ActionGroup>
 
           <div className={groupDividerClass}>
-            <ActionGroup eyebrow="SUPPORT" title="\uc9c0\uc6d0">
+            <ActionGroup eyebrow="SUPPORT" title="지원">
               <div className="grid gap-3 sm:grid-cols-3">
                 <PhoneRow
-                  label="\uace0\uac1d\uc13c\ud130"
+                  label="고객센터"
                   value={insurer.customerCenterPhone}
                 />
                 <PhoneRow
-                  label="\uc804\uc0b0 \ud5ec\ud504"
+                  label="전산 헬프"
                   value={insurer.helpdeskPhone}
                 />
                 <PhoneRow
-                  label="\uc778\ucf5c \ubaa8\ub2c8\ud130\ub9c1"
+                  label="인콜 모니터링"
                   value={insurer.callMonitoringPhone}
                 />
               </div>
@@ -125,26 +125,26 @@ export function InsurerActionCard({
           </div>
 
           <div className={groupDividerClass}>
-            <ActionGroup eyebrow="CLAIM" title="\uccad\uad6c">
+            <ActionGroup eyebrow="CLAIM" title="청구">
               <div className="grid gap-3 sm:grid-cols-2">
                 <ActionLink
                   href={insurer.claimPageUrl}
-                  label="\uccad\uad6c \uc548\ub0b4"
+                  label="청구 안내"
                 />
                 <ActionLink
                   href={insurer.claimFormUrl}
-                  label="\uccad\uad6c\uc591\uc2dd"
+                  label="청구양식"
                 />
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <InfoRow
-                  label="\uccad\uad6c \ud329\uc2a4"
+                  label="청구 팩스"
                   value={claimFax.primary}
                   hint={claimFax.secondary}
                   isFallback={claimFax.isFallback}
                 />
                 <InfoRow
-                  label="\ub4f1\uae30\uc6b0\ud3b8"
+                  label="등기우편"
                   value={registeredMailing ?? DIRECTORY_TEXT.missing}
                   isFallback={!registeredMailing}
                 />
@@ -153,15 +153,15 @@ export function InsurerActionCard({
           </div>
 
           <div className={groupDividerClass}>
-            <ActionGroup eyebrow="POLICY" title="\uc57d\uad00">
+            <ActionGroup eyebrow="POLICY" title="약관">
               <div className="grid gap-3 sm:grid-cols-2">
-                <ActionLink href={insurer.termsUrl} label="\uc57d\uad00" />
+                <ActionLink href={insurer.termsUrl} label="약관" />
               </div>
             </ActionGroup>
           </div>
 
           <div className={groupDividerClass}>
-            <ActionGroup eyebrow="PAYMENT" title="\uce74\ub4dc\ub0a9">
+            <ActionGroup eyebrow="PAYMENT" title="카드납">
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold ${paymentToneClasses.pill}`}
@@ -169,18 +169,18 @@ export function InsurerActionCard({
                   {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
                 </span>
                 <span className={`text-xs ${paymentToneClasses.text}`}>
-                  \uce74\ub4dc\ub0a9 \uc885\ud569 \uc0c1\ud0dc
+                  카드납 종합 상태
                 </span>
               </div>
 
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <InfoRow
-                  label="\ucd08\ud68c\ubcf4\ud5d8\ub8cc"
+                  label="초회보험료"
                   value={cardPaymentLegLabel(insurer.cardPaymentInitialAvailable)}
                   isFallback={insurer.cardPaymentInitialAvailable === null}
                 />
                 <InfoRow
-                  label="\uacc4\uc18d\ubcf4\ud5d8\ub8cc"
+                  label="계속보험료"
                   value={cardPaymentLegLabel(insurer.cardPaymentRecurringAvailable)}
                   isFallback={insurer.cardPaymentRecurringAvailable === null}
                 />
@@ -197,13 +197,13 @@ export function InsurerActionCard({
           {onRequestCorrection ? (
             <div className="flex justify-end pt-1">
               <button
-                aria-label={`${insurer.name} \uc218\uc815 \uc694\uccad`}
+                aria-label={`${insurer.name} 수정 요청`}
                 className="inline-flex min-h-9 items-center gap-1 rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-[#7a612d] underline-offset-4 transition hover:bg-[#fff7e6] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
                 onClick={() => onRequestCorrection(insurer.id)}
                 type="button"
               >
                 <span aria-hidden="true">{"\u270e"}</span>
-                <span>{"\uc815\ubcf4 \uc218\uc815 \uc694\uccad"}</span>
+                <span>{"정보 수정 요청"}</span>
               </button>
             </div>
           ) : null}
@@ -249,7 +249,7 @@ function CardHeader({
           </span>
           {insurer.isFeatured ? (
             <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-[#aa8137] bg-[#fff7e6] px-3 py-1 text-xs font-semibold text-[#7a612d]">
-              \ud2b9\ubcc4 \ud45c\uae30
+              특별 표기
             </span>
           ) : null}
         </div>
@@ -257,7 +257,7 @@ function CardHeader({
 
       <div className="inline-flex items-center gap-2 text-xs text-[#5f6670]">
         <span className="rounded-full border border-[#e7ddc9] bg-white px-2.5 py-0.5 font-semibold text-[#7a612d]">
-          \ucd5c\uadfc \uac80\uc218
+          최근 검수
         </span>
         <span className="break-keep">{lastVerifiedLabel(insurer.lastVerifiedAt)}</span>
       </div>
@@ -275,8 +275,8 @@ function FavoriteButton({
   onToggle: (id: string) => void;
 }) {
   const label = isFavorite
-    ? "\uc990\uaca8\ucc3e\uae30 \ud574\uc81c"
-    : "\uc990\uaca8\ucc3e\uae30 \ucd94\uac00";
+    ? "즐겨찾기 해제"
+    : "즐겨찾기 추가";
   const toneClass = isFavorite
     ? "border-[#aa8137] bg-[#fff7e6] text-[#7a612d]"
     : "border-[#d9c9a8] bg-white text-[#5f6670] hover:border-[#aa8137] hover:text-[#7a612d]";

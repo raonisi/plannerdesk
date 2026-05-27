@@ -6,9 +6,9 @@ import { createInsurer } from "../actions";
 import InsurerForm from "../form";
 import { ADMIN_VISIBILITY_COPY } from "../visibility";
 
-const PAGE_TITLE = "\uc0c8 \ubcf4\ud5d8\uc0ac \ub4f1\ub85d";
+const PAGE_TITLE = "새 보험사 등록";
 const PAGE_DESCRIPTION =
-  "\ucd08\uc548 \uc0c1\ud0dc\uc758 \ubcf4\ud5d8\uc0ac \ub808\ucf54\ub4dc\ub97c \uc0dd\uc131\ud569\ub2c8\ub2e4. \uc811\uc18d\u00b7\uc9c0\uc6d0\u00b7\uccad\uad6c\u00b7\uc57d\uad00\u00b7\uce74\ub4dc\ub0a9\u00b7\uc6b4\uc601 \uba54\ud0c0\ub370\uc774\ud130\ub97c \uc774\uacf3\uc5d0\uc11c \ud568\uaed8 \uc785\ub825\ud569\ub2c8\ub2e4.";
+  "초안 상태의 보험사 레코드를 생성합니다. 접속·지원·청구·약관·카드납·운영 메타데이터를 이곳에서 함께 입력합니다.";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +56,7 @@ export default async function NewInsurerPage({
         </div>
 
         <section className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}>
-          <InsurerForm action={createInsurer} submitLabel="\ubcf4\ud5d8\uc0ac \ub4f1\ub85d" />
+          <InsurerForm action={createInsurer} submitLabel="보험사 등록" />
         </section>
       </div>
     </main>

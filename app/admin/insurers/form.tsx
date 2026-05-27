@@ -19,35 +19,35 @@ const sectionTitleClass = "text-base font-semibold text-[#102235]";
 const sectionDescClass = "mt-1 text-xs leading-relaxed text-[#5f6875]";
 
 const NOTICE_TEXT =
-  "\uacf5\uc2dd \ub9c1\ud06c\uc640 \uc5f0\ub77d\ucc98\ub294 \uacf5\uac1c \uc804 \ubc18\ub4dc\uc2dc \ubcf4\ud5d8\uc0ac \uacf5\uc2dd \ucd9c\ucc98 \uae30\uc900\uc73c\ub85c \uac80\uc218\ud574 \uc8fc\uc138\uc694.";
+  "공식 링크와 연락처는 공개 전 반드시 보험사 공식 출처 기준으로 검수해 주세요.";
 const SENSITIVE_NOTICE_TEXT =
-  "\uace0\uac1d \uac1c\uc778\uc815\ubcf4, \uc758\ub8cc \ub370\uc774\ud130, \ubcf4\ud5d8\uae08 \uc9c0\uae09 \ud310\ub2e8, \uc190\ud574 \uc0ac\uc815 \uc758\uacac\uc740 \uc785\ub825\ud558\uc9c0 \ub9c8\uc138\uc694.";
+  "고객 개인정보, 의료 데이터, 보험금 지급 판단, 손해 사정 의견은 입력하지 마세요.";
 const URL_PLACEHOLDER_OPTIONAL = "https://example.com";
 
 const TRISTATE_OPTIONS = [
-  { value: "", label: "\ud655\uc778 \ud544\uc694" },
-  { value: "true", label: "\uac00\ub2a5" },
-  { value: "false", label: "\ud574\ub2f9\uc0ac\ud56d \uc5c6\uc74c" },
+  { value: "", label: "확인 필요" },
+  { value: "true", label: "가능" },
+  { value: "false", label: "해당사항 없음" },
 ];
 
 const CARD_PAYMENT_STATUS_OPTIONS: { value: CardPaymentStatus; label: string }[] = [
-  { value: CardPaymentStatus.available, label: "\uc0ac\uc6a9 \uac00\ub2a5" },
-  { value: CardPaymentStatus.conditional, label: "\uc870\uac74\ubd80 \uc0ac\uc6a9" },
-  { value: CardPaymentStatus.unavailable, label: "\ud574\ub2f9\uc0ac\ud56d \uc5c6\uc74c" },
-  { value: CardPaymentStatus.unknown, label: "\ud655\uc778 \ud544\uc694" },
+  { value: CardPaymentStatus.available, label: "사용 가능" },
+  { value: CardPaymentStatus.conditional, label: "조건부 사용" },
+  { value: CardPaymentStatus.unavailable, label: "해당사항 없음" },
+  { value: CardPaymentStatus.unknown, label: "확인 필요" },
 ];
 
 const CLAIM_FAX_HANDLING_TYPE_OPTIONS: {
   value: ClaimFaxHandlingType;
   label: string;
 }[] = [
-  { value: ClaimFaxHandlingType.fax, label: "\ud329\uc2a4 \uc0ac\uc6a9" },
+  { value: ClaimFaxHandlingType.fax, label: "팩스 사용" },
   {
     value: ClaimFaxHandlingType.call_center_individual,
-    label: "\ucf5c\uc13c\ud130 \uac1c\ubcc4\uc811\uc218",
+    label: "콜센터 개별접수",
   },
-  { value: ClaimFaxHandlingType.unavailable, label: "\ud574\ub2f9\uc0ac\ud56d \uc5c6\uc74c" },
-  { value: ClaimFaxHandlingType.unknown, label: "\ud655\uc778 \ud544\uc694" },
+  { value: ClaimFaxHandlingType.unavailable, label: "해당사항 없음" },
+  { value: ClaimFaxHandlingType.unknown, label: "확인 필요" },
 ];
 
 function formatDateInput(value: Date | null | undefined) {
@@ -100,11 +100,11 @@ export default function InsurerForm({
       </div>
 
       <Section
-        title="A. \uae30\ubcf8 \uc815\ubcf4"
-        description="\ubcf4\ud5d8\uc0ac \uc774\ub984, \ubd84\ub958, \uacf5\uac1c \uc5ec\ubd80\uc640 \uac80\uc218 \uc0c1\ud0dc\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4."
+        title="A. 기본 정보"
+        description="보험사 이름, 분류, 공개 여부와 검수 상태를 관리합니다."
       >
         <label className={labelClass}>
-          \ubcf4\ud5d8\uc0ac \uc774\ub984
+          보험사 이름
           <input
             className={fieldClass}
             name="name"
@@ -114,36 +114,37 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \ubd84\ub958
+          분류
           <select
             className={fieldClass}
             name="category"
             required
             defaultValue={insurer?.category ?? InsurerCategory.life}
           >
-            <option value={InsurerCategory.life}>\uc0dd\uba85\ubcf4\ud5d8</option>
-            <option value={InsurerCategory.non_life}>\uc190\ud574\ubcf4\ud5d8</option>
+            <option value={InsurerCategory.life}>생명보험</option>
+            <option value={InsurerCategory.non_life}>손해보험</option>
           </select>
         </label>
 
         <label className={labelClass}>
-          \uac80\uc218 \uc0c1\ud0dc
+          검수 상태
           <select
             className={fieldClass}
             name="verificationStatus"
             defaultValue={insurer?.verificationStatus ?? VerificationStatus.draft}
           >
-            <option value={VerificationStatus.draft}>\ucd08\uc548 (Draft)</option>
-            <option value={VerificationStatus.needs_review}>\uac80\uc218 \ud544\uc694 (Needs review)</option>
-            <option value={VerificationStatus.verified}>\uac80\uc218 \uc644\ub8cc (Verified)</option>
+            <option value={VerificationStatus.draft}>초안 (Draft)</option>
+            <option value={VerificationStatus.needs_review}>검수 필요 (Needs review)</option>
+            <option value={VerificationStatus.verified}>검수 완료 (Verified)</option>
           </select>
           <span className={hintClass}>
-            \uacf5\uc2dd \ucd9c\ucc98\ub85c \uc0ac\ub78c\uc774 \uac80\uc218\ud55c \ub808\ucf54\ub4dc\ub9cc &quot;\uac80\uc218 \uc644\ub8cc&quot;\ub85c \ud45c\uc2dc\ud558\uc138\uc694. {ADMIN_VISIBILITY_COPY.governanceRule}
+            {"공식 출처로 사람이 검수한 레코드만 '검수 완료'로 표시하세요. "}
+            {ADMIN_VISIBILITY_COPY.governanceRule}
           </span>
         </label>
 
         <label className={labelClass}>
-          \ucd5c\uc885 \uac80\uc218\uc77c
+          최종 검수일
           <input
             className={fieldClass}
             name="lastVerifiedAt"
@@ -151,7 +152,7 @@ export default function InsurerForm({
             defaultValue={formatDateInput(insurer?.lastVerifiedAt)}
           />
           <span className={hintClass}>
-            \uc218\ub3d9 \uac80\uc218\uac00 \uc2e4\uc81c\ub85c \uc774\ub8e8\uc5b4\uc9c4 \ub0a0\uc9dc\ub9cc \uc785\ub825\ud558\uc138\uc694. \uac00\uc9dc \ub0a0\uc9dc \uc785\ub825 \uae08\uc9c0.
+            수동 검수가 실제로 이루어진 날짜만 입력하세요. 가짜 날짜 입력 금지.
           </span>
         </label>
 
@@ -165,7 +166,7 @@ export default function InsurerForm({
               defaultChecked={insurer?.isPublished ?? false}
               className="h-4 w-4 accent-[#1f6b55]"
             />
-            \uacf5\uac1c (Published)
+            공개 (Published)
           </label>
           <p className="text-xs text-[#5f6875]">
             {ADMIN_VISIBILITY_COPY.draftPublishBlocked}
@@ -174,11 +175,11 @@ export default function InsurerForm({
       </Section>
 
       <Section
-        title="B. \uc811\uc18d (Access)"
-        description="\uc124\uacc4\uc0ac\uc640 \uacf5\uac1c \uc0ac\uc6a9\uc790\uac00 \uc810\uadfc\ud558\ub294 \ub9c1\ud06c\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4."
+        title="B. 접속 (Access)"
+        description="설계사와 공개 사용자가 접근하는 링크를 관리합니다."
       >
         <label className={labelClass}>
-          \uacf5\uc2dd \uc6f9\uc0ac\uc774\ud2b8 URL
+          공식 웹사이트 URL
           <input
             className={fieldClass}
             name="officialWebsiteUrl"
@@ -189,7 +190,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uc124\uacc4\uc0ac \ud3ec\ud138 URL
+          설계사 포털 URL
           <input
             className={fieldClass}
             name="plannerPortalUrl"
@@ -200,7 +201,7 @@ export default function InsurerForm({
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          \uc124\uacc4\uc0ac \uc804\uc0b0 \uc811\uc18d URL
+          설계사 전산 접속 URL
           <input
             className={fieldClass}
             name="systemUrl"
@@ -209,17 +210,17 @@ export default function InsurerForm({
             placeholder={URL_PLACEHOLDER_OPTIONAL}
           />
           <span className={hintClass}>
-            \uc124\uacc4\uc0ac \uc804\uc6a9 \uc804\uc0b0 \ub85c\uadf8\uc778 \ud398\uc774\uc9c0\uc785\ub2c8\ub2e4. \uc77c\ubc18 \uace0\uac1d\uc6a9 \uc6f9\uc0ac\uc774\ud2b8\uc640 \uad6c\ubd84\ud574 \uc785\ub825\ud558\uc138\uc694.
+            설계사 전용 전산 로그인 페이지입니다. 일반 고객용 웹사이트와 구분해 입력하세요.
           </span>
         </label>
       </Section>
 
       <Section
-        title="C. \uc9c0\uc6d0 (Support)"
-        description="\uace0\uac1d\uc13c\ud130\uc640 \uc124\uacc4\uc0ac \uc9c0\uc6d0 \uc804\ud654\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4."
+        title="C. 지원 (Support)"
+        description="고객센터와 설계사 지원 전화를 관리합니다."
       >
         <label className={labelClass}>
-          \uace0\uac1d\uc13c\ud130 \ubc88\ud638
+          고객센터 번호
           <input
             className={fieldClass}
             name="customerCenterPhone"
@@ -229,7 +230,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uc804\uc0b0 \ud5ec\ud504\ub370\uc2a4\ud06c
+          전산 헬프데스크
           <input
             className={fieldClass}
             name="helpdeskPhone"
@@ -237,12 +238,12 @@ export default function InsurerForm({
             placeholder="1588-0000"
           />
           <span className={hintClass}>
-            \uc124\uacc4\uc0ac \uc804\uc0b0 \uc811\uc18d \uc9c0\uc6d0\uc6a9 \ud68c\uc120\uc785\ub2c8\ub2e4. \uc77c\ubc18 \uace0\uac1d \ub300\uc751 \ubc88\ud638\uc640 \ubcc4\ub3c4\ub85c \uad00\ub9ac\ud558\uc138\uc694.
+            설계사 전산 접속 지원용 회선입니다. 일반 고객 대응 번호와 별도로 관리하세요.
           </span>
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          \uc778\ucf5c \ubaa8\ub2c8\ud130\ub9c1 \ubc88\ud638
+          인콜 모니터링 번호
           <input
             className={fieldClass}
             name="callMonitoringPhone"
@@ -250,17 +251,17 @@ export default function InsurerForm({
             placeholder="1588-0000"
           />
           <span className={hintClass}>
-            \uc124\uacc4\uc0ac \uc77c\ucc98\ub9ac \ud488\uc9c8 \uc810\uac80\uc6a9 \ud68c\uc120\uc785\ub2c8\ub2e4. \uc77c\ubc18 \uace0\uac1d\uc5d0\uac8c \ub178\ucd9c\ud558\uc9c0 \ub9c8\uc138\uc694.
+            설계사 일처리 품질 점검용 회선입니다. 일반 고객에게 노출하지 마세요.
           </span>
         </label>
       </Section>
 
       <Section
-        title="D. \uccad\uad6c (Claim)"
-        description="\uccad\uad6c \uc811\uc218 \ub9c1\ud06c, \ud329\uc2a4, \uc8fc\uc18c, \uccad\uad6c \uc591\uc2dd\uc744 \uad00\ub9ac\ud569\ub2c8\ub2e4."
+        title="D. 청구 (Claim)"
+        description="청구 접수 링크, 팩스, 주소, 청구 양식을 관리합니다."
       >
         <label className={labelClass}>
-          \uccad\uad6c \uc548\ub0b4 \ud398\uc774\uc9c0 URL
+          청구 안내 페이지 URL
           <input
             className={fieldClass}
             name="claimPageUrl"
@@ -271,7 +272,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uccad\uad6c \uc591\uc2dd URL
+          청구 양식 URL
           <input
             className={fieldClass}
             name="claimFormUrl"
@@ -282,7 +283,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uccad\uad6c \ud329\uc2a4 \ubc88\ud638
+          청구 팩스 번호
           <input
             className={fieldClass}
             name="claimFaxNumber"
@@ -292,7 +293,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uccad\uad6c \ud329\uc2a4 \ucc98\ub9ac \ubc29\uc2dd
+          청구 팩스 처리 방식
           <select
             className={fieldClass}
             name="claimFaxHandlingType"
@@ -305,50 +306,50 @@ export default function InsurerForm({
             ))}
           </select>
           <span className={hintClass}>
-            \uccad\uad6c \uc811\uc218\ub97c \ucf5c\uc13c\ud130\uac00 \uac1c\ubcc4 \ucc98\ub9ac\ud558\ub294 \uacbd\uc6b0 &quot;\ucf5c\uc13c\ud130 \uac1c\ubcc4\uc811\uc218&quot;\ub97c \uc120\ud0dd\ud558\uc138\uc694.
+            {"청구 접수를 콜센터가 개별 처리하는 경우 '콜센터 개별접수'를 선택하세요."}
           </span>
         </label>
 
         <label className={labelClass}>
-          \uc77c\ubc18 \ud329\uc2a4 \ubc88\ud638
+          일반 팩스 번호
           <input
             className={fieldClass}
             name="faxNumber"
             defaultValue={insurer?.faxNumber ?? ""}
             placeholder="0505-000-0000"
           />
-          <span className={hintClass}>\uccad\uad6c \uc6a9\ub3c4\uac00 \uc544\ub2cc \uc77c\ubc18 \ud589\uc815\uc6a9 \ud329\uc2a4 \ubc88\ud638\uc785\ub2c8\ub2e4.</span>
+          <span className={hintClass}>청구 용도가 아닌 일반 행정용 팩스 번호입니다.</span>
         </label>
 
         <label className={labelClass}>
-          \uc77c\ubc18 \uc6b0\ud3b8 \uc8fc\uc18c
+          일반 우편 주소
           <input
             className={fieldClass}
             name="mailingAddress"
             defaultValue={insurer?.mailingAddress ?? ""}
           />
-          <span className={hintClass}>\uccad\uad6c \uc804\uc6a9\uc774 \uc544\ub2cc \uc77c\ubc18 \uc6b0\ud3b8 \uc8fc\uc18c\uc785\ub2c8\ub2e4.</span>
+          <span className={hintClass}>청구 전용이 아닌 일반 우편 주소입니다.</span>
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          \uc8fc\uc18c (\uc6b0\ud3b8/\ub4f1\uae30)
+          주소 (우편/등기)
           <input
             className={fieldClass}
             name="registeredMailAddress"
             defaultValue={insurer?.registeredMailAddress ?? ""}
           />
           <span className={hintClass}>
-            \uccad\uad6c \ub4f1\uae30\uc6b0\ud3b8 \uc811\uc218 \uc8fc\uc18c\uc785\ub2c8\ub2e4. \uacf5\uc2dd \uc548\ub0b4\ubb38 \uae30\uc900\uc73c\ub85c \uc785\ub825\ud558\uc138\uc694.
+            청구 등기우편 접수 주소입니다. 공식 안내문 기준으로 입력하세요.
           </span>
         </label>
       </Section>
 
       <Section
-        title="E. \uc57d\uad00 / \uc548\ub0b4 (Policy / Disclosure)"
-        description="\uc57d\uad00 \ubc0f \uacf5\uc2dd \uc548\ub0b4 \ub9c1\ud06c\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4."
+        title="E. 약관 / 안내 (Policy / Disclosure)"
+        description="약관 및 공식 안내 링크를 관리합니다."
       >
         <label className={`${labelClass} md:col-span-2`}>
-          \uc57d\uad00 URL
+          약관 URL
           <input
             className={fieldClass}
             name="termsUrl"
@@ -357,17 +358,17 @@ export default function InsurerForm({
             placeholder={URL_PLACEHOLDER_OPTIONAL}
           />
           <span className={hintClass}>
-            \ubcf4\ud5d8\uc0ac \uacf5\uc2dd \uc57d\uad00 \ud398\uc774\uc9c0 \ub9c1\ud06c\ub9cc \ub4f1\ub85d\ud558\uc138\uc694.
+            보험사 공식 약관 페이지 링크만 등록하세요.
           </span>
         </label>
       </Section>
 
       <Section
-        title="F. \uce74\ub4dc\ub0a9 (Payment)"
-        description="\uce74\ub4dc\ub0a9 \uac00\ub2a5 \uc5ec\ubd80\uc640 \uc870\uac74\uc744 \uad00\ub9ac\ud569\ub2c8\ub2e4. \ud655\uc778\ub418\uc9c0 \uc54a\uc740 \ud56d\ubaa9\uc740 &quot;\ud655\uc778 \ud544\uc694&quot;\ub85c \ub354 \ub354\ub985\ub2c8\ub2e4."
+        title="F. 카드납 (Payment)"
+        description="카드납 가능 여부와 조건을 관리합니다. 확인되지 않은 항목은 '확인 필요'로 둡니다."
       >
         <label className={labelClass}>
-          \ucd08\ud68c\ubcf4\ud5d8\ub8cc \uce74\ub4dc\ub0a9
+          초회보험료 카드납
           <select
             className={fieldClass}
             name="cardPaymentInitialAvailable"
@@ -382,7 +383,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uacc4\uc18d\ubcf4\ud5d8\ub8cc \uce74\ub4dc\ub0a9
+          계속보험료 카드납
           <select
             className={fieldClass}
             name="cardPaymentRecurringAvailable"
@@ -397,7 +398,7 @@ export default function InsurerForm({
         </label>
 
         <label className={labelClass}>
-          \uce74\ub4dc\ub0a9 \uc885\ud569 \uc0c1\ud0dc
+          카드납 종합 상태
           <select
             className={fieldClass}
             name="cardPaymentStatus"
@@ -410,52 +411,52 @@ export default function InsurerForm({
             ))}
           </select>
           <span className={hintClass}>
-            \uc870\uac74\ubd80\ub85c \uc0ac\uc6a9 \uac00\ub2a5\ud55c \uacbd\uc6b0 \uc544\ub798 \ub9e4\ubaa8\uc5d0 \uc870\uac74\uc744 \uba85\uc2dc\ud574 \uc8fc\uc138\uc694.
+            조건부로 사용 가능한 경우 아래 메모에 조건을 명시해 주세요.
           </span>
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          \uce74\ub4dc\ub0a9 \uc870\uac74 \uba54\ubaa8
+          카드납 조건 메모
           <textarea
             className={`${fieldClass} min-h-20`}
             name="cardPaymentNote"
             defaultValue={insurer?.cardPaymentNote ?? ""}
-            placeholder="\uc608: \ud2b9\uc815 \uce74\ub4dc\ub9cc \uac00\ub2a5 / \uc628\ub77c\uc778 \uc561\uc218\uc6a9 \ud55c\uc815 \ub4f1"
+            placeholder="예: 특정 카드만 가능 / 온라인 액수용 한정 등"
           />
         </label>
       </Section>
 
       <Section
-        title="G. \uc6b4\uc601 \uba54\ud0c0\ub370\uc774\ud130 (Governance)"
-        description="\ucd9c\ucc98 \uba54\ubaa8, \ub0b4\ubd80 \ub178\ud2b8, \uc815\ub82c \uc21c\uc11c, \ud2b9\ubcc4 \ud45c\uae30 \uc5ec\ubd80\ub97c \uad00\ub9ac\ud569\ub2c8\ub2e4."
+        title="G. 운영 메타데이터 (Governance)"
+        description="출처 메모, 내부 노트, 정렬 순서, 특별 표기 여부를 관리합니다."
       >
         <label className={`${labelClass} md:col-span-2`}>
-          \uacf5\uc2dd \ucd9c\ucc98 \uba54\ubaa8 (sourceNote)
+          공식 출처 메모 (sourceNote)
           <textarea
             className={`${fieldClass} min-h-20`}
             name="sourceNote"
             defaultValue={insurer?.sourceNote ?? ""}
-            placeholder="\uc608: 2026-05 \uacf5\uc2dd \uccad\uad6c \uc548\ub0b4\ubb38 PDF \uae30\uc900, content_admin \uac80\uc218"
+            placeholder="예: 2026-05 공식 청구 안내문 PDF 기준, content_admin 검수"
           />
           <span className={hintClass}>
-            \ub2f9 \ub808\ucf54\ub4dc\uc758 \uc6b4\uc601 \uc815\ubcf4\ub97c \ucc44\uc6b4 \ucd9c\ucc98\ub97c \uba85\ud655\ud788 \uae30\ub85d\ud558\uc138\uc694. \uc774 \uba54\ubaa8\ub294 \uacf5\uac1c \ud398\uc774\uc9c0\uc5d0 \ub178\ucd9c\ub418\uc9c0 \uc54a\uc544\ub3c4 \uc6b4\uc601\uc6a9\uc73c\ub85c \uc720\uc9c0\ub429\ub2c8\ub2e4.
+            당 레코드의 운영 정보를 채운 출처를 명확히 기록하세요. 이 메모는 공개 페이지에 노출되지 않아도 운영용으로 유지됩니다.
           </span>
         </label>
 
         <label className={`${labelClass} md:col-span-2`}>
-          \ub0b4\ubd80 \ub178\ud2b8 (notes)
+          내부 노트 (notes)
           <textarea
             className={`${fieldClass} min-h-20`}
             name="notes"
             defaultValue={insurer?.notes ?? ""}
           />
           <span className={hintClass}>
-            \uace0\uac1d \uac1c\uc778\uc815\ubcf4, \uc758\ub8cc \ub370\uc774\ud130, \ubcf4\ud5d8\uae08 \ud310\ub2e8\uc740 \uc785\ub825\ud558\uc9c0 \ub9c8\uc138\uc694.
+            고객 개인정보, 의료 데이터, 보험금 판단은 입력하지 마세요.
           </span>
         </label>
 
         <label className={labelClass}>
-          \uc815\ub82c \uc21c\uc11c (sortOrder)
+          정렬 순서 (sortOrder)
           <input
             className={fieldClass}
             name="sortOrder"
@@ -467,7 +468,7 @@ export default function InsurerForm({
             defaultValue={insurer?.sortOrder ?? 0}
           />
           <span className={hintClass}>
-            \uc228\uaca8\uc9c4 \uba54\ud0c0 \uac12\uc785\ub2c8\ub2e4. \uacf5\uac1c \ub514\ub809\ud1a0\ub9ac\uac00 \uc774 \uac12\uc744 \uc77d\ub294 \uc2dc\uc810\uc740 PR-31\uc5d0\uc11c \uacb0\uc815\ub429\ub2c8\ub2e4.
+            숨겨진 메타 값입니다. 공개 디렉토리가 이 값을 읽는 시점은 PR-31에서 결정됩니다.
           </span>
         </label>
 
@@ -478,7 +479,7 @@ export default function InsurerForm({
             defaultChecked={insurer?.isFeatured ?? false}
             className="h-4 w-4 accent-[#1f6b55]"
           />
-          \ud2b9\ubcc4 \ud45c\uae30 (Featured)
+          특별 표기 (Featured)
         </label>
       </Section>
 
@@ -487,7 +488,7 @@ export default function InsurerForm({
           href="/admin/insurers"
           className="rounded-md border border-[#d9c9a8] px-4 py-2 text-center text-sm font-semibold text-[#4f5661] transition hover:bg-white"
         >
-          \ucde8\uc18c
+          취소
         </Link>
         <button
           type="submit"

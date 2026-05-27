@@ -17,49 +17,49 @@ type CategoryFilter = "all" | DisclosureCategory;
 type StatusFilter = "all" | VerificationStatus;
 
 const text = {
-  all: "\uc804\uccb4",
-  searchLabel: "\uacf5\uc2dc\u00b7\uc57d\uad00 \uac80\uc0c9",
+  all: "전체",
+  searchLabel: "공시·약관 검색",
   searchPlaceholder:
-    "\uc81c\ubaa9, \uce74\ud14c\uace0\ub9ac, \uc124\uba85\uc744 \uc785\ub825\ud574 \uc8fc\uc138\uc694",
-  category: "\uce74\ud14c\uace0\ub9ac",
-  status: "\uac80\uc218 \uc0c1\ud0dc",
-  verified: "\uac80\uc218 \uc644\ub8cc",
-  needsReview: "\uac80\uc218 \ud544\uc694",
-  draft: "\ucd08\uc548",
-  countSuffix: "\uac1c \ub9c1\ud06c",
+    "제목, 카테고리, 설명을 입력해 주세요",
+  category: "카테고리",
+  status: "검수 상태",
+  verified: "검수 완료",
+  needsReview: "검수 필요",
+  draft: "초안",
+  countSuffix: "개 링크",
   resultSuffix:
-    "\uac1c \ud56d\ubaa9\uc774 \ud45c\uc2dc\ub429\ub2c8\ub2e4. \ud604\uc7ac \uc77c\ubd80 \uc815\ubcf4\ub294 \uac80\uc218 \uc804 \uc0d8\ud50c \ub370\uc774\ud130\uc774\uba70, \uc0c1\ub2f4 \uc804 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
-  lastVerifiedLabel: "\ucd5c\uadfc \uac80\uc218",
-  officialSource: "\uacf5\uc2dd \ucd9c\ucc98",
-  openSource: "\uacf5\uc2dd \ucd9c\ucc98 \uc5f4\uae30",
+    "개 항목이 표시됩니다. 현재 일부 정보는 검수 전 샘플 데이터이며, 상담 전 공식 출처 확인이 필요합니다.",
+  lastVerifiedLabel: "최근 검수",
+  officialSource: "공식 출처",
+  openSource: "공식 출처 열기",
   emptyTitle:
-    "\uc870\uac74\uc5d0 \ub9de\ub294 \uacf5\uc2dc\u00b7\uc57d\uad00 \ub9c1\ud06c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    "조건에 맞는 공시·약관 링크가 없습니다.",
   emptyDescription:
-    "\uac80\uc0c9\uc5b4\ub97c \uc904\uc774\uac70\ub098 \uce74\ud14c\uace0\ub9ac \ud544\ud130\ub97c \ubcc0\uacbd\ud574 \uc8fc\uc138\uc694."
+    "검색어를 줄이거나 카테고리 필터를 변경해 주세요."
 };
 
 const categoryLabels: Record<DisclosureCategory, string> = {
-  product_disclosure: "\uc0c1\ud488\uacf5\uc2dc",
-  policy_terms: "\uc57d\uad00",
-  insurance_association: "\ubcf4\ud5d8\ud611\ud68c",
-  insurer_official_materials: "\ubcf4\ud5d8\uc0ac \uacf5\uc2dd\uc790\ub8cc",
-  claim_compensation_reference: "\uccad\uad6c\u00b7\ubcf4\uc0c1 \ucc38\uace0",
-  education_practice_reference: "\uad50\uc721\u00b7\uc2e4\ubb34 \ucc38\uace0"
+  product_disclosure: "상품공시",
+  policy_terms: "약관",
+  insurance_association: "보험협회",
+  insurer_official_materials: "보험사 공식자료",
+  claim_compensation_reference: "청구·보상 참고",
+  education_practice_reference: "교육·실무 참고"
 };
 
 const categoryDescriptions: Record<DisclosureCategory, string> = {
   product_disclosure:
-    "\uc0c1\ud488 \uad6c\uc870\uc640 \uacf5\uc2dd \uacf5\uc2dc\uc790\ub8cc \ud655\uc778",
+    "상품 구조와 공식 공시자료 확인",
   policy_terms:
-    "\ubcf4\uc7a5 \ubc94\uc704\uc640 \uba74\ucc45\u00b7\uac10\uc561 \uae30\uc900 \ud655\uc778",
+    "보장 범위와 면책·감액 기준 확인",
   insurance_association:
-    "\uacf5\uc2e0\ub825 \uc788\ub294 \uc678\ubd80 \uae30\uc900 \ud655\uc778",
+    "공신력 있는 외부 기준 확인",
   insurer_official_materials:
-    "\ubcf4\ud5d8\uc0ac \uacf5\uc2dd \uc548\ub0b4 \uacbd\ub85c \ud655\uc778",
+    "보험사 공식 안내 경로 확인",
   claim_compensation_reference:
-    "\uccad\uad6c \uc808\ucc28\uc640 \ubcf4\uc0c1 \uc548\ub0b4 \ucc38\uace0",
+    "청구 절차와 보상 안내 참고",
   education_practice_reference:
-    "\uc0c1\ub2f4 \uc900\ube44\uc640 \uc2e4\ubb34 \uad50\uc721 \uc790\ub8cc \ucc38\uace0"
+    "상담 준비와 실무 교육 자료 참고"
 };
 
 const categoryOrder: DisclosureCategory[] = [

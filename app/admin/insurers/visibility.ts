@@ -12,14 +12,14 @@ import {
 // docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md (Public visibility policy).
 export const ADMIN_VISIBILITY_COPY = {
   policySummary:
-    "\uacf5\uac1c \uc870\uac74: \uac8c\uc2dc \uc911\uc774\uba70, \uac80\uc218 \ud544\uc694 \ub610\ub294 \uac80\uc218 \uc644\ub8cc \uc0c1\ud0dc\uc778 \ubcf4\ud5d8\uc0ac\ub9cc \uacf5\uac1c \ud654\uba74\uc5d0 \ud45c\uc2dc\ub429\ub2c8\ub2e4.",
+    "공개 조건: 게시 중이며, 검수 필요 또는 검수 완료 상태인 보험사만 공개 화면에 표시됩니다.",
   draftRule:
-    "\ucd08\uc548 \uc0c1\ud0dc\ub294 \uac8c\uc2dc \uc5ec\ubd80\uc640 \uad00\uacc4\uc5c6\uc774 \uacf5\uac1c \ud654\uba74\uc5d0 \ud45c\uc2dc\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "초안 상태는 게시 여부와 관계없이 공개 화면에 표시되지 않습니다.",
   governanceRule:
-    "\uac80\uc218 \uc644\ub8cc \uc804 \uc815\ubcf4\ub294 \uacf5\uac1c \uc804 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
+    "검수 완료 전 정보는 공개 전 공식 출처 확인이 필요합니다.",
   draftPublishBlocked:
-    "\ucd08\uc548 \uc0c1\ud0dc\uc758 \ubcf4\ud5d8\uc0ac\ub294 \uacf5\uac1c\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4. \uac80\uc218 \ud544\uc694 \ub610\ub294 \uac80\uc218 \uc644\ub8cc \uc0c1\ud0dc\ub85c \ubcc0\uacbd\ud55c \ub4a4 \uacf5\uac1c\ud574 \uc8fc\uc138\uc694.",
-  insurerNotFound: "\ubcf4\ud5d8\uc0ac \uad00\ub9ac \ub808\ucf54\ub4dc\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    "초안 상태의 보험사는 공개할 수 없습니다. 검수 필요 또는 검수 완료 상태로 변경한 뒤 공개해 주세요.",
+  insurerNotFound: "보험사 관리 레코드를 찾을 수 없습니다.",
 } as const;
 
 // The Insurer admin UI only offers draft / needs_review / verified because
@@ -27,21 +27,21 @@ export const ADMIN_VISIBILITY_COPY = {
 // values (`unverified`, `pending`) exist on the shared VerificationStatus enum
 // for the User model and are surfaced here only to keep the label exhaustive.
 export const VERIFICATION_STATUS_LABEL: Record<VerificationStatus, string> = {
-  [VerificationStatus.draft]: "\ucd08\uc548",
-  [VerificationStatus.needs_review]: "\uac80\uc218 \ud544\uc694",
-  [VerificationStatus.verified]: "\uac80\uc218 \uc644\ub8cc",
-  [VerificationStatus.unverified]: "\uac80\uc218 \uc774\ub825 \uc5c6\uc74c",
-  [VerificationStatus.pending]: "\uac80\uc218 \ub300\uae30",
+  [VerificationStatus.draft]: "초안",
+  [VerificationStatus.needs_review]: "검수 필요",
+  [VerificationStatus.verified]: "검수 완료",
+  [VerificationStatus.unverified]: "검수 이력 없음",
+  [VerificationStatus.pending]: "검수 대기",
 };
 
 export const PUBLICATION_LABEL = {
-  published: "\uac8c\uc2dc \uc911",
-  unpublished: "\ube44\uac8c\uc2dc",
+  published: "게시 중",
+  unpublished: "비게시",
 } as const;
 
 export const VISIBILITY_LABEL = {
-  visible: "\uacf5\uac1c \ud654\uba74 \ud45c\uc2dc",
-  hidden: "\uacf5\uac1c \uc870\uac74 \ubbf8\ucda9\uc871",
+  visible: "공개 화면 표시",
+  hidden: "공개 조건 미충족",
 } as const;
 
 // True when the next save/publish would land in the forbidden state of

@@ -8,12 +8,12 @@ import { disclosureLinkEntries } from "@/lib/content";
 import { DisclosureLinkCenter } from "./disclosure-link-center";
 
 const t = {
-  title: "\uacf5\uc2dc\u00b7\uc57d\uad00 \ub9c1\ud06c\uc13c\ud130",
+  title: "공시·약관 링크센터",
   note:
-    "\ud604\uc7ac \uc77c\ubd80 \uc815\ubcf4\ub294 \uac80\uc218 \uc804 \uc0d8\ud50c \ub370\uc774\ud130\uc785\ub2c8\ub2e4. \uc2e4\uc81c \uace0\uac1d \uc0c1\ub2f4 \ub610\ub294 \uc790\ub8cc \uc548\ub0b4 \uc804 \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778\uc774 \ud544\uc694\ud569\ub2c8\ub2e4.",
-  workflowTitle: "\uc0c1\ub2f4 \uc804 \uc790\ub8cc \ud655\uc778 \uc21c\uc11c",
-  directory: "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30",
-  claim: "\uccad\uad6c\uc11c\ub958 \ud655\uc778"
+    "현재 일부 정보는 검수 전 샘플 데이터입니다. 실제 고객 상담 또는 자료 안내 전 공식 출처 확인이 필요합니다.",
+  workflowTitle: "상담 전 자료 확인 순서",
+  directory: "보험사 바로가기",
+  claim: "청구서류 확인"
 };
 
 const workflowSteps = [

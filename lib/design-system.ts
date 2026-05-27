@@ -53,9 +53,9 @@ export const spacing = {
 } as const;
 
 export const verificationLabels: Record<VerificationStatus, string> = {
-  draft: "\ucd08\uc548",
-  verified: "\uac80\uc218 \uc644\ub8cc",
-  needs_review: "\uac80\uc218 \ud544\uc694"
+  draft: "초안",
+  verified: "검수 완료",
+  needs_review: "검수 필요"
 };
 
 export const statusBadgeClasses: Record<VerificationStatus, string> = {

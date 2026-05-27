@@ -8,9 +8,9 @@ import { updateClaimDocument } from "../../actions";
 import ClaimDocumentForm from "../../form";
 import { ADMIN_CLAIM_DOC_COPY } from "../../visibility";
 
-const PAGE_TITLE = "\uccad\uad6c\uc11c\ub958 \uc815\ubcf4 \uc218\uc815";
+const PAGE_TITLE = "청구서류 정보 수정";
 const PAGE_DESCRIPTION =
-  "\uc81c\ubaa9, \uc548\ub0b4 \ubcf8\ubb38, \uacf5\uc2dd \ub9c1\ud06c, \uace0\uac1d\uc6a9 \uba54\uc2dc\uc9c0 \ud15c\ud50c\ub9bf, \uc6b4\uc601 \uba54\ud0c0\ub370\uc774\ud130\ub97c \uc218\uc815\ud569\ub2c8\ub2e4. \ud558\ub4dc \uc0ad\uc81c\ub294 \uc81c\uacf5\ub418\uc9c0 \uc54a\uc73c\uba70, \uacf5\uac1c \uc870\uac74\uc740 \ud558\ub2e8 \uc548\ub0b4\ubb38\uc744 \uc6b0\uc120 \ud655\uc778\ud574 \uc8fc\uc138\uc694.";
+  "제목, 안내 본문, 공식 링크, 고객용 메시지 템플릿, 운영 메타데이터를 수정합니다. 하드 삭제는 제공되지 않으며, 공개 조건은 하단 안내문을 우선 확인해 주세요.";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +81,7 @@ export default async function EditClaimDocumentPage({
             action={updateClaimDocument.bind(null, claimDocument.id)}
             claimDocument={claimDocument}
             insurers={insurers}
-            submitLabel={"\ubcc0\uacbd \uc0ac\ud56d \uc800\uc7a5"}
+            submitLabel="변경 사항 저장"
           />
         </section>
       </div>
