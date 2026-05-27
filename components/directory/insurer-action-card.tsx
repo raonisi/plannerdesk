@@ -345,12 +345,12 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
 
   const toneClass =
     tone === "primary"
-      ? "border-[#173f36] bg-[#173f36] text-[#fbf7ee] hover:bg-[#0f322a]"
+      ? "border-[#102235] bg-[#102235] text-[#fffaf0] shadow-[0_12px_24px_rgba(16,34,53,0.16)] hover:bg-[#173f36]"
       : "border-[#173f36] bg-white text-[#173f36] hover:bg-[#173f36] hover:text-[#fbf7ee]";
 
   return (
     <a
-      className={`inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] ${toneClass}`}
+      className={`inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border-2 px-4 py-3 text-sm font-bold tracking-[0.01em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:text-[15px] ${toneClass}`}
       href={href}
       rel="noopener noreferrer"
       target="_blank"
