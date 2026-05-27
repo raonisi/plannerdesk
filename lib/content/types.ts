@@ -39,17 +39,48 @@ export type MessageSituation =
   | "referral_response"
   | "long_time_no_contact";
 
+export type SupportedBrowser = "chrome" | "edge";
+
+export type ClaimFaxHandlingType =
+  | "fax"
+  | "call_center_individual"
+  | "unavailable"
+  | "unknown";
+
+export type CardPaymentStatus =
+  | "available"
+  | "unavailable"
+  | "conditional"
+  | "unknown";
+
 export interface InsurerDirectoryEntry {
   id: string;
   name: string;
   category: InsurerCategory;
   officialWebsiteUrl: string | null;
   plannerPortalUrl: string | null;
+  systemUrl: string | null;
   claimPageUrl: string | null;
+  claimFormUrl: string | null;
+  termsUrl: string | null;
   customerCenterPhone: string | null;
+  helpdeskPhone: string | null;
+  callMonitoringPhone: string | null;
   faxNumber: string | null;
+  claimFaxNumber: string | null;
+  claimFaxHandlingType: ClaimFaxHandlingType;
   mailingAddress: string | null;
+  registeredMailAddress: string | null;
+  cardPaymentInitialAvailable: boolean | null;
+  cardPaymentRecurringAvailable: boolean | null;
+  cardPaymentStatus: CardPaymentStatus;
+  cardPaymentNote: string | null;
+  supportedBrowsers: SupportedBrowser[];
+  sourceNote: string | null;
   notes: string;
+  sortOrder: number;
+  isFeatured: boolean;
+  isPublished: boolean;
   lastVerifiedAt: string | null;
   verificationStatus: VerificationStatus;
 }

@@ -10,6 +10,8 @@ import { prisma } from "@/lib/prisma";
 // `notes`, `sourceNote`, `createdById`, `updatedById`, and any unpublished
 // records must not flow through this type. Keep this list in sync with the
 // allow list in `getPublicInsurers` below.
+export type SupportedBrowser = "chrome" | "edge";
+
 export interface PublicInsurer {
   id: string;
   name: string;
@@ -35,11 +37,48 @@ export interface PublicInsurer {
   cardPaymentStatus: CardPaymentStatus;
   cardPaymentNote: string | null;
   isFeatured: boolean;
+  supportedBrowsers: SupportedBrowser[];
 }
 
 export type PublicInsurersResult =
   | { status: "ok"; insurers: PublicInsurer[] }
   | { status: "error" };
+
+const BROWSER_MAPPING: Record<string, SupportedBrowser[]> = {
+  "samsung-fire": ["chrome", "edge"],
+  "hanwha-general": ["chrome", "edge"],
+  "hyundai-marine": ["chrome", "edge"],
+  "meritz-fire": ["chrome", "edge"],
+  "db-general": ["chrome"],
+  "kb-general": ["chrome", "edge"],
+  "heungkuk-fire": ["chrome", "edge"],
+  "nh-general": ["chrome"],
+  "lotte-general": ["chrome", "edge"],
+  "aig-general": ["chrome", "edge"],
+  "chubb-general": ["chrome", "edge"],
+  "yebyeol-general": ["edge"],
+  "hana-general": ["chrome"],
+  "samsung-life": ["edge"],
+  "hanwha-life": ["chrome", "edge"],
+  "kyobo-life": ["chrome", "edge"],
+  "metlife": ["chrome"],
+  "nh-life": ["chrome", "edge"],
+  "shinhan-life": ["chrome"],
+  "kb-life": ["chrome", "edge"],
+  "heungkuk-life": ["chrome"],
+  "abl-life": ["chrome", "edge"],
+  "miraeasset-life": ["chrome", "edge"],
+  "tongyang-life": ["chrome"],
+  "kdb-life": ["chrome"],
+  "db-life": ["chrome", "edge"],
+  "aia-life": ["chrome", "edge"],
+  "im-life": ["chrome"],
+  "lina-life": ["chrome", "edge"],
+};
+
+export function getSupportedBrowsersForId(id: string): SupportedBrowser[] {
+  return BROWSER_MAPPING[id] ?? [];
+}
 
 // Canonical public visibility rule for the Insurer surface.
 //
@@ -126,6 +165,7 @@ export async function getPublicInsurers(): Promise<PublicInsurersResult> {
     const insurers: PublicInsurer[] = records.map((record) => ({
       ...record,
       lastVerifiedAt: toIsoDate(record.lastVerifiedAt),
+      supportedBrowsers: getSupportedBrowsersForId(record.id),
     }));
 
     return { status: "ok", insurers };

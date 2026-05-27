@@ -4,7 +4,9 @@ export { customerMessageTemplates } from "./message-templates";
 export { disclosureLinkEntries } from "./disclosure-links";
 export { insurerDirectoryEntries } from "./insurers";
 export type {
+  CardPaymentStatus,
   ClaimDocumentEntry,
+  ClaimFaxHandlingType,
   ClaimType,
   ContentSafetyRule,
   CustomerMessageTemplate,
@@ -14,5 +16,6 @@ export type {
   InsurerDirectoryEntry,
   MessageSituation,
   MessageTone,
+  SupportedBrowser,
   VerificationStatus
 } from "./types";

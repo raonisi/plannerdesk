@@ -93,11 +93,18 @@ export function InsurerActionCard({
         <div className="mt-6 space-y-5">
           <ActionGroup eyebrow="ACCESS" title="접속">
             <div className="grid gap-3 sm:grid-cols-2">
-              <ActionLink
-                href={accessHref}
-                label="전산접속"
-                tone="primary"
-              />
+              <div className="flex flex-col gap-1.5">
+                <ActionLink
+                  href={accessHref}
+                  label="전산접속"
+                  tone="primary"
+                />
+                {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 ? (
+                  <span className="text-[11px] font-medium text-[#7a612d] pl-1">
+                    권장 브라우저: {insurer.supportedBrowsers.map((b) => b === "chrome" ? "Chrome" : "Edge").join(", ")}
+                  </span>
+                ) : null}
+              </div>
               <ActionLink
                 href={insurer.officialWebsiteUrl}
                 label="공식 홈페이지"
