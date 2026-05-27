@@ -7,15 +7,15 @@
 // future DB-backed workflow (PR-35+).
 
 export const CORRECTION_REQUEST_TYPES = [
-  { value: "incorrect_link", label: "\ub9c1\ud06c \uc624\ub958" },
-  { value: "outdated_phone", label: "\uc804\ud654\ubc88\ud638 \ubcc0\uacbd" },
-  { value: "outdated_fax", label: "\ud329\uc2a4\ubc88\ud638 \ubcc0\uacbd" },
-  { value: "mailing_address", label: "\ub4f1\uae30\uc6b0\ud3b8 \uc8fc\uc18c \ubcc0\uacbd" },
-  { value: "claim_form_link", label: "\uccad\uad6c\uc591\uc2dd \ub9c1\ud06c \ubcc0\uacbd" },
-  { value: "terms_link", label: "\uc57d\uad00 \ub9c1\ud06c \ubcc0\uacbd" },
-  { value: "card_payment_info", label: "\uce74\ub4dc\ub0a9 \uc815\ubcf4 \ubcc0\uacbd" },
-  { value: "insurer_category", label: "\ubcf4\ud5d8\uc0ac \ubd84\ub958 \uc624\ub958" },
-  { value: "other", label: "\uae30\ud0c0" },
+  { value: "incorrect_link", label: "링크 오류" },
+  { value: "outdated_phone", label: "전화번호 변경" },
+  { value: "outdated_fax", label: "팩스번호 변경" },
+  { value: "mailing_address", label: "등기우편 주소 변경" },
+  { value: "claim_form_link", label: "청구양식 링크 변경" },
+  { value: "terms_link", label: "약관 링크 변경" },
+  { value: "card_payment_info", label: "카드납 정보 변경" },
+  { value: "insurer_category", label: "보험사 분류 오류" },
+  { value: "other", label: "기타" },
 ] as const;
 
 export type CorrectionRequestType = (typeof CORRECTION_REQUEST_TYPES)[number]["value"];
@@ -34,45 +34,45 @@ export const MESSAGE_MIN_LENGTH = 20;
 export const MESSAGE_MAX_LENGTH = 1000;
 
 export const CORRECTION_REQUEST_COPY = {
-  triggerLabel: "\uc815\ubcf4 \uc218\uc815 \uc694\uccad",
+  triggerLabel: "정보 수정 요청",
   triggerHint:
-    "\ubcf4\ud5d8\uc0ac \ub9c1\ud06c\ub098 \uc5f0\ub77d\ucc98\uac00 \ub2ec\ub77c\uc84c\ub2e4\uba74 \uc218\uc815 \uc694\uccad\uc744 \ub0a8\uaca8\uc8fc\uc138\uc694.",
-  cardTriggerLabel: "\uc218\uc815 \uc694\uccad",
-  cardTriggerAria: "\uc774 \ubcf4\ud5d8\uc0ac \uc815\ubcf4\uc758 \uc218\uc815 \uc694\uccad",
-  dialogTitle: "\uc815\ubcf4 \uc218\uc815 \uc694\uccad",
+    "보험사 링크나 연락처가 달라졌다면 수정 요청을 남겨주세요.",
+  cardTriggerLabel: "수정 요청",
+  cardTriggerAria: "이 보험사 정보의 수정 요청",
+  dialogTitle: "정보 수정 요청",
   dialogDescription:
-    "\uc694\uccad \ub0b4\uc6a9\uc740 \uad00\ub9ac\uc790 \uac80\ud1a0 \ud6c4 \ubc18\uc601\ub429\ub2c8\ub2e4.",
-  sensitiveWarningTitle: "\uac1c\uc778\uc815\ubcf4 \uc785\ub825 \uae08\uc9c0",
+    "요청 내용은 관리자 검토 후 반영됩니다.",
+  sensitiveWarningTitle: "개인정보 입력 금지",
   sensitiveWarningBody:
-    "\uac1c\uc778\uc815\ubcf4, \uc8fc\ubbfc\ub4f1\ub85d\ubc88\ud638, \uc99d\uad8c\ubc88\ud638, \uc9c4\ub8cc\uae30\ub85d, \ubcf4\ud5d8\uae08 \uccad\uad6c\uc11c\ub958\ub294 \uc785\ub825\ud558\uc9c0 \ub9c8\uc138\uc694.",
+    "개인정보, 주민등록번호, 증권번호, 진료기록, 보험금 청구서류는 입력하지 마세요.",
   reviewNoticeBody:
-    "\uc218\uc815 \uc694\uccad\uc740 \uc989\uc2dc \ubc18\uc601\ub418\uc9c0 \uc54a\uc73c\uba70, \uad00\ub9ac\uc790 \uac80\ud1a0 \ud6c4 \ubc18\uc601\ub429\ub2c8\ub2e4.",
-  insurerLabel: "\ub300\uc0c1 \ubcf4\ud5d8\uc0ac",
-  insurerPlaceholder: "\ubcf4\ud5d8\uc0ac\ub97c \uc120\ud0dd\ud558\uc138\uc694",
-  requestTypeLabel: "\uc694\uccad \uc885\ub958",
-  requestTypePlaceholder: "\uc694\uccad \uc885\ub958\ub97c \uc120\ud0dd\ud558\uc138\uc694",
-  messageLabel: "\uc218\uc815 \ub0b4\uc6a9",
+    "수정 요청은 즉시 반영되지 않으며, 관리자 검토 후 반영됩니다.",
+  insurerLabel: "대상 보험사",
+  insurerPlaceholder: "보험사를 선택하세요",
+  requestTypeLabel: "요청 종류",
+  requestTypePlaceholder: "요청 종류를 선택하세요",
+  messageLabel: "수정 내용",
   messagePlaceholder:
-    "\ud604\uc7ac \ud45c\uc2dc\ub418\ub294 \uc815\ubcf4\uc640 \uc81c\uc548\ud558\ub294 \uc218\uc815 \uc0ac\ud56d\uc744 \uad6c\uccb4\uc801\uc73c\ub85c \uc801\uc5b4\uc8fc\uc138\uc694.",
-  sourceUrlLabel: "\uacf5\uc2dd \uc790\ub8cc \ub9c1\ud06c (\uc120\ud0dd)",
+    "현재 표시되는 정보와 제안하는 수정 사항을 구체적으로 적어주세요.",
+  sourceUrlLabel: "공식 자료 링크 (선택)",
   sourceUrlPlaceholder: "https://",
   sourceUrlHint:
-    "\uadfc\uac70 \uacf5\uc2dd \uc790\ub8cc\uc758 URL\uc744 \ud568\uaed8 \uc801\uc5b4\uc8fc\uc2dc\uba74 \uac80\ud1a0\uac00 \ube68\ub77c\uc9d1\ub2c8\ub2e4.",
-  requesterNameLabel: "\uc774\ub984 (\uc120\ud0dd)",
-  requesterEmailLabel: "\uc774\uba54\uc77c (\uc120\ud0dd)",
+    "근거 공식 자료의 URL을 함께 적어주시면 검토가 빨라집니다.",
+  requesterNameLabel: "이름 (선택)",
+  requesterEmailLabel: "이메일 (선택)",
   optionalIdentityHint:
-    "\ud544\uc694 \uc5c6\uc73c\uba74 \ube44\uc6cc\ub450\uc154\ub3c4 \ub429\ub2c8\ub2e4. \ud68c\uc2e0\uc774 \ud544\uc694\ud55c \uacbd\uc6b0\uc5d0\ub9cc \uc774\uba54\uc77c\uc744 \ub0a8\uaca8\uc8fc\uc138\uc694.",
-  copyAction: "\uc694\uccad \ub0b4\uc6a9 \ubcf5\uc0ac\ud558\uae30",
-  cancelAction: "\ub2eb\uae30",
-  copySuccess: "\uc694\uccad \ub0b4\uc6a9\uc774 \ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+    "필요 없으면 비워두셔도 됩니다. 회신이 필요한 경우에만 이메일을 남겨주세요.",
+  copyAction: "요청 내용 복사하기",
+  cancelAction: "닫기",
+  copySuccess: "요청 내용이 클립보드에 복사되었습니다.",
   copyManualHint:
-    "\uc790\ub3d9 \ubcf5\uc0ac\uac00 \ub418\uc9c0 \uc54a\ub294 \uacbd\uc6b0 \uc544\ub798 \ub0b4\uc6a9\uc744 \uc9c1\uc811 \uc120\ud0dd\ud574 \ubcf5\uc0ac\ud574 \uc8fc\uc138\uc694.",
+    "자동 복사가 되지 않는 경우 아래 내용을 직접 선택해 복사해 주세요.",
   submissionChannelNote:
-    "\uad00\ub9ac\uc790 \uc81c\ucd9c \ucc44\ub110\uc740 \ucd94\ud6c4 \uc548\ub0b4 \uc608\uc815\uc785\ub2c8\ub2e4. \ud604\uc7ac\ub294 \uc900\ube44\ub41c \ub0b4\uc6a9\uc744 \ubcf5\uc0ac\ud574 \ubcf4\uad00\ud574\uc8fc\uc138\uc694.",
-  validationRequired: "\ud544\uc218 \ud56d\ubaa9\uc785\ub2c8\ub2e4.",
-  validationMessageRange: `\uc218\uc815 \ub0b4\uc6a9\uc740 ${MESSAGE_MIN_LENGTH}\uc790 \uc774\uc0c1 ${MESSAGE_MAX_LENGTH}\uc790 \uc774\ud558\ub85c \uc785\ub825\ud574 \uc8fc\uc138\uc694.`,
-  validationUrlInvalid: "http:// \ub610\ub294 https://\ub85c \uc2dc\uc791\ud558\ub294 URL\uc744 \uc785\ub825\ud574 \uc8fc\uc138\uc694.",
-  validationEmailInvalid: "\uc774\uba54\uc77c \ud615\uc2dd\uc774 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "관리자 제출 채널은 추후 안내 예정입니다. 현재는 준비된 내용을 복사해 보관해 주세요.",
+  validationRequired: "필수 항목입니다.",
+  validationMessageRange: `수정 내용은 ${MESSAGE_MIN_LENGTH}자 이상 ${MESSAGE_MAX_LENGTH}자 이하로 입력해 주세요.`,
+  validationUrlInvalid: "http:// 또는 https://로 시작하는 URL을 입력해 주세요.",
+  validationEmailInvalid: "이메일 형식이 올바르지 않습니다.",
 } as const;
 
 export interface CorrectionRequestInput {
@@ -168,35 +168,35 @@ export function formatCorrectionRequest(
 ): string {
   const now = options.generatedAtIso ?? new Date().toISOString();
   const lines = [
-    "[PlannerDesk] \uc815\ubcf4 \uc218\uc815 \uc694\uccad",
-    `\uc791\uc131\uc77c: ${now}`,
+    "[PlannerDesk] 정보 수정 요청",
+    `작성일: ${now}`,
     "",
-    `\ub300\uc0c1 \ubcf4\ud5d8\uc0ac: ${input.insurerName} (id: ${input.insurerId})`,
-    `\uc694\uccad \uc885\ub958: ${correctionRequestTypeLabel(input.requestType)}`,
+    `대상 보험사: ${input.insurerName} (id: ${input.insurerId})`,
+    `요청 종류: ${correctionRequestTypeLabel(input.requestType)}`,
     "",
-    "\uc218\uc815 \ub0b4\uc6a9:",
+    "수정 내용:",
     input.message.trim(),
   ];
 
   const trimmedSourceUrl = input.sourceUrl?.trim();
   if (trimmedSourceUrl) {
-    lines.push("", `\uacf5\uc2dd \uc790\ub8cc \ub9c1\ud06c: ${trimmedSourceUrl}`);
+    lines.push("", `공식 자료 링크: ${trimmedSourceUrl}`);
   }
 
   const trimmedName = input.requesterName?.trim();
   const trimmedEmail = input.requesterEmail?.trim();
   if (trimmedName || trimmedEmail) {
     lines.push("");
-    lines.push("\uc694\uccad\uc790:");
-    if (trimmedName) lines.push(`- \uc774\ub984: ${trimmedName}`);
-    if (trimmedEmail) lines.push(`- \uc774\uba54\uc77c: ${trimmedEmail}`);
+    lines.push("요청자:");
+    if (trimmedName) lines.push(`- 이름: ${trimmedName}`);
+    if (trimmedEmail) lines.push(`- 이메일: ${trimmedEmail}`);
   }
 
   lines.push(
     "",
-    "[\uc548\ub0b4]",
-    "- \uac1c\uc778\uc815\ubcf4, \uc8fc\ubbfc\ub4f1\ub85d\ubc88\ud638, \uc99d\uad8c\ubc88\ud638, \uc9c4\ub8cc\uae30\ub85d, \ubcf4\ud5d8\uae08 \uccad\uad6c\uc11c\ub958\ub294 \ud3ec\ud568\ub418\uc9c0 \uc54a\uc544\uc57c \ud569\ub2c8\ub2e4.",
-    "- \uc774 \uc694\uccad\uc740 \uad00\ub9ac\uc790 \uac80\ud1a0 \ud6c4 \ubc18\uc601\ub429\ub2c8\ub2e4. \uc790\ub3d9 \ubc18\uc601\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    "[안내]",
+    "- 개인정보, 주민등록번호, 증권번호, 진료기록, 보험금 청구서류는 포함되지 않아야 합니다.",
+    "- 이 요청은 관리자 검토 후 반영됩니다. 자동 반영되지 않습니다.",
   );
 
   return lines.join("\n");

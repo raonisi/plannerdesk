@@ -7,9 +7,9 @@ import { createClaimDocument } from "../actions";
 import ClaimDocumentForm from "../form";
 import { ADMIN_CLAIM_DOC_COPY } from "../visibility";
 
-const PAGE_TITLE = "\uc0c8 \uccad\uad6c\uc11c\ub958 \ub4f1\ub85d";
+const PAGE_TITLE = "새 청구서류 등록";
 const PAGE_DESCRIPTION =
-  "\ucd08\uc548 \uc0c1\ud0dc\uc758 \uccad\uad6c\uc11c\ub958 \ub808\ucf54\ub4dc\ub97c \uc0dd\uc131\ud569\ub2c8\ub2e4. \uacf5\uc2dd \ucd9c\ucc98 \ud655\uc778 \uc804\uc5d0\ub294 \uacf5\uac1c\ub85c \uc804\ud658\ud558\uc9c0 \ub9c8\uc138\uc694.";
+  "초안 상태의 청구서류 레코드를 생성합니다. 공식 출처 확인 전에는 공개로 전환하지 마세요.";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +70,7 @@ export default async function NewClaimDocumentPage({
           <ClaimDocumentForm
             action={createClaimDocument}
             insurers={insurers}
-            submitLabel={"\uccad\uad6c\uc11c\ub958 \ub4f1\ub85d"}
+            submitLabel="청구서류 등록"
           />
         </section>
       </div>

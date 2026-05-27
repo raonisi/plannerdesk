@@ -14,26 +14,26 @@ type FeaturedFilter = "all" | "featured";
 type ViewMode = "all" | "favorites";
 
 const categoryOptions: { label: string; value: CategoryFilter }[] = [
-  { label: "\uc804\uccb4", value: "all" },
-  { label: "\uc190\ud574\ubcf4\ud5d8", value: "non_life" },
-  { label: "\uc0dd\uba85\ubcf4\ud5d8", value: "life" },
+  { label: "전체", value: "all" },
+  { label: "손해보험", value: "non_life" },
+  { label: "생명보험", value: "life" },
 ];
 
 const statusOptions: { label: string; value: StatusFilter }[] = [
-  { label: "\uc804\uccb4", value: "all" },
-  { label: "\uac80\uc218 \uc644\ub8cc", value: "verified" },
-  { label: "\uac80\uc218 \ud544\uc694", value: "needs_review" },
+  { label: "전체", value: "all" },
+  { label: "검수 완료", value: "verified" },
+  { label: "검수 필요", value: "needs_review" },
 ];
 
 const featuredOptions: { label: string; value: FeaturedFilter }[] = [
-  { label: "\uc804\uccb4", value: "all" },
-  { label: "\ud2b9\ubcc4 \ud45c\uae30\ub9cc", value: "featured" },
+  { label: "전체", value: "all" },
+  { label: "특별 표기만", value: "featured" },
 ];
 
 const FAVORITES_EMPTY_TITLE =
-  "\uc990\uaca8\ucc3e\uae30\ud55c \ubcf4\ud5d8\uc0ac\uac00 \uc544\uc9c1 \uc5c6\uc2b5\ub2c8\ub2e4.";
+  "즐겨찾기한 보험사가 아직 없습니다.";
 const FAVORITES_EMPTY_DESC =
-  "\ubcf4\ud5d8\uc0ac \uce74\ub4dc \uc0c1\ub2e8 \uc624\ub978\ucabd \ubcc4\ud45c \ubc84\ud2bc\uc744 \ub20c\ub7ec \uc790\uc8fc \uc4f0\ub294 \ubcf4\ud5d8\uc0ac\ub97c \uc774 \ud654\uba74\uc5d0 \uace0\uc815\ud574 \ubcf4\uc138\uc694.";
+  "보험사 카드 상단 오른쪽 별표 버튼을 눌러 자주 쓰는 보험사를 이 화면에 고정해 보세요.";
 
 export function DirectoryExplorer({
   insurers,
@@ -96,12 +96,12 @@ export function DirectoryExplorer({
       <div className="flex flex-wrap items-center gap-2">
         <ViewTab
           active={view === "all"}
-          label="\uc804\uccb4"
+          label="전체"
           onClick={() => setView("all")}
         />
         <ViewTab
           active={view === "favorites"}
-          label="\uc990\uaca8\ucc3e\uae30"
+          label="즐겨찾기"
           onClick={() => setView("favorites")}
           count={favoriteCount}
         />
@@ -111,12 +111,12 @@ export function DirectoryExplorer({
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <label className="block">
             <span className="text-sm font-semibold text-[#303845]">
-              \ubcf4\ud5d8\uc0ac \uac80\uc0c9
+              보험사 검색
             </span>
             <input
               className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="\ubcf4\ud5d8\uc0ac \uc774\ub984\uc744 \uc785\ub825\ud558\uc138\uc694"
+              placeholder="보험사 이름을 입력하세요"
               type="search"
               value={query}
             />
@@ -124,19 +124,19 @@ export function DirectoryExplorer({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <FilterGroup
-              label="\ubd84\ub958"
+              label="분류"
               onChange={(value) => setCategory(value as CategoryFilter)}
               options={categoryOptions}
               value={category}
             />
             <FilterGroup
-              label="\uac80\uc218 \uc0c1\ud0dc"
+              label="검수 상태"
               onChange={(value) => setStatus(value as StatusFilter)}
               options={statusOptions}
               value={status}
             />
             <FilterGroup
-              label="\ud2b9\ubcc4 \ud45c\uae30"
+              label="특별 표기"
               onChange={(value) => setFeatured(value as FeaturedFilter)}
               options={featuredOptions}
               value={featured}
@@ -144,7 +144,7 @@ export function DirectoryExplorer({
           </div>
         </div>
         <p className="mt-4 text-sm leading-6 text-[#4f5661]">
-          {filteredInsurers.length}\uac1c \ubcf4\ud5d8\uc0ac\uac00 \ud45c\uc2dc\ub429\ub2c8\ub2e4. \ub2f9 \uc815\ubcf4\ub294 \uad00\ub9ac\uc790 \uac80\uc218 \uacb0\uacfc\ub97c \ubc18\uc601\ud55c \uacf5\uac1c\uc6a9 \ub370\uc774\ud130\uc785\ub2c8\ub2e4. \uc990\uaca8\ucc3e\uae30\ub294 \uc774 \uae30\uae30\uc5d0\ub9cc \uc800\uc7a5\ub429\ub2c8\ub2e4.
+          {filteredInsurers.length}개 보험사가 표시됩니다. 당 정보는 관리자 검수 결과를 반영한 공개용 데이터입니다. 즐겨찾기는 이 기기에만 저장됩니다.
         </p>
       </section>
 
@@ -167,8 +167,8 @@ export function DirectoryExplorer({
         </div>
       ) : (
         <EmptyState
-          title="\uc870\uac74\uc5d0 \ub9de\ub294 \ubcf4\ud5d8\uc0ac\uac00 \uc5c6\uc2b5\ub2c8\ub2e4."
-          description="\uac80\uc0c9\uc5b4\ub97c \uc904\uc774\uac70\ub098 \ud544\ud130\ub97c \ubcc0\uacbd\ud574 \uc8fc\uc138\uc694."
+          title="조건에 맞는 보험사가 없습니다."
+          description="검색어를 줄이거나 필터를 변경해 주세요."
         />
       )}
 

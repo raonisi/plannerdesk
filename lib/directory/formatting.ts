@@ -5,23 +5,23 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 // governance). Never render raw null, undefined, empty strings, or enum
 // identifiers in the public surface.
 export const DIRECTORY_TEXT = {
-  missing: "\uacf5\uc2dd \ud655\uc778 \ud6c4 \uc5c5\ub370\uc774\ud2b8 \uc608\uc815",
-  unavailable: "\ud574\ub2f9\uc0ac\ud56d \uc5c6\uc74c",
-  callCenterIndividual: "\ucf5c\uc13c\ud130 \uac1c\ubcc4\uc811\uc218",
-  conditional: "\uc870\uac74 \ud655\uc778 \ud544\uc694",
+  missing: "공식 확인 후 업데이트 예정",
+  unavailable: "해당사항 없음",
+  callCenterIndividual: "콜센터 개별접수",
+  conditional: "조건 확인 필요",
 } as const;
 
 export const CATEGORY_LABELS: Record<PublicInsurer["category"], string> = {
-  life: "\uc0dd\uba85\ubcf4\ud5d8",
-  non_life: "\uc190\ud574\ubcf4\ud5d8",
+  life: "생명보험",
+  non_life: "손해보험",
 };
 
 export function verificationStatusLabel(
   status: PublicInsurer["verificationStatus"],
 ): string {
-  if (status === "verified") return "\uac80\uc218 \uc644\ub8cc";
-  if (status === "needs_review") return "\uac80\uc218 \ud544\uc694";
-  return "\uac80\uc218 \uc911";
+  if (status === "verified") return "검수 완료";
+  if (status === "needs_review") return "검수 필요";
+  return "검수 중";
 }
 
 // Normalize a Korean phone-style string into a tel: URL. Returns null when
@@ -38,7 +38,7 @@ export function cardPaymentStatusLabel(
 ): string {
   switch (status) {
     case "available":
-      return "\uc0ac\uc6a9 \uac00\ub2a5";
+      return "사용 가능";
     case "conditional":
       return DIRECTORY_TEXT.conditional;
     case "unavailable":
@@ -60,7 +60,7 @@ export function cardPaymentTone(
 }
 
 export function cardPaymentLegLabel(value: boolean | null): string {
-  if (value === true) return "\uac00\ub2a5";
+  if (value === true) return "가능";
   if (value === false) return DIRECTORY_TEXT.unavailable;
   return DIRECTORY_TEXT.missing;
 }

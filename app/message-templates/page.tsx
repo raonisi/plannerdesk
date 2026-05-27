@@ -8,12 +8,12 @@ import { customerMessageTemplates } from "@/lib/content";
 import { MessageTemplateLibrary } from "./message-template-library";
 
 const t = {
-  title: "\uace0\uac1d \uc548\ub0b4 \ubb38\uad6c",
+  title: "고객 안내 문구",
   note:
-    "\ud604\uc7ac \ubb38\uad6c\ub294 \uc2e4\ubb34 \ucc38\uace0\uc6a9 \ucd08\uc548\uc785\ub2c8\ub2e4. \uc2e4\uc81c \uace0\uac1d \ubc1c\uc1a1 \uc804 \uc0c1\ud669\uacfc \uc0c1\ud488 \uae30\uc900\uc5d0 \ub9de\uac8c \ubc18\ub4dc\uc2dc \uc218\uc815\ud574 \uc8fc\uc138\uc694.",
-  workflowTitle: "\uace0\uac1d \ubc1c\uc1a1 \uc804 \ud655\uc778 \uc21c\uc11c",
-  claim: "\uccad\uad6c\uc11c\ub958 \ud655\uc778",
-  directory: "\ubcf4\ud5d8\uc0ac \ubc14\ub85c\uac00\uae30"
+    "현재 문구는 실무 참고용 초안입니다. 실제 고객 발송 전 상황과 상품 기준에 맞게 반드시 수정해 주세요.",
+  workflowTitle: "고객 발송 전 확인 순서",
+  claim: "청구서류 확인",
+  directory: "보험사 바로가기"
 };
 
 const workflowSteps = [

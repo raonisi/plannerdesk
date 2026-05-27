@@ -171,7 +171,7 @@ function optionalSortOrder(
   ) {
     return {
       ok: false,
-      message: `\uc815\ub82c \uc21c\uc11c(sortOrder)\ub294 ${SORT_ORDER_MIN}~${SORT_ORDER_MAX} \ubc94\uc704\uc758 \uc815\uc218\uc5ec\uc57c \ud569\ub2c8\ub2e4.`,
+      message: `정렬 순서(sortOrder)는 ${SORT_ORDER_MIN}~${SORT_ORDER_MAX} 범위의 정수여야 합니다.`,
     };
   }
 
@@ -192,7 +192,7 @@ async function parseClaimDocumentForm(
   if (!isValidSlug(slug)) {
     return {
       ok: false,
-      message: `\uc2ac\ub7ec\uadf8\ub294 \uc18c\ubb38\uc790, \uc22b\uc790, \ud558\uc774\ud508(-) \ub9cc \uc0ac\uc6a9\ud558\uace0 ${SLUG_MAX_LENGTH}\uc790 \uc774\ud558\ub85c \uc785\ub825\ud574 \uc8fc\uc138\uc694.`,
+      message: `슬러그는 소문자, 숫자, 하이픈(-) 만 사용하고 ${SLUG_MAX_LENGTH}자 이하로 입력해 주세요.`,
     };
   }
 
