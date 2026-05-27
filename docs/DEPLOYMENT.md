@@ -28,11 +28,20 @@ The start script reads Railway's `PORT` environment variable and falls back to `
 
 ## Environment Variables
 
-The initial deployment does not require secrets.
+The database-backed runtime requires the following variables configured on Railway:
+- `DATABASE_URL` (Neon PostgreSQL pooled connection)
+- `DIRECT_URL` (Neon PostgreSQL direct connection for migrations)
+- `AUTH_SECRET` (Auth.js token signing secret)
+- `AUTH_URL` (Canonical production Auth API path, e.g., `https://plannerdesk-production.up.railway.app/api/auth`)
 
-Allowed placeholder file:
+### Google OAuth Configuration Variables
+To enable Google Login for the admin interface, configure the following variables in the Railway dashboard:
+- `AUTH_GOOGLE_ID` (Google OAuth Client ID)
+- `AUTH_GOOGLE_SECRET` (Google OAuth Client Secret)
 
-- `.env.example`
+### Google Console OAuth Settings
+- **Authorized JavaScript origin**: `https://plannerdesk-production.up.railway.app`
+- **Authorized Redirect URI (Callback URL)**: `https://plannerdesk-production.up.railway.app/api/auth/callback/google`
 
 Do not commit:
 
@@ -41,7 +50,7 @@ Do not commit:
 - `.env.production`
 - Any file containing real credentials, API keys, database URLs, or tokens
 
-When secrets are needed in a later PR, configure them through Railway Variables. Do not commit real values to GitHub.
+Configure secrets exclusively through Railway Variables. Do not commit real values to GitHub.
 
 ## Neon PostgreSQL
 

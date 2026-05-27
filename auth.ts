@@ -25,6 +25,11 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import Google from "next-auth/providers/google";
+
+const googleProviderEnabled =
+  Boolean(process.env.AUTH_GOOGLE_ID) &&
+  Boolean(process.env.AUTH_GOOGLE_SECRET);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   /**
@@ -33,11 +38,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
 
   /**
-   * Providers will be added in a future PR.
-   * An empty array means no login method is available yet.
-   * This is intentional for the foundation setup.
+   * Google provider is conditionally registered only when environment variables are set.
+   * If they are missing, the providers list remains empty to prevent application crashes.
    */
-  providers: [],
+  providers: [
+    ...(googleProviderEnabled
+      ? [
+          Google({
+            clientId: process.env.AUTH_GOOGLE_ID!,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+          }),
+        ]
+      : []),
+  ],
 
   /**
    * Use JWT strategy for session token resolution to minimize database-backed
