@@ -96,10 +96,10 @@ function NavLink({
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className={`whitespace-nowrap px-3 py-2 transition ${
+      className={`whitespace-nowrap px-3 py-2 transition focus-visible:ring-2 focus-visible:ring-[#b8924a] focus-visible:outline-hidden ${
         isActive
-          ? "bg-[#173f36] text-[#fbf7ee]"
-          : "text-[#303845] hover:bg-[#f7f1e5] hover:text-[#7a612d]"
+          ? "bg-[#234b3b] !text-[#f7f3e8]"
+          : "!text-[#10243e] hover:bg-[#f4efe5] hover:!text-[#10243e]"
       }`}
       href={href}
     >
@@ -120,10 +120,10 @@ function MobileNavLink({
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className={`shrink-0 whitespace-nowrap border px-3 py-2 transition ${
+      className={`shrink-0 whitespace-nowrap border px-3 py-2 transition focus-visible:ring-2 focus-visible:ring-[#b8924a] focus-visible:outline-hidden ${
         isActive
-          ? "border-[#173f36] bg-[#173f36] text-[#fbf7ee]"
-          : "border-[#d9c9a8] bg-white text-[#303845] hover:border-[#aa8137] hover:text-[#7a612d]"
+          ? "border-[#234b3b] bg-[#234b3b] !text-[#f7f3e8]"
+          : "border-[#d9c9a8] bg-white !text-[#10243e] hover:border-[#b8924a] hover:bg-[#f4efe5] hover:!text-[#10243e]"
       }`}
       href={href}
     >

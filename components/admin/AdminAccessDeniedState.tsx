@@ -41,7 +41,7 @@ export default function AdminAccessDeniedState() {
           <div className="space-y-3">
             <Link
               href="/"
-              className="block w-full text-center py-2.5 px-4 rounded bg-[#102235] text-white font-medium hover:bg-[#1b344e] transition-colors text-sm shadow-sm"
+              className="block w-full text-center py-2.5 px-4 rounded bg-[#10243e] text-[#f7f3e8] hover:bg-[#17324f] focus-visible:ring-2 focus-visible:ring-[#b8924a] focus-visible:outline-hidden transition-colors text-sm font-semibold shadow-sm"
             >
               메인 페이지로 돌아가기
             </Link>
