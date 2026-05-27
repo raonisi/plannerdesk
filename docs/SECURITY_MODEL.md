@@ -4,13 +4,14 @@ PlannerDesk starts as a public landing page with no database connection and no c
 
 ## Current State
 
-- Static public landing page
-- No authentication
-- No database requirement
-- No file upload
-- No customer medical document upload
-- No claim payout or claim amount logic
-- No BOA CRM access
+- Public landing page, dynamic database-backed insurer directory, and dynamic claim document library.
+- Neon PostgreSQL connection for runtime operations.
+- Auth.js session protection and Role-Based Access Control (RBAC) server-side validation.
+- No file upload.
+- No customer medical document upload.
+- No claim payout or claim amount logic.
+- No BOA CRM access.
+- No Aiven connection.
 
 ## Data Classification
 
@@ -19,18 +20,20 @@ Public:
 - Landing page copy
 - Product descriptions
 - Public roadmap statements
+- Published, verified insurer directory records and claim document checklists
 
 Internal:
 
 - Future operational docs
-- Future admin-only content drafts
+- Admin-only content drafts and unpublished records
+- Verification state logs
 
 Restricted:
 
-- Production secrets
+- Production secrets (`AUTH_SECRET`, OAuth client keys)
 - API keys
-- Database URLs
-- Future user account data
+- Database URLs (`DATABASE_URL`, `DIRECT_URL`)
+- User account and session records
 
 Prohibited For MVP:
 
@@ -44,18 +47,16 @@ Prohibited For MVP:
 
 - `.env.example` may contain placeholders only.
 - `.env`, `.env.local`, and environment-specific secret files must not be committed.
-- `DATABASE_URL` is reserved for future Neon PostgreSQL work and must not be required by the first build.
+- `DATABASE_URL` and `DIRECT_URL` are required at runtime to access Neon PostgreSQL.
 - Railway and Neon credentials must be configured only in their respective service dashboards.
 
 ## Future Controls
 
-Before adding accounts, community, AI tools, uploads, or database-backed workflows, implement or document:
+Before adding community, AI tools, file uploads, or customer-facing document vaults, implement or document:
 
-- Authentication and session management
-- Authorization model
 - Planner verification workflow
 - Moderation and reporting process
-- Audit logging
+- Audit logging details
 - Data retention policy
 - Backup and recovery plan
 - Privacy policy and terms review

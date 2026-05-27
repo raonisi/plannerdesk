@@ -12,7 +12,8 @@ Positioning: **전국 보험설계사를 위한 실무 포털 & 성장 플랫폼
 - TypeScript
 - Tailwind CSS
 - Railway deployment target
-- Neon PostgreSQL planned for later, not required for the first build
+- Neon PostgreSQL (connected via Prisma)
+- Auth.js (NextAuth) for admin session protection
 
 ## Local Development
 
@@ -45,6 +46,8 @@ The production server uses `PORT` when it is set and falls back to `3000`.
 npm run typecheck
 npm run lint
 npm run build
+npx prisma validate
+npx prisma generate
 ```
 
 ## Environment Variables
@@ -53,9 +56,7 @@ Copy `.env.example` to `.env.local` for local development if needed.
 
 Do not commit real `.env` files. `.env.example` must contain placeholders only.
 
-The initial build and Railway deployment do not require `DATABASE_URL`.
-
-Neon PostgreSQL will be connected only when database-backed features begin. Do not add Neon credentials, Prisma migrations, database tables, authentication, billing, community features, or file upload in the foundation PR.
+Production operations require the configuring of Neon database variables (`DATABASE_URL`, `DIRECT_URL`) and Auth.js session keys (`AUTH_SECRET`, `AUTH_URL`) in the Railway dashboard.
 
 PlannerDesk must not connect to BOA CRM data, BOA CRM databases, or Aiven.
 
@@ -69,11 +70,9 @@ Recommended Railway settings:
 - Start command: `npm run start`
 - Node version: use the `engines.node` value from `package.json`
 
-No Railway credentials, Neon credentials, or production secrets are required for the initial landing page deployment.
-
-See `docs/DEPLOYMENT.md` for deployment readiness notes.
-
-See `docs/NEON_CONNECTION_PLAN.md` for the planned Neon PostgreSQL connection sequence. Neon is not connected and `DATABASE_URL` is not required for the current static MVP.
+See [docs/DEPLOYMENT.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/DEPLOYMENT.md) for deployment readiness notes.
+See [docs/RAILWAY_HARDENING.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/RAILWAY_HARDENING.md) for environment configuration parameters and hardening rules.
+See [docs/OPERATING_QA_CHECKLIST.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/OPERATING_QA_CHECKLIST.md) for verification and QA checklists.
 
 See `docs/ADMIN_ACCESS_PLAN.md` for the conceptual minimal admin access plan, role definitions, and access control principles.
 

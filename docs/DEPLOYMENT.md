@@ -45,15 +45,16 @@ When secrets are needed in a later PR, configure them through Railway Variables.
 
 ## Neon PostgreSQL
 
-Neon PostgreSQL is now connected at runtime for the Auth.js persistence layer (PR-22) and holds the first business model (PR-25):
+Neon PostgreSQL is connected at runtime for the Auth.js persistence layer (PR-22) and holds all core content models (including `Insurer` and `ClaimDocument` schemas):
 
-- `prisma/schema.prisma` contains the standard NextAuth models, custom fields, and the new `Insurer` model with its categories and verification states.
-- Database schemas are applied via migrations (`init_auth` and `add_insurer_model`).
+- `prisma/schema.prisma` contains NextAuth models, custom fields, `Insurer`, and `ClaimDocument` schemas with their categories and verification states.
+- Database schemas are applied via migrations under `prisma/migrations/*`.
 - Prisma Adapter `@auth/prisma-adapter` binds NextAuth to the Neon database.
-- A `lib/prisma.ts` helper is now imported in `auth.ts` to manage database client connections.
+- A `lib/prisma.ts` helper manages database client connections.
 
-The current static MVP still builds and runs without `DATABASE_URL` or `DIRECT_URL` during static generation, but runtime auth routes and future admin pages will require Railway Variables `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` to be correctly configured.
+The application is database-backed. Dynamic route pages (`/directory` and `/claim-documents`) and protected admin CRUD routes (`/admin/*`) require the Railway environment variables `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, and `AUTH_URL` to be correctly configured for the application to function.
 
+See [docs/RAILWAY_HARDENING.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/RAILWAY_HARDENING.md) for environment configuration parameters and hardening rules.
 See `docs/NEON_CONNECTION_PLAN.md` for the full Neon, Railway Variables, and Prisma rollout sequence.
 See `docs/AUTH_FOUNDATION_PLAN.md` for the Auth.js foundation details.
 See [docs/AUTH_DATABASE_SCHEMA_PLAN.md](file:///c:/work/plannerdesk/plannerdesk-main/docs/AUTH_DATABASE_SCHEMA_PLAN.md) for the Auth database schema plan.
