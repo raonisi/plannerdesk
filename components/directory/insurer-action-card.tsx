@@ -8,13 +8,7 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
   DIRECTORY_TEXT,
-  cardPaymentLegLabel,
-  cardPaymentStatusLabel,
-  cardPaymentTone,
-  claimFaxDisplay,
-  lastVerifiedLabel,
   telHref,
-  verificationStatusLabel,
 } from "@/lib/directory/formatting";
 
 const cardClass =
@@ -25,35 +19,6 @@ const sectionEyebrowClass =
 const sectionHeadingClass = "text-sm font-semibold text-[#102235]";
 const sectionContainerClass = "space-y-3";
 const groupDividerClass = "border-t border-[#e7ddc9] pt-5";
-
-const verificationBadgeTone: Record<
-  PublicInsurer["verificationStatus"],
-  string
-> = {
-  verified: "border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]",
-  needs_review: "border-[#d9c9a8] bg-[#fff9ed] text-[#7b5b19]",
-  draft: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
-  unverified: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
-  pending: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
-};
-
-const paymentToneClass: Record<
-  ReturnType<typeof cardPaymentTone>,
-  { pill: string; text: string }
-> = {
-  ok: {
-    pill: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-    text: "text-[#173f36]",
-  },
-  warn: {
-    pill: "border-[#d9c9a8] bg-[#fff9ed] text-[#7b5b19]",
-    text: "text-[#7b5b19]",
-  },
-  muted: {
-    pill: "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]",
-    text: "text-[#4f5661]",
-  },
-};
 
 const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
   {
@@ -276,12 +241,7 @@ export function InsurerActionCard({
 }: InsurerActionCardProps) {
   const [claimGuideOpen, setClaimGuideOpen] = useState(false);
   const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
-  const claimFax = claimFaxDisplay(insurer);
   const claimGuidePanelId = `claim-guide-${insurer.id}`;
-  const registeredMailing =
-    insurer.registeredMailAddress ?? insurer.mailingAddress;
-  const paymentTone = cardPaymentTone(insurer.cardPaymentStatus);
-  const paymentToneClasses = paymentToneClass[paymentTone];
 
   return (
     <article className={cardClass}>
@@ -300,7 +260,8 @@ export function InsurerActionCard({
         />
 
         <div className="mt-6 space-y-5">
-          <ActionGroup eyebrow="ACCESS" title="접속">
+          {/* 1) 업무 바로가기 */}
+          <ActionGroup eyebrow="ACCESS" title="업무 바로가기">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <ActionLink href={accessHref} label="전산접속" tone="primary" />
@@ -321,6 +282,27 @@ export function InsurerActionCard({
             </div>
           </ActionGroup>
 
+          {/* 2) 청구 */}
+          <div className={groupDividerClass}>
+            <ActionGroup eyebrow="CLAIM" title="청구">
+              <div className="space-y-3">
+                <ClaimGuideToggleButton
+                  count={claimItems.length}
+                  isOpen={claimGuideOpen}
+                  onToggle={() => setClaimGuideOpen((open) => !open)}
+                  panelId={claimGuidePanelId}
+                />
+                <div hidden={!claimGuideOpen}>
+                  <InsurerClaimGuidePanel
+                    claimItems={claimItems}
+                    insurer={insurer}
+                  />
+                </div>
+              </div>
+            </ActionGroup>
+          </div>
+
+          {/* 3) 지원 */}
           <div className={groupDividerClass}>
             <ActionGroup eyebrow="SUPPORT" title="지원">
               <div className="grid gap-3 sm:grid-cols-3">
@@ -330,92 +312,23 @@ export function InsurerActionCard({
                 />
                 <PhoneRow label="전산 헬프" value={insurer.helpdeskPhone} />
                 <PhoneRow
-                  label="인콜 모니터링"
+                  label="인물 모니터링"
                   value={insurer.callMonitoringPhone}
                 />
               </div>
             </ActionGroup>
           </div>
 
+          {/* 4) 자료 */}
           <div className={groupDividerClass}>
-            <ActionGroup eyebrow="CLAIM" title="청구">
+            <ActionGroup eyebrow="DATA" title="자료">
               <div className="grid gap-3 sm:grid-cols-2">
-                <ClaimGuideToggleButton
-                  count={claimItems.length}
-                  isOpen={claimGuideOpen}
-                  onToggle={() => setClaimGuideOpen((open) => !open)}
-                  panelId={claimGuidePanelId}
-                />
-                <ActionLink href={insurer.claimFormUrl} label="청구양식" />
-              </div>
-              <div hidden={!claimGuideOpen}>
-                <InsurerClaimGuidePanel
-                  claimItems={claimItems}
-                  insurer={insurer}
-                />
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <InfoRow
-                  label="청구 팩스"
-                  value={claimFax.primary}
-                  hint={claimFax.secondary}
-                  isFallback={claimFax.isFallback}
-                />
-                <InfoRow
-                  label="등기우편"
-                  value={registeredMailing ?? DIRECTORY_TEXT.missing}
-                  isFallback={!registeredMailing}
-                />
+                <ActionLink href={insurer.termsUrl} label="공시·약관 보기" />
               </div>
             </ActionGroup>
           </div>
 
-          <div className={groupDividerClass}>
-            <ActionGroup eyebrow="POLICY" title="약관">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ActionLink href={insurer.termsUrl} label="약관" />
-              </div>
-            </ActionGroup>
-          </div>
-
-          <div className={groupDividerClass}>
-            <ActionGroup eyebrow="PAYMENT" title="카드납">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold ${paymentToneClasses.pill}`}
-                >
-                  {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
-                </span>
-                <span className={`text-xs ${paymentToneClasses.text}`}>
-                  카드납 종합 상태
-                </span>
-              </div>
-
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <InfoRow
-                  label="초회보험료"
-                  value={cardPaymentLegLabel(
-                    insurer.cardPaymentInitialAvailable,
-                  )}
-                  isFallback={insurer.cardPaymentInitialAvailable === null}
-                />
-                <InfoRow
-                  label="계속보험료"
-                  value={cardPaymentLegLabel(
-                    insurer.cardPaymentRecurringAvailable,
-                  )}
-                  isFallback={insurer.cardPaymentRecurringAvailable === null}
-                />
-              </div>
-
-              {insurer.cardPaymentNote ? (
-                <p className="mt-3 break-keep rounded-md bg-white/70 px-3 py-2 text-sm leading-6 text-[#4f5661]">
-                  {insurer.cardPaymentNote}
-                </p>
-              ) : null}
-            </ActionGroup>
-          </div>
-
+          {/* 정보 수정 요청 */}
           {onRequestCorrection ? (
             <div className="flex justify-end pt-1">
               <button
@@ -467,26 +380,7 @@ function CardHeader({
               onToggle={onToggleFavorite}
             />
           ) : null}
-          <span
-            className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold ${verificationBadgeTone[insurer.verificationStatus]}`}
-          >
-            {verificationStatusLabel(insurer.verificationStatus)}
-          </span>
-          {insurer.isFeatured ? (
-            <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-[#aa8137] bg-[#fff7e6] px-3 py-1 text-xs font-semibold text-[#7a612d]">
-              특별 표기
-            </span>
-          ) : null}
         </div>
-      </div>
-
-      <div className="inline-flex items-center gap-2 text-xs text-[#5f6670]">
-        <span className="rounded-full border border-[#e7ddc9] bg-white px-2.5 py-0.5 font-semibold text-[#7a612d]">
-          최근 검수
-        </span>
-        <span className="break-keep">
-          {lastVerifiedLabel(insurer.lastVerifiedAt)}
-        </span>
       </div>
     </header>
   );
@@ -499,8 +393,6 @@ function InsurerLogo({ insurer }: { insurer: PublicInsurer }) {
   return (
     <span className="grid h-16 w-32 shrink-0 place-items-center rounded-xl border border-[#e7ddc9] bg-white px-4 py-2 shadow-[0_10px_22px_rgba(16,34,53,0.08)] sm:w-36">
       {logoSrc && !imageFailed ? (
-        // Public insurer logo assets are rendered directly to avoid remote
-        // image optimization configuration for this static visual polish.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           alt={`${insurer.name} 로고`}
@@ -570,12 +462,6 @@ function ActionGroup({
   );
 }
 
-interface ActionLinkProps {
-  href: string | null;
-  label: string;
-  tone?: "primary" | "default";
-}
-
 function ClaimGuideToggleButton({
   count,
   isOpen,
@@ -595,12 +481,18 @@ function ClaimGuideToggleButton({
       onClick={onToggle}
       type="button"
     >
-      <span className="break-keep">청구 안내</span>
+      <span className="break-keep">청구안내 보기</span>
       <span className="shrink-0 text-xs font-semibold text-[#d8c08f]">
         {count}건 {isOpen ? "▲" : "▼"}
       </span>
     </button>
   );
+}
+
+interface ActionLinkProps {
+  href: string | null;
+  label: string;
+  tone?: "primary" | "default";
 }
 
 function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
@@ -657,36 +549,6 @@ function PhoneRow({ label, value }: { label: string; value: string | null }) {
           {DIRECTORY_TEXT.missing}
         </p>
       )}
-    </div>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-  hint,
-  isFallback = false,
-}: {
-  label: string;
-  value: string;
-  hint?: string | null;
-  isFallback?: boolean;
-}) {
-  return (
-    <div className="rounded-lg border border-[#e7ddc9] bg-white px-3 py-3">
-      <p className="text-xs font-semibold text-[#7a612d]">{label}</p>
-      <p
-        className={`mt-1 break-keep ${
-          isFallback
-            ? "text-sm text-[#8b7660]"
-            : "text-base font-semibold text-[#173f36]"
-        }`}
-      >
-        {value}
-      </p>
-      {hint ? (
-        <p className="mt-1 text-xs leading-5 text-[#5f6670]">{hint}</p>
-      ) : null}
     </div>
   );
 }
