@@ -34,8 +34,6 @@ interface FormState {
   requestType: string;
   message: string;
   sourceUrl: string;
-  requesterName: string;
-  requesterEmail: string;
 }
 
 const initialFormState: FormState = {
@@ -43,9 +41,72 @@ const initialFormState: FormState = {
   requestType: "",
   message: "",
   sourceUrl: "",
-  requesterName: "",
-  requesterEmail: "",
 };
+
+const ALLOWED_ITEMS = [
+  "보험사 전산 링크 오류",
+  "고객센터 번호 오류",
+  "전산 헬프데스크 번호 오류",
+  "인콜/모니터링 번호 오류",
+  "청구 팩스 번호 오류",
+  "등기우편 주소 오류",
+  "약관 링크 오류",
+  "청구양식 링크 오류",
+  "공시/약관 링크 오류",
+  "청구서류 명칭 또는 분류 오류",
+  "카드납 가능 여부 오류",
+  "지원 브라우저 정보 오류",
+  "오탈자 또는 UI 표시 오류",
+  "공식 출처 변경 제보",
+] as const;
+
+const PROHIBITED_ITEMS = [
+  "고객 이름",
+  "주민등록번호",
+  "휴대폰 번호",
+  "주소",
+  "이메일",
+  "계약번호",
+  "증권번호",
+  "계좌번호",
+  "병명",
+  "진단명",
+  "진단서",
+  "처방전",
+  "진료기록",
+  "검사결과지",
+  "입퇴원확인서 원본",
+  "수술확인서 원본",
+  "보험금 청구서 원본",
+  "고객 의료자료",
+  "고객 개인정보가 포함된 사진 또는 파일",
+  "보험금 지급 가능 여부 판단 요청",
+  "보험금 지급 금액 산정 요청",
+  "손해사정 판단 요청",
+  "의료 진단 해석 요청",
+  "특정 고객의 청구 가능성 판단 요청",
+] as const;
+
+const RESIDENT_ID_PATTERN = /\b\d{6}-\d{7}\b/;
+const LONG_DIGITS_PATTERN = /\b\d{10,}\b/;
+const NUMBER_WITH_CONTEXT_PATTERN =
+  /(계약번호|증권번호|계좌번호)[^0-9]{0,12}\d{6,}/;
+const MEDICAL_KEYWORD_PATTERN =
+  /(진단서|처방전|진료기록|검사결과지|입퇴원확인서|수술확인서|보험금\s*청구서\s*원본|의료자료)/;
+const CLAIM_JUDGMENT_PATTERN =
+  /(보험금\s*지급\s*가능\s*여부|보험금\s*얼마나|지급될까요|손해사정|진단\s*해석|청구\s*가능성)/;
+
+function hasSensitiveSignal(message: string): boolean {
+  const normalized = message.trim();
+  if (!normalized) return false;
+  return (
+    RESIDENT_ID_PATTERN.test(normalized) ||
+    NUMBER_WITH_CONTEXT_PATTERN.test(normalized) ||
+    MEDICAL_KEYWORD_PATTERN.test(normalized) ||
+    CLAIM_JUDGMENT_PATTERN.test(normalized) ||
+    LONG_DIGITS_PATTERN.test(normalized)
+  );
+}
 
 export function CorrectionRequestDialog({
   open,
@@ -140,6 +201,7 @@ function CorrectionRequestForm({
   const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">(
     "idle",
   );
+  const [safetyConfirmed, setSafetyConfirmed] = useState(false);
 
   const selectedInsurer = useMemo(
     () => insurers.find((i) => i.id === form.insurerId) ?? null,
@@ -160,10 +222,13 @@ function CorrectionRequestForm({
       requestType: form.requestType,
       message: form.message,
       sourceUrl: form.sourceUrl || undefined,
-      requesterName: form.requesterName || undefined,
-      requesterEmail: form.requesterEmail || undefined,
     });
   }, [form, selectedInsurer]);
+
+  const containsSensitiveSignal = useMemo(
+    () => hasSensitiveSignal(form.message),
+    [form.message],
+  );
 
   const handleCopy = useCallback(async () => {
     if (!selectedInsurer) {
@@ -180,13 +245,16 @@ function CorrectionRequestForm({
       requestType: form.requestType,
       message: form.message,
       sourceUrl: form.sourceUrl || undefined,
-      requesterName: form.requesterName || undefined,
-      requesterEmail: form.requesterEmail || undefined,
     };
 
     const validation = validateCorrectionRequest(input);
     if (!validation.ok) {
       setErrors(validation.errors);
+      setCopyState("idle");
+      return;
+    }
+
+    if (!safetyConfirmed) {
       setCopyState("idle");
       return;
     }
@@ -214,12 +282,14 @@ function CorrectionRequestForm({
       preview.select();
     }
     setCopyState("manual");
-  }, [form, selectedInsurer]);
+  }, [form, safetyConfirmed, selectedInsurer]);
 
   const messageLength = form.message.trim().length;
   const messageOverLimit = messageLength > MESSAGE_MAX_LENGTH;
   const messageUnderLimit =
     messageLength > 0 && messageLength < MESSAGE_MIN_LENGTH;
+  const submitDisabled =
+    !safetyConfirmed || messageUnderLimit || messageOverLimit;
 
   return (
     <form
@@ -265,6 +335,24 @@ function CorrectionRequestForm({
             {CORRECTION_REQUEST_COPY.reviewNoticeBody}
           </p>
         </div>
+
+        <section className="rounded-md border border-[#d9c9a8] bg-white px-4 py-3">
+          <h3 className="text-sm font-semibold text-[#102235]">제보 가능 항목</h3>
+          <ul className="mt-2 grid gap-1 text-xs leading-5 text-[#4f5661] sm:grid-cols-2">
+            {ALLOWED_ITEMS.map((item) => (
+              <li key={item}>- {item}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-md border border-[#d9c9a8] bg-[#fbf7ee] px-4 py-3">
+          <h3 className="text-sm font-semibold text-[#102235]">제보 금지 항목</h3>
+          <ul className="mt-2 grid gap-1 text-xs leading-5 text-[#5f6670] sm:grid-cols-2">
+            {PROHIBITED_ITEMS.map((item) => (
+              <li key={item}>- {item}</li>
+            ))}
+          </ul>
+        </section>
 
         <label className="block">
           <span className="text-sm font-semibold text-[#303845]">
@@ -359,6 +447,16 @@ function CorrectionRequestForm({
           ) : null}
         </label>
 
+        {containsSensitiveSignal ? (
+          <p
+            aria-live="assertive"
+            className="rounded-md border border-[#d9c9a8] bg-[#fff7e6] px-3 py-2 text-sm text-[#7a612d]"
+            role="alert"
+          >
+            {CORRECTION_REQUEST_COPY.sensitiveSignalWarning}
+          </p>
+        ) : null}
+
         <label className="block">
           <span className="text-sm font-semibold text-[#303845]">
             {CORRECTION_REQUEST_COPY.sourceUrlLabel}
@@ -385,53 +483,17 @@ function CorrectionRequestForm({
           ) : null}
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="text-sm font-semibold text-[#303845]">
-              {CORRECTION_REQUEST_COPY.requesterNameLabel}
-            </span>
-            <input
-              className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm text-[#102235] outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/15"
-              maxLength={120}
-              name="requesterName"
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  requesterName: event.target.value,
-                }))
-              }
-              value={form.requesterName}
-            />
-          </label>
-          <label className="block">
-            <span className="text-sm font-semibold text-[#303845]">
-              {CORRECTION_REQUEST_COPY.requesterEmailLabel}
-            </span>
-            <input
-              aria-invalid={errors.requesterEmail ? "true" : "false"}
-              className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm text-[#102235] outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/15"
-              inputMode="email"
-              maxLength={200}
-              name="requesterEmail"
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  requesterEmail: event.target.value,
-                }))
-              }
-              type="email"
-              value={form.requesterEmail}
-            />
-            {errors.requesterEmail ? (
-              <span className="mt-1 block text-xs text-[#a04141]">
-                {errors.requesterEmail}
-              </span>
-            ) : null}
-          </label>
-        </div>
-        <p className="-mt-2 text-xs text-[#5f6670]">
-          {CORRECTION_REQUEST_COPY.optionalIdentityHint}
-        </p>
+        <label className="flex items-start gap-3 rounded-md border border-[#d9c9a8] bg-white px-3 py-3">
+          <input
+            checked={safetyConfirmed}
+            className="mt-0.5 h-4 w-4 rounded border-[#aa8137] text-[#173f36] focus:ring-[#aa8137]"
+            onChange={(event) => setSafetyConfirmed(event.target.checked)}
+            type="checkbox"
+          />
+          <span className="text-sm leading-6 text-[#303845]">
+            {CORRECTION_REQUEST_COPY.declarationLabel}
+          </span>
+        </label>
 
         {formattedPayload ? (
           <div className="rounded-md border border-[#d9c9a8] bg-white p-3">
@@ -454,6 +516,10 @@ function CorrectionRequestForm({
             role="status"
           >
             {CORRECTION_REQUEST_COPY.copySuccess}
+            <br />
+            <span className="text-xs font-medium text-[#2f705f]">
+              {CORRECTION_REQUEST_COPY.copySuccessSubcopy}
+            </span>
           </p>
         ) : copyState === "manual" ? (
           <p
@@ -480,11 +546,17 @@ function CorrectionRequestForm({
         </button>
         <button
           className="min-h-11 rounded-md bg-[#102235] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1b344e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] disabled:cursor-not-allowed disabled:bg-[#8a909a]"
+          disabled={submitDisabled}
           type="submit"
         >
           {CORRECTION_REQUEST_COPY.copyAction}
         </button>
       </footer>
+      {!safetyConfirmed ? (
+        <p className="px-6 pb-4 text-xs text-[#7a612d]">
+          {CORRECTION_REQUEST_COPY.declarationRequired}
+        </p>
+      ) : null}
     </form>
   );
 }

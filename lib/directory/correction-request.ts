@@ -41,32 +41,36 @@ export const CORRECTION_REQUEST_COPY = {
   cardTriggerAria: "이 보험사 정보의 수정 요청",
   dialogTitle: "정보 수정 요청",
   dialogDescription:
-    "요청 내용은 관리자 검토 후 반영됩니다.",
-  sensitiveWarningTitle: "개인정보 입력 금지",
+    "잘못된 링크, 연락처, 팩스, 서류 정보를 발견했다면 제보해주세요. 제보 내용은 관리자 검수 후 반영됩니다.",
+  sensitiveWarningTitle: "입력 전 확인해주세요",
   sensitiveWarningBody:
-    "개인정보, 주민등록번호, 증권번호, 진료기록, 보험금 청구서류는 입력하지 마세요.",
+    "고객 이름, 주민등록번호, 병명, 진단서, 청구서류 원본, 보험금 지급 가능 여부 판단 요청은 입력하지 마세요.",
   reviewNoticeBody:
-    "수정 요청은 즉시 반영되지 않으며, 관리자 검토 후 반영됩니다.",
+    "플래너데스크는 보험금 지급 여부를 판단하지 않으며, 보험금 지급 금액을 산정하지 않습니다.",
   insurerLabel: "대상 보험사",
   insurerPlaceholder: "보험사를 선택하세요",
   requestTypeLabel: "요청 종류",
   requestTypePlaceholder: "요청 종류를 선택하세요",
-  messageLabel: "수정 내용",
+  messageLabel: "수정 요청 내용",
   messagePlaceholder:
-    "현재 표시되는 정보와 제안하는 수정 사항을 구체적으로 적어주세요.",
+    "예: ○○보험 청구 팩스 번호가 변경되었습니다. 공식 홈페이지 기준 새 번호는 000-0000-0000입니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본 내용은 입력하지 마세요.",
   sourceUrlLabel: "공식 자료 링크 (선택)",
   sourceUrlPlaceholder: "https://",
   sourceUrlHint:
-    "근거 공식 자료의 URL을 함께 적어주시면 검토가 빨라집니다.",
-  requesterNameLabel: "이름 (선택)",
-  requesterEmailLabel: "이메일 (선택)",
-  optionalIdentityHint:
-    "필요 없으면 비워두셔도 됩니다. 회신이 필요한 경우에만 이메일을 남겨주세요.",
-  copyAction: "요청 내용 복사하기",
+    "공식 출처를 함께 남기면 검수에 도움이 됩니다.",
+  copyAction: "제보 내용 복사",
   cancelAction: "닫기",
-  copySuccess: "요청 내용이 클립보드에 복사되었습니다.",
+  copySuccess:
+    "제보 내용이 복사되었습니다. 관리자 검수 전에는 공개 정보에 반영되지 않습니다.",
+  copySuccessSubcopy: "공식 출처 확인 후 업데이트됩니다.",
   copyManualHint:
     "자동 복사가 되지 않는 경우 아래 내용을 직접 선택해 복사해 주세요.",
+  declarationLabel:
+    "고객 개인정보, 의료자료, 보험금 지급 판단 요청을 포함하지 않았습니다.",
+  declarationRequired:
+    "안전 확인 체크 후 제보 내용을 복사할 수 있습니다.",
+  sensitiveSignalWarning:
+    "제보 내용에 고객 개인정보, 의료자료 또는 보험금 판단 요청으로 보일 수 있는 표현이 포함되어 있습니다. 해당 내용을 제거한 뒤 다시 진행해주세요.",
   submissionChannelNote:
     "관리자 제출 채널은 추후 안내 예정입니다. 현재는 준비된 내용을 복사해 보관해 주세요.",
   validationRequired: "필수 항목입니다.",
