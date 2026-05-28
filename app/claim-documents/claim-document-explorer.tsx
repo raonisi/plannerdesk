@@ -10,6 +10,7 @@ import {
   StatusBadge,
 } from "@/components/content-page";
 import { ClaimDocumentCategory, VerificationStatus } from "@prisma/client";
+import { claimFormFiles } from "@/lib/content/claim-form-files";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { VerificationStatus as ClientVerificationStatus } from "@/lib/content";
 
@@ -96,8 +97,7 @@ export function ClaimDocumentExplorer({
 
       const matchesQuery =
         normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
-      const matchesCategory =
-        category === "all" || doc.category === category;
+      const matchesCategory = category === "all" || doc.category === category;
       const matchesStatus =
         status === "all" || doc.verificationStatus === status;
       const matchesInsurer =
@@ -108,6 +108,21 @@ export function ClaimDocumentExplorer({
       return matchesQuery && matchesCategory && matchesStatus && matchesInsurer;
     });
   }, [category, documents, query, status, selectedInsurerId]);
+
+  const filteredClaimForms = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return claimFormFiles.filter((form) => {
+      const searchTarget = [form.insurerName, form.categoryLabel, form.label]
+        .join(" ")
+        .toLowerCase();
+      const matchesQuery =
+        normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
+      const matchesCategory = category === "all" || form.category === category;
+
+      return matchesQuery && matchesCategory;
+    });
+  }, [category, query]);
 
   const groups = useMemo(() => {
     return categoryOrder
@@ -124,7 +139,9 @@ export function ClaimDocumentExplorer({
         <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
           <div className="space-y-4">
             <label className="block">
-              <span className="text-sm font-semibold text-[#303845]">서류 검색</span>
+              <span className="text-sm font-semibold text-[#303845]">
+                서류 검색
+              </span>
               <input
                 className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
                 onChange={(event) => setQuery(event.target.value)}
@@ -135,7 +152,9 @@ export function ClaimDocumentExplorer({
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold text-[#303845]">보험사 선택</span>
+              <span className="text-sm font-semibold text-[#303845]">
+                보험사 선택
+              </span>
               <select
                 className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition focus:border-[#aa8137]"
                 onChange={(event) => setSelectedInsurerId(event.target.value)}
@@ -173,6 +192,59 @@ export function ClaimDocumentExplorer({
         </p>
       </section>
 
+      <section className="border border-[#d9c9a8] bg-white p-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-[#7a612d]">
+              Claim form files
+            </p>
+            <h2 className="mt-1 break-keep text-2xl font-semibold text-[#102235]">
+              ???? ????
+            </h2>
+            <p className="mt-2 break-keep text-sm leading-6 text-[#5f6670]">
+              ?? ???? ???? ???? PDF? ?????? ?? ??? ???????. ?? ? ??? ?? ??? ??
+              ?? ??? ?? ??? ???.
+            </p>
+          </div>
+          <p className="whitespace-nowrap text-sm text-[#5f6670]">
+            {filteredClaimForms.length}? ??
+          </p>
+        </div>
+
+        {filteredClaimForms.length > 0 ? (
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {filteredClaimForms.map((form) => (
+              <a
+                className="block border border-[#e3d5b8] bg-[#fbf7ee] p-4 transition hover:border-[#173f36] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+                href={form.href}
+                key={form.id}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="border border-[#d9c9a8] bg-white px-2.5 py-1 text-xs font-semibold text-[#7a612d]">
+                    {form.insurerName}
+                  </span>
+                  <span className="border border-[#d9c9a8] bg-white px-2.5 py-1 text-xs font-semibold text-[#4f5661]">
+                    {form.categoryLabel}
+                  </span>
+                </div>
+                <p className="mt-3 break-keep text-sm font-semibold leading-6 text-[#102235]">
+                  {form.label}
+                </p>
+                <p className="mt-2 text-xs font-semibold text-[#173f36]">
+                  PDF ?? / ????
+                </p>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="??? ?? ????? ????."
+            description="??? ?? ?? ?? ??? ??? ???."
+          />
+        )}
+      </section>
       {groups.length > 0 ? (
         <div className="space-y-8">
           {groups.map((group) => (
@@ -266,7 +338,10 @@ function ClaimDocumentCard({ document }: { document: PublicClaimDocument }) {
       </div>
 
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-        <InfoRow label="관련 보험사" value={document.insurerName ?? "공통 기준"} />
+        <InfoRow
+          label="관련 보험사"
+          value={document.insurerName ?? "공통 기준"}
+        />
         <InfoRow label="구분" value={categoryLabels[document.category]} />
       </dl>
 
@@ -284,7 +359,9 @@ function ClaimDocumentCard({ document }: { document: PublicClaimDocument }) {
           </p>
         </div>
         <div className="border border-[#e3d5b8] bg-white p-4">
-          <h4 className="text-sm font-semibold text-[#7a612d]">선택/추가 서류</h4>
+          <h4 className="text-sm font-semibold text-[#7a612d]">
+            선택/추가 서류
+          </h4>
           <p className="mt-2 text-sm leading-6 text-[#5f6670] whitespace-pre-line break-keep">
             {document.optionalDocuments || "해당사항 없음"}
           </p>
@@ -293,7 +370,9 @@ function ClaimDocumentCard({ document }: { document: PublicClaimDocument }) {
 
       {document.customerMessageTemplate && (
         <div className="mt-5 border border-[#e3d5b8] bg-[#fbf7ee] p-4">
-          <h4 className="text-sm font-semibold text-[#303845]">안내 문구 템플릿</h4>
+          <h4 className="text-sm font-semibold text-[#303845]">
+            안내 문구 템플릿
+          </h4>
           <pre className="mt-2 whitespace-pre-wrap font-sans text-xs leading-5 text-[#4f5661] break-all">
             {document.customerMessageTemplate}
           </pre>
