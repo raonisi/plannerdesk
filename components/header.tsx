@@ -10,6 +10,7 @@ const label = {
   home: "홈",
   directory: "보험사 바로가기",
   directoryShort: "보험사",
+  workTools: "업무 도구",
   claim: "청구서류",
   disclosure: "공시·약관",
   message: "고객 문구",
@@ -20,6 +21,7 @@ const label = {
 
 const navItems = [
   { label: label.directory, shortLabel: label.directoryShort, href: "/directory" },
+  { label: label.workTools, shortLabel: label.workTools, href: "/work-tools" },
   { label: label.claim, shortLabel: label.claim, href: "/claim-documents" },
   { label: label.disclosure, shortLabel: label.disclosure, href: "/disclosure-links" },
   { label: label.message, shortLabel: label.message, href: "/message-templates" },
