@@ -813,29 +813,29 @@ export function WorkToolsClient() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-[#d9c9a8] bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">
+      <section className="rounded-2xl border border-[slate-200] bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a612d]">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[indigo-600]">
               Work Links
             </p>
-            <h2 className="mt-1 text-2xl font-semibold text-[#102235]">
+            <h2 className="mt-1 text-2xl font-semibold text-[slate-900]">
               주요 업무 링크 전체
             </h2>
-            <p className="mt-2 break-keep text-sm leading-6 text-[#5f6670]">
+            <p className="mt-2 break-keep text-sm leading-6 text-[slate-500]">
               보험학교 주요업무링크 항목 중 전산 로그인 그룹만 제외하고, 플래너데스크
               안에서 실행할 수 있는 기능과 공식 외부 링크로 다시 구성했습니다.
             </p>
           </div>
-          <p className="rounded-full border border-[#d9c9a8] bg-[#fbf7ee] px-4 py-2 text-xs font-semibold text-[#7a612d]">
+          <p className="rounded-full border border-[slate-200] bg-[slate-50] px-4 py-2 text-xs font-semibold text-[indigo-600]">
             {allTools().length}개 업무 기능
           </p>
         </div>
       </section>
 
       {favoriteTools.length > 0 ? (
-        <section className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5">
-          <h2 className="text-sm font-semibold text-[#102235]">즐겨찾기</h2>
+        <section className="rounded-2xl border border-[slate-200] bg-[slate-50] p-5">
+          <h2 className="text-sm font-semibold text-[slate-900]">즐겨찾기</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {favoriteTools.map((tool) => (
               <ToolChip
@@ -854,13 +854,13 @@ export function WorkToolsClient() {
       <section className="grid gap-4 lg:grid-cols-3">
         {toolGroups.map((group) => (
           <article
-            className="rounded-xl border border-[#e7ddc9] bg-white p-4 shadow-[0_8px_22px_rgba(16,34,53,0.03)]"
+            className="rounded-xl border border-[slate-200] bg-white p-4 shadow-[0_8px_22px_rgba(16,34,53,0.03)]"
             key={group.title}
           >
-            <h2 className="text-base font-semibold text-[#102235]">
+            <h2 className="text-base font-semibold text-[slate-900]">
               {group.title}
             </h2>
-            <p className="mt-2 break-keep text-xs leading-5 text-[#5f6670]">
+            <p className="mt-2 break-keep text-xs leading-5 text-[slate-500]">
               {group.description}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -881,9 +881,9 @@ export function WorkToolsClient() {
 
       <ToolPanel id={activeTool} />
 
-      <aside className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5">
-        <h2 className="text-sm font-semibold text-[#102235]">안전 안내</h2>
-        <p className="mt-2 break-keep text-sm leading-6 text-[#5f6670]">
+      <aside className="rounded-xl border border-[slate-200] border-l-4 border-l-[indigo-500] bg-[slate-50] p-5">
+        <h2 className="text-sm font-semibold text-[slate-900]">안전 안내</h2>
+        <p className="mt-2 break-keep text-sm leading-6 text-[slate-500]">
           계산 결과와 검색 결과는 설계사 업무 참고용입니다. 보험금 지급 여부,
           지급 금액, 손해사정, 의료 진단 해석을 판단하지 않습니다. 고객 개인정보,
           의료자료, 진단서 원본은 입력하지 마세요.
@@ -917,8 +917,8 @@ function ToolChip({
     <span
       className={`inline-flex min-h-10 overflow-hidden rounded-full border text-xs font-semibold ${
         active
-          ? "border-[#173f36] bg-[#173f36] !text-[#fbf7ee]"
-          : "border-[#d9c9a8] bg-[#fbf7ee] text-[#173f36]"
+          ? "border-[indigo-600] bg-[indigo-600] !text-[slate-50]"
+          : "border-[slate-200] bg-[slate-50] text-[indigo-600]"
       }`}
     >
       <button className="px-3 py-2" onClick={onClick} type="button">
@@ -926,7 +926,7 @@ function ToolChip({
       </button>
       <button
         aria-label={`${tool.label} 즐겨찾기 ${favorite ? "해제" : "추가"}`}
-        className={`border-l px-2 ${active ? "border-[#fbf7ee]/25" : "border-[#d9c9a8]"}`}
+        className={`border-l px-2 ${active ? "border-[slate-50]/25" : "border-[slate-200]"}`}
         onClick={onFavorite}
         type="button"
       >
@@ -961,9 +961,9 @@ function StatsTool() {
       title="플래너데스크 통계실"
     >
       <label className="block">
-        <span className="text-sm font-semibold text-[#303845]">상담 키워드</span>
+        <span className="text-sm font-semibold text-[slate-700]">상담 키워드</span>
         <input
-          className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 text-base outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
+          className="mt-2 min-h-12 w-full rounded-lg border border-[slate-200] bg-white px-4 text-base outline-none focus:border-[indigo-500] focus:ring-2 focus:ring-[indigo-500]/20"
           onChange={(event) => setKeyword(event.target.value)}
           placeholder="예: 자동차, 자영업자, 5060"
           value={keyword}
@@ -972,14 +972,14 @@ function StatsTool() {
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         {filtered.map((card) => (
           <article
-            className="rounded-xl border border-[#e7ddc9] bg-[#fbf7ee] p-4"
+            className="rounded-xl border border-[slate-200] bg-[slate-50] p-4"
             key={card.title}
           >
-            <p className="text-xs font-semibold text-[#7a612d]">{card.stat}</p>
-            <h3 className="mt-1 text-lg font-semibold text-[#102235]">
+            <p className="text-xs font-semibold text-[indigo-600]">{card.stat}</p>
+            <h3 className="mt-1 text-lg font-semibold text-[slate-900]">
               {card.title}
             </h3>
-            <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
+            <p className="mt-2 break-keep text-sm leading-6 text-[slate-500]">
               {card.script}
             </p>
           </article>
@@ -1015,7 +1015,7 @@ function highlightText(text: string, query: string) {
     <>
       {parts.map((part, index) =>
         index % 2 === 1 ? (
-          <mark key={index} className="bg-yellow-100 text-[#102235] px-0.5 rounded">
+          <mark key={index} className="bg-yellow-100 text-[slate-900] px-0.5 rounded">
             {part}
           </mark>
         ) : (
@@ -1179,7 +1179,7 @@ function DiseaseSearchTool() {
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <select
-            className="w-full px-3 py-2.5 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
+            className="w-full px-3 py-2.5 text-sm border border-[slate-200] bg-white rounded-lg outline-none focus:border-[indigo-500] focus:ring-1 focus:ring-[indigo-500]/30"
             value={insurer}
             onChange={(e) => {
               setInsurer(e.target.value);
@@ -1194,7 +1194,7 @@ function DiseaseSearchTool() {
             ))}
           </select>
           <select
-            className="w-full px-3 py-2.5 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
+            className="w-full px-3 py-2.5 text-sm border border-[slate-200] bg-white rounded-lg outline-none focus:border-[indigo-500] focus:ring-1 focus:ring-[indigo-500]/30"
             value={category}
             onChange={(e) => {
               setCategory(e.target.value);
@@ -1210,14 +1210,14 @@ function DiseaseSearchTool() {
           </select>
           <div className="sm:col-span-2 flex gap-2">
             <input
-              className="flex-1 min-w-0 px-3 py-2 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
+              className="flex-1 min-w-0 px-3 py-2 text-sm border border-[slate-200] bg-white rounded-lg outline-none focus:border-[indigo-500] focus:ring-1 focus:ring-[indigo-500]/30"
               placeholder="질환명 검색 (예: 고혈압, 당뇨)"
               value={queryInput}
               onChange={(e) => setQueryInput(e.target.value)}
               onKeyDown={handleKeyDown}
             />
             <button
-              className="px-5 py-2 bg-[#173f36] !text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
+              className="px-5 py-2 bg-[indigo-600] !text-[slate-50] rounded-lg text-sm font-semibold hover:bg-[indigo-700] transition shrink-0"
               onClick={handleSearch}
               type="button"
             >
@@ -1226,7 +1226,7 @@ function DiseaseSearchTool() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-1 sm:flex-row sm:justify-between text-[11px] text-[#5f6670]">
+        <div className="flex flex-col gap-1 sm:flex-row sm:justify-between text-[11px] text-[slate-500]">
           {meta?.last_synced_at && (
             <span>마지막 동기화: {formatDate(meta.last_synced_at)}</span>
           )}
@@ -1234,17 +1234,17 @@ function DiseaseSearchTool() {
         </div>
 
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-[#5f6670]">불러오는 중...</div>
+          <div className="py-20 text-center text-sm text-[slate-500]">불러오는 중...</div>
         ) : items.length === 0 ? (
-          <div className="py-20 text-center text-sm text-[#5f6670] border border-[#e7ddc9] bg-[#fbf7ee] rounded-xl">
+          <div className="py-20 text-center text-sm text-[slate-500] border border-[slate-200] bg-[slate-50] rounded-xl">
             검색 결과가 없습니다.
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="hidden md:block overflow-x-auto border border-[#e7ddc9] rounded-xl bg-white shadow-sm">
+            <div className="hidden md:block overflow-x-auto border border-[slate-200] rounded-xl bg-white shadow-sm">
               <table className="w-full border-collapse text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="bg-[#fbf7ee] border-b border-[#e7ddc9] text-[#102235] font-semibold">
+                  <tr className="bg-[slate-50] border-b border-[slate-200] text-[slate-900] font-semibold">
                     <th className="px-4 py-3 font-semibold">보험사</th>
                     <th className="px-4 py-3 font-semibold">예외질환</th>
                     <th className="px-4 py-3 font-semibold">최소경과</th>
@@ -1254,10 +1254,10 @@ function DiseaseSearchTool() {
                     <th className="px-4 py-3 font-semibold">비고</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e7ddc9]">
+                <tbody className="divide-y divide-[slate-200]">
                   {items.map((item: DiseaseItem) => (
-                    <tr key={item.id} className="hover:bg-[#fbf7ee]/40 text-[#303845] transition-colors">
-                      <td className="px-4 py-3 font-semibold text-[#102235] whitespace-nowrap">{item.insurer}</td>
+                    <tr key={item.id} className="hover:bg-[slate-50]/40 text-[slate-700] transition-colors">
+                      <td className="px-4 py-3 font-semibold text-[slate-900] whitespace-nowrap">{item.insurer}</td>
                       <td className="px-4 py-3 font-medium text-slate-900">{highlightText(item.disease_name, query)}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{item.min_elapsed || "-"}</td>
                       <td className="px-4 py-3">{item.treatment_period || "-"}</td>
@@ -1272,26 +1272,26 @@ function DiseaseSearchTool() {
 
             <div className="md:hidden space-y-3">
               {items.map((item: DiseaseItem) => (
-                <div key={item.id} className="p-4 border border-[#e7ddc9] bg-white rounded-xl space-y-2.5">
+                <div key={item.id} className="p-4 border border-[slate-200] bg-white rounded-xl space-y-2.5">
                   <div className="flex justify-between items-start">
-                    <span className="font-bold text-[#102235]">{item.insurer}</span>
+                    <span className="font-bold text-[slate-900]">{item.insurer}</span>
                     {item.product_category && (
-                      <span className="text-[10px] px-2 py-0.5 border border-[#d9c9a8] bg-[#fbf7ee] text-[#7a612d] rounded font-semibold">
+                      <span className="text-[10px] px-2 py-0.5 border border-[slate-200] bg-[slate-50] text-[indigo-600] rounded font-semibold">
                         {item.product_category}
                       </span>
                     )}
                   </div>
                   <h4 className="font-semibold text-slate-900 text-sm">{highlightText(item.disease_name, query)}</h4>
-                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-[#5f6670]">
-                    <div className="flex justify-between border-b border-dashed border-[#e7ddc9] pb-1">
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-[slate-500]">
+                    <div className="flex justify-between border-b border-dashed border-[slate-200] pb-1">
                       <dt className="text-slate-400">최소경과</dt>
                       <dd className="font-medium text-slate-800">{item.min_elapsed || "-"}</dd>
                     </div>
-                    <div className="flex justify-between border-b border-dashed border-[#e7ddc9] pb-1">
+                    <div className="flex justify-between border-b border-dashed border-[slate-200] pb-1">
                       <dt className="text-slate-400">수술여부</dt>
                       <dd className="font-medium text-slate-800">{item.surgery_status || "-"}</dd>
                     </div>
-                    <div className="col-span-2 flex justify-between border-b border-dashed border-[#e7ddc9] pb-1">
+                    <div className="col-span-2 flex justify-between border-b border-dashed border-[slate-200] pb-1">
                       <dt className="text-slate-400">치료기간</dt>
                       <dd className="font-medium text-slate-800">{item.treatment_period || "-"}</dd>
                     </div>
@@ -1428,13 +1428,13 @@ function SurgeryCodeSearchTool() {
       title="수술분류표 수술코드 검색"
     >
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 border border-[#e7ddc9] rounded-xl shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 border border-[slate-200] rounded-xl shadow-sm">
           <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             <button
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition whitespace-nowrap ${
                 classificationSet === ""
-                  ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
-                  : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
+                  ? "bg-[indigo-600] !text-[slate-50] border-transparent"
+                  : "bg-[slate-50] text-[indigo-600] border-[slate-200] hover:bg-[slate-100]"
               }`}
               onClick={() => {
                 setClassificationSet("");
@@ -1447,8 +1447,8 @@ function SurgeryCodeSearchTool() {
             <button
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition whitespace-nowrap ${
                 classificationSet === "1-3/1-5"
-                  ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
-                  : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
+                  ? "bg-[indigo-600] !text-[slate-50] border-transparent"
+                  : "bg-[slate-50] text-[indigo-600] border-[slate-200] hover:bg-[slate-100]"
               }`}
               onClick={() => {
                 setClassificationSet("1-3/1-5");
@@ -1461,8 +1461,8 @@ function SurgeryCodeSearchTool() {
             <button
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition whitespace-nowrap ${
                 classificationSet === "1-7/1-8"
-                  ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
-                  : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
+                  ? "bg-[indigo-600] !text-[slate-50] border-transparent"
+                  : "bg-[slate-50] text-[indigo-600] border-[slate-200] hover:bg-[slate-100]"
               }`}
               onClick={() => {
                 setClassificationSet("1-7/1-8");
@@ -1476,14 +1476,14 @@ function SurgeryCodeSearchTool() {
 
           <div className="flex gap-2">
             <input
-              className="flex-1 sm:w-64 px-3 py-2 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
+              className="flex-1 sm:w-64 px-3 py-2 text-sm border border-[slate-200] bg-white rounded-lg outline-none focus:border-[indigo-500] focus:ring-1 focus:ring-[indigo-500]/30"
               placeholder="수술명 검색 (예: 백내장, 대장용종)"
               value={queryInput}
               onChange={(e) => setQueryInput(e.target.value)}
               onKeyDown={handleKeyDown}
             />
             <button
-              className="px-5 py-2 bg-[#173f36] !text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
+              className="px-5 py-2 bg-[indigo-600] !text-[slate-50] rounded-lg text-sm font-semibold hover:bg-[indigo-700] transition shrink-0"
               onClick={handleSearch}
               type="button"
             >
@@ -1492,7 +1492,7 @@ function SurgeryCodeSearchTool() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-1 sm:flex-row sm:justify-between text-[11px] text-[#5f6670]">
+        <div className="flex flex-col gap-1 sm:flex-row sm:justify-between text-[11px] text-[slate-500]">
           {meta?.last_updated_at && (
             <span>마지막 업데이트: {formatDate(meta.last_updated_at)}</span>
           )}
@@ -1500,36 +1500,36 @@ function SurgeryCodeSearchTool() {
         </div>
 
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-[#5f6670]">불러오는 중...</div>
+          <div className="py-20 text-center text-sm text-[slate-500]">불러오는 중...</div>
         ) : items.length === 0 ? (
-          <div className="py-20 text-center text-sm text-[#5f6670] border border-[#e7ddc9] bg-[#fbf7ee] rounded-xl">
+          <div className="py-20 text-center text-sm text-[slate-500] border border-[slate-200] bg-[slate-50] rounded-xl">
             검색 결과가 없습니다.
           </div>
         ) : (
           <div className="space-y-6">
             {items1_3.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-sm font-bold text-[#102235] px-2 flex items-center gap-1.5">
-                  <span className="w-1.5 h-3 bg-[#aa8137] rounded-full inline-block"></span>
+                <h3 className="text-sm font-bold text-[slate-900] px-2 flex items-center gap-1.5">
+                  <span className="w-1.5 h-3 bg-[indigo-500] rounded-full inline-block"></span>
                   1-3종 · 1-5종 분류표
                 </h3>
-                <div className="overflow-x-auto border border-[#e7ddc9] rounded-xl bg-white shadow-sm">
+                <div className="overflow-x-auto border border-[slate-200] rounded-xl bg-white shadow-sm">
                   <table className="w-full border-collapse text-left text-sm">
                     <thead>
-                      <tr className="bg-[#fbf7ee] border-b border-[#e7ddc9] text-[#102235] font-semibold text-xs sm:text-sm">
+                      <tr className="bg-[slate-50] border-b border-[slate-200] text-[slate-900] font-semibold text-xs sm:text-sm">
                         <th className="px-4 py-2.5 font-semibold">수술명</th>
                         <th className="px-4 py-2.5 font-semibold text-center w-24">1-3종</th>
                         <th className="px-4 py-2.5 font-semibold text-center w-24">1-5종</th>
                         <th className="px-4 py-2.5 font-semibold">비고</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e7ddc9]">
+                    <tbody className="divide-y divide-[slate-200]">
                       {items1_3.map((item: SurgeryCodeItem) => {
                         const style1_3 = getGradeStyle(item.classification_1_3);
                         const style1_5 = getGradeStyle(item.classification_1_5);
                         return (
-                           <tr key={item.id} className="hover:bg-[#fbf7ee]/40 text-[#303845] transition-colors">
-                             <td className="px-4 py-3 font-semibold text-[#102235]">{highlightText(item.surgery_name, query)}</td>
+                           <tr key={item.id} className="hover:bg-[slate-50]/40 text-[slate-700] transition-colors">
+                             <td className="px-4 py-3 font-semibold text-[slate-900]">{highlightText(item.surgery_name, query)}</td>
                              <td className="px-4 py-3 text-center">
                                <span className={`inline-block px-2.5 py-0.5 text-xs font-bold border rounded-md min-w-[3.5rem] text-center ${style1_3.bg} ${style1_3.text}`}>
                                  {item.classification_1_3 || "-"}
@@ -1552,27 +1552,27 @@ function SurgeryCodeSearchTool() {
 
             {items1_7.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-sm font-bold text-[#102235] px-2 flex items-center gap-1.5">
-                  <span className="w-1.5 h-3 bg-[#aa8137] rounded-full inline-block"></span>
+                <h3 className="text-sm font-bold text-[slate-900] px-2 flex items-center gap-1.5">
+                  <span className="w-1.5 h-3 bg-[indigo-500] rounded-full inline-block"></span>
                   1-7종 · 1-8종 분류표
                 </h3>
-                <div className="overflow-x-auto border border-[#e7ddc9] rounded-xl bg-white shadow-sm">
+                <div className="overflow-x-auto border border-[slate-200] rounded-xl bg-white shadow-sm">
                   <table className="w-full border-collapse text-left text-sm">
                     <thead>
-                      <tr className="bg-[#fbf7ee] border-b border-[#e7ddc9] text-[#102235] font-semibold text-xs sm:text-sm">
+                      <tr className="bg-[slate-50] border-b border-[slate-200] text-[slate-900] font-semibold text-xs sm:text-sm">
                         <th className="px-4 py-2.5 font-semibold">수술명</th>
                         <th className="px-4 py-2.5 font-semibold text-center w-24">1-7종</th>
                         <th className="px-4 py-2.5 font-semibold text-center w-24">1-8종</th>
                         <th className="px-4 py-2.5 font-semibold">비고</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#e7ddc9]">
+                    <tbody className="divide-y divide-[slate-200]">
                       {items1_7.map((item: SurgeryCodeItem) => {
                         const style1_7 = getGradeStyle(item.classification_1_7);
                         const style1_8 = getGradeStyle(item.classification_1_8);
                         return (
-                          <tr key={item.id} className="hover:bg-[#fbf7ee]/40 text-[#303845] transition-colors">
-                            <td className="px-4 py-3 font-semibold text-[#102235]">{highlightText(item.surgery_name, query)}</td>
+                          <tr key={item.id} className="hover:bg-[slate-50]/40 text-[slate-700] transition-colors">
+                            <td className="px-4 py-3 font-semibold text-[slate-900]">{highlightText(item.surgery_name, query)}</td>
                             <td className="px-4 py-3 text-center">
                               <span className={`inline-block px-2.5 py-0.5 text-xs font-bold border rounded-md min-w-[3.5rem] text-center ${style1_7.bg} ${style1_7.text}`}>
                                 {item.classification_1_7 || "-"}
@@ -1760,16 +1760,16 @@ function DiseaseCodeSearchTool() {
       title="상병코드(KCD) 검색"
     >
       <div className="space-y-4">
-        <div className="flex gap-2 max-w-xl bg-white p-3 border border-[#e7ddc9] rounded-xl shadow-sm">
+        <div className="flex gap-2 max-w-xl bg-white p-3 border border-[slate-200] rounded-xl shadow-sm">
           <input
-            className="flex-1 min-w-0 px-3 py-2 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
+            className="flex-1 min-w-0 px-3 py-2 text-sm border border-[slate-200] bg-white rounded-lg outline-none focus:border-[indigo-500] focus:ring-1 focus:ring-[indigo-500]/30"
             placeholder="상병코드·한글명·영문명 (예: I10, 칸디다, Candida)"
             value={queryInput}
             onChange={(e) => setQueryInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           <button
-            className="px-5 py-2 bg-[#173f36] !text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
+            className="px-5 py-2 bg-[indigo-600] !text-[slate-50] rounded-lg text-sm font-semibold hover:bg-[indigo-700] transition shrink-0"
             onClick={handleSearch}
             type="button"
           >
@@ -1777,7 +1777,7 @@ function DiseaseCodeSearchTool() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-1 sm:flex-row sm:justify-between text-[11px] text-[#5f6670]">
+        <div className="flex flex-col gap-1 sm:flex-row sm:justify-between text-[11px] text-[slate-500]">
           {meta?.last_updated_at && (
             <span>마지막 업데이트: {formatDate(meta.last_updated_at)}</span>
           )}
@@ -1785,14 +1785,14 @@ function DiseaseCodeSearchTool() {
         </div>
 
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-[#5f6670]">불러오는 중...</div>
+          <div className="py-20 text-center text-sm text-[slate-500]">불러오는 중...</div>
         ) : items.length === 0 ? (
-          <div className="py-20 text-center text-sm text-[#5f6670] border border-[#e7ddc9] bg-[#fbf7ee] rounded-xl">
+          <div className="py-20 text-center text-sm text-[slate-500] border border-[slate-200] bg-[slate-50] rounded-xl">
             검색 결과가 없습니다.
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="divide-y divide-[#e7ddc9] border border-[#e7ddc9] rounded-xl overflow-hidden bg-white shadow-sm">
+            <div className="divide-y divide-[slate-200] border border-[slate-200] rounded-xl overflow-hidden bg-white shadow-sm">
               {items.map((item: DiseaseCodeItem) => {
                 const category = getKcdCategory(item.code);
                 const isExpanded = expandedId === item.id;
@@ -1806,19 +1806,19 @@ function DiseaseCodeSearchTool() {
                       <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           {category && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 border border-[#d9c9a8] bg-[#fbf7ee] text-[#7a612d] rounded">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 border border-[slate-200] bg-[slate-50] text-[indigo-600] rounded">
                               {category}
                             </span>
                           )}
-                          <span className="text-sm font-bold font-mono text-[#173f36]">
+                          <span className="text-sm font-bold font-mono text-[indigo-600]">
                             {highlightText(item.code, query)}
                           </span>
                         </div>
-                        <h4 className="font-semibold text-[#102235] text-sm sm:text-base">
+                        <h4 className="font-semibold text-[slate-900] text-sm sm:text-base">
                           {highlightText(item.name_ko, query)}
                         </h4>
                         {item.name_en && (
-                          <p className="text-xs text-[#5f6670] font-medium leading-tight">
+                          <p className="text-xs text-[slate-500] font-medium leading-tight">
                             {highlightText(item.name_en, query)}
                           </p>
                         )}
@@ -1844,15 +1844,15 @@ function DiseaseCodeSearchTool() {
                     </button>
 
                     {isExpanded && (
-                      <div className="px-5 pb-5 pt-1 bg-[#fbf7ee]/40 border-t border-[#e7ddc9]/70 space-y-4">
+                      <div className="px-5 pb-5 pt-1 bg-[slate-50]/40 border-t border-[slate-200]/70 space-y-4">
                         {coverageLoading ? (
-                          <div className="py-6 text-center text-xs text-[#5f6670]">불러오는 중...</div>
+                          <div className="py-6 text-center text-xs text-[slate-500]">불러오는 중...</div>
                         ) : !coverageData ? (
                           <p className="text-xs text-red-500 py-4">상세 정보를 로드할 수 없습니다.</p>
                         ) : (
                           <>
                             <div className="space-y-2.5">
-                              <h5 className="text-xs font-bold text-[#5f6670] flex items-center gap-1">
+                              <h5 className="text-xs font-bold text-[slate-500] flex items-center gap-1">
                                 <svg
                                   className="w-3.5 h-3.5 text-green-600"
                                   fill="none"
@@ -1869,7 +1869,7 @@ function DiseaseCodeSearchTool() {
                                 청구 가능 표준 담보 ({coverageData.coverages?.length || 0})
                               </h5>
                               {(!coverageData.coverages || coverageData.coverages.length === 0) ? (
-                                <div className="p-3.5 text-xs border border-[#e7ddc9] bg-white rounded-lg text-[#5f6670] flex items-start gap-2">
+                                <div className="p-3.5 text-xs border border-[slate-200] bg-white rounded-lg text-[slate-500] flex items-start gap-2">
                                   <svg
                                     className="w-4 h-4 text-amber-500 shrink-0 mt-0.5"
                                     fill="none"
@@ -1940,8 +1940,8 @@ function DiseaseCodeSearchTool() {
 
                             {coverageData.details && (
                               <div className="space-y-2">
-                                <h5 className="text-xs font-bold text-[#5f6670]">의학 정보</h5>
-                                <div className="p-4 border border-[#e7ddc9] bg-white rounded-xl space-y-3.5 text-xs text-[#303845]">
+                                <h5 className="text-xs font-bold text-[slate-500]">의학 정보</h5>
+                                <div className="p-4 border border-[slate-200] bg-white rounded-xl space-y-3.5 text-xs text-[slate-700]">
                                   {[
                                     ["진료과", coverageData.details.department],
                                     ["설명", coverageData.details.description],
@@ -2037,27 +2037,27 @@ function Pagination({
   }, [page, totalPages]);
 
   return (
-    <div className="flex items-center justify-center gap-1 pt-4 border-t border-[#e7ddc9]">
+    <div className="flex items-center justify-center gap-1 pt-4 border-t border-[slate-200]">
       <button
-        className="p-2 border border-[#d9c9a8] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white transition"
+        className="p-2 border border-[slate-200] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white transition"
         disabled={page === 1}
         onClick={() => onChange(page - 1)}
         type="button"
       >
-        <svg className="w-4 h-4 text-[#173f36]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <svg className="w-4 h-4 text-[indigo-600]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
       {visiblePages[0] > 1 && (
         <>
           <button
-            className="w-9 h-9 border border-[#d9c9a8] text-xs font-semibold rounded-lg hover:bg-white transition"
+            className="w-9 h-9 border border-[slate-200] text-xs font-semibold rounded-lg hover:bg-white transition"
             onClick={() => onChange(1)}
             type="button"
           >
             1
           </button>
-          {visiblePages[0] > 2 && <span className="text-[#5f6670] text-xs px-1">...</span>}
+          {visiblePages[0] > 2 && <span className="text-[slate-500] text-xs px-1">...</span>}
         </>
       )}
       {visiblePages.map((p) => (
@@ -2065,8 +2065,8 @@ function Pagination({
           key={p}
           className={`w-9 h-9 text-xs font-semibold rounded-lg border transition ${
             p === page
-              ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
-              : "border-[#d9c9a8] text-[#173f36] hover:bg-white"
+              ? "bg-[indigo-600] !text-[slate-50] border-transparent"
+              : "border-[slate-200] text-[indigo-600] hover:bg-white"
           }`}
           onClick={() => onChange(p)}
           type="button"
@@ -2077,10 +2077,10 @@ function Pagination({
       {visiblePages[visiblePages.length - 1] < totalPages && (
         <>
           {visiblePages[visiblePages.length - 1] < totalPages - 1 && (
-            <span className="text-[#5f6670] text-xs px-1">...</span>
+            <span className="text-[slate-500] text-xs px-1">...</span>
           )}
           <button
-            className="w-9 h-9 border border-[#d9c9a8] text-xs font-semibold rounded-lg hover:bg-white transition"
+            className="w-9 h-9 border border-[slate-200] text-xs font-semibold rounded-lg hover:bg-white transition"
             onClick={() => onChange(totalPages)}
             type="button"
           >
@@ -2089,12 +2089,12 @@ function Pagination({
         </>
       )}
       <button
-        className="p-2 border border-[#d9c9a8] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white transition"
+        className="p-2 border border-[slate-200] rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white transition"
         disabled={page === totalPages}
         onClick={() => onChange(page + 1)}
         type="button"
       >
-        <svg className="w-4 h-4 text-[#173f36]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <svg className="w-4 h-4 text-[indigo-600]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -2181,10 +2181,10 @@ function FolderDownloadModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-white border border-[#d9c9a8] rounded-2xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col z-10 animate-in fade-in-0 duration-200">
-        <div className="px-5 py-4 border-b border-[#e7ddc9] flex justify-between items-center">
+      <div className="relative w-full max-w-lg bg-white border border-[slate-200] rounded-2xl shadow-xl overflow-hidden max-h-[85vh] flex flex-col z-10 animate-in fade-in-0 duration-200">
+        <div className="px-5 py-4 border-b border-[slate-200] flex justify-between items-center">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-[#102235]">{title}</h3>
+            <h3 className="text-base sm:text-lg font-bold text-[slate-900]">{title}</h3>
             <p className="text-[10px] font-mono text-slate-400 mt-0.5">{target}</p>
           </div>
           <button
@@ -2214,7 +2214,7 @@ function FolderDownloadModal({
               <span>파일 목록을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</span>
             </div>
           ) : files.length === 0 ? (
-            <div className="py-12 text-center text-sm text-[#5f6670] border border-dashed border-[#d9c9a8] bg-[#fbf7ee]/40 rounded-xl">
+            <div className="py-12 text-center text-sm text-[slate-500] border border-dashed border-[slate-200] bg-[slate-50]/40 rounded-xl">
               등록된 파일이 없습니다.
             </div>
           ) : (
@@ -2222,17 +2222,17 @@ function FolderDownloadModal({
               {files.map((file) => (
                 <li key={file.name}>
                   <a
-                    className="flex items-center justify-between gap-3 px-4 py-3 border border-[#e7ddc9] bg-white hover:border-[#aa8137] hover:bg-[#fbf7ee]/30 rounded-xl group transition-all"
+                    className="flex items-center justify-between gap-3 px-4 py-3 border border-[slate-200] bg-white hover:border-[indigo-500] hover:bg-[slate-50]/30 rounded-xl group transition-all"
                     href={file.public_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     download={file.name}
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <svg className="w-5 h-5 text-[#aa8137] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-5 h-5 text-[indigo-500] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      <span className="text-sm font-semibold text-slate-800 truncate group-hover:text-[#aa8137] transition-colors">
+                      <span className="text-sm font-semibold text-slate-800 truncate group-hover:text-[indigo-500] transition-colors">
                         {file.name}
                       </span>
                     </div>
@@ -2242,7 +2242,7 @@ function FolderDownloadModal({
                           {formatSize(file.size)}
                         </span>
                       )}
-                      <svg className="w-4 h-4 text-slate-400 group-hover:text-[#aa8137] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="w-4 h-4 text-slate-400 group-hover:text-[indigo-500] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
                     </div>
@@ -2253,9 +2253,9 @@ function FolderDownloadModal({
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-[#e7ddc9] bg-[#fbf7ee]/50 flex justify-end">
+        <div className="px-5 py-3 border-t border-[slate-200] bg-[slate-50]/50 flex justify-end">
           <button
-            className="px-4 py-2 border border-[#d9c9a8] bg-white text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition"
+            className="px-4 py-2 border border-[slate-200] bg-white text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 transition"
             onClick={onClose}
             type="button"
           >
@@ -2376,25 +2376,25 @@ function calculateSavings(
 /* ── Shared row + tip components for calculator results ── */
 function ResultRow({ label, value, bold, highlight }: { label: string; value: string; bold?: boolean; highlight?: boolean }) {
   return (
-    <div className={`flex justify-between py-1.5 ${bold ? 'border-b border-[#d9c9a8]' : 'border-b border-dashed border-[#e7ddc9]/80'} ${highlight ? 'text-[#aa8137] font-bold text-base sm:text-lg' : ''}`}>
-      <span className={bold ? 'font-semibold text-[#102235]' : 'text-[#5f6670]'}>{label}</span>
-      <span className={bold ? 'font-bold text-[#102235]' : 'font-medium text-[#102235]'}>{value}</span>
+    <div className={`flex justify-between py-1.5 ${bold ? 'border-b border-[slate-200]' : 'border-b border-dashed border-[slate-200]/80'} ${highlight ? 'text-[indigo-500] font-bold text-base sm:text-lg' : ''}`}>
+      <span className={bold ? 'font-semibold text-[slate-900]' : 'text-[slate-500]'}>{label}</span>
+      <span className={bold ? 'font-bold text-[slate-900]' : 'font-medium text-[slate-900]'}>{value}</span>
     </div>
   );
 }
 
 function TipBox({ title, children }: { title: string; children: React.ReactNode; }) {
   return (
-    <div className="mt-4 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-      <p className="text-xs font-bold text-[#7a612d] mb-2">💡 {title}</p>
-      <div className="text-xs leading-relaxed text-[#5f6670] break-keep">{children}</div>
+    <div className="mt-4 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+      <p className="text-xs font-bold text-[indigo-600] mb-2">💡 {title}</p>
+      <div className="text-xs leading-relaxed text-[slate-500] break-keep">{children}</div>
     </div>
   );
 }
 
-const inputCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20";
-const selectCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30";
-const radioCls = (active: boolean) => `py-2 px-3 text-xs font-semibold rounded-lg border transition cursor-pointer text-center ${active ? 'bg-[#173f36] !text-[#fbf7ee] border-transparent' : 'bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]'}`;
+const inputCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[slate-200] bg-white px-3 text-sm outline-none focus:border-[indigo-500] focus:ring-2 focus:ring-[indigo-500]/20";
+const selectCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[slate-200] bg-white px-3 text-sm outline-none focus:border-[indigo-500] focus:ring-1 focus:ring-[indigo-500]/30";
+const radioCls = (active: boolean) => `py-2 px-3 text-xs font-semibold rounded-lg border transition cursor-pointer text-center ${active ? 'bg-[indigo-600] !text-[slate-50] border-transparent' : 'bg-[slate-50] text-[indigo-600] border-[slate-200] hover:bg-[slate-100]'}`;
 
 function CalculatorTool({ id }: { id: ToolId }) {
   switch (id) {
@@ -2422,11 +2422,11 @@ function InsuranceAgeCalc() {
   return (
     <PanelShell description="생년월일 기준 만 나이와 보험나이를 계산하고, 보험나이 변경일까지 남은 일수를 알려줍니다." id="insurance-age" title="보험나이 계산기">
       <label className="block max-w-xs">
-        <span className="text-sm font-semibold text-[#303845]">생년월일 8자리</span>
+        <span className="text-sm font-semibold text-[slate-700]">생년월일 8자리</span>
         <input className={inputCls} placeholder="예: 19900115" value={birthInput} onChange={e => setBirthInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))} inputMode="numeric" />
       </label>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+      <div className="mt-5 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+        <p className="text-xs font-semibold text-[indigo-600]">계산 결과</p>
         {result ? (
           <div className="mt-3 space-y-0.5 text-sm">
             <ResultRow label="만 나이" value={`${result.realAge}세`} bold />
@@ -2436,7 +2436,7 @@ function InsuranceAgeCalc() {
             <ResultRow label="기준일" value={fmtDate(new Date())} />
           </div>
         ) : (
-          <p className="mt-2 text-sm text-[#102235] font-semibold">생년월일 8자리를 입력하세요.</p>
+          <p className="mt-2 text-sm text-[slate-900] font-semibold">생년월일 8자리를 입력하세요.</p>
         )}
       </div>
       {result && result.daysToNext <= 30 && (
@@ -2502,14 +2502,14 @@ function SilbiCalc() {
           </p>
         </div>
         <div>
-          <span className="text-sm font-semibold text-[#303845]">진료 구분</span>
+          <span className="text-sm font-semibold text-[slate-700]">진료 구분</span>
           <div className="mt-2 grid grid-cols-2 gap-1.5">
             <button type="button" className={radioCls(treatType==='outpatient')} onClick={() => setTreatType('outpatient')}>통원 진료</button>
             <button type="button" className={radioCls(treatType==='inpatient')} onClick={() => setTreatType('inpatient')}>입원 진료</button>
           </div>
         </div>
         <div>
-          <span className="text-sm font-semibold text-[#303845]">방문 의료기관</span>
+          <span className="text-sm font-semibold text-[slate-700]">방문 의료기관</span>
           <select className={`${selectCls} mt-2 py-2.5`} value={facility} onChange={e => setFacility(e.target.value as SilbiFacility)}>
             <option value="clinic">의원급 (공제 1만원)</option>
             <option value="general">병원/종합병원 (공제 1.5만원)</option>
@@ -2589,19 +2589,19 @@ function CurrencyValueCalc() {
   return (
     <PanelShell description="현재 금액의 미래 명목가치와 구매력 변화를 계산합니다." id="currency-value" title="화폐가치 계산기">
       <div className="grid gap-3 sm:grid-cols-4">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">금액</span><input className={inputCls} placeholder="예: 10000000" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">연 상승률(%)</span><input className={inputCls} placeholder="예: 3" value={rate} onChange={e => setRate(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">기간(년)</span><input className={inputCls} placeholder="예: 10" value={years} onChange={e => setYears(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">금액</span><input className={inputCls} placeholder="예: 10000000" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">연 상승률(%)</span><input className={inputCls} placeholder="예: 3" value={rate} onChange={e => setRate(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">기간(년)</span><input className={inputCls} placeholder="예: 10" value={years} onChange={e => setYears(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
         <div>
-          <span className="text-sm font-semibold text-[#303845]">계산 방향</span>
+          <span className="text-sm font-semibold text-[slate-700]">계산 방향</span>
           <div className="mt-1.5 grid grid-cols-2 gap-1">
             <button type="button" className={radioCls(dir==='future')} onClick={() => setDir('future')}>미래가치</button>
             <button type="button" className={radioCls(dir==='present')} onClick={() => setDir('present')}>현재가치</button>
           </div>
         </div>
       </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+      <div className="mt-5 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+        <p className="text-xs font-semibold text-[indigo-600]">계산 결과</p>
         {result ? (
           <div className="mt-3 space-y-0.5 text-sm">
             <ResultRow label="입력 금액" value={money(Number(amount))} />
@@ -2610,7 +2610,7 @@ function CurrencyValueCalc() {
             <ResultRow label="누적 상승률" value={`${result.cumulative.toFixed(1)}%`} />
             <ResultRow label="구매력 감소율" value={`${result.purchasingLoss.toFixed(1)}%`} />
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">금액과 기간을 입력하세요.</p>}
+        ) : <p className="mt-2 text-sm text-[slate-900] font-semibold">금액과 기간을 입력하세요.</p>}
       </div>
       <TipBox title="상담 활용 팁">
         고객에게 보장 금액의 실질 가치 하락을 설명할 때 활용하세요. 예: &quot;지금 1억 보장이 {years}년 후에는 구매력 기준 {result ? money(result.real) : '-'}에 불과합니다.&quot;
@@ -2629,7 +2629,7 @@ function LoanCalc() {
   return (
     <PanelShell description="원리금균등, 원금균등, 만기일시 상환 방식별 월 납입액과 총 이자를 계산합니다." id="loan" title="대출 이자 계산기">
       <div className="mb-3">
-        <span className="text-sm font-semibold text-[#303845]">상환 방식</span>
+        <span className="text-sm font-semibold text-[slate-700]">상환 방식</span>
         <div className="mt-1.5 grid grid-cols-3 gap-1">
           <button type="button" className={radioCls(mode==='equal_payment')} onClick={() => setMode('equal_payment')}>원리금균등</button>
           <button type="button" className={radioCls(mode==='equal_principal')} onClick={() => setMode('equal_principal')}>원금균등</button>
@@ -2637,12 +2637,12 @@ function LoanCalc() {
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">대출 원금</span><input className={inputCls} placeholder="예: 100000000" value={principal} onChange={e => setPrincipal(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">연 금리(%)</span><input className={inputCls} placeholder="예: 4.5" value={ratePct} onChange={e => setRatePct(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">기간(개월)</span><input className={inputCls} placeholder="예: 360" value={months} onChange={e => setMonths(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">대출 원금</span><input className={inputCls} placeholder="예: 100000000" value={principal} onChange={e => setPrincipal(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">연 금리(%)</span><input className={inputCls} placeholder="예: 4.5" value={ratePct} onChange={e => setRatePct(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">기간(개월)</span><input className={inputCls} placeholder="예: 360" value={months} onChange={e => setMonths(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
       </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+      <div className="mt-5 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+        <p className="text-xs font-semibold text-[indigo-600]">계산 결과</p>
         {result ? (
           <div className="mt-3 space-y-0.5 text-sm">
             <ResultRow label="첫 달 납입액" value={money(result.first)} bold />
@@ -2651,7 +2651,7 @@ function LoanCalc() {
             <ResultRow label="총 이자" value={money(result.totalInterest)} />
             <ResultRow label="총 상환액" value={money(result.totalPayment)} highlight />
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">대출 정보를 입력하세요.</p>}
+        ) : <p className="mt-2 text-sm text-[slate-900] font-semibold">대출 정보를 입력하세요.</p>}
       </div>
       <TipBox title="상환 방식 비교">
         원리금균등은 매월 같은 금액, 원금균등은 초기 부담이 크지만 총 이자가 적고, 만기일시는 매월 이자만 납부하다 만기에 원금을 상환합니다.
@@ -2670,13 +2670,13 @@ function NetSalaryCalc() {
   return (
     <PanelShell description="연봉 기준 4대 보험, 소득세, 지방소득세를 계산하여 월 실수령액을 알려줍니다." id="net-salary" title="연봉 실수령액 계산기">
       <div className="grid gap-3 sm:grid-cols-4">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">연봉(세전)</span><input className={inputCls} placeholder="예: 50000000" value={grossAnnual} onChange={e => setGrossAnnual(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">비과세액(연)</span><input className={inputCls} placeholder="예: 1200000" value={nonTaxable} onChange={e => setNonTaxable(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">부양가족 수</span><input className={inputCls} placeholder="예: 1" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">20세 이하 자녀</span><input className={inputCls} placeholder="예: 0" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">연봉(세전)</span><input className={inputCls} placeholder="예: 50000000" value={grossAnnual} onChange={e => setGrossAnnual(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">비과세액(연)</span><input className={inputCls} placeholder="예: 1200000" value={nonTaxable} onChange={e => setNonTaxable(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">부양가족 수</span><input className={inputCls} placeholder="예: 1" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">20세 이하 자녀</span><input className={inputCls} placeholder="예: 0" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
       </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+      <div className="mt-5 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+        <p className="text-xs font-semibold text-[indigo-600]">계산 결과</p>
         {result ? (
           <div className="mt-3 space-y-0.5 text-sm">
             <ResultRow label="연봉(세전)" value={money(result.grossAnnual)} />
@@ -2687,7 +2687,7 @@ function NetSalaryCalc() {
             <ResultRow label="근로소득세액공제" value={`-${money(result.workCredit)}`} />
             <ResultRow label="소득세(결정)" value={money(result.finalTax)} bold />
             <ResultRow label="지방소득세" value={money(result.localTax)} />
-            <p className="text-[10px] font-bold text-[#5f6670] pt-2">월 공제 내역</p>
+            <p className="text-[10px] font-bold text-[slate-500] pt-2">월 공제 내역</p>
             <ResultRow label="국민연금" value={money(result.mb.pension)} />
             <ResultRow label="건강보험" value={money(result.mb.health)} />
             <ResultRow label="장기요양" value={money(result.mb.longcare)} />
@@ -2698,7 +2698,7 @@ function NetSalaryCalc() {
             <ResultRow label="연 실수령액" value={money(result.netAnnual)} />
             <ResultRow label="월 실수령액" value={money(result.netMonthly)} highlight />
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">연봉을 입력하세요.</p>}
+        ) : <p className="mt-2 text-sm text-[slate-900] font-semibold">연봉을 입력하세요.</p>}
       </div>
       <TipBox title="상담 활용 팁">
         연봉 대비 실수령액 차이를 보여주면 보장성 보험 보험료 부담 설명이 수월해집니다. 비과세 항목(식대 등)이 있다면 비과세액을 수정하세요.
@@ -2714,11 +2714,11 @@ function EarnedTaxCalc() {
   return (
     <PanelShell description="총 급여에서 근로소득공제를 적용한 간편 소득세를 계산합니다." id="earned-tax" title="간편 근로소득세 계산기">
       <label className="block max-w-xs">
-        <span className="text-sm font-semibold text-[#303845]">총 급여(연간)</span>
+        <span className="text-sm font-semibold text-[slate-700]">총 급여(연간)</span>
         <input className={inputCls} placeholder="예: 50000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" />
       </label>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+      <div className="mt-5 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+        <p className="text-xs font-semibold text-[indigo-600]">계산 결과</p>
         {result ? (
           <div className="mt-3 space-y-0.5 text-sm">
             <ResultRow label="총 급여" value={money(result.salary)} />
@@ -2730,7 +2730,7 @@ function EarnedTaxCalc() {
             <ResultRow label="합계" value={money(result.total)} highlight />
             <ResultRow label="실효세율" value={`${result.effectiveRate.toFixed(2)}%`} />
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">총 급여를 입력하세요.</p>}
+        ) : <p className="mt-2 text-sm text-[slate-900] font-semibold">총 급여를 입력하세요.</p>}
       </div>
     </PanelShell>
   );
@@ -2767,25 +2767,25 @@ function CompTaxCalc() {
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">사업/임대소득</span><input className={inputCls} placeholder="예: 45000000" value={rental} onChange={e => setRental(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">기타소득</span><input className={inputCls} placeholder="예: 5000000" value={other} onChange={e => setOther(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">필요경비</span><input className={inputCls} placeholder="예: 10000000" value={expense} onChange={e => setExpense(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">부양가족 (본인포함)</span><input className={inputCls} placeholder="예: 2" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 1" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">기타 소득공제 합계</span><input className={inputCls} placeholder="예: 0" value={otherDeduction} onChange={e => setOtherDeduction(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block sm:col-span-2"><span className="text-sm font-semibold text-[#303845]">기타 세액공제 합계</span><input className={inputCls} placeholder="예: 0" value={otherCredit} onChange={e => setOtherCredit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">사업/임대소득</span><input className={inputCls} placeholder="예: 45000000" value={rental} onChange={e => setRental(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">기타소득</span><input className={inputCls} placeholder="예: 5000000" value={other} onChange={e => setOther(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">필요경비</span><input className={inputCls} placeholder="예: 10000000" value={expense} onChange={e => setExpense(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">부양가족 (본인포함)</span><input className={inputCls} placeholder="예: 2" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">자녀 수</span><input className={inputCls} placeholder="예: 1" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">기타 소득공제 합계</span><input className={inputCls} placeholder="예: 0" value={otherDeduction} onChange={e => setOtherDeduction(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block sm:col-span-2"><span className="text-sm font-semibold text-[slate-700]">기타 세액공제 합계</span><input className={inputCls} placeholder="예: 0" value={otherCredit} onChange={e => setOtherCredit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
           </div>
         </div>
 
         <div>
           {result ? (
-            <div className="h-full rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold text-[#7a612d] mb-4">연금저축 절세 시뮬레이션</p>
+            <div className="h-full rounded-xl border border-[slate-200] bg-white p-5 shadow-sm">
+              <p className="text-xs font-bold text-[indigo-600] mb-4">연금저축 절세 시뮬레이션</p>
               <div className="h-40 w-full mb-6">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#5f6670' }} tickLine={false} axisLine={false} />
-                    <YAxis tickFormatter={(val: number) => `${(val/10000).toFixed(0)}만`} tick={{ fontSize: 10, fill: '#5f6670' }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'slate-500' }} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={(val: number) => `${(val/10000).toFixed(0)}만`} tick={{ fontSize: 10, fill: 'slate-500' }} axisLine={false} tickLine={false} />
                     <RechartsTooltip formatter={(value: unknown) => [`${Number(value).toLocaleString()} 원`, '세액']} />
                     <Bar dataKey="value" fill="#8884d8" radius={[4, 4, 0, 0]}>
                       {chartData.map((entry, index) => (
@@ -2799,7 +2799,7 @@ function CompTaxCalc() {
                 <ResultRow label="종합소득 과세표준" value={krw(result.tb)} />
                 <ResultRow label="산출세액" value={krw(result.gt)} bold />
                 <ResultRow label="세액공제 합계 (자녀+기타)" value={`-${krw(result.totalCredit)}`} />
-                <div className="my-1 border-t border-dashed border-[#e7ddc9]/80"></div>
+                <div className="my-1 border-t border-dashed border-[slate-200]/80"></div>
                 <ResultRow label="결정세액 (지방세포함)" value={krw(result.totalTax)} highlight />
               </div>
               <div className="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
@@ -2869,11 +2869,11 @@ function InheritanceTaxCalc() {
         <div className="space-y-4">
            <div className="grid gap-3 sm:grid-cols-2">
             <label className="block sm:col-span-2"><span className="text-sm font-bold text-[#1e293b]">총 상속재산</span><input className={`${inputCls} border-blue-300 bg-blue-50/30 text-lg py-3`} placeholder="예: 2000000000" value={estate} onChange={e => setEstate(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">채무·장례비</span><input className={inputCls} placeholder="예: 100000000" value={debts} onChange={e => setDebts(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">사전증여(10년)</span><input className={inputCls} placeholder="예: 0" value={priorGift} onChange={e => setPriorGift(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">순수 금융재산</span><input className={inputCls} placeholder="예: 300000000" value={financialAssets} onChange={e => setFinancialAssets(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">동거주택 가액</span><input className={inputCls} placeholder="예: 0" value={homeValue} onChange={e => setHomeValue(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 2" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">채무·장례비</span><input className={inputCls} placeholder="예: 100000000" value={debts} onChange={e => setDebts(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">사전증여(10년)</span><input className={inputCls} placeholder="예: 0" value={priorGift} onChange={e => setPriorGift(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">순수 금융재산</span><input className={inputCls} placeholder="예: 300000000" value={financialAssets} onChange={e => setFinancialAssets(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">동거주택 가액</span><input className={inputCls} placeholder="예: 0" value={homeValue} onChange={e => setHomeValue(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">자녀 수</span><input className={inputCls} placeholder="예: 2" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
             
             <div className="sm:col-span-2 border-t border-slate-200 mt-2 pt-4">
               <span className="text-sm font-bold text-slate-700 mb-2 block">배우자 상속 조건</span>
@@ -2909,8 +2909,8 @@ function InheritanceTaxCalc() {
 
         <div>
           {result ? (
-            <div className="h-full rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold text-[#7a612d] mb-4">상속세 자금 출처 분석</p>
+            <div className="h-full rounded-xl border border-[slate-200] bg-white p-5 shadow-sm">
+              <p className="text-xs font-bold text-[indigo-600] mb-4">상속세 자금 출처 분석</p>
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <div className="w-32 h-32 shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
@@ -2930,7 +2930,7 @@ function InheritanceTaxCalc() {
                   {skipGeneration && <ResultRow label="세대생략 할증(+)" value={krw(result.generationSurcharge)} />}
                   {recentDeathYears !== 'none' && <ResultRow label="단기재상속 공제(-)" value={krw(result.shortTermDeduction)} />}
                   <ResultRow label="신고세액 공제(-)" value={krw(result.finalReportCredit)} />
-                  <div className="my-1 border-t border-dashed border-[#e7ddc9]/80"></div>
+                  <div className="my-1 border-t border-dashed border-[slate-200]/80"></div>
                   <ResultRow label="최종 납부 상속세" value={krw(result.finalNetTax)} highlight />
                 </div>
               </div>
@@ -2992,14 +2992,14 @@ function CardDeductionCalc() {
   return (
     <PanelShell description="연봉 및 결제 수단별 사용액을 분석하여 연말정산 공제 극대화를 위한 '소비 황금비율'을 가이드합니다." id="card-deduction" title="프리미엄 카드공제 최적화 분석기">
       <div className="grid gap-4 sm:grid-cols-3 mb-6">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">총 급여(연봉)</span><input className={inputCls} placeholder="예: 60000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">현재까지 신용카드 누적액</span><input className={inputCls} placeholder="예: 12000000" value={card} onChange={e => setCard(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">현금영수증/체크카드 누적액</span><input className={inputCls} placeholder="예: 3000000" value={cash} onChange={e => setCash(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">총 급여(연봉)</span><input className={inputCls} placeholder="예: 60000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">현재까지 신용카드 누적액</span><input className={inputCls} placeholder="예: 12000000" value={card} onChange={e => setCard(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">현금영수증/체크카드 누적액</span><input className={inputCls} placeholder="예: 3000000" value={cash} onChange={e => setCash(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
       </div>
 
       {result ? (
         <div className="space-y-6">
-          <div className="rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-[slate-200] bg-white p-5 shadow-sm">
             <p className="text-sm font-bold text-slate-700 mb-5">공제 문턱(25%) 달성 현황</p>
             <div className="relative w-full h-8 bg-slate-100 rounded-full overflow-hidden">
                <div className="absolute top-0 bottom-0 border-l-2 border-dashed border-slate-400 z-10" style={{ left: `${result.thresholdPct}%` }}></div>
@@ -3008,7 +3008,7 @@ function CardDeductionCalc() {
             </div>
             <div className="mt-7 flex justify-between text-sm font-semibold">
               <span className="text-slate-500">현재 누적 사용액: {krw(result.cd + result.cs)}</span>
-              <span className="text-[#aa8137]">문턱 도달 기준액: {krw(result.minUsage)}</span>
+              <span className="text-[indigo-500]">문턱 도달 기준액: {krw(result.minUsage)}</span>
             </div>
           </div>
 
@@ -3055,24 +3055,24 @@ function VatCalc() {
   return (
     <PanelShell description="합계금액에서 공급가액과 부가세를 분리하거나, 공급가액에 부가세를 더합니다." id="vat" title="부가세/공급가액 계산기">
       <div className="grid gap-3 sm:grid-cols-2 max-w-lg">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">금액</span><input className={inputCls} placeholder="예: 110000" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[slate-700]">금액</span><input className={inputCls} placeholder="예: 110000" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
         <div>
-          <span className="text-sm font-semibold text-[#303845]">계산 방향</span>
+          <span className="text-sm font-semibold text-[slate-700]">계산 방향</span>
           <div className="mt-1.5 grid grid-cols-2 gap-1">
             <button type="button" className={radioCls(dir==='inclusive')} onClick={() => setDir('inclusive')}>VAT 포함→분리</button>
             <button type="button" className={radioCls(dir==='exclusive')} onClick={() => setDir('exclusive')}>VAT 별도→합산</button>
           </div>
         </div>
       </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+      <div className="mt-5 rounded-xl border border-[slate-200] bg-[slate-50] p-4">
+        <p className="text-xs font-semibold text-[indigo-600]">계산 결과</p>
         {result ? (
           <div className="mt-3 space-y-0.5 text-sm">
             <ResultRow label="공급가액" value={money(result.supply)} bold />
             <ResultRow label="부가세(10%)" value={money(result.vat)} />
             <ResultRow label="합계금액" value={money(result.total)} highlight />
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">금액을 입력하세요.</p>}
+        ) : <p className="mt-2 text-sm text-[slate-900] font-semibold">금액을 입력하세요.</p>}
       </div>
     </PanelShell>
   );
@@ -3110,18 +3110,18 @@ function BmiCalc() {
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">키 (cm)</span><input className={inputCls} placeholder="예: 170" value={height} onChange={e => setHeight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">체중 (kg)</span><input className={inputCls} placeholder="예: 65" value={weight} onChange={e => setWeight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">키 (cm)</span><input className={inputCls} placeholder="예: 170" value={height} onChange={e => setHeight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">체중 (kg)</span><input className={inputCls} placeholder="예: 65" value={weight} onChange={e => setWeight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
           </div>
           <div className="pt-4 border-t border-slate-200">
             <span className="text-sm font-bold text-slate-700 mb-2 block">기저질환 체크 (선택)</span>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                <input type="checkbox" className="w-4 h-4 rounded text-[#173f36] focus:ring-[#173f36]" checked={hasDiabetes} onChange={(e) => setHasDiabetes(e.target.checked)} />
+                <input type="checkbox" className="w-4 h-4 rounded text-[indigo-600] focus:ring-[indigo-600]" checked={hasDiabetes} onChange={(e) => setHasDiabetes(e.target.checked)} />
                 당뇨병
               </label>
               <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                <input type="checkbox" className="w-4 h-4 rounded text-[#173f36] focus:ring-[#173f36]" checked={hasHypertension} onChange={(e) => setHasHypertension(e.target.checked)} />
+                <input type="checkbox" className="w-4 h-4 rounded text-[indigo-600] focus:ring-[indigo-600]" checked={hasHypertension} onChange={(e) => setHasHypertension(e.target.checked)} />
                 고혈압
               </label>
             </div>
@@ -3182,7 +3182,7 @@ function SavingsCalc() {
 
   const pieData = result ? [
     { name: '원금 합계', value: result.totalPrincipal, fill: '#94a3b8' },
-    { name: '세후 수령 이자', value: result.postTaxInterest, fill: '#aa8137' }
+    { name: '세후 수령 이자', value: result.postTaxInterest, fill: 'indigo-500' }
   ] : [];
 
   return (
@@ -3190,10 +3190,10 @@ function SavingsCalc() {
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">초기 거치금액 (예금)</span><input className={inputCls} placeholder="예: 50000000" value={deposit} onChange={e => setDeposit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">월 적립액 (적금)</span><input className={inputCls} placeholder="예: 1000000" value={monthly} onChange={e => setMonthly(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">연 금리 (%)</span><input className={inputCls} placeholder="예: 3.5" value={rate} onChange={e => setRate(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">가입 기간 (개월)</span><input className={inputCls} placeholder="예: 36" value={months} onChange={e => setMonths(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">초기 거치금액 (예금)</span><input className={inputCls} placeholder="예: 50000000" value={deposit} onChange={e => setDeposit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">월 적립액 (적금)</span><input className={inputCls} placeholder="예: 1000000" value={monthly} onChange={e => setMonthly(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">연 금리 (%)</span><input className={inputCls} placeholder="예: 3.5" value={rate} onChange={e => setRate(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[slate-700]">가입 기간 (개월)</span><input className={inputCls} placeholder="예: 36" value={months} onChange={e => setMonths(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
           </div>
           
           <div className="pt-4 border-t border-slate-200 grid sm:grid-cols-2 gap-4">
@@ -3217,8 +3217,8 @@ function SavingsCalc() {
 
         <div>
           {result ? (
-            <div className="h-full rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold text-[#7a612d] mb-4">만기 수령액 시각화</p>
+            <div className="h-full rounded-xl border border-[slate-200] bg-white p-5 shadow-sm">
+              <p className="text-xs font-bold text-[indigo-600] mb-4">만기 수령액 시각화</p>
               
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <div className="w-32 h-32 shrink-0">
@@ -3240,9 +3240,9 @@ function SavingsCalc() {
                 </div>
               </div>
               
-              <div className="mt-5 p-3 bg-[#fbf7ee] rounded-lg text-center border border-[#e7ddc9]">
-                <span className="text-xs font-semibold text-[#7a612d] block mb-1">최종 만기 수령액 (세후)</span>
-                <span className="text-2xl font-black text-[#aa8137]">{krw(result.maturityPostTax)}</span>
+              <div className="mt-5 p-3 bg-[slate-50] rounded-lg text-center border border-[slate-200]">
+                <span className="text-xs font-semibold text-[indigo-600] block mb-1">최종 만기 수령액 (세후)</span>
+                <span className="text-2xl font-black text-[indigo-500]">{krw(result.maturityPostTax)}</span>
                 <span className="text-xs font-medium text-slate-500 block mt-1">실효 수익률: 연 {result.effectiveRate.toFixed(2)}% (세후)</span>
               </div>
             </div>
@@ -3267,15 +3267,15 @@ function SavingsCalc() {
 function ExternalTool({ copy }: { copy: ToolItem }) {
   return (
     <PanelShell description={copy.description} id={copy.id} title={copy.label}>
-      <div className="rounded-xl border border-[#e7ddc9] bg-[#fbf7ee] p-5">
-        <p className="text-xs font-semibold text-[#7a612d]">공식 출처</p>
-        <p className="mt-1 text-lg font-semibold text-[#102235]">{copy.source}</p>
-        <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
+      <div className="rounded-xl border border-[slate-200] bg-[slate-50] p-5">
+        <p className="text-xs font-semibold text-[indigo-600]">공식 출처</p>
+        <p className="mt-1 text-lg font-semibold text-[slate-900]">{copy.source}</p>
+        <p className="mt-2 break-keep text-sm leading-6 text-[slate-500]">
           보험학교 링크를 재사용하지 않고, 플래너데스크에서 별도로 정리한 공식
           기관 링크입니다.
         </p>
         <a
-          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold !text-[#fbf7ee] transition hover:bg-[#0f2f28]"
+          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[indigo-600] bg-[indigo-600] px-5 text-sm font-semibold !text-[slate-50] transition hover:bg-[indigo-700]"
           href={copy.href}
           rel="noopener noreferrer"
           target="_blank"
@@ -3293,7 +3293,7 @@ function NewsletterTool({ copy }: { copy: ToolItem }) {
       <div className="grid gap-3 md:grid-cols-2">
         {newsletterItems.map((item) => (
           <div
-            className="rounded-xl border border-[#e7ddc9] bg-[#fbf7ee] p-4 text-sm font-semibold text-[#102235]"
+            className="rounded-xl border border-[slate-200] bg-[slate-50] p-4 text-sm font-semibold text-[slate-900]"
             key={item}
           >
             {item}
@@ -3301,7 +3301,7 @@ function NewsletterTool({ copy }: { copy: ToolItem }) {
         ))}
       </div>
       <a
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold !text-[#fbf7ee] transition hover:bg-[#0f2f28]"
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[indigo-600] bg-[indigo-600] px-5 text-sm font-semibold !text-[slate-50] transition hover:bg-[indigo-700]"
         href="/disclosure-links"
       >
         공시·약관 링크센터에서 확인
@@ -3323,11 +3323,11 @@ function PanelShell({
 }) {
   return (
     <section
-      className="rounded-2xl border border-[#d9c9a8] bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6"
+      className="rounded-2xl border border-[slate-200] bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6"
       id={id}
     >
-      <h2 className="text-2xl font-semibold text-[#102235]">{title}</h2>
-      <p className="mt-2 break-keep text-sm leading-6 text-[#5f6670]">
+      <h2 className="text-2xl font-semibold text-[slate-900]">{title}</h2>
+      <p className="mt-2 break-keep text-sm leading-6 text-[slate-500]">
         {description}
       </p>
       <div className="mt-5">{children}</div>

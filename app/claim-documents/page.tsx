@@ -50,7 +50,7 @@ export default async function ClaimDocumentsPage() {
       />
       <ContentSection>
         <div className="space-y-8">
-          <p className="break-keep text-sm leading-6 text-[#5f6670]">
+          <p className="break-keep text-sm font-medium leading-relaxed text-slate-500">
             {t.subcopy}
           </p>
 
@@ -70,26 +70,26 @@ export default async function ClaimDocumentsPage() {
             </Suspense>
           )}
 
-          <section className="grid gap-4 border-y border-[#d9c9a8] py-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <section className="grid gap-6 border-y border-slate-200 py-12 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600">
                 Planner workflow
               </p>
-              <h2 className="mt-3 break-keep text-3xl font-semibold leading-tight text-[#102235]">
+              <h2 className="mt-3 break-keep text-3xl font-bold tracking-tight leading-tight text-slate-900">
                 {t.workflowTitle}
               </h2>
-              <p className="mt-4 break-keep text-sm leading-6 text-[#4f5661]">
+              <p className="mt-5 break-keep text-sm font-medium leading-relaxed text-slate-500">
                 이 안내 서류 정보는 실무 참고용이며, 실제 보험금 지급 여부나
                 지급 금액은 보험사 기준과 최종 심사 결과가 우선합니다.
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               {workflowSteps.map((step, index) => (
-                <div className="border border-[#e3d5b8] bg-white p-4" key={step}>
-                  <p className="text-sm font-semibold text-[#7a612d]">
-                    Step {index + 1}
+                <div className="rounded-lg border border-slate-100 bg-slate-50 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md" key={step}>
+                  <p className="text-[13px] font-bold tracking-widest text-indigo-600">
+                    STEP {index + 1}
                   </p>
-                  <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
+                  <p className="mt-3 break-keep text-sm font-medium leading-relaxed text-slate-600">
                     {step}
                   </p>
                 </div>
@@ -97,7 +97,7 @@ export default async function ClaimDocumentsPage() {
             </div>
           </section>
 
-          <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
+          <p className="break-keep border-l-2 border-indigo-500 pl-4 text-sm font-medium leading-relaxed text-slate-600">
             {t.footerNote}
           </p>
 

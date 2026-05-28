@@ -565,8 +565,8 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
 
   const toneClass =
     tone === "primary"
-      ? "border-slate-900 bg-slate-900 text-white shadow-md hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg"
-      : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900";
+      ? "border-slate-900 bg-slate-900 !text-white shadow-md hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg"
+      : "border-slate-300 bg-white !text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:!text-slate-900";
 
   return (
     <ExternalTabAnchor

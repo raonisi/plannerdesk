@@ -53,10 +53,10 @@ export function PageHero({
     <section className={`border-b ${borders.divider} ${surfaces.hero}`}>
       <div className={`mx-auto max-w-7xl ${spacing.pageX} ${spacing.heroY}`}>
         <p className={textStyles.heroEyebrow}>{eyebrow}</p>
-        <h1 className={`mt-4 max-w-4xl break-keep ${textStyles.heroTitle}`}>
+        <h1 className={`mt-6 max-w-4xl break-keep tracking-tight ${textStyles.heroTitle}`}>
           {title}
         </h1>
-        <p className="mt-5 max-w-3xl break-keep text-base leading-7 text-[#d8d0c3] sm:text-lg">
+        <p className="mt-6 max-w-3xl break-keep text-lg leading-relaxed text-indigo-100/80 sm:text-xl">
           {description}
         </p>
       </div>
@@ -150,7 +150,7 @@ export function LastVerified({ value }: { value: string | null }) {
 
 export function LastVerifiedText({ value }: { value: string | null }) {
   return (
-    <span className="whitespace-nowrap text-sm text-[#5f6670]">
+    <span className="whitespace-nowrap text-sm font-medium text-slate-500">
       {uiText.lastVerified}: {formatVerifiedDate(value)}
     </span>
   );
@@ -170,7 +170,7 @@ export function EmptyValue({ label = uiText.missing }: { label?: string }) {
 }
 
 export function MissingFieldText({ label = uiText.missing }: { label?: string }) {
-  return <span className="break-keep text-[#8b7660]">{label}</span>;
+  return <span className="break-keep text-slate-400 font-medium italic">{label}</span>;
 }
 
 export function EmptyState({
@@ -181,9 +181,9 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className={`${borders.default} ${surfaces.card} p-6 text-center`}>
-      <p className="break-keep text-lg font-semibold text-[#102235]">{title}</p>
-      <p className={`mt-2 break-keep ${textStyles.small}`}>{description}</p>
+    <div className={`${borders.default} ${surfaces.card} rounded-xl p-10 text-center shadow-sm`}>
+      <p className="break-keep text-xl font-bold tracking-tight text-slate-900">{title}</p>
+      <p className={`mt-3 break-keep ${textStyles.small}`}>{description}</p>
     </div>
   );
 }
@@ -201,7 +201,7 @@ export function ExternalSourceLink({
 
   return (
     <ExternalTabAnchor
-      className="font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4"
+      className="font-bold text-indigo-600 underline decoration-indigo-300 underline-offset-4 transition-colors hover:text-indigo-800 hover:decoration-indigo-600"
       href={href}
     >
       {children}
@@ -237,8 +237,8 @@ export function LinkButton({
 }) {
   const className =
     variant === "solid"
-      ? "inline-flex min-h-11 items-center justify-center bg-[#aa8137] px-4 py-2 text-sm font-semibold text-[#102235] transition hover:bg-[#c19b58]"
-      : "inline-flex min-h-11 items-center justify-center border border-[#102235] px-4 py-2 text-sm font-semibold text-[#102235] transition hover:bg-[#102235] hover:text-[#fbf7ee]";
+      ? "inline-flex min-h-11 items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+      : "inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2";
 
   return (
     <Link className={className} href={href}>
@@ -265,9 +265,11 @@ export function ActionButton({
 
 export function DraftDataNotice({ children }: { children?: ReactNode }) {
   return (
-    <aside className={`${borders.default} ${surfaces.card} p-5`}>
-      <p className="text-sm font-semibold text-[#102235]">{uiText.safetyTitle}</p>
-      <p className="mt-3 break-keep text-sm leading-6 text-[#4f5661]">
+    <aside className={`border-l-4 border-amber-500 bg-amber-50 p-5 rounded-r-xl shadow-sm`}>
+      <p className="text-sm font-bold text-amber-900 flex items-center gap-2">
+        <span aria-hidden="true">⚠️</span> {uiText.safetyTitle}
+      </p>
+      <p className="mt-2 break-keep text-sm leading-relaxed text-amber-800/90">
         {children ?? uiText.generalSafety}
       </p>
     </aside>
@@ -276,7 +278,7 @@ export function DraftDataNotice({ children }: { children?: ReactNode }) {
 
 export function OfficialSourceNotice({ children }: { children?: ReactNode }) {
   return (
-    <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
+    <p className="break-keep border-l-2 border-indigo-500 pl-4 text-sm font-medium leading-relaxed text-slate-600">
       {children ?? uiText.generalSafety}
     </p>
   );
@@ -291,19 +293,21 @@ export function SafetyNotice({
     variant === "message" ? uiText.messageSafety : uiText.generalSafety;
 
   return (
-    <aside className={`${borders.default} ${surfaces.card} p-5`}>
-      <p className="text-sm font-semibold text-[#102235]">{uiText.safetyTitle}</p>
-      <p className="mt-3 break-keep text-sm leading-6 text-[#4f5661]">
+    <aside className={`border-l-4 border-amber-500 bg-amber-50 p-6 rounded-r-xl shadow-sm`}>
+      <p className="text-sm font-bold text-amber-900 flex items-center gap-2">
+        <span aria-hidden="true">⚠️</span> {uiText.safetyTitle}
+      </p>
+      <p className="mt-3 break-keep text-sm font-medium leading-relaxed text-amber-800">
         {message}
       </p>
-      <ul className="mt-4 grid gap-2 text-sm leading-6 text-[#4f5661] sm:grid-cols-2">
+      <ul className="mt-4 grid gap-3 text-sm leading-relaxed text-amber-800/80 sm:grid-cols-2 list-inside list-disc">
         <li>{uiText.noPayoutJudge}</li>
         <li>{uiText.noPayoutEstimate}</li>
         <li>{uiText.noAdjusting}</li>
         <li>{uiText.noMedicalDocs}</li>
       </ul>
       {variant === "claim" ? (
-        <p className="mt-4 break-keep text-sm font-medium text-[#7a612d]">
+        <p className="mt-5 break-keep text-sm font-bold text-amber-900">
           {uiText.referenceOnly}
         </p>
       ) : null}
@@ -326,7 +330,7 @@ export function RelatedPageLinks() {
       >
         {links.map((link) => (
           <Link
-            className="shrink-0 whitespace-nowrap border border-[#d9c9a8] px-3 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] hover:text-[#7a612d]"
+            className="shrink-0 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition-all hover:border-indigo-600 hover:text-indigo-600 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             href={link.href}
             key={link.href}
           >

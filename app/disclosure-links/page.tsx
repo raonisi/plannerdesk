@@ -25,21 +25,21 @@ const workflowSteps = [
 
 export default function DisclosureLinksPage() {
   return (
-    <main className="min-h-screen bg-[#f7f1e5] text-[#18202b]">
+    <main className="min-h-screen bg-slate-50 text-slate-900">
       <Header />
-      <section className="border-b border-[#d9c9a8] bg-[#102235] text-[#fbf7ee]">
+      <section className="border-b border-slate-800 bg-slate-900 text-white">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#d8c08f]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-400">
             Disclosure & Policy Link Center
           </p>
-          <h1 className="mt-4 break-keep text-4xl font-semibold leading-tight sm:text-5xl">
+          <h1 className="mt-5 break-keep text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             {t.title}
           </h1>
-          <p className="mt-5 max-w-3xl break-keep text-base leading-7 text-[#d8d0c3] sm:text-lg">
+          <p className="mt-6 max-w-3xl break-keep text-lg leading-relaxed text-slate-300 sm:text-xl">
             A practical reference hub for official disclosure, policy terms,
             product pages, association references, and insurer material paths.
           </p>
-          <p className="mt-6 max-w-3xl border-l border-[#d8c08f] pl-4 text-sm leading-6 text-[#eee4d2]">
+          <p className="mt-8 max-w-3xl border-l-2 border-indigo-500 pl-4 text-sm font-medium leading-relaxed text-indigo-100/70">
             {t.note}
           </p>
         </div>
@@ -74,20 +74,20 @@ export default function DisclosureLinksPage() {
 
 function PlannerWorkflow() {
   return (
-    <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5 sm:p-6">
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]">
+    <section className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600">
         Planner workflow
       </p>
-      <h2 className="mt-2 break-keep text-2xl font-semibold text-[#102235]">
+      <h2 className="mt-3 break-keep text-2xl font-bold tracking-tight text-slate-900">
         {t.workflowTitle}
       </h2>
-      <div className="mt-5 grid gap-3 md:grid-cols-4">
+      <div className="mt-8 grid gap-4 md:grid-cols-4">
         {workflowSteps.map((step, index) => (
-          <div className="border border-[#e3d5b8] bg-white p-4" key={step}>
-            <p className="text-sm font-semibold text-[#7a612d]">
-              Step {index + 1}
+          <div className="rounded-lg border border-slate-100 bg-slate-50 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md" key={step}>
+            <p className="text-[13px] font-bold tracking-widest text-indigo-600">
+              STEP {index + 1}
             </p>
-            <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
+            <p className="mt-3 break-keep text-sm font-medium leading-relaxed text-slate-600">
               {step}
             </p>
           </div>

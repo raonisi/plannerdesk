@@ -1,53 +1,53 @@
 import type { VerificationStatus } from "@/lib/content";
 
 export const colors = {
-  navy: "#102235",
-  deepGreen: "#173f36",
-  ivory: "#fbf7ee",
-  cream: "#f7f1e5",
-  border: "#d9c9a8",
-  gold: "#aa8137",
-  deepGray: "#303845",
-  bodyGray: "#4f5661"
+  navy: "#0f172a",       // slate-900
+  deepGreen: "#3730a3",  // indigo-800
+  ivory: "#f8fafc",      // slate-50
+  cream: "#f1f5f9",      // slate-100
+  border: "#e2e8f0",     // slate-200
+  gold: "#4f46e5",       // indigo-600
+  deepGray: "#334155",   // slate-700
+  bodyGray: "#64748b"    // slate-500
 } as const;
 
 export const surfaces = {
-  page: "bg-[#f7f1e5] text-[#18202b]",
-  hero: "bg-[#102235] text-[#fbf7ee]",
-  card: "bg-[#fbf7ee]",
-  inset: "bg-white",
-  muted: "bg-[#f7f1e5]"
+  page: "bg-slate-50 text-slate-900",
+  hero: "bg-slate-900 text-white",
+  card: "bg-white",
+  inset: "bg-slate-50",
+  muted: "bg-slate-100"
 } as const;
 
 export const borders = {
-  default: "border border-[#d9c9a8]",
-  subtle: "border border-[#e3d5b8]",
-  divider: "border-[#d9c9a8]"
+  default: "border border-slate-200",
+  subtle: "border border-slate-100",
+  divider: "border-slate-200"
 } as const;
 
 export const shadows = {
-  card: "shadow-[0_18px_40px_rgba(16,34,53,0.05)]",
-  elevated: "shadow-[0_30px_80px_rgba(16,34,53,0.12)]"
+  card: "shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5",
+  elevated: "shadow-lg"
 } as const;
 
 export const textStyles = {
   eyebrow:
-    "text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]",
+    "text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600",
   heroEyebrow:
-    "text-sm font-semibold uppercase tracking-[0.14em] text-[#d8c08f]",
-  heroTitle: "text-4xl font-semibold leading-tight sm:text-5xl",
-  sectionTitle: "text-3xl font-semibold leading-tight text-[#102235] sm:text-4xl",
-  cardTitle: "text-2xl font-semibold text-[#102235]",
-  body: "text-base leading-7 text-[#4f5661]",
-  small: "text-sm leading-6 text-[#4f5661]",
-  label: "text-sm font-semibold text-[#303845]",
-  accent: "text-sm font-semibold text-[#7a612d]"
+    "inline-flex border border-indigo-500/50 px-3 py-1 text-sm font-medium text-indigo-200",
+  heroTitle: "text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl text-white",
+  sectionTitle: "text-3xl font-bold leading-tight text-slate-900 sm:text-4xl",
+  cardTitle: "text-2xl font-bold text-slate-900",
+  body: "text-base leading-7 text-slate-600",
+  small: "text-sm leading-6 text-slate-500",
+  label: "text-sm font-bold text-slate-900",
+  accent: "text-sm font-bold text-indigo-600"
 } as const;
 
 export const spacing = {
   pageX: "px-5 sm:px-8 lg:px-10",
   sectionY: "py-10",
-  heroY: "py-12",
+  heroY: "py-12 sm:py-16",
   cardPadding: "p-6",
   stack: "space-y-8"
 } as const;
@@ -59,7 +59,7 @@ export const verificationLabels: Record<VerificationStatus, string> = {
 };
 
 export const statusBadgeClasses: Record<VerificationStatus, string> = {
-  draft: "border-[#d9c9a8] bg-[#f7f1e5] text-[#303845]",
-  verified: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-  needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]"
+  draft: "border-slate-200 bg-slate-50 text-slate-500 rounded-md",
+  verified: "border-indigo-200 bg-indigo-50 text-indigo-700 rounded-md",
+  needs_review: "border-amber-200 bg-amber-50 text-amber-700 rounded-md"
 };
