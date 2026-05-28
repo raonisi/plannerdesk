@@ -68,6 +68,10 @@ export function MessageTemplateLibrary({
   const [query, setQuery] = useState("");
   const [situation, setSituation] = useState<SituationFilter>("all");
   const [tone, setTone] = useState<ToneFilter>("all");
+  
+  // 개인화(Personalization) 변수 상태
+  const [customerName, setCustomerName] = useState("");
+  const [plannerName, setPlannerName] = useState("");
 
   const filteredTemplates = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
@@ -104,6 +108,34 @@ export function MessageTemplateLibrary({
 
   return (
     <div className="space-y-8">
+      {/* 개인화 정보 입력 패널 */}
+      <section className="rounded-xl border border-blue-100 bg-white p-5 shadow-sm">
+        <h3 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+          ✨ 개인화 템플릿 설정
+          <span className="text-xs font-normal text-slate-500">입력하신 이름이 아래 모든 템플릿에 실시간으로 적용됩니다.</span>
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-xs font-semibold text-slate-600 block mb-1.5">고객 이름</span>
+            <input 
+              className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg"
+              placeholder="예: 홍길동"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold text-slate-600 block mb-1.5">담당 설계사 이름</span>
+            <input 
+              className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg"
+              placeholder="예: 김설계"
+              value={plannerName}
+              onChange={(e) => setPlannerName(e.target.value)}
+            />
+          </label>
+        </div>
+      </section>
+
       <SearchAndFilters
         onQueryChange={setQuery}
         onSituationChange={setSituation}
@@ -133,7 +165,12 @@ export function MessageTemplateLibrary({
               </div>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 {group.templates.map((template) => (
-                  <TemplateCard key={template.id} template={template} />
+                  <TemplateCard 
+                    key={template.id} 
+                    template={template} 
+                    customerName={customerName} 
+                    plannerName={plannerName} 
+                  />
                 ))}
               </div>
             </section>
@@ -240,13 +277,41 @@ function FilterGroup({
   );
 }
 
-function TemplateCard({ template }: { template: CustomerMessageTemplate }) {
+function TemplateCard({ 
+  template, 
+  customerName, 
+  plannerName 
+}: { 
+  template: CustomerMessageTemplate;
+  customerName: string;
+  plannerName: string;
+}) {
   const [copied, setCopied] = useState(false);
+  const [kakaoCopied, setKakaoCopied] = useState(false);
+
+  // OOO, 고객명 등을 치환하는 로직
+  const replacedBody = useMemo(() => {
+    let text = template.body;
+    if (customerName) {
+      text = text.replace(/O+고객|O+님|\[고객명\]|\{고객명\}|OOO/g, `${customerName}`);
+    }
+    if (plannerName) {
+      text = text.replace(/\[설계사명\]|\{설계사명\}|담당자 OOO/g, `${plannerName}`);
+    }
+    return text;
+  }, [template.body, customerName, plannerName]);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(template.body);
+    await navigator.clipboard.writeText(replacedBody);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
+  }
+  
+  async function handleKakaoShare() {
+    await navigator.clipboard.writeText(replacedBody);
+    setKakaoCopied(true);
+    alert('문구가 복사되었습니다. 카카오톡 창을 열어 붙여넣기 해주세요!');
+    window.setTimeout(() => setKakaoCopied(false), 1800);
   }
 
   return (
@@ -274,9 +339,9 @@ function TemplateCard({ template }: { template: CustomerMessageTemplate }) {
         {template.situation}
       </p>
 
-      <div className="mt-5 border border-[#e3d5b8] bg-white p-4">
+      <div className="mt-5 border border-[#e3d5b8] bg-white p-4 rounded-lg relative group">
         <p className="whitespace-pre-wrap break-keep text-base leading-8 text-[#303845]">
-          {template.body}
+          {replacedBody}
         </p>
       </div>
 
@@ -291,15 +356,24 @@ function TemplateCard({ template }: { template: CustomerMessageTemplate }) {
           최근 수정: {formatVerifiedDate(template.lastUpdatedAt)}
         </p>
         <div className="flex flex-col gap-2 sm:items-end">
-          <button
-            className="inline-flex items-center justify-center border border-[#173f36] px-4 py-2 text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee]"
-            onClick={handleCopy}
-            type="button"
-          >
-            {copied ? "복사 완료" : "문구 복사"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="inline-flex items-center justify-center border border-[#173f36] px-4 py-2 text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee] rounded"
+              onClick={handleCopy}
+              type="button"
+            >
+              {copied ? "✓ 복사 완료" : "문구 복사"}
+            </button>
+            <button
+              className="inline-flex items-center justify-center bg-[#FEE500] text-[#000000] px-4 py-2 text-sm font-semibold transition hover:bg-[#F4DC00] rounded"
+              onClick={handleKakaoShare}
+              type="button"
+            >
+              {kakaoCopied ? "✓ 준비 완료" : "카카오톡 전송"}
+            </button>
+          </div>
           <p className="break-keep text-xs leading-5 text-[#5f6670]">
-            복사 후 고객 상황에 맞게 수정하세요.
+            버튼을 누르면 고객 맞춤형으로 치환된 텍스트가 즉시 복사됩니다.
           </p>
         </div>
       </div>

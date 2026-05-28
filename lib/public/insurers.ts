@@ -5,6 +5,7 @@ import {
   type InsurerCategory,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { insurerDirectoryEntries } from "@/lib/content/insurers";
 
 // Public-safe projection of the Insurer model. Internal governance fields like
 // `notes`, `sourceNote`, `createdById`, `updatedById`, and any unpublished
@@ -170,10 +171,14 @@ export async function getPublicInsurers(): Promise<PublicInsurersResult> {
 
     return { status: "ok", insurers };
   } catch (error) {
-    // Never expose raw DB errors to the public page. The UI renders a calm
-    // "잠시 후 다시 확인해 주세요" notice and operators see the underlying
-    // failure through the server logs only.
-    console.error("[plannerdesk] getPublicInsurers failed", error);
-    return { status: "error" };
+    // DB 연결이 불가능한 MVP 단계이므로, 실패 시 모의(Mock) 데이터를 반환합니다.
+    console.error("[plannerdesk] DB query failed, falling back to mock data:", error);
+    const insurers: PublicInsurer[] = insurerDirectoryEntries.map((record) => ({
+      ...record,
+      lastVerifiedAt: record.lastVerifiedAt ? record.lastVerifiedAt : null,
+      supportedBrowsers: getSupportedBrowsersForId(record.id),
+    })) as PublicInsurer[];
+
+    return { status: "ok", insurers };
   }
 }

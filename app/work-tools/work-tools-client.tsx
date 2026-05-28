@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, PieChart, Pie } from 'recharts';
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder";
 
@@ -523,34 +524,62 @@ function fmtDate(d: Date) {
 }
 
 // ── 실손 의료비 (Silbi) ──
-type SilbiGen = '1' | '2' | '3' | '4';
+type SilbiGen = '1' | '2' | '3' | '4' | '5';
 type SilbiType = 'outpatient' | 'inpatient';
 type SilbiFacility = 'clinic' | 'general' | 'tertiary';
 const silbiDeductible: Record<SilbiFacility, number> = { clinic: 10_000, general: 15_000, tertiary: 20_000 };
 
-function calcSilbi(gen: SilbiGen, treatType: SilbiType, facility: SilbiFacility, costs: { benefit: number; nonBenefit: number; pharmaBenefit: number; pharmaNonBenefit: number }) {
-  const { benefit, nonBenefit, pharmaBenefit, pharmaNonBenefit } = costs;
+function calcSilbi(gen: SilbiGen, treatType: SilbiType, facility: SilbiFacility, costs: { benefit: number; nonBenefit: number; nonBenefitHeavy: number; nonBenefitLight: number; pharmaBenefit: number; pharmaNonBenefit: number }) {
+  const { benefit, nonBenefit, nonBenefitHeavy, nonBenefitLight, pharmaBenefit, pharmaNonBenefit } = costs;
   const ded = silbiDeductible[facility];
-  const rows: { label: string; selfPay: number; refund: number }[] = [];
-  let selfMedical = 0;
-  if (treatType === 'outpatient') {
-    if (gen === '4') { const s1 = Math.max(ded, benefit * 0.2); const s2 = Math.max(30_000, nonBenefit * 0.3); selfMedical = Math.min(benefit, s1) + Math.min(nonBenefit, s2); }
-    else if (gen === '3') { const tot = benefit + nonBenefit; selfMedical = Math.min(tot, Math.max(ded, tot * 0.2)); }
-    else if (gen === '2') { const tot = benefit + nonBenefit; selfMedical = tot <= ded ? tot : ded + (tot - ded) * 0.1; }
-    else selfMedical = 0;
-    rows.push({ label: '통원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical });
-  } else {
-    selfMedical = gen === '4' ? benefit * 0.2 + nonBenefit * 0.3 : gen === '3' ? (benefit + nonBenefit) * 0.2 : gen === '2' ? (benefit + nonBenefit) * 0.1 : 0;
-    rows.push({ label: '입원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical });
+  const rows: { label: string; selfPay: number; refund: number; memo: string }[] = [];
+  
+  if (gen === '5') {
+    const benefitSelf = treatType === 'outpatient' ? Math.min(benefit, Math.max(ded, benefit * 0.2)) : benefit * 0.2;
+    const nbHeavySelf = nonBenefitHeavy * 0.3;
+    const nbLightSelf = nonBenefitLight * 0.5;
+    
+    rows.push({ label: '급여 진료비', selfPay: benefitSelf, refund: benefit - benefitSelf, memo: '자기부담 20%' });
+    if (nonBenefitHeavy > 0) rows.push({ label: '중증 비급여', selfPay: nbHeavySelf, refund: nonBenefitHeavy - nbHeavySelf, memo: '자기부담 30%' });
+    if (nonBenefitLight > 0) rows.push({ label: '비중증 비급여 (도수/주사 등)', selfPay: nbLightSelf, refund: nonBenefitLight - nbLightSelf, memo: '자기부담 50%' });
+    
+    let selfPharma = 0;
+    if (treatType === 'outpatient' && pharmaBenefit > 0) {
+      selfPharma = Math.min(pharmaBenefit, Math.max(8_000, pharmaBenefit * 0.2));
+      rows.push({ label: '급여 약제비', selfPay: selfPharma, refund: pharmaBenefit - selfPharma, memo: '자기부담 20%' });
+    }
+    
+    const totalPaid = benefit + nonBenefitHeavy + nonBenefitLight + pharmaBenefit;
+    const selfPayTotal = Math.round(benefitSelf + nbHeavySelf + nbLightSelf + selfPharma);
+    return { totalPaid, selfPay: selfPayTotal, refund: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
   }
+
+  let selfMedical = 0;
+  let memoMedical = '';
+  if (treatType === 'outpatient') {
+    if (gen === '4') { const s1 = Math.max(ded, benefit * 0.2); const s2 = Math.max(30_000, nonBenefit * 0.3); selfMedical = Math.min(benefit, s1) + Math.min(nonBenefit, s2); memoMedical = '급여 20%, 비급여 30%'; }
+    else if (gen === '3') { const tot = benefit + nonBenefit; selfMedical = Math.min(tot, Math.max(ded, tot * 0.2)); memoMedical = '급여 10~20%, 비급여 20%'; }
+    else if (gen === '2') { const tot = benefit + nonBenefit; selfMedical = tot <= ded ? tot : ded + (tot - ded) * 0.1; memoMedical = '10% 공제'; }
+    else { selfMedical = 0; memoMedical = '자기부담금 없음'; }
+    rows.push({ label: '통원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical, memo: memoMedical });
+  } else {
+    if (gen === '4') { selfMedical = benefit * 0.2 + nonBenefit * 0.3; memoMedical = '급여 20%, 비급여 30%'; }
+    else if (gen === '3') { selfMedical = (benefit + nonBenefit) * 0.2; memoMedical = '합산 20%'; }
+    else if (gen === '2') { selfMedical = (benefit + nonBenefit) * 0.1; memoMedical = '합산 10%'; }
+    else { selfMedical = 0; memoMedical = '자기부담금 없음'; }
+    rows.push({ label: '입원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical, memo: memoMedical });
+  }
+
   let selfPharma = 0;
   if (treatType === 'outpatient' && (pharmaBenefit > 0 || pharmaNonBenefit > 0)) {
-    if (gen === '4') { const s1 = Math.max(8_000, pharmaBenefit * 0.2); const s2 = Math.max(30_000, pharmaNonBenefit * 0.3); selfPharma = Math.min(pharmaBenefit, s1) + Math.min(pharmaNonBenefit, s2); }
-    else if (gen === '3') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = Math.min(tot, Math.max(8_000, tot * 0.2)); }
-    else if (gen === '2') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = tot <= 8_000 ? tot : 8_000 + (tot - 8_000) * 0.1; }
-    else selfPharma = 0;
-    rows.push({ label: '약제비', selfPay: selfPharma, refund: pharmaBenefit + pharmaNonBenefit - selfPharma });
+    let memoPharma = '';
+    if (gen === '4') { const s1 = Math.max(8_000, pharmaBenefit * 0.2); const s2 = Math.max(30_000, pharmaNonBenefit * 0.3); selfPharma = Math.min(pharmaBenefit, s1) + Math.min(pharmaNonBenefit, s2); memoPharma = '급여 20%, 비급여 30%'; }
+    else if (gen === '3') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = Math.min(tot, Math.max(8_000, tot * 0.2)); memoPharma = '합산 20%'; }
+    else if (gen === '2') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = tot <= 8_000 ? tot : 8_000 + (tot - 8_000) * 0.1; memoPharma = '10% 공제'; }
+    else { selfPharma = 0; memoPharma = '자기부담금 없음'; }
+    rows.push({ label: '약제비', selfPay: selfPharma, refund: pharmaBenefit + pharmaNonBenefit - selfPharma, memo: memoPharma });
   }
+
   const totalPaid = benefit + nonBenefit + pharmaBenefit + pharmaNonBenefit;
   const selfPayTotal = Math.round(selfMedical + selfPharma);
   return { totalPaid, selfPay: selfPayTotal, refund: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
@@ -2264,11 +2293,11 @@ function FolderDownloadModal({
 }
 
 function getBmiCategory(bmi: number) {
-  if (bmi < 18.5) return { key: "underweight", label: "저체중", tone: "info" };
-  if (bmi < 23) return { key: "normal", label: "정상", tone: "success" };
-  if (bmi < 25) return { key: "overweight", label: "과체중", tone: "warning" };
-  if (bmi < 30) return { key: "obese1", label: "비만 (1단계)", tone: "warning" };
-  return { key: "obese2", label: "고도비만", tone: "danger" };
+  if (bmi < 18.5) return { key: "underweight", label: "저체중", tone: "info", color: "#60a5fa" };
+  if (bmi < 23) return { key: "normal", label: "정상", tone: "success", color: "#10b981" };
+  if (bmi < 25) return { key: "overweight", label: "과체중", tone: "warning", color: "#f59e0b" };
+  if (bmi < 30) return { key: "obese1", label: "비만 (1단계)", tone: "warning", color: "#f97316" };
+  return { key: "obese2", label: "고도비만", tone: "danger", color: "#ef4444" };
 }
 
 function getBmiUnderwriting(bmi: number) {
@@ -2379,7 +2408,7 @@ function ResultRow({ label, value, bold, highlight }: { label: string; value: st
   );
 }
 
-function TipBox({ title, children }: { title: string; children: React.ReactNode }) {
+function TipBox({ title, children, type }: { title: string; children: React.ReactNode; type?: 'info' | 'warning' | 'error' | string }) {
   return (
     <div className="mt-4 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
       <p className="text-xs font-bold text-[#7a612d] mb-2">💡 {title}</p>
@@ -2404,7 +2433,9 @@ function CalculatorTool({ id }: { id: ToolId }) {
     case "inheritance-tax": return <InheritanceTaxCalc />;
     case "card-deduction": return <CardDeductionCalc />;
     case "vat": return <VatCalc />;
-    default: return <GenericCalc id={id} />;
+    case "bmi-calculator": return <BmiCalc />;
+    case "savings": return <SavingsCalc />;
+    default: return null;
   }
 }
 
@@ -2444,66 +2475,130 @@ function InsuranceAgeCalc() {
 
 /* ── Silbi (실손의료비) ── */
 function SilbiCalc() {
-  const [gen, setGen] = useState<SilbiGen>('4');
+  const [gen, setGen] = useState<SilbiGen>('5');
   const [treatType, setTreatType] = useState<SilbiType>('outpatient');
   const [facility, setFacility] = useState<SilbiFacility>('clinic');
   const [benefit, setBenefit] = useState('');
   const [nonBenefit, setNonBenefit] = useState('');
+  const [nonBenefitHeavy, setNonBenefitHeavy] = useState('');
+  const [nonBenefitLight, setNonBenefitLight] = useState('');
   const [pharmaBenefit, setPharmaBenefit] = useState('');
   const [pharmaNonBenefit, setPharmaNonBenefit] = useState('');
+
   const result = useMemo(() => {
-    const b = Number(benefit) || 0, nb = Number(nonBenefit) || 0;
-    if (b + nb <= 0) return null;
-    return calcSilbi(gen, treatType, facility, { benefit: b, nonBenefit: nb, pharmaBenefit: Number(pharmaBenefit) || 0, pharmaNonBenefit: Number(pharmaNonBenefit) || 0 });
-  }, [gen, treatType, facility, benefit, nonBenefit, pharmaBenefit, pharmaNonBenefit]);
+    const b = Number(benefit) || 0;
+    const nb = Number(nonBenefit) || 0;
+    const nbh = Number(nonBenefitHeavy) || 0;
+    const nbl = Number(nonBenefitLight) || 0;
+    const pb = Number(pharmaBenefit) || 0;
+    const pnb = Number(pharmaNonBenefit) || 0;
+    
+    if (b + nb + nbh + nbl <= 0) return null;
+    return calcSilbi(gen, treatType, facility, { 
+      benefit: b, 
+      nonBenefit: nb, 
+      nonBenefitHeavy: nbh, 
+      nonBenefitLight: nbl, 
+      pharmaBenefit: pb, 
+      pharmaNonBenefit: pnb 
+    });
+  }, [gen, treatType, facility, benefit, nonBenefit, nonBenefitHeavy, nonBenefitLight, pharmaBenefit, pharmaNonBenefit]);
+
+  const genDates: Record<SilbiGen, string> = {
+    '1': '~ 2009년 9월 이전 (구실손)',
+    '2': '2009년 10월 ~ 2017년 3월 (표준화)',
+    '3': '2017년 4월 ~ 2021년 6월 (착한실손)',
+    '4': '2021년 7월 ~ 2026년 5월 5일',
+    '5': '2026년 5월 6일 이후 ~ 현재'
+  };
+
   return (
-    <PanelShell description="세대별 실손의료보험 자기부담금과 예상 환급금을 계산합니다. 통원/입원, 의원급/종합병원/상급종합을 구분합니다." id="silbi-calculator" title="실손의료비 계산기">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div>
-          <span className="text-sm font-semibold text-[#303845]">실손 세대</span>
-          <div className="mt-1.5 grid grid-cols-4 gap-1">
-            {(['1','2','3','4'] as SilbiGen[]).map(g => <button key={g} type="button" className={radioCls(gen===g)} onClick={() => setGen(g)}>{g}세대</button>)}
+    <PanelShell description="세대별(1~5세대) 실손의료보험 자기부담금 비율과 예상 환급금을 가장 정확하게 계산합니다." id="silbi-calculator" title="프리미엄 실손의료비 분석기">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+        <div className="col-span-full lg:col-span-1">
+          <span className="text-sm font-bold text-[#1e293b]">실손 가입 세대</span>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {(['1','2','3','4','5'] as SilbiGen[]).map(g => (
+              <button key={g} type="button" className={radioCls(gen===g)} onClick={() => setGen(g)}>{g}세대</button>
+            ))}
           </div>
+          <p className="mt-2 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1.5 rounded inline-block">
+            📅 가입기간: {genDates[gen]}
+          </p>
         </div>
         <div>
           <span className="text-sm font-semibold text-[#303845]">진료 구분</span>
-          <div className="mt-1.5 grid grid-cols-2 gap-1">
-            <button type="button" className={radioCls(treatType==='outpatient')} onClick={() => setTreatType('outpatient')}>통원</button>
-            <button type="button" className={radioCls(treatType==='inpatient')} onClick={() => setTreatType('inpatient')}>입원</button>
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
+            <button type="button" className={radioCls(treatType==='outpatient')} onClick={() => setTreatType('outpatient')}>통원 진료</button>
+            <button type="button" className={radioCls(treatType==='inpatient')} onClick={() => setTreatType('inpatient')}>입원 진료</button>
           </div>
         </div>
         <div>
-          <span className="text-sm font-semibold text-[#303845]">의료기관</span>
-          <select className={selectCls} value={facility} onChange={e => setFacility(e.target.value as SilbiFacility)}>
+          <span className="text-sm font-semibold text-[#303845]">방문 의료기관</span>
+          <select className={`${selectCls} mt-2 py-2.5`} value={facility} onChange={e => setFacility(e.target.value as SilbiFacility)}>
             <option value="clinic">의원급 (공제 1만원)</option>
-            <option value="general">종합병원 (공제 1.5만원)</option>
-            <option value="tertiary">상급종합 (공제 2만원)</option>
+            <option value="general">병원/종합병원 (공제 1.5만원)</option>
+            <option value="tertiary">상급종합병원 (공제 2만원)</option>
           </select>
         </div>
       </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">급여 진료비</span><input className={inputCls} placeholder="예: 80000" value={benefit} onChange={e => setBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">비급여 진료비</span><input className={inputCls} placeholder="예: 40000" value={nonBenefit} onChange={e => setNonBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        {treatType === 'outpatient' && (
-          <>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">급여 약제비</span><input className={inputCls} placeholder="예: 5000" value={pharmaBenefit} onChange={e => setPharmaBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-            <label className="block"><span className="text-sm font-semibold text-[#303845]">비급여 약제비</span><input className={inputCls} placeholder="예: 10000" value={pharmaNonBenefit} onChange={e => setPharmaNonBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-          </>
-        )}
+
+      <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <span className="text-sm font-bold text-slate-700 mb-3 block">진료비 및 약제비 영수증 입력</span>
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+          <label className="block"><span className="text-xs font-semibold text-slate-600">급여 진료비 총액</span><input className={`${inputCls} bg-white`} placeholder="예: 80000" value={benefit} onChange={e => setBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+          
+          {gen === '5' ? (
+            <>
+              <label className="block"><span className="text-xs font-bold text-amber-600">중증 비급여 (특약1)</span><input className={`${inputCls} bg-amber-50 border-amber-200`} placeholder="예: 40000" value={nonBenefitHeavy} onChange={e => setNonBenefitHeavy(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+              <label className="block"><span className="text-xs font-bold text-rose-600">비중증 비급여 (도수/주사 등)</span><input className={`${inputCls} bg-rose-50 border-rose-200`} placeholder="예: 100000" value={nonBenefitLight} onChange={e => setNonBenefitLight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            </>
+          ) : (
+            <label className="block"><span className="text-xs font-semibold text-slate-600">비급여 진료비 총액</span><input className={`${inputCls} bg-white`} placeholder="예: 40000" value={nonBenefit} onChange={e => setNonBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+          )}
+
+          {treatType === 'outpatient' && (
+            <>
+              <label className="block"><span className="text-xs font-semibold text-slate-600">급여 약제비</span><input className={`${inputCls} bg-white`} placeholder="예: 5000" value={pharmaBenefit} onChange={e => setPharmaBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+              {gen !== '5' && (
+                <label className="block"><span className="text-xs font-semibold text-slate-600">비급여 약제비</span><input className={`${inputCls} bg-white`} placeholder="예: 10000" value={pharmaNonBenefit} onChange={e => setPharmaNonBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+              )}
+            </>
+          )}
+        </div>
       </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+
+      <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/40 p-5">
+        <p className="text-xs font-bold text-blue-800 mb-4">자기부담금 분석 결과</p>
         {result ? (
-          <div className="mt-3 space-y-0.5 text-sm">
-            <ResultRow label="총 진료비" value={money(result.totalPaid)} />
-            {result.breakdown.map(r => <ResultRow key={r.label} label={`${r.label} — 자기부담`} value={money(r.selfPay)} />)}
-            <ResultRow label="자기부담금 합계" value={money(result.selfPay)} bold />
-            <ResultRow label="예상 환급금" value={money(result.refund)} highlight />
+          <div className="space-y-1.5 text-sm">
+            <ResultRow label="총 진료비+약제비 결제액" value={money(result.totalPaid)} />
+            <div className="my-2 border-t border-dashed border-blue-200"></div>
+            {result.breakdown.map(r => (
+              <div key={r.label} className="flex justify-between items-center py-1">
+                 <span className="text-slate-600 flex items-center gap-2">
+                   {r.label} 공제액
+                   <span className="text-[10px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-500 font-medium">{r.memo}</span>
+                 </span>
+                 <span className="font-medium text-slate-700">-{money(r.selfPay)}</span>
+              </div>
+            ))}
+            <div className="my-2 border-t border-blue-200"></div>
+            <ResultRow label="고객 최종 자기부담금" value={money(result.selfPay)} bold />
+            <div className="mt-3 p-3 bg-white rounded-lg border border-blue-100 flex justify-between items-center">
+               <span className="font-bold text-blue-900">최종 보험금 예상 환급액</span>
+               <span className="text-xl font-black text-blue-600">{money(result.refund)}</span>
+            </div>
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">진료비를 입력하세요.</p>}
+        ) : <p className="mt-2 text-sm text-slate-400 font-semibold text-center py-4">영수증에 적힌 급여/비급여 금액을 입력하세요.</p>}
       </div>
-      <TipBox title="실손 상담 팁">
-        {gen === '4' ? '4세대 실손은 급여/비급여 자기부담률이 다르고, 비급여 특약은 별도입니다. 비급여 특약 가입 여부도 같이 확인하세요.' : gen === '3' ? '3세대 실손은 급여+비급여 합산 20% 자기부담입니다. 4세대 전환 시 비교 안내가 필요합니다.' : gen === '2' ? '2세대 실손은 공제금액 초과분의 10%만 자기부담입니다. 갱신 보험료 인상률을 함께 확인하세요.' : '1세대 실손은 자기부담금 없이 전액 보상됩니다. 현재 갱신 보험료를 확인해보세요.'}
+      
+      <TipBox title="세대별 실손보험 컨설팅 팁" type="info">
+        {gen === '5' ? '5세대 실손은 과잉진료 차단을 위해 비중증 비급여(도수, 주사 등)의 자기부담률이 50%로 대폭 상향되었습니다. 병원 이용 패턴을 정확히 파악하여 전환 시 유불리를 꼼꼼하게 안내하세요.' : 
+         gen === '4' ? '4세대 실손은 급여 20%, 비급여 30%의 차등 자기부담이 적용되며 비급여 사용량에 따라 할증이 붙습니다. 의료쇼핑을 하지 않는 건강한 고객이라면 5세대 전환도 고려해볼 만합니다.' : 
+         gen === '3' ? '3세대 실손(착한실손)은 3대 비급여가 분리되어 있습니다. 현 시점 가성비가 가장 좋으므로 함부로 4/5세대로 전환하지 않도록 유지 관리를 권장합니다.' : 
+         gen === '2' ? '2세대 실손은 급여/비급여 구분 없이 10%의 낮은 공제율을 자랑하지만 갱신 보험료 폭탄의 위험이 있습니다. 갱신 시점 인상률을 분석하여 신계약 전환을 제시하세요.' : 
+         '1세대 구실손은 100% 보장이라는 엄청난 메리트가 있지만 갱신 보험료 상승폭이 가장 큽니다. 보험료 부담을 느끼는 고객에게 4/5세대 전환 후 남는 차액으로 다른 건강보험 가입을 권유하세요.'}
       </TipBox>
     </PanelShell>
   );
@@ -2666,7 +2761,7 @@ function EarnedTaxCalc() {
   );
 }
 
-/* ── Comprehensive Tax ── */
+/* ── Comprehensive Tax (Premium) ── */
 function CompTaxCalc() {
   const [rental, setRental] = useState('');
   const [other, setOther] = useState('');
@@ -2675,39 +2770,81 @@ function CompTaxCalc() {
   const [otherDeduction, setOtherDeduction] = useState('0');
   const [children, setChildren] = useState('0');
   const [otherCredit, setOtherCredit] = useState('0');
-  const result = useMemo(() => calcCompTax({ rental: Number(rental) || 0, other: Number(other) || 0, expense: Number(expense) || 0, dependents: Number(dependents) || 1, otherDeduction: Number(otherDeduction) || 0, children: Number(children) || 0, otherCredit: Number(otherCredit) || 0 }), [rental, other, expense, dependents, otherDeduction, children, otherCredit]);
+
+  const result = useMemo(() => calcCompTax({ 
+    rental: Number(rental) || 0, 
+    other: Number(other) || 0, 
+    expense: Number(expense) || 0, 
+    dependents: Number(dependents) || 1, 
+    otherDeduction: Number(otherDeduction) || 0, 
+    children: Number(children) || 0, 
+    otherCredit: Number(otherCredit) || 0 
+  }), [rental, other, expense, dependents, otherDeduction, children, otherCredit]);
+
+  const chartData = result ? [
+    { name: '공제 전 세액', value: result.gt },
+    { name: '공제 후 결정세액', value: result.finalTax },
+    { name: '연금저축/IRP 반영(가정)', value: Math.max(0, result.finalTax - result.pensionSaving) }
+  ] : [];
+
   return (
-    <PanelShell description="종합소득 과세표준 기준 간편 산출세액과 절세 가능 연금저축 세액공제를 계산합니다." id="comp-tax" title="간편 종합소득세 계산기">
-      <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-4">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">임대소득</span><input className={inputCls} placeholder="예: 30000000" value={rental} onChange={e => setRental(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">기타소득</span><input className={inputCls} placeholder="예: 10000000" value={other} onChange={e => setOther(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">필요경비</span><input className={inputCls} placeholder="예: 5000000" value={expense} onChange={e => setExpense(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">부양가족</span><input className={inputCls} placeholder="예: 1" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">기타공제</span><input className={inputCls} placeholder="예: 0" value={otherDeduction} onChange={e => setOtherDeduction(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 0" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">기타세액공제</span><input className={inputCls} placeholder="예: 0" value={otherCredit} onChange={e => setOtherCredit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-      </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
-        {result ? (
-          <div className="mt-3 space-y-0.5 text-sm">
-            <ResultRow label="종합소득금액" value={money(result.gross)} />
-            <ResultRow label="인적공제" value={money(result.personal)} />
-            <ResultRow label="과세표준" value={money(result.tb)} />
-            <ResultRow label="산출세액" value={money(result.gt)} bold />
-            <ResultRow label="자녀세액공제" value={money(result.childCr)} />
-            <ResultRow label="결정세액" value={money(result.finalTax)} />
-            <ResultRow label="지방소득세" value={money(result.lt)} />
-            <ResultRow label="총 납부세액" value={money(result.totalTax)} highlight />
-            <p className="text-[10px] text-[#5f6670] pt-2">※ 연금저축 세액공제 한도(900만원) 적용 시 절세 가능액: {money(result.pensionSaving)} (공제율 {(result.pensionRate * 100).toFixed(1)}%)</p>
+    <PanelShell description="종합소득 과세표준 기준 간편 산출세액과 프리랜서/사업자 절세의 핵심인 IRP/연금저축 세액공제 효과를 시뮬레이션합니다." id="comp-tax" title="프리미엄 종소세 & 절세 시뮬레이터">
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">사업/임대소득</span><input className={inputCls} placeholder="예: 45000000" value={rental} onChange={e => setRental(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">기타소득</span><input className={inputCls} placeholder="예: 5000000" value={other} onChange={e => setOther(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">필요경비</span><input className={inputCls} placeholder="예: 10000000" value={expense} onChange={e => setExpense(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">부양가족 (본인포함)</span><input className={inputCls} placeholder="예: 2" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 1" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">기타 소득공제 합계</span><input className={inputCls} placeholder="예: 0" value={otherDeduction} onChange={e => setOtherDeduction(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block sm:col-span-2"><span className="text-sm font-semibold text-[#303845]">기타 세액공제 합계</span><input className={inputCls} placeholder="예: 0" value={otherCredit} onChange={e => setOtherCredit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">소득 정보를 입력하세요.</p>}
+        </div>
+
+        <div>
+          {result ? (
+            <div className="h-full rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
+              <p className="text-xs font-bold text-[#7a612d] mb-4">연금저축 절세 시뮬레이션</p>
+              <div className="h-40 w-full mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#5f6670' }} tickLine={false} axisLine={false} />
+                    <YAxis tickFormatter={(val: number) => `${(val/10000).toFixed(0)}만`} tick={{ fontSize: 10, fill: '#5f6670' }} axisLine={false} tickLine={false} />
+                    <RechartsTooltip formatter={(value: unknown) => [`${Number(value).toLocaleString()} 원`, '세액']} />
+                    <Bar dataKey="value" fill="#8884d8" radius={[4, 4, 0, 0]}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === 2 ? '#10b981' : index === 1 ? '#6366f1' : '#cbd5e1'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-1.5 text-sm mt-4 border-t border-slate-100 pt-4">
+                <ResultRow label="종합소득 과세표준" value={krw(result.tb)} />
+                <ResultRow label="산출세액" value={krw(result.gt)} bold />
+                <ResultRow label="세액공제 합계 (자녀+기타)" value={`-${krw(result.totalCredit)}`} />
+                <div className="my-1 border-t border-dashed border-[#e7ddc9]/80"></div>
+                <ResultRow label="결정세액 (지방세포함)" value={krw(result.totalTax)} highlight />
+              </div>
+              <div className="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
+                <span className="text-[11px] font-bold text-emerald-700 block mb-1">💡 IRP/연금저축(납입한도 900만원) 가입 시 추가 절세액</span>
+                <span className="text-lg font-black text-emerald-600">최대 {krw(result.pensionSaving)} 절세</span>
+                <span className="text-[10px] text-emerald-600/70 block mt-0.5">적용 공제율: {(result.pensionRate * 100).toFixed(1)}%</span>
+              </div>
+            </div>
+          ) : (
+             <div className="h-full min-h-[300px] rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
+               <p className="text-sm font-semibold text-slate-400">종합소득 항목을 입력하여<br/>절세액을 확인하세요.</p>
+             </div>
+          )}
+        </div>
       </div>
     </PanelShell>
   );
 }
 
-/* ── Inheritance Tax ── */
+/* ── Inheritance Tax (Premium) ── */
 function InheritanceTaxCalc() {
   const [estate, setEstate] = useState('');
   const [debts, setDebts] = useState('0');
@@ -2717,93 +2854,220 @@ function InheritanceTaxCalc() {
   const [spouseMode, setSpouseMode] = useState<'none' | 'legal' | 'actual'>('legal');
   const [spouseActual, setSpouseActual] = useState('0');
   const [children, setChildren] = useState('2');
+  const [skipGeneration, setSkipGeneration] = useState(false);
+  const [recentDeathYears, setRecentDeathYears] = useState<'none'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'>('none');
+
   const result = useMemo(() => {
     const e = Number(estate) || 0;
     if (e <= 0) return null;
-    return calcInheritance({ estate: e, debts: Number(debts) || 0, priorGift: Number(priorGift) || 0, financialAssets: Number(financialAssets) || 0, homeValue: Number(homeValue) || 0, spouseMode, spouseActual: Number(spouseActual) || 0, children: Number(children) || 0 });
-  }, [estate, debts, priorGift, financialAssets, homeValue, spouseMode, spouseActual, children]);
+    const calc = calcInheritance({ 
+      estate: e, debts: Number(debts) || 0, priorGift: Number(priorGift) || 0, 
+      financialAssets: Number(financialAssets) || 0, homeValue: Number(homeValue) || 0, 
+      spouseMode, spouseActual: Number(spouseActual) || 0, children: Number(children) || 0 
+    });
+    
+    // 할증 및 공제 로직
+    let generationSurcharge = 0;
+    if (skipGeneration) generationSurcharge = calc.grossTax * 0.3;
+    
+    let shortTermDeduction = 0;
+    if (recentDeathYears !== 'none') {
+      const deductionRate = 100 - (Number(recentDeathYears) * 10);
+      shortTermDeduction = (calc.grossTax + generationSurcharge) * (deductionRate / 100);
+    }
+    
+    const finalGrossTax = calc.grossTax + generationSurcharge - shortTermDeduction;
+    const finalReportCredit = finalGrossTax * 0.03;
+    const finalNetTax = Math.max(0, finalGrossTax - finalReportCredit);
+    
+    return { ...calc, generationSurcharge, shortTermDeduction, finalGrossTax, finalReportCredit, finalNetTax };
+  }, [estate, debts, priorGift, financialAssets, homeValue, spouseMode, spouseActual, children, skipGeneration, recentDeathYears]);
+
+  const pieData = result ? [
+    { name: '세후 상속재산', value: result.estate - result.finalNetTax, fill: '#10b981' },
+    { name: '납부할 상속세', value: result.finalNetTax, fill: '#ef4444' }
+  ] : [];
+
   return (
-    <PanelShell description="상속재산, 채무, 배우자 공제 등 주요 항목을 입력하여 참고 상속세를 계산합니다." id="inheritance-tax" title="간편 상속세 계산기">
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">총 상속재산</span><input className={inputCls} placeholder="예: 2000000000" value={estate} onChange={e => setEstate(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">채무·장례비</span><input className={inputCls} placeholder="예: 100000000" value={debts} onChange={e => setDebts(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">사전증여(10년)</span><input className={inputCls} placeholder="예: 0" value={priorGift} onChange={e => setPriorGift(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">금융재산</span><input className={inputCls} placeholder="예: 300000000" value={financialAssets} onChange={e => setFinancialAssets(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">동거주택 가액</span><input className={inputCls} placeholder="예: 0" value={homeValue} onChange={e => setHomeValue(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 2" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <div>
-          <span className="text-sm font-semibold text-[#303845]">배우자 공제</span>
-          <select className={selectCls} value={spouseMode} onChange={e => setSpouseMode(e.target.value as 'none' | 'legal' | 'actual')}>
-            <option value="none">배우자 없음</option>
-            <option value="legal">법정상속분</option>
-            <option value="actual">실제상속분</option>
-          </select>
-        </div>
-        {spouseMode === 'actual' && (
-          <label className="block"><span className="text-sm font-semibold text-[#303845]">배우자 실제 상속액</span><input className={inputCls} placeholder="예: 500000000" value={spouseActual} onChange={e => setSpouseActual(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        )}
-      </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
-        {result ? (
-          <div className="mt-3 space-y-0.5 text-sm">
-            <ResultRow label="총 상속재산" value={krw(result.estate)} />
-            <ResultRow label="채무·장례비" value={`-${krw(result.debts)}`} />
-            <ResultRow label="과세가액" value={krw(result.taxableEstate)} />
-            <ResultRow label="사전증여 합산" value={krw(result.priorGift)} />
-            <ResultRow label="합산 과세가액" value={krw(result.combined)} bold />
-            <p className="text-[10px] font-bold text-[#5f6670] pt-2">공제 내역</p>
-            <ResultRow label="일괄/인적공제" value={krw(result.lumpOrPersonal)} />
-            <ResultRow label="배우자 공제" value={krw(result.spouse)} />
-            <ResultRow label="금융재산 공제" value={krw(result.financial)} />
-            <ResultRow label="동거주택 공제" value={krw(result.home)} />
-            <ResultRow label="총 공제" value={krw(result.totalDeduction)} bold />
-            <ResultRow label="과세표준" value={krw(result.taxBase)} />
-            <ResultRow label="산출세액" value={krw(result.grossTax)} />
-            <ResultRow label="신고세액공제(3%)" value={`-${krw(result.reportCredit)}`} />
-            <ResultRow label="납부 상속세" value={krw(result.netTax)} highlight />
+    <PanelShell description="상속재산, 공제항목 및 단기재상속/세대생략 조건을 반영하여 정밀한 상속세를 계산합니다." id="inheritance-tax" title="프리미엄 상속세/증여세 진단기">
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <div className="space-y-4">
+           <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block sm:col-span-2"><span className="text-sm font-bold text-[#1e293b]">총 상속재산</span><input className={`${inputCls} border-blue-300 bg-blue-50/30 text-lg py-3`} placeholder="예: 2000000000" value={estate} onChange={e => setEstate(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">채무·장례비</span><input className={inputCls} placeholder="예: 100000000" value={debts} onChange={e => setDebts(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">사전증여(10년)</span><input className={inputCls} placeholder="예: 0" value={priorGift} onChange={e => setPriorGift(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">순수 금융재산</span><input className={inputCls} placeholder="예: 300000000" value={financialAssets} onChange={e => setFinancialAssets(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">동거주택 가액</span><input className={inputCls} placeholder="예: 0" value={homeValue} onChange={e => setHomeValue(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 2" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            
+            <div className="sm:col-span-2 border-t border-slate-200 mt-2 pt-4">
+              <span className="text-sm font-bold text-slate-700 mb-2 block">배우자 상속 조건</span>
+              <div className="grid grid-cols-2 gap-3">
+                <select className={selectCls} value={spouseMode} onChange={e => setSpouseMode(e.target.value as 'none' | 'legal' | 'actual')}>
+                  <option value="none">배우자 없음 (공제 0원)</option>
+                  <option value="legal">법정상속분 (최소 5억~최대 30억)</option>
+                  <option value="actual">실제상속분 (직접 입력)</option>
+                </select>
+                {spouseMode === 'actual' && (
+                  <input className={inputCls} placeholder="실제 상속액 입력" value={spouseActual} onChange={e => setSpouseActual(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" />
+                )}
+              </div>
+            </div>
+
+            <div className="sm:col-span-2 border-t border-slate-200 mt-2 pt-4">
+              <span className="text-sm font-bold text-slate-700 mb-2 block">특례 및 할증 조건</span>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input type="checkbox" className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" checked={skipGeneration} onChange={(e) => setSkipGeneration(e.target.checked)} />
+                  세대생략 상속 (30% 할증)
+                </label>
+                <div>
+                  <select className={selectCls} value={recentDeathYears} onChange={e => setRecentDeathYears(e.target.value as any)}>
+                    <option value="none">단기재상속 해당없음</option>
+                    {[1,2,3,4,5,6,7,8,9,10].map(y => <option key={y} value={y}>{y}년 이내 이전 상속 발생</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">상속재산을 입력하세요.</p>}
+        </div>
+
+        <div>
+          {result ? (
+            <div className="h-full rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
+              <p className="text-xs font-bold text-[#7a612d] mb-4">상속세 자금 출처 분석</p>
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="w-32 h-32 shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={pieData} innerRadius={40} outerRadius={60} dataKey="value" stroke="none" paddingAngle={3}>
+                        {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+                      </Pie>
+                      <RechartsTooltip formatter={(value: unknown) => [`${Number(value).toLocaleString()} 원`, '']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-full space-y-1.5 text-sm">
+                  <ResultRow label="총 공제액 합계" value={krw(result.totalDeduction)} />
+                  <ResultRow label="상속 과세표준" value={krw(result.taxBase)} />
+                  <div className="my-1 border-t border-slate-200"></div>
+                  <ResultRow label="기본 산출세액" value={krw(result.grossTax)} bold />
+                  {skipGeneration && <ResultRow label="세대생략 할증(+)" value={krw(result.generationSurcharge)} />}
+                  {recentDeathYears !== 'none' && <ResultRow label="단기재상속 공제(-)" value={krw(result.shortTermDeduction)} />}
+                  <ResultRow label="신고세액 공제(-)" value={krw(result.finalReportCredit)} />
+                  <div className="my-1 border-t border-dashed border-[#e7ddc9]/80"></div>
+                  <ResultRow label="최종 납부 상속세" value={krw(result.finalNetTax)} highlight />
+                </div>
+              </div>
+            </div>
+          ) : (
+             <div className="h-full min-h-[300px] rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
+               <p className="text-sm font-semibold text-slate-400">상속재산과 부채를 입력하여<br/>예상 상속세를 확인하세요.</p>
+             </div>
+          )}
+        </div>
       </div>
-      <TipBox title="상속세 상담 팁">
-        종신보험 사망보험금은 상속재산에 포함되지만, 상속세 납부 재원으로 활용할 수 있습니다. 상속세 납부 대비 종신보험 설계 시 이 계산기를 활용하세요.
+      <TipBox title="종신보험 세테크 플랜 제안" type="warning">
+        {result && result.finalNetTax > 0 ? 
+          `예상 상속세가 ${krw(result.finalNetTax)} 발생합니다. 현금 유동성이 부족할 경우, 유가족이 알짜 부동산을 급매하여 손실을 볼 수 있습니다. 부모님 피보험자, 자녀 계약자/수익자 구조의 종신보험으로 상속세 재원을 미리 준비하세요.` :
+          "종신보험 사망보험금은 상속재산에 포함되지만, 상속세 납부 재원으로 활용할 수 있습니다. 상속세 납부 대비 종신보험 설계 시 이 계산기를 활용하세요."
+        }
       </TipBox>
     </PanelShell>
   );
 }
 
-/* ── Card Deduction ── */
+/* ── Card Deduction (Premium) ── */
 function CardDeductionCalc() {
   const [salary, setSalary] = useState('');
   const [card, setCard] = useState('');
   const [cash, setCash] = useState('');
-  const result = useMemo(() => calcCardDeduction({ salary: Number(salary) || 0, card: Number(card) || 0, cash: Number(cash) || 0 }), [salary, card, cash]);
+  
+  const result = useMemo(() => {
+    const s = Number(salary) || 0;
+    const cd = Number(card) || 0;
+    const cs = Number(cash) || 0;
+    if (s <= 0) return null;
+    
+    const base = calcCardDeduction({ salary: s, card: cd, cash: cs });
+    if (!base) return null;
+
+    const minUsage = base.minUsage;
+    const totalUsed = cd + cs;
+    const isMinMet = totalUsed >= minUsage;
+    const progressPct = Math.min((totalUsed / (s * 0.5)) * 100, 100); 
+    const thresholdPct = 50; 
+    
+    let guideMessage = '';
+    if (!isMinMet) {
+      const remaining = minUsage - totalUsed;
+      guideMessage = `공제 문턱(연봉의 25%)까지 아직 ${krw(remaining)} 부족합니다. 남은 금액은 각종 할인/포인트 혜택이 좋은 신용카드를 우선 사용하여 문턱을 채우세요.`;
+    } else {
+      const remainCap = base.cap - base.final;
+      if (remainCap > 0) {
+        guideMessage = `공제 문턱을 돌파했습니다! 지금부터는 공제율이 2배 높은(30%) 현금/체크카드만 사용하세요. 공제 한도를 꽉 채우려면 현금/체크카드로 약 ${krw(remainCap / 0.3)} 추가 소비가 필요합니다.`;
+      } else {
+        guideMessage = `소득공제 한도(${krw(base.cap)})를 모두 채웠습니다! 더 이상의 카드 소비는 소득공제 효과가 없으니 혜택(마일리지/할인) 위주의 신용카드를 편하게 사용하세요.`;
+      }
+    }
+    
+    return { ...base, s, cd, cs, isMinMet, progressPct, thresholdPct, guideMessage };
+  }, [salary, card, cash]);
+
   return (
-    <PanelShell description="연봉, 신용카드, 현금영수증 사용액 기준 소득공제 가능 금액과 예상 환급액을 계산합니다." id="card-deduction" title="카드/현금 소득공제 계산기">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">총 급여(연간)</span><input className={inputCls} placeholder="예: 60000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">신용카드 사용액</span><input className={inputCls} placeholder="예: 18000000" value={card} onChange={e => setCard(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
-        <label className="block"><span className="text-sm font-semibold text-[#303845]">현금영수증/체크카드</span><input className={inputCls} placeholder="예: 3000000" value={cash} onChange={e => setCash(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+    <PanelShell description="연봉 및 결제 수단별 사용액을 분석하여 연말정산 공제 극대화를 위한 '소비 황금비율'을 가이드합니다." id="card-deduction" title="프리미엄 카드공제 최적화 분석기">
+      <div className="grid gap-4 sm:grid-cols-3 mb-6">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">총 급여(연봉)</span><input className={inputCls} placeholder="예: 60000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">현재까지 신용카드 누적액</span><input className={inputCls} placeholder="예: 12000000" value={card} onChange={e => setCard(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">현금영수증/체크카드 누적액</span><input className={inputCls} placeholder="예: 3000000" value={cash} onChange={e => setCash(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
       </div>
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
-        {result ? (
-          <div className="mt-3 space-y-0.5 text-sm">
-            <ResultRow label="최소 사용금액(25%)" value={money(result.minUsage)} />
-            <ResultRow label="총 사용액" value={money(result.total)} />
-            <ResultRow label="초과 사용액" value={money(result.excess)} />
-            <ResultRow label="카드 공제대상" value={`${money(result.cardEligible)} × 15%`} />
-            <ResultRow label="현금 공제대상" value={`${money(result.cashEligible)} × 30%`} />
-            <ResultRow label="산출 공제액" value={money(result.raw)} />
-            <ResultRow label="공제 한도" value={money(result.cap)} />
-            <ResultRow label="최종 공제액" value={money(result.final)} highlight />
-            <ResultRow label="예상 환급 참고액" value={money(result.refund)} bold />
+
+      {result ? (
+        <div className="space-y-6">
+          <div className="rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
+            <p className="text-sm font-bold text-slate-700 mb-5">공제 문턱(25%) 달성 현황</p>
+            <div className="relative w-full h-8 bg-slate-100 rounded-full overflow-hidden">
+               <div className="absolute top-0 bottom-0 border-l-2 border-dashed border-slate-400 z-10" style={{ left: `${result.thresholdPct}%` }}></div>
+               <div className="absolute top-8 text-[10px] text-slate-500 font-bold -translate-x-1/2 mt-1" style={{ left: `${result.thresholdPct}%` }}>25% 문턱</div>
+               <div className={`h-full transition-all duration-1000 ${result.isMinMet ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: `${result.progressPct}%` }}></div>
+            </div>
+            <div className="mt-7 flex justify-between text-sm font-semibold">
+              <span className="text-slate-500">현재 누적 사용액: {krw(result.cd + result.cs)}</span>
+              <span className="text-[#aa8137]">문턱 도달 기준액: {krw(result.minUsage)}</span>
+            </div>
           </div>
-        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">급여와 사용액을 입력하세요.</p>}
-      </div>
-      <TipBox title="절세 팁">
-        최소사용금액(25%)까지는 신용카드를 쓰고, 초과분은 현금영수증·체크카드(30% 공제)를 활용하면 공제 효과가 극대화됩니다.
-      </TipBox>
+
+          <div className="grid md:grid-cols-2 gap-4">
+             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+               <p className="text-xs font-bold text-slate-500 mb-3">소득공제 산출 내역</p>
+               <div className="space-y-1.5 text-sm text-slate-700">
+                 <ResultRow label="카드 공제대상 (15%)" value={krw(result.cardEligible)} />
+                 <ResultRow label="현금 공제대상 (30%)" value={krw(result.cashEligible)} />
+                 <div className="my-1 border-t border-dashed border-slate-300"></div>
+                 <ResultRow label="산출 공제액" value={krw(result.raw)} bold />
+                 <ResultRow label="연봉대비 공제 한도" value={krw(result.cap)} />
+                 <div className="my-1 border-t border-slate-200"></div>
+                 <ResultRow label="최종 인정 공제액" value={krw(result.final)} highlight />
+               </div>
+             </div>
+             
+             <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 flex flex-col justify-center">
+                <span className="text-sm font-bold text-blue-800 mb-2">황금비율 최적화 가이드</span>
+                <p className="text-sm leading-relaxed text-blue-900 font-medium break-keep">
+                  {result.guideMessage}
+                </p>
+                <div className="mt-4 p-3 bg-white rounded-lg text-center shadow-sm">
+                   <span className="text-xs font-semibold text-slate-500 block mb-1">연말정산 예상 세금 환급액</span>
+                   <span className="text-2xl font-black text-blue-600">{krw(result.refund)}</span>
+                </div>
+             </div>
+          </div>
+        </div>
+      ) : (
+        <div className="h-40 rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
+          <p className="text-sm font-semibold text-slate-400">급여와 카드 사용액을 입력하여<br/>소비 황금비율을 확인하세요.</p>
+        </div>
+      )}
     </PanelShell>
   );
 }
@@ -2839,160 +3103,188 @@ function VatCalc() {
   );
 }
 
-/* ── Generic fallback (BMI + Savings still use this) ── */
-function GenericCalc({ id }: { id: ToolId }) {
-  const [values, setValues] = useState({ a: "", b: "", c: "", d: "" });
+/* ── BMI (Premium) ── */
+function BmiCalc() {
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [hasDiabetes, setHasDiabetes] = useState(false);
+  const [hasHypertension, setHasHypertension] = useState(false);
+
+  const result = useMemo(() => {
+    const h = Number(height);
+    const w = Number(weight);
+    if (h < 80 || h > 250 || w < 20 || w > 400) return null;
+    
+    const heightM = h / 100;
+    const bmiVal = w / (heightM * heightM);
+    const bmi = Math.round(bmiVal * 10) / 10;
+    
+    const category = getBmiCategory(bmi);
+    const standardWeight = Math.round(heightM * heightM * 22 * 10) / 10;
+    
+    let underwriting = getBmiUnderwriting(bmi);
+    if ((hasDiabetes || hasHypertension) && underwriting.tone === "success") {
+      underwriting = { label: "유병자 플랜 우회 필요", desc: "체중은 정상이나 기저질환(당뇨/고혈압)으로 인해 표준체 가입이 거절될 수 있습니다. 유병자 335, 355 플랜으로 전환을 검토하세요.", tone: "danger" };
+    }
+
+    return { bmi, category, standardWeight, underwriting };
+  }, [height, weight, hasDiabetes, hasHypertension]);
+
+  return (
+    <PanelShell description="고객의 체질량지수(BMI)를 계산하고, 기저질환 여부를 결합하여 표준체 보험 가입 가능성(언더라이팅)을 실시간으로 예측합니다." id="bmi-calculator" title="프리미엄 BMI 언더라이팅 진단기">
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">키 (cm)</span><input className={inputCls} placeholder="예: 170" value={height} onChange={e => setHeight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">체중 (kg)</span><input className={inputCls} placeholder="예: 65" value={weight} onChange={e => setWeight(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+          </div>
+          <div className="pt-4 border-t border-slate-200">
+            <span className="text-sm font-bold text-slate-700 mb-2 block">기저질환 체크 (선택)</span>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                <input type="checkbox" className="w-4 h-4 rounded text-[#173f36] focus:ring-[#173f36]" checked={hasDiabetes} onChange={(e) => setHasDiabetes(e.target.checked)} />
+                당뇨병
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                <input type="checkbox" className="w-4 h-4 rounded text-[#173f36] focus:ring-[#173f36]" checked={hasHypertension} onChange={(e) => setHasHypertension(e.target.checked)} />
+                고혈압
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          {result ? (
+            <div className={`h-full rounded-xl border p-5 shadow-sm transition-colors duration-500 ${result.underwriting.tone === 'success' ? 'bg-emerald-50 border-emerald-200' : result.underwriting.tone === 'danger' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+               <p className="text-xs font-bold text-slate-500 mb-4 uppercase">Analysis Result</p>
+               <div className="flex justify-between items-end mb-4">
+                 <div>
+                   <span className="text-3xl font-black block" style={{ color: result.category.color }}>{result.bmi}</span>
+                   <span className="text-sm font-bold text-slate-600">BMI 지수 ({result.category.label})</span>
+                 </div>
+                 <div className="text-right">
+                   <span className="text-lg font-bold text-slate-700 block">{result.standardWeight} kg</span>
+                   <span className="text-xs font-medium text-slate-500">권장 표준 체중</span>
+                 </div>
+               </div>
+               
+               <div className="mt-4 p-4 rounded-lg bg-white/60 border border-white backdrop-blur-sm">
+                 <div className="font-bold text-sm flex items-center gap-2 mb-1 text-slate-800">
+                   {result.underwriting.tone === 'success' ? '✅' : result.underwriting.tone === 'danger' ? '⛔' : '⚠️'}
+                   인수 심사 예측: {result.underwriting.label}
+                 </div>
+                 <p className="text-xs leading-relaxed text-slate-600 break-keep">{result.underwriting.desc}</p>
+               </div>
+            </div>
+          ) : (
+            <div className="h-full min-h-[200px] rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
+               <p className="text-sm font-semibold text-slate-400">고객의 신체 정보와 질환을 입력하여<br/>가입 심사 결과를 예측해보세요.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </PanelShell>
+  );
+}
+
+/* ── Savings (Premium) ── */
+function SavingsCalc() {
+  const [deposit, setDeposit] = useState('');
+  const [monthly, setMonthly] = useState('');
+  const [rate, setRate] = useState('');
+  const [months, setMonths] = useState('');
   const [savingsMode, setSavingsMode] = useState<"simple" | "compound">("compound");
   const [savingsTaxType, setSavingsTaxType] = useState<"general" | "preferential" | "tax_free">("general");
 
-  const inputs = inputsForTool(id);
-  const copy = getToolCopy(id);
+  const result = useMemo(() => {
+    const d = Number(deposit) || 0;
+    const m = Number(monthly) || 0;
+    const r = Number(rate) || 0;
+    const mo = Number(months) || 0;
+    if ((d <= 0 && m <= 0) || r <= 0 || mo <= 0) return null;
+    return calculateSavings(savingsMode, savingsTaxType, d, m, mo, r);
+  }, [deposit, monthly, rate, months, savingsMode, savingsTaxType]);
 
-  const result = useMemo<React.ReactNode>(() => {
-    const x = numberValue(values.a);
-    const y = numberValue(values.b);
-    const w = numberValue(values.d);
-    const z = numberValue(values.c);
-
-    switch (id) {
-      case "bmi-calculator": {
-        const heightM = x / 100;
-        const bmiVal = heightM > 0 ? y / (heightM * heightM) : 0;
-        if (bmiVal <= 0 || x < 80 || x > 250 || y < 20 || y > 400) {
-          return "키와 체중을 다시 확인해주세요.";
-        }
-        const bmi = Math.round(bmiVal * 10) / 10;
-        const category = getBmiCategory(bmi);
-        const standardWeight = Math.round(heightM * heightM * 22 * 10) / 10;
-        const underwriting = getBmiUnderwriting(bmi);
-
-        const toneBg =
-          underwriting.tone === "success" ? "bg-green-50/70 border-green-200 text-green-800" :
-          underwriting.tone === "danger" ? "bg-red-50/70 border-red-200 text-red-800" :
-          "bg-amber-50/70 border-amber-200 text-amber-800";
-
-        return (
-          <div className="space-y-3.5 text-xs sm:text-sm text-[#102235]">
-            <div className="flex justify-between border-b border-[#e7ddc9] pb-2">
-              <span className="text-[#5f6670]">BMI 지수</span>
-              <span className="font-bold">{bmi} ({category.label})</span>
-            </div>
-            <div className="flex justify-between border-b border-[#e7ddc9] pb-2">
-              <span className="text-[#5f6670]">표준 체중 (BMI 22 기준)</span>
-              <span className="font-semibold">{standardWeight} kg</span>
-            </div>
-            <div className={`p-4 border rounded-xl space-y-1.5 ${toneBg}`}>
-              <div className="font-bold text-sm sm:text-base flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                인수 심사 예측: {underwriting.label}
-              </div>
-              <p className="text-[11px] leading-normal opacity-90 break-keep">{underwriting.desc}</p>
-            </div>
-          </div>
-        );
-      }
-      case "savings": {
-        const res = calculateSavings(savingsMode, savingsTaxType, x, y, w, z);
-        if (!res) return "금액과 이자율, 기간을 입력하세요.";
-        return (
-          <div className="space-y-2.5 text-xs sm:text-sm text-[#102235]">
-            <div className="flex justify-between border-b border-[#e7ddc9] pb-2 font-semibold">
-              <span className="text-[#5f6670]">총 납입 원금</span>
-              <span>{money(res.totalPrincipal)}</span>
-            </div>
-            <div className="flex justify-between border-b border-dashed border-[#e7ddc9]/80 pb-2">
-              <span className="text-[#5f6670]">세전 이자</span>
-              <span>{money(res.preTaxInterest)}</span>
-            </div>
-            <div className="flex justify-between border-b border-dashed border-[#e7ddc9]/80 pb-2 text-red-600">
-              <span className="text-red-500">이자 소득세 ({savingsTaxType === "general" ? "15.4%" : savingsTaxType === "preferential" ? "9.5%" : "0%"})</span>
-              <span>- {money(res.tax)}</span>
-            </div>
-            <div className="flex justify-between border-b border-dashed border-[#e7ddc9]/80 pb-2 text-green-700">
-              <span className="text-green-600">세후 수령 이자</span>
-              <span>{money(res.postTaxInterest)}</span>
-            </div>
-            <div className="flex justify-between border-b border-[#e7ddc9] pb-2.5 font-bold text-base sm:text-lg text-[#aa8137]">
-              <span>세후 만기 수령액</span>
-              <span>{money(res.maturityPostTax)}</span>
-            </div>
-            <div className="text-[10px] text-slate-400 text-right mt-1.5">
-              ※ 연 복리 환산 실효 수익률(세후): {res.effectiveRate.toFixed(2)}%
-            </div>
-          </div>
-        );
-      }
-      default:
-        return "-";
-    }
-  }, [id, values, savingsMode, savingsTaxType]);
+  const pieData = result ? [
+    { name: '원금 합계', value: result.totalPrincipal, fill: '#94a3b8' },
+    { name: '세후 수령 이자', value: result.postTaxInterest, fill: '#aa8137' }
+  ] : [];
 
   return (
-    <PanelShell description={copy?.description ?? ""} id={id} title={copy?.label ?? ""}>
-      <div className="grid gap-3 md:grid-cols-4">
-        {inputs.map((input) => (
-          <NumberInput
-            key={input.key}
-            label={input.label}
-            onChange={(value) =>
-              setValues((current) => ({ ...current, [input.key]: value }))
-            }
-            placeholder={input.placeholder}
-            value={values[input.key]}
-          />
-        ))}
-      </div>
-
-      {id === "savings" && (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#e7ddc9]/80 pt-4">
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-[#303845]">이자 단리/복리 방식</span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                className={`py-2 text-xs font-semibold rounded-lg border transition ${
-                  savingsMode === "simple"
-                    ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
-                    : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
-                }`}
-                onClick={() => setSavingsMode("simple")}
-              >
-                단리 계산
-              </button>
-              <button
-                type="button"
-                className={`py-2 text-xs font-semibold rounded-lg border transition ${
-                  savingsMode === "compound"
-                    ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
-                    : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
-                }`}
-                onClick={() => setSavingsMode("compound")}
-              >
-                복리 계산 (월)
-              </button>
+    <PanelShell description="예적금의 단리/복리 효과와 세금(일반/비과세)을 적용하여 세후 실제 수령액을 계산합니다." id="savings" title="프리미엄 예적금 & 복리 계산기">
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">초기 거치금액 (예금)</span><input className={inputCls} placeholder="예: 50000000" value={deposit} onChange={e => setDeposit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">월 적립액 (적금)</span><input className={inputCls} placeholder="예: 1000000" value={monthly} onChange={e => setMonthly(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">연 금리 (%)</span><input className={inputCls} placeholder="예: 3.5" value={rate} onChange={e => setRate(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">가입 기간 (개월)</span><input className={inputCls} placeholder="예: 36" value={months} onChange={e => setMonths(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+          </div>
+          
+          <div className="pt-4 border-t border-slate-200 grid sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-slate-500">이자 계산 방식</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" className={radioCls(savingsMode === 'simple')} onClick={() => setSavingsMode("simple")}>단리</button>
+                <button type="button" className={radioCls(savingsMode === 'compound')} onClick={() => setSavingsMode("compound")}>월 복리</button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-slate-500">세금 우대 혜택</span>
+              <select className={selectCls} value={savingsTaxType} onChange={e => setSavingsTaxType(e.target.value as "general" | "preferential" | "tax_free")}>
+                <option value="general">일반과세 (15.4%)</option>
+                <option value="preferential">세금우대 (9.5%)</option>
+                <option value="tax_free">비과세 (0%)</option>
+              </select>
             </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-[#303845]">이자 과세 구분</span>
-            <select
-              className="w-full px-3 py-2 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
-              value={savingsTaxType}
-              onChange={(e) => setSavingsTaxType(e.target.value as "general" | "preferential" | "tax_free")}
-            >
-              <option value="general">일반과세 (15.4%)</option>
-              <option value="preferential">세금우대 (9.5%)</option>
-              <option value="tax_free">비과세 (0%)</option>
-            </select>
-          </div>
         </div>
-      )}
 
-      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
-        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
-        <div className="mt-2 break-keep text-base sm:text-lg font-semibold text-[#102235]">
-          {result}
+        <div>
+          {result ? (
+            <div className="h-full rounded-xl border border-[#d9c9a8] bg-white p-5 shadow-sm">
+              <p className="text-xs font-bold text-[#7a612d] mb-4">만기 수령액 시각화</p>
+              
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="w-32 h-32 shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={pieData} innerRadius={35} outerRadius={60} dataKey="value" stroke="none" paddingAngle={2}>
+                        {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+                      </Pie>
+                      <RechartsTooltip formatter={(value: unknown) => [`${Number(value).toLocaleString()} 원`, '']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-full space-y-1.5 text-sm">
+                  <ResultRow label="총 납입 원금" value={krw(result.totalPrincipal)} />
+                  <ResultRow label="세전 이자" value={`+ ${krw(result.preTaxInterest)}`} />
+                  <ResultRow label={`이자 소득세 (${savingsTaxType === 'general' ? '15.4%' : savingsTaxType === 'preferential' ? '9.5%' : '0%'})`} value={`- ${krw(result.tax)}`} />
+                  <div className="my-1 border-t border-dashed border-slate-200"></div>
+                  <ResultRow label="세후 수령 이자" value={krw(result.postTaxInterest)} highlight />
+                </div>
+              </div>
+              
+              <div className="mt-5 p-3 bg-[#fbf7ee] rounded-lg text-center border border-[#e7ddc9]">
+                <span className="text-xs font-semibold text-[#7a612d] block mb-1">최종 만기 수령액 (세후)</span>
+                <span className="text-2xl font-black text-[#aa8137]">{krw(result.maturityPostTax)}</span>
+                <span className="text-xs font-medium text-slate-500 block mt-1">실효 수익률: 연 {result.effectiveRate.toFixed(2)}% (세후)</span>
+              </div>
+            </div>
+          ) : (
+             <div className="h-full min-h-[250px] rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
+               <p className="text-sm font-semibold text-slate-400">거치금액, 적립액, 금리 등<br/>저축 조건을 입력해주세요.</p>
+             </div>
+          )}
         </div>
       </div>
+      
+      <TipBox title="비과세 복리 저축 영업 팁" type="info">
+        {savingsMode === 'simple' && savingsTaxType === 'general' ? 
+          "단리+일반과세(15.4%) 조건의 일반 은행 적금은 인플레이션을 방어하기 어렵습니다. 저축성 보험의 비과세 혜택과 연복리 구조를 비교 제시하여, 고객의 장기 목적자금 마련 플랜을 저축성 보험으로 유도하세요." :
+          "월복리 및 비과세 혜택이 적용될 때 수익률이 어떻게 극대화되는지 고객의 눈앞에서 즉시 보여주며, 복리 효과가 폭발적으로 일어나는 '시간의 마법'을 설명하기에 최적입니다."
+        }
+      </TipBox>
     </PanelShell>
   );
 }
