@@ -7,6 +7,7 @@ import {
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { MvpModuleLinks, MvpSafetyNotice } from "@/components/mvp-navigation";
+import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { ClaimDocumentExplorer } from "./claim-document-explorer";
 
@@ -34,6 +35,9 @@ const workflowSteps = [
 
 export default async function ClaimDocumentsPage() {
   const result = await getPublicClaimDocuments();
+  const documents = result.status === "ok" ? result.data : [];
+  const visibleDocuments =
+    documents.length > 0 ? documents : claimDocumentCandidateFallback;
 
   return (
     <PageFrame>
@@ -54,13 +58,13 @@ export default async function ClaimDocumentsPage() {
               title="청구서류 정보를 불러오지 못했습니다."
               description="잠시 후 다시 확인해 주세요."
             />
-          ) : result.data.length === 0 ? (
+          ) : visibleDocuments.length === 0 ? (
             <EmptyState
               title="공개된 청구서류 안내가 아직 없습니다."
               description="관리자 검수 후 순차적으로 업데이트됩니다."
             />
           ) : (
-            <ClaimDocumentExplorer documents={result.data} />
+            <ClaimDocumentExplorer documents={visibleDocuments} />
           )}
 
           <section className="grid gap-4 border-y border-[#d9c9a8] py-8 lg:grid-cols-[0.8fr_1.2fr]">
