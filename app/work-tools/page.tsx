@@ -10,7 +10,7 @@ export default function WorkToolsPage() {
       <PageHero
         eyebrow="Planner Work Tools"
         title="업무 도구"
-        description="보험학교 주요 업무 링크에서 GA 전산시스템을 제외한 검색·계산 업무를 플래너데스크 기준으로 정리했습니다."
+        description="보험학교 주요 업무 링크에서 전산 로그인 그룹만 제외하고, 검색·계산·공식 업무 링크를 플래너데스크 자체 기능으로 다시 구성했습니다."
       />
       <ContentSection>
         <WorkToolsClient />
