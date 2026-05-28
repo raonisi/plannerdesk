@@ -23,13 +23,13 @@ import {
 } from "@/lib/directory/formatting";
 
 const cardClass =
-  "group/insurer relative overflow-hidden rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] shadow-[0_18px_40px_rgba(16,34,53,0.06)] transition hover:shadow-[0_30px_60px_rgba(16,34,53,0.1)]";
+  "group/insurer relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5";
 
 const sectionEyebrowClass =
-  "text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a612d]";
-const sectionHeadingClass = "text-sm font-semibold text-[#102235]";
-const sectionContainerClass = "space-y-3";
-const groupDividerClass = "border-t border-[#e7ddc9] pt-5";
+  "text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600";
+const sectionHeadingClass = "text-sm font-bold text-slate-900";
+const sectionContainerClass = "space-y-4";
+const groupDividerClass = "border-t border-slate-200 pt-6 mt-2";
 
 const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
   {
@@ -279,7 +279,7 @@ export function InsurerActionCard({
       {insurer.isFeatured ? (
         <span
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#aa8137] via-[#d6b06b] to-[#aa8137]"
+          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"
         />
       ) : null}
 
@@ -294,11 +294,11 @@ export function InsurerActionCard({
           {/* 1) 업무 바로가기 */}
           <ActionGroup eyebrow="ACCESS" title="업무 바로가기">
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <ActionLink href={accessHref} label="전산접속" tone="primary" />
                 {insurer.supportedBrowsers &&
                 insurer.supportedBrowsers.length > 0 ? (
-                  <span className="text-[11px] font-medium text-[#7a612d] pl-1">
+                  <span className="text-[11px] font-semibold text-slate-500 pl-1">
                     권장 브라우저:{" "}
                     {insurer.supportedBrowsers
                       .map((b) => (b === "chrome" ? "Chrome" : "Edge"))
@@ -378,7 +378,7 @@ export function InsurerActionCard({
             <div className="flex justify-end pt-1">
               <button
                 aria-label={`${insurer.name} 수정 요청`}
-                className="inline-flex min-h-9 items-center gap-1 rounded-full border border-transparent px-3 py-1 text-xs font-semibold text-[#7a612d] underline-offset-4 transition hover:bg-[#fff7e6] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
                 onClick={() => onRequestCorrection(insurer.id)}
                 type="button"
               >
@@ -416,13 +416,13 @@ function CardHeader({
   return (
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
+        <div className="flex min-w-0 items-start gap-4">
           <InsurerLogo insurer={insurer} />
-          <div className="min-w-0">
+          <div className="min-w-0 pt-1">
             <p className={sectionEyebrowClass}>
               {CATEGORY_LABELS[insurer.category]}
             </p>
-            <h2 className="mt-2 break-keep text-2xl font-semibold leading-snug text-[#102235] sm:text-[1.65rem]">
+            <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
               {insurer.name}
             </h2>
           </div>
@@ -447,7 +447,7 @@ function InsurerLogo({ insurer }: { insurer: PublicInsurer }) {
   const logoSrc = insurerLogoSrc(insurer);
 
   return (
-    <span className="grid h-16 w-32 shrink-0 place-items-center rounded-xl border border-[#e7ddc9] bg-white px-4 py-2 shadow-[0_10px_22px_rgba(16,34,53,0.08)] sm:w-36">
+    <span className="grid h-16 w-32 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-sm sm:w-36">
       {logoSrc && !imageFailed ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -459,7 +459,7 @@ function InsurerLogo({ insurer }: { insurer: PublicInsurer }) {
           src={logoSrc}
         />
       ) : (
-        <span className="text-sm font-black tracking-[0.02em] text-[#102235]">
+        <span className="text-sm font-black tracking-[0.02em] text-slate-400">
           {insurerLogoLabel(insurer.name)}
         </span>
       )}
@@ -533,12 +533,12 @@ function ClaimGuideToggleButton({
     <button
       aria-controls={panelId}
       aria-expanded={isOpen}
-      className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-[#173f36] bg-[#173f36] px-4 py-3 text-left text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+      className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-slate-900 bg-slate-900 px-5 py-3 text-left text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
       onClick={onToggle}
       type="button"
     >
       <span className="break-keep">청구안내 보기</span>
-      <span className="shrink-0 text-xs font-semibold text-[#d8c08f]">
+      <span className="shrink-0 text-xs font-semibold text-indigo-300">
         {count}건 {isOpen ? "▲" : "▼"}
       </span>
     </button>
@@ -554,9 +554,9 @@ interface ActionLinkProps {
 function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
   if (!href) {
     return (
-      <span className="inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border border-dashed border-[#d9c9a8] bg-white/60 px-4 py-3 text-sm font-semibold text-[#8b7660]">
+      <span className="inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-400">
         <span className="break-keep">{label}</span>
-        <span className="text-xs font-normal text-[#a08e6f]">
+        <span className="text-xs font-normal text-slate-400">
           {DIRECTORY_TEXT.missing}
         </span>
       </span>
@@ -565,12 +565,12 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
 
   const toneClass =
     tone === "primary"
-      ? "border-[#102235] bg-[#102235] !text-[#fffaf0] shadow-[0_12px_24px_rgba(16,34,53,0.16)] hover:bg-[#173f36]"
-      : "border-[#173f36] bg-white text-[#173f36] hover:bg-[#173f36] hover:text-[#fbf7ee]";
+      ? "border-slate-900 bg-slate-900 text-white shadow-md hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg"
+      : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900";
 
   return (
     <ExternalTabAnchor
-      className={`inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border-2 px-4 py-3 text-sm font-bold tracking-[0.01em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:text-[15px] ${toneClass}`}
+      className={`inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border-2 px-5 py-3 text-sm font-bold tracking-[0.01em] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:text-[15px] ${toneClass}`}
       href={href}
     >
       <span className="break-keep">{label}</span>
@@ -628,22 +628,22 @@ function PhoneRow({ label, value }: { label: string; value: string | null }) {
   const hasValue = Boolean(value && value.trim().length > 0);
 
   return (
-    <div className="rounded-lg border border-[#e7ddc9] bg-white px-3 py-3">
-      <p className="text-xs font-semibold text-[#7a612d]">{label}</p>
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
+      <p className="text-xs font-bold text-slate-500">{label}</p>
       {hasValue && href ? (
         <a
-          className="mt-1 inline-flex min-h-10 items-center text-base font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4"
+          className="mt-1 inline-flex min-h-10 items-center text-[17px] font-bold text-slate-900 underline decoration-indigo-400 underline-offset-4 hover:text-indigo-600 transition-colors"
           href={href}
           rel="noopener noreferrer"
         >
           {value}
         </a>
       ) : hasValue ? (
-        <p className="mt-1 break-keep text-base font-semibold text-[#173f36]">
+        <p className="mt-1 break-keep text-[17px] font-bold text-slate-900">
           {value}
         </p>
       ) : (
-        <p className="mt-1 break-keep text-sm text-[#8b7660]">
+        <p className="mt-1 break-keep text-sm font-semibold text-slate-400">
           {DIRECTORY_TEXT.missing}
         </p>
       )}
@@ -676,13 +676,13 @@ function DisplayRow({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-[#e7ddc9] bg-white px-3 py-3">
-      <p className="text-xs font-semibold text-[#7a612d]">{label}</p>
-      <p className="mt-1 break-keep text-base font-semibold text-[#173f36]">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
+      <p className="text-xs font-bold text-slate-500">{label}</p>
+      <p className="mt-1 break-keep text-[17px] font-bold text-slate-900">
         {value}
       </p>
       {secondary ? (
-        <p className="mt-1 break-keep text-xs leading-5 text-[#5f6670]">
+        <p className="mt-1.5 break-keep text-xs font-semibold leading-5 text-indigo-500">
           문의: {secondary}
         </p>
       ) : null}
@@ -703,13 +703,13 @@ function InfoActionRow({
 }) {
   return (
     <button
-      className="flex min-h-12 items-center justify-between gap-3 rounded-lg border border-[#e7ddc9] bg-white px-3 py-3 text-left transition hover:border-[#aa8137] disabled:cursor-not-allowed disabled:bg-white/60 disabled:text-[#8b7660]"
+      className="flex min-h-12 items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left transition-all hover:border-slate-400 hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50/60 disabled:text-slate-400"
       disabled={disabled}
       onClick={onClick}
       type="button"
     >
-      <span className="text-xs font-semibold text-[#7a612d]">{label}</span>
-      <span className="break-keep text-sm font-semibold text-[#173f36]">
+      <span className="text-xs font-bold text-slate-500">{label}</span>
+      <span className="break-keep text-sm font-bold text-slate-900">
         {detail}
       </span>
     </button>

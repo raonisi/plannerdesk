@@ -6,12 +6,10 @@ import {
 } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { MvpModuleLinks, MvpSafetyNotice } from "@/components/mvp-navigation";
 import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { DirectoryExplorer } from "./directory-explorer";
-import { MajorWorkLinks } from "@/components/directory/major-work-links";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +59,6 @@ export default async function DirectoryPage() {
       />
       <ContentSection>
         <div className="space-y-8">
-          <MajorWorkLinks />
 
           <p className="break-keep text-sm leading-6 text-[#5f6670]">
             {t.subcopy}
@@ -90,24 +87,6 @@ export default async function DirectoryPage() {
           <p className="break-keep border-l border-[#c8d2dc] pl-4 text-sm leading-6 text-[#5f6670]">
             {t.verificationNote}
           </p>
-
-          <MvpModuleLinks
-            description={t.moduleDescription}
-            items={[
-              {
-                href: "/claim-documents",
-                label: t.claim,
-                description: t.claimDesc,
-              },
-              {
-                href: "/disclosure-links",
-                label: t.disclosure,
-                description: t.disclosureDesc,
-              },
-            ]}
-          />
-
-          <MvpSafetyNotice />
         </div>
       </ContentSection>
       <Footer />

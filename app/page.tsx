@@ -12,6 +12,8 @@ import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { claimFormFiles } from "@/lib/content/claim-form-files";
 import { customerMessageTemplates } from "@/lib/content/message-templates";
 import { disclosureLinkEntries } from "@/lib/content/disclosure-links";
+import { MajorWorkLinks } from "@/components/directory/major-work-links";
+import { MvpModuleLinks, MvpSafetyNotice } from "@/components/mvp-navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -84,40 +86,40 @@ export default async function Home() {
   const disclosureLinkCount = disclosureLinkEntries.length;
 
   return (
-    <main className="overflow-hidden bg-[#f7f1e5] text-[#18202b]">
+    <main className="overflow-hidden bg-slate-50 text-slate-900">
       <Header />
       
       {/* Hero Section */}
-      <section className="relative border-b border-[#d9c9a8] bg-[#102235] text-[#fbf7ee]">
+      <section className="relative border-b border-slate-800 bg-slate-900 text-white">
         <div className="mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl items-center gap-10 px-5 py-12 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:px-10 lg:py-16">
           <div className="max-w-3xl">
-            <p className="mb-5 inline-flex border border-[#aa8137]/60 px-3 py-1 text-sm font-medium text-[#e6d4ac]">
+            <p className="mb-5 inline-flex border border-indigo-500/50 px-3 py-1 text-sm font-medium text-indigo-200">
               전국 보험설계사를 위한 실무 포털 & 성장 플랫폼
             </p>
-            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.15] tracking-normal text-[#fbf7ee] sm:text-5xl lg:text-6xl whitespace-pre-line">
+            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.15] tracking-normal text-white sm:text-5xl lg:text-6xl whitespace-pre-line">
               보험설계사의 실무를{"\n"}빠르게 정리하는 업무 포털
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-[#d8d0c3] sm:text-lg whitespace-pre-line">
+            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg whitespace-pre-line">
               흩어진 보험사 링크, 청구안내, 공시·약관, 고객 안내 문구를{"\n"}한곳에서 빠르게 확인할 수 있도록 정리했습니다.
             </p>
-            <p className="mt-4 max-w-2xl text-xs leading-5 text-[#d8c08f]">
+            <p className="mt-4 max-w-2xl text-xs leading-5 text-indigo-200/80">
               ※ 플래너데스크는 설계사의 단순 반복 검색을 줄이기 위한 B2B 공용 실무 포털입니다.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-4 sm:flex-row">
               <Link
-                className="inline-flex min-h-12 items-center justify-center bg-[#aa8137] px-6 py-3 text-sm font-semibold text-[#102235] transition hover:bg-[#c19b58] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#aa8137]"
+                className="inline-flex min-h-14 items-center justify-center rounded-lg bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
                 href="/directory"
               >
                 보험사 디렉토리 바로가기
               </Link>
               <Link
-                className="inline-flex min-h-12 items-center justify-center border border-[#efe4cf]/35 px-6 py-3 text-sm font-semibold text-[#fbf7ee] transition hover:border-[#efe4cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#efe4cf]"
+                className="inline-flex min-h-14 items-center justify-center rounded-lg border border-slate-700 bg-slate-800/50 px-8 py-3 text-sm font-semibold text-slate-200 transition-all hover:bg-slate-800 hover:border-slate-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500"
                 href="/work-tools"
               >
                 업무 도구 열기
               </Link>
               <Link
-                className="inline-flex min-h-12 items-center justify-center border border-[#efe4cf]/35 px-6 py-3 text-sm font-semibold text-[#fbf7ee] transition hover:border-[#efe4cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#efe4cf]"
+                className="inline-flex min-h-14 items-center justify-center rounded-lg border border-slate-700 bg-slate-800/50 px-8 py-3 text-sm font-semibold text-slate-200 transition-all hover:bg-slate-800 hover:border-slate-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500"
                 href="/claim-documents"
               >
                 청구서류 검색하기
@@ -142,36 +144,36 @@ export default async function Home() {
           title="자주 찾는 실무 업무의 유기적 흐름"
           description="플래너데스크를 이용해 보험사 선택부터 고객 안내 메시지 발송까지의 실무 동선을 단축해 보세요."
         />
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {practiceSteps.map((item) => (
-            <div className="border border-[#d9c9a8] bg-white p-5 shadow-[0_4px_12px_rgba(16,34,53,0.03)]" key={item.step}>
-              <span className="text-xs font-bold text-[#7a612d] uppercase tracking-wider">{item.step}</span>
-              <h3 className="mt-2 text-lg font-semibold text-[#102235]">{item.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#5f6670] break-keep">{item.desc}</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md" key={item.step}>
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">{item.step}</span>
+              <h3 className="mt-3 text-lg font-bold text-slate-900">{item.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 break-keep">{item.desc}</p>
             </div>
           ))}
         </div>
       </ContentSection>
 
       {/* 주요 기능 카드 Section */}
-      <section className="border-y border-[#d9c9a8] bg-[#fbf7ee]">
-        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
+      <section className="border-y border-slate-200 bg-slate-50">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
           <SectionHeader
             eyebrow="Key Features"
             title="실무에 바로 사용하는 핵심 포털 도구"
             description="링크 팜이 아닌 실무 단위로 구조화된 콘텐츠를 통해 필요한 정보를 1초 만에 찾을 수 있습니다."
           />
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-5">
             {featureCards.map((card) => (
               <PremiumCard key={card.title}>
-                <h3 className="text-xl font-semibold text-[#102235]">{card.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-[#4f5661] min-h-[72px] break-keep">
+                <h3 className="text-xl font-bold text-slate-900">{card.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600 min-h-[72px] break-keep">
                   {card.desc}
                 </p>
-                <div className="mt-5">
+                <div className="mt-6">
                   <Link
                     href={card.href}
-                    className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#173f36] bg-white px-4 py-2 text-xs font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee]"
+                    className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-500"
                   >
                     {card.actionLabel}
                   </Link>
@@ -189,14 +191,37 @@ export default async function Home() {
           title="안전하고 정확한 정보를 위한 실무 안내"
           description="플래너데스크의 모든 정보는 설계사의 실무를 돕기 위한 공용 참고 자료입니다."
         />
-        <div className="mt-8 rounded-xl border-l-4 border-[#aa8137] bg-white p-5 shadow-[0_4px_12px_rgba(16,34,53,0.03)]">
-          <p className="text-base font-semibold text-[#102235]">자료 활용 시 주의 사항</p>
-          <p className="mt-2 text-sm leading-relaxed text-[#5f6670] break-keep">
+        <div className="mt-8 rounded-xl border-l-4 border-indigo-500 bg-white p-6 shadow-sm">
+          <p className="text-base font-bold text-slate-900">자료 활용 시 주의 사항</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600 break-keep">
             보험사별 서류와 접수 기준은 상시 변경될 수 있습니다. 최종 제출 전 해당 보험사 공식 안내를 함께 확인해 주세요.
           </p>
-          <p className="mt-1 text-sm leading-relaxed text-[#5f6670] break-keep">
+          <p className="mt-1 text-sm leading-relaxed text-slate-600 break-keep">
             플래너데스크는 설계사가 활용하기 좋은 포털을 지향하며, 개별 보험금 지급 가능 여부 판정, 금액 추정, 손해사정 등의 어떠한 심사 권한도 갖지 않습니다.
           </p>
+        </div>
+      </ContentSection>
+
+      {/* 확장된 WORK HUB 및 퀵 툴 모음 (디렉토리에서 이동) */}
+      <ContentSection>
+        <div className="space-y-8 border-t border-slate-200 pt-16 mt-4">
+          <MajorWorkLinks />
+          <MvpModuleLinks
+            description="보험사 채널을 확인한 다음에는 청구서류 또는 공시 자료를 이어서 확인하세요."
+            items={[
+              {
+                href: "/claim-documents",
+                label: "청구서류 확인",
+                description: "청구서류 구조를 확인하고 고객 안내 전 필수 항목을 정리하세요.",
+              },
+              {
+                href: "/disclosure-links",
+                label: "공시·약관 확인",
+                description: "상품 공시, 약관, 협회 자료, 보험사 공식 자료 경로를 확인하세요.",
+              },
+            ]}
+          />
+          <MvpSafetyNotice />
         </div>
       </ContentSection>
 

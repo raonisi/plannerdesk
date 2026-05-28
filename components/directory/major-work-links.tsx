@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { borders, shadows, textStyles } from "@/lib/design-system";
+import { textStyles } from "@/lib/design-system";
 
 const featuredMiniLinks = [
   { href: "/directory", label: "보험사 전산" },
@@ -135,14 +135,14 @@ function StatusBadge({
   tone: "active" | "info" | "muted";
 }) {
   const toneClasses = {
-    active: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-    info: "border-[#d9c9a8] bg-[#fff7e6] text-[#7a612d]",
-    muted: "border-[#d6d8dc] bg-[#f4f5f6] text-[#5f6670]",
+    active: "border-indigo-200 bg-indigo-50 text-indigo-700",
+    info: "border-slate-200 bg-slate-100 text-slate-700",
+    muted: "border-slate-200 bg-slate-50 text-slate-500",
   } as const;
 
   return (
     <span
-      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${toneClasses[tone]}`}
+      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${toneClasses[tone]}`}
     >
       {children}
     </span>
@@ -160,17 +160,17 @@ function CoreWorkCard({
 }) {
   return (
     <article
-      className={`flex h-full flex-col rounded-xl border ${borders.divider} bg-[#fbf7ee] p-5 shadow-[0_10px_25px_rgba(16,34,53,0.03)] transition hover:border-[#aa8137]/50 hover:shadow-[0_15px_35px_rgba(16,34,53,0.05)]`}
+      className={`flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5`}
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-lg font-semibold text-[#102235]">{title}</h3>
+        <h3 className="text-lg font-bold text-slate-900">{title}</h3>
         <StatusBadge tone="active">사용 가능</StatusBadge>
       </div>
-      <p className="mt-2 flex-1 break-keep text-sm leading-relaxed text-[#4f5661]">
+      <p className="mt-3 flex-1 break-keep text-sm leading-relaxed text-slate-600">
         {description}
       </p>
       <Link
-        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-[#173f36] bg-white text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+        className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-slate-300 bg-white text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
         href={href}
       >
         바로가기
@@ -188,17 +188,17 @@ function RoadmapCard({
 }) {
   return (
     <article
-      className={`flex h-full flex-col rounded-xl border ${borders.divider} bg-[#f7f1e5]/80 p-5 opacity-90`}
+      className={`flex h-full flex-col rounded-xl border border-slate-200 bg-slate-50/80 p-6 opacity-90`}
     >
       <p className="sr-only">{title} 영역은 아직 준비 중입니다.</p>
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-lg font-semibold text-[#5f6670]">{title}</h3>
+        <h3 className="text-lg font-bold text-slate-500">{title}</h3>
         <StatusBadge tone="muted">준비 중</StatusBadge>
       </div>
-      <p className="mt-2 break-keep text-sm leading-relaxed text-[#5f6670]">
+      <p className="mt-3 break-keep text-sm leading-relaxed text-slate-500">
         {description}
       </p>
-      <p className="mt-5 text-xs font-medium text-[#8a909a]">
+      <p className="mt-6 text-xs font-medium text-slate-400">
         서비스 준비가 완료되면 안내드립니다.
       </p>
     </article>
@@ -207,44 +207,44 @@ function RoadmapCard({
 
 export function MajorWorkLinks() {
   return (
-    <section aria-labelledby="major-work-links-heading" className="space-y-8">
-      <header className="space-y-2">
+    <section aria-labelledby="major-work-links-heading" className="space-y-10">
+      <header className="space-y-3">
         <p className={textStyles.eyebrow}>WORK HUB</p>
         <h2
-          className="text-2xl font-semibold text-[#102235] sm:text-3xl"
+          className="text-2xl font-bold text-slate-900 sm:text-3xl"
           id="major-work-links-heading"
         >
           주요 업무 링크
         </h2>
-        <p className="max-w-3xl break-keep text-sm leading-6 text-[#4f5661] sm:text-base">
+        <p className="max-w-3xl break-keep text-sm leading-7 text-slate-600 sm:text-base">
           반복해서 찾는 전산, 업무 도구, 청구서류, 공시·약관, 고객 안내문을
           한곳에서 정리합니다.
         </p>
       </header>
 
       <article
-        className={`rounded-2xl border ${borders.divider} bg-gradient-to-br from-[#fbf7ee] via-[#f7f1e5] to-[#fbf7ee] p-5 sm:p-6 ${shadows.card}`}
+        className={`rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-6 sm:p-8 shadow-sm`}
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#7a612d]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">
               Today&apos;s hub
             </p>
-            <h3 className="text-xl font-semibold text-[#102235] sm:text-2xl">
+            <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
               오늘의 업무 진입점
             </h3>
-            <p className="max-w-2xl break-keep text-sm leading-6 text-[#4f5661]">
+            <p className="max-w-2xl break-keep text-sm leading-6 text-slate-600">
               보험사 전산, 업무 도구, 청구서류, 공시·약관, 고객 안내문까지
               설계사가 자주 확인하는 업무를 빠르게 연결합니다.
             </p>
           </div>
           <nav
             aria-label="오늘의 업무 진입점 바로가기"
-            className="flex flex-wrap gap-2"
+            className="flex flex-wrap gap-3 mt-2 lg:mt-0"
           >
             {featuredMiniLinks.map((item) => (
               <Link
-                className="inline-flex min-h-10 items-center rounded-full border border-[#d9c9a8] bg-white/90 px-4 py-2 text-sm font-semibold text-[#173f36] transition hover:border-[#aa8137] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+                className="inline-flex min-h-11 items-center rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
                 href={item.href}
                 key={item.href + item.label}
               >
@@ -257,7 +257,7 @@ export function MajorWorkLinks() {
 
       <div>
         <h3 className="sr-only">핵심 업무 링크</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           {coreWorkLinks.map((item) => (
             <CoreWorkCard
               description={item.description}
@@ -270,38 +270,40 @@ export function MajorWorkLinks() {
       </div>
 
       <article
-        className={`rounded-2xl border ${borders.divider} bg-white p-5 sm:p-6 ${shadows.card}`}
+        className={`rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm`}
       >
-        <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="space-y-2">
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="space-y-3">
             <p className={textStyles.eyebrow}>QUICK TOOLS</p>
-            <h3 className="break-keep text-xl font-semibold text-[#102235] sm:text-2xl">
+            <h3 className="break-keep text-xl font-bold text-slate-900 sm:text-2xl leading-snug">
               보험학교 주요 업무 링크를 플래너데스크 도구로 정리했습니다
             </h3>
-            <p className="break-keep text-sm leading-6 text-[#4f5661]">
+            <p className="break-keep text-sm leading-relaxed text-slate-600">
               전산 로그인 그룹은 제외하고, 설계사가 반복해서 여는 검색·계산
               업무를 한 화면에서 사용할 수 있게 구성했습니다.
             </p>
-            <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
-              href="/work-tools"
-            >
-              업무 도구 열기
-            </Link>
+            <div className="pt-4">
+              <Link
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-bold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+                href="/work-tools"
+              >
+                업무 도구 열기
+              </Link>
+            </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {quickToolGroups.map((group) => (
               <section
-                className="rounded-xl border border-[#e7ddc9] bg-[#fbf7ee] p-4"
+                className="rounded-xl border border-slate-200 bg-slate-50 p-5"
                 key={group.title}
               >
-                <h4 className="text-sm font-semibold text-[#102235]">
+                <h4 className="text-sm font-bold text-slate-900">
                   {group.title}
                 </h4>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2.5">
                   {group.items.map((item) => (
                     <Link
-                      className="inline-flex min-h-9 items-center rounded-full border border-[#d9c9a8] bg-white px-3 text-xs font-semibold text-[#173f36] transition hover:border-[#aa8137] hover:bg-[#fff7e6]"
+                      className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                       href={`/work-tools#${item.id}`}
                       key={item.id}
                     >
@@ -316,26 +318,26 @@ export function MajorWorkLinks() {
       </article>
 
       <article
-        className={`rounded-xl border ${borders.divider} bg-white p-5 sm:p-6 ${shadows.card}`}
+        className={`rounded-xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm`}
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-semibold text-[#102235]">
+              <h3 className="text-lg font-bold text-slate-900">
                 수정 요청 / 제보
               </h3>
               <StatusBadge tone="info">안내</StatusBadge>
             </div>
-            <p className="break-keep text-sm leading-6 text-[#4f5661]">
+            <p className="break-keep text-sm leading-6 text-slate-600 mt-2">
               잘못된 링크, 번호, 서류 정보를 발견했다면 검수 요청으로
               남겨주세요.
             </p>
-            <p className="break-keep text-xs leading-5 text-[#5f6670]">
+            <p className="break-keep text-xs leading-5 text-slate-500">
               고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하지 마세요.
             </p>
           </div>
           <a
-            className="inline-flex min-h-11 shrink-0 items-center justify-center self-start rounded-lg border border-[#aa8137] bg-[#fff7e6] px-5 text-sm font-semibold text-[#7a612d] transition hover:bg-[#fbf0d4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:self-center"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center self-start rounded-lg border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:self-center mt-2 sm:mt-0"
             href="#feedback-section"
           >
             제보 안내
@@ -344,10 +346,10 @@ export function MajorWorkLinks() {
       </article>
 
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-[#5f6670]">
+        <h3 className="mb-5 text-sm font-bold text-slate-500">
           확장 예정 영역
         </h3>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-3">
           {roadmapItems.map((item) => (
             <RoadmapCard
               description={item.description}
@@ -359,13 +361,13 @@ export function MajorWorkLinks() {
       </div>
 
       <aside
-        className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5 sm:p-6"
+        className="rounded-xl border border-slate-200 border-l-4 border-l-slate-400 bg-slate-50 p-6 sm:p-8"
         role="note"
       >
-        <h3 className="text-sm font-semibold text-[#102235]">
+        <h3 className="text-sm font-bold text-slate-900">
           안전한 실무 참고 기준
         </h3>
-        <p className="mt-3 break-keep text-sm leading-6 text-[#5f6670]">
+        <p className="mt-3 break-keep text-sm leading-relaxed text-slate-600">
           플래너데스크는 보험금 지급 여부를 판단하지 않으며, 보험금 지급
           금액을 산정하지 않습니다.
           <br />

@@ -64,11 +64,7 @@ type ToolGroup = {
   tools: ToolItem[];
 };
 
-type InputSpec = {
-  key: "a" | "b" | "c" | "d";
-  label: string;
-  placeholder?: string;
-};
+
 
 const STORAGE_KEY = "plannerdesk.workTools.favorites";
 
@@ -483,9 +479,6 @@ function money(value: number) {
   return `${moneyFormatter.format(Math.max(0, Math.round(value)))}원`;
 }
 
-function numberValue(value: string) {
-  return Number(value) || 0;
-}
 
 
 // ── Insurance Age ──
@@ -783,24 +776,6 @@ function getToolCopy(id: ToolId) {
   return allTools().find((tool) => tool.id === id);
 }
 
-function inputsForTool(id: ToolId): InputSpec[] {
-  switch (id) {
-    case "bmi-calculator":
-      return [
-        { key: "a", label: "키(cm)", placeholder: "예: 170" },
-        { key: "b", label: "체중(kg)", placeholder: "예: 65" },
-      ];
-    case "savings":
-      return [
-        { key: "a", label: "초기 예치금", placeholder: "예: 5000000" },
-        { key: "b", label: "월 납입액", placeholder: "예: 300000" },
-        { key: "c", label: "연 금리(%)", placeholder: "예: 3.5" },
-        { key: "d", label: "기간(개월)", placeholder: "예: 24" },
-      ];
-    default:
-      return [];
-  }
-}
 
 export function WorkToolsClient() {
   const [activeTool, setActiveTool] = useState<ToolId>("planner-stats");
@@ -2408,7 +2383,7 @@ function ResultRow({ label, value, bold, highlight }: { label: string; value: st
   );
 }
 
-function TipBox({ title, children, type }: { title: string; children: React.ReactNode; type?: 'info' | 'warning' | 'error' | string }) {
+function TipBox({ title, children }: { title: string; children: React.ReactNode; }) {
   return (
     <div className="mt-4 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
       <p className="text-xs font-bold text-[#7a612d] mb-2">💡 {title}</p>
@@ -2593,7 +2568,7 @@ function SilbiCalc() {
         ) : <p className="mt-2 text-sm text-slate-400 font-semibold text-center py-4">영수증에 적힌 급여/비급여 금액을 입력하세요.</p>}
       </div>
       
-      <TipBox title="세대별 실손보험 컨설팅 팁" type="info">
+      <TipBox title="세대별 실손보험 컨설팅 팁">
         {gen === '5' ? '5세대 실손은 과잉진료 차단을 위해 비중증 비급여(도수, 주사 등)의 자기부담률이 50%로 대폭 상향되었습니다. 병원 이용 패턴을 정확히 파악하여 전환 시 유불리를 꼼꼼하게 안내하세요.' : 
          gen === '4' ? '4세대 실손은 급여 20%, 비급여 30%의 차등 자기부담이 적용되며 비급여 사용량에 따라 할증이 붙습니다. 의료쇼핑을 하지 않는 건강한 고객이라면 5세대 전환도 고려해볼 만합니다.' : 
          gen === '3' ? '3세대 실손(착한실손)은 3대 비급여가 분리되어 있습니다. 현 시점 가성비가 가장 좋으므로 함부로 4/5세대로 전환하지 않도록 유지 관리를 권장합니다.' : 
@@ -2922,7 +2897,7 @@ function InheritanceTaxCalc() {
                   세대생략 상속 (30% 할증)
                 </label>
                 <div>
-                  <select className={selectCls} value={recentDeathYears} onChange={e => setRecentDeathYears(e.target.value as any)}>
+                  <select className={selectCls} value={recentDeathYears} onChange={e => setRecentDeathYears(e.target.value as "none" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10")}>
                     <option value="none">단기재상속 해당없음</option>
                     {[1,2,3,4,5,6,7,8,9,10].map(y => <option key={y} value={y}>{y}년 이내 이전 상속 발생</option>)}
                   </select>
@@ -2967,7 +2942,7 @@ function InheritanceTaxCalc() {
           )}
         </div>
       </div>
-      <TipBox title="종신보험 세테크 플랜 제안" type="warning">
+      <TipBox title="종신보험 세테크 플랜 제안">
         {result && result.finalNetTax > 0 ? 
           `예상 상속세가 ${krw(result.finalNetTax)} 발생합니다. 현금 유동성이 부족할 경우, 유가족이 알짜 부동산을 급매하여 손실을 볼 수 있습니다. 부모님 피보험자, 자녀 계약자/수익자 구조의 종신보험으로 상속세 재원을 미리 준비하세요.` :
           "종신보험 사망보험금은 상속재산에 포함되지만, 상속세 납부 재원으로 활용할 수 있습니다. 상속세 납부 대비 종신보험 설계 시 이 계산기를 활용하세요."
@@ -3279,7 +3254,7 @@ function SavingsCalc() {
         </div>
       </div>
       
-      <TipBox title="비과세 복리 저축 영업 팁" type="info">
+      <TipBox title="비과세 복리 저축 영업 팁">
         {savingsMode === 'simple' && savingsTaxType === 'general' ? 
           "단리+일반과세(15.4%) 조건의 일반 은행 적금은 인플레이션을 방어하기 어렵습니다. 저축성 보험의 비과세 혜택과 연복리 구조를 비교 제시하여, 고객의 장기 목적자금 마련 플랜을 저축성 보험으로 유도하세요." :
           "월복리 및 비과세 혜택이 적용될 때 수익률이 어떻게 극대화되는지 고객의 눈앞에서 즉시 보여주며, 복리 효과가 폭발적으로 일어나는 '시간의 마법'을 설명하기에 최적입니다."
@@ -3360,27 +3335,3 @@ function PanelShell({
   );
 }
 
-function NumberInput({
-  label,
-  onChange,
-  placeholder,
-  value,
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  value: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-sm font-semibold text-[#303845]">{label}</span>
-      <input
-        className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 text-base outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
-        inputMode="decimal"
-        onChange={(event) => onChange(event.target.value.replace(/[^0-9.]/g, ""))}
-        placeholder={placeholder}
-        value={value}
-      />
-    </label>
-  );
-}
