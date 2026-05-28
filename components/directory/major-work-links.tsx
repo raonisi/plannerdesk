@@ -20,7 +20,7 @@ const coreWorkLinks = [
     href: "/work-tools",
     title: "업무 도구",
     description:
-      "인수예외질환 검색, 보험나이·BMI·실손·대출·세금 계산기를 빠르게 확인합니다.",
+      "숨은보험금찾기, 인수·청구 검색, 보험·금융 계산기, 자동차·화재·공문서 링크를 확인합니다.",
   },
   {
     href: "/claim-documents",
@@ -62,24 +62,29 @@ const roadmapItems = [
 
 const quickToolGroups = [
   {
-    title: "인수·보종 검색",
+    title: "통계·인수 검색",
     items: [
-      { id: "disease-search", label: "인수예외질환 검색" },
+      { id: "planner-stats", label: "통계실" },
+      { id: "disease-search", label: "인수예외질환" },
       { id: "surgery-code", label: "수술분류표" },
-      { id: "disease-code", label: "질병코드" },
+      { id: "disease-code", label: "상병코드" },
     ],
   },
   {
-    title: "보험계산기",
+    title: "보험금청구",
+    items: [
+      { id: "hospital-pharmacy", label: "병원/약국찾기" },
+      { id: "silson24", label: "실손24" },
+      { id: "hidden-insurance", label: "숨은보험금찾기" },
+      { id: "lost-health-standard", label: "실손 인수기준" },
+    ],
+  },
+  {
+    title: "보험·금융 계산기",
     items: [
       { id: "silbi-calculator", label: "실손보험금" },
       { id: "insurance-age", label: "보험나이" },
       { id: "bmi-calculator", label: "BMI" },
-    ],
-  },
-  {
-    title: "금융계산기",
-    items: [
       { id: "currency-value", label: "화폐가치" },
       { id: "loan", label: "대출 이자" },
       { id: "savings", label: "예·적금 이자" },
@@ -94,6 +99,30 @@ const quickToolGroups = [
       { id: "inheritance-tax", label: "상속세" },
       { id: "card-deduction", label: "카드·현금 공제" },
       { id: "vat", label: "부가세·공급가액" },
+    ],
+  },
+  {
+    title: "자동차·화재보험",
+    items: [
+      { id: "car-face-quote", label: "대면 간편견적" },
+      { id: "car-einsmarket", label: "보험다모아" },
+      { id: "car-premium-factor", label: "할인/할증" },
+      { id: "car-fault-ratio", label: "과실비율" },
+      { id: "fire-special-building", label: "특수건물" },
+      { id: "building-register", label: "건축물대장" },
+      { id: "elevator-info", label: "승강기" },
+    ],
+  },
+  {
+    title: "공문서·모집·학습",
+    items: [
+      { id: "gov-resident", label: "정부24" },
+      { id: "hometax-income", label: "홈택스" },
+      { id: "court-family", label: "가족관계" },
+      { id: "knia-agent", label: "손보협회" },
+      { id: "klia-agent", label: "생보협회" },
+      { id: "insurance-institute", label: "보험연수원" },
+      { id: "insurer-newsletter", label: "보험사소식지" },
     ],
   },
 ] as const;
@@ -250,7 +279,7 @@ export function MajorWorkLinks() {
               보험학교 주요 업무 링크를 플래너데스크 도구로 정리했습니다
             </h3>
             <p className="break-keep text-sm leading-6 text-[#4f5661]">
-              GA 전산시스템은 제외하고, 설계사가 반복해서 여는 검색·계산
+              전산 로그인 그룹은 제외하고, 설계사가 반복해서 여는 검색·계산
               업무를 한 화면에서 사용할 수 있게 구성했습니다.
             </p>
             <Link
