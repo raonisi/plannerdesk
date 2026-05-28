@@ -913,7 +913,7 @@ function ToolChip({
     <span
       className={`inline-flex min-h-10 overflow-hidden rounded-full border text-xs font-semibold ${
         active
-          ? "border-[#173f36] bg-[#173f36] text-[#fbf7ee]"
+          ? "border-[#173f36] bg-[#173f36] !text-[#fbf7ee]"
           : "border-[#d9c9a8] bg-[#fbf7ee] text-[#173f36]"
       }`}
     >
@@ -1213,7 +1213,7 @@ function DiseaseSearchTool() {
               onKeyDown={handleKeyDown}
             />
             <button
-              className="px-5 py-2 bg-[#173f36] text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
+              className="px-5 py-2 bg-[#173f36] !text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
               onClick={handleSearch}
               type="button"
             >
@@ -1429,7 +1429,7 @@ function SurgeryCodeSearchTool() {
             <button
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition whitespace-nowrap ${
                 classificationSet === ""
-                  ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                  ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
                   : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
               }`}
               onClick={() => {
@@ -1443,7 +1443,7 @@ function SurgeryCodeSearchTool() {
             <button
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition whitespace-nowrap ${
                 classificationSet === "1-3/1-5"
-                  ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                  ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
                   : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
               }`}
               onClick={() => {
@@ -1457,7 +1457,7 @@ function SurgeryCodeSearchTool() {
             <button
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition whitespace-nowrap ${
                 classificationSet === "1-7/1-8"
-                  ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                  ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
                   : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
               }`}
               onClick={() => {
@@ -1479,7 +1479,7 @@ function SurgeryCodeSearchTool() {
               onKeyDown={handleKeyDown}
             />
             <button
-              className="px-5 py-2 bg-[#173f36] text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
+              className="px-5 py-2 bg-[#173f36] !text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
               onClick={handleSearch}
               type="button"
             >
@@ -1765,7 +1765,7 @@ function DiseaseCodeSearchTool() {
             onKeyDown={handleKeyDown}
           />
           <button
-            className="px-5 py-2 bg-[#173f36] text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
+            className="px-5 py-2 bg-[#173f36] !text-[#fbf7ee] rounded-lg text-sm font-semibold hover:bg-[#0f2f28] transition shrink-0"
             onClick={handleSearch}
             type="button"
           >
@@ -2061,7 +2061,7 @@ function Pagination({
           key={p}
           className={`w-9 h-9 text-xs font-semibold rounded-lg border transition ${
             p === page
-              ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+              ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
               : "border-[#d9c9a8] text-[#173f36] hover:bg-white"
           }`}
           onClick={() => onChange(p)}
@@ -2390,7 +2390,7 @@ function TipBox({ title, children }: { title: string; children: React.ReactNode 
 
 const inputCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20";
 const selectCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30";
-const radioCls = (active: boolean) => `py-2 px-3 text-xs font-semibold rounded-lg border transition cursor-pointer text-center ${active ? 'bg-[#173f36] text-[#fbf7ee] border-transparent' : 'bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]'}`;
+const radioCls = (active: boolean) => `py-2 px-3 text-xs font-semibold rounded-lg border transition cursor-pointer text-center ${active ? 'bg-[#173f36] !text-[#fbf7ee] border-transparent' : 'bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]'}`;
 
 function CalculatorTool({ id }: { id: ToolId }) {
   switch (id) {
@@ -2952,7 +2952,7 @@ function GenericCalc({ id }: { id: ToolId }) {
                 type="button"
                 className={`py-2 text-xs font-semibold rounded-lg border transition ${
                   savingsMode === "simple"
-                    ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                    ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
                     : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
                 }`}
                 onClick={() => setSavingsMode("simple")}
@@ -2963,7 +2963,7 @@ function GenericCalc({ id }: { id: ToolId }) {
                 type="button"
                 className={`py-2 text-xs font-semibold rounded-lg border transition ${
                   savingsMode === "compound"
-                    ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                    ? "bg-[#173f36] !text-[#fbf7ee] border-transparent"
                     : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
                 }`}
                 onClick={() => setSavingsMode("compound")}
@@ -3008,7 +3008,7 @@ function ExternalTool({ copy }: { copy: ToolItem }) {
           기관 링크입니다.
         </p>
         <a
-          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28]"
+          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold !text-[#fbf7ee] transition hover:bg-[#0f2f28]"
           href={copy.href}
           rel="noopener noreferrer"
           target="_blank"
@@ -3034,7 +3034,7 @@ function NewsletterTool({ copy }: { copy: ToolItem }) {
         ))}
       </div>
       <a
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28]"
+        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-5 text-sm font-semibold !text-[#fbf7ee] transition hover:bg-[#0f2f28]"
         href="/disclosure-links"
       >
         공시·약관 링크센터에서 확인
