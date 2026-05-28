@@ -62,7 +62,7 @@ const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
     src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/aig-fire.png",
   },
   {
-    tokens: ["chubb-general", "chubb.com/kr-kr"],
+    tokens: ["chubb-general", "lina-general", "chubb.com/kr-kr"],
     src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/fire/lina-fire.png",
   },
   {
@@ -152,6 +152,22 @@ const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
   {
     tokens: ["fubonhyundai-life", "fubonhyundai.com"],
     src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/life/fubon-life.png",
+  },
+  {
+    tokens: ["woochegook-mutual", "wuchegook-gongje"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/gongje/wuchegook-gongje.png",
+  },
+  {
+    tokens: ["suhyeop-mutual", "suhyup-gongje"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/gongje/suhyup-gongje.png",
+  },
+  {
+    tokens: ["thek-mutual", "thek-gongje"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/gongje/thek-gongje.png",
+  },
+  {
+    tokens: ["shinhyeop-mutual", "shinhyup-gongje"],
+    src: "https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/insurers_logo/gongje/shinhyup-gongje.png",
   },
   {
     tokens: ["axa-insurance", "axa.co.kr"],
