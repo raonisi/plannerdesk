@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/content-page";
 import {
@@ -213,7 +214,16 @@ function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
       <p className="mt-3 text-xs leading-5 text-[#5f6670]">
         {item.aiUsable ? "AI 참조 가능" : "AI 참조 전 검수 필요"}
       </p>
-      <p className="mt-1 text-xs leading-5 text-[#8a909a]">상세 보기 준비 중</p>
+      {item.slug ? (
+        <Link
+          className="mt-1 inline-flex text-xs font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+          href={`/knowledge/${item.slug}`}
+        >
+          상세 보기
+        </Link>
+      ) : (
+        <p className="mt-1 text-xs leading-5 text-[#8a909a]">상세 보기 준비 중</p>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2">
         {item.tags.map((tag) => (
