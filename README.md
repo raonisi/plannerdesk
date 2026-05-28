@@ -88,6 +88,8 @@ See `docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md` for the planned evolution of t
 
 See `docs/CORRECTION_REQUEST_POLICY.md` for the operating policy, safety boundaries, and review principles of the correction request (수정 요청·제보) flow.
 
+See `docs/CLAIM_DOCUMENT_IMPORT_CANDIDATES.md` for the safe dry-run and draft-only import process for claim document checklist candidates.
+
 See `docs/KNOWLEDGE_ARCHIVE_IA.md` for the IA foundation of the planned knowledge archive feature.
 See `docs/KNOWLEDGE_CONTENT_POLICY.md` for the operating policy governing drafting, review, and publishing of knowledge archive content.
 
