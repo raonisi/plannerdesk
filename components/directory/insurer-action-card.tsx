@@ -2,6 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { ExternalTabAnchor } from "@/components/content-page";
+import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
+import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
@@ -259,6 +261,7 @@ function insurerLogoSrc(insurer: PublicInsurer) {
 
 export interface InsurerActionCardProps {
   insurer: PublicInsurer;
+  claimItems?: ClaimLibraryItem[];
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
   onRequestCorrection?: (id: string) => void;
@@ -266,12 +269,15 @@ export interface InsurerActionCardProps {
 
 export function InsurerActionCard({
   insurer,
+  claimItems = [],
   isFavorite = false,
   onToggleFavorite,
   onRequestCorrection,
 }: InsurerActionCardProps) {
+  const [claimGuideOpen, setClaimGuideOpen] = useState(false);
   const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
   const claimFax = claimFaxDisplay(insurer);
+  const claimGuidePanelId = `claim-guide-${insurer.id}`;
   const registeredMailing =
     insurer.registeredMailAddress ?? insurer.mailingAddress;
   const paymentTone = cardPaymentTone(insurer.cardPaymentStatus);
@@ -334,8 +340,19 @@ export function InsurerActionCard({
           <div className={groupDividerClass}>
             <ActionGroup eyebrow="CLAIM" title="청구">
               <div className="grid gap-3 sm:grid-cols-2">
-                <ActionLink href={insurer.claimPageUrl} label="청구 안내" />
+                <ClaimGuideToggleButton
+                  count={claimItems.length}
+                  isOpen={claimGuideOpen}
+                  onToggle={() => setClaimGuideOpen((open) => !open)}
+                  panelId={claimGuidePanelId}
+                />
                 <ActionLink href={insurer.claimFormUrl} label="청구양식" />
+              </div>
+              <div hidden={!claimGuideOpen}>
+                <InsurerClaimGuidePanel
+                  claimItems={claimItems}
+                  insurer={insurer}
+                />
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <InfoRow
@@ -557,6 +574,33 @@ interface ActionLinkProps {
   href: string | null;
   label: string;
   tone?: "primary" | "default";
+}
+
+function ClaimGuideToggleButton({
+  count,
+  isOpen,
+  onToggle,
+  panelId,
+}: {
+  count: number;
+  isOpen: boolean;
+  onToggle: () => void;
+  panelId: string;
+}) {
+  return (
+    <button
+      aria-controls={panelId}
+      aria-expanded={isOpen}
+      className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-[#173f36] bg-[#173f36] px-4 py-3 text-left text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+      onClick={onToggle}
+      type="button"
+    >
+      <span className="break-keep">청구 안내</span>
+      <span className="shrink-0 text-xs font-semibold text-[#d8c08f]">
+        {count}건 {isOpen ? "▲" : "▼"}
+      </span>
+    </button>
+  );
 }
 
 function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
