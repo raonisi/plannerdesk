@@ -9,6 +9,7 @@ import { Header } from "@/components/header";
 import { MvpModuleLinks, MvpSafetyNotice } from "@/components/mvp-navigation";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { DirectoryExplorer } from "./directory-explorer";
+import { MajorWorkLinks } from "@/components/directory/major-work-links";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,8 @@ export default async function DirectoryPage() {
       />
       <ContentSection>
         <div className="space-y-8">
+          <MajorWorkLinks />
+
           <p className="break-keep text-sm leading-6 text-[#5f6670]">
             {t.subcopy}
           </p>
