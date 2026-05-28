@@ -13,7 +13,7 @@ import {
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
-type CategoryFilter = "all" | PublicInsurer["category"];
+type CategoryFilter = "all" | "non_life" | "life" | "mutual" | "digital";
 type StatusFilter = "all" | "verified" | "needs_review";
 type FeaturedFilter = "all" | "featured";
 type ViewMode = "all" | "favorites";
@@ -22,7 +22,27 @@ const categoryOptions: { label: string; value: CategoryFilter }[] = [
   { label: "전체", value: "all" },
   { label: "손해보험", value: "non_life" },
   { label: "생명보험", value: "life" },
+  { label: "공제보험", value: "mutual" },
+  { label: "디지털손보사", value: "digital" },
 ];
+
+function getDisplayCategory(insurer: PublicInsurer): CategoryFilter {
+  if (
+    insurer.id.endsWith("-mutual") ||
+    insurer.name.includes("공제") ||
+    insurer.name.includes("우체국")
+  ) {
+    return "mutual";
+  }
+  if (
+    insurer.id.endsWith("-digital") ||
+    insurer.name.includes("디지털") ||
+    insurer.name.includes("캐롯")
+  ) {
+    return "digital";
+  }
+  return insurer.category;
+}
 
 const statusOptions: { label: string; value: StatusFilter }[] = [
   { label: "전체", value: "all" },
@@ -81,7 +101,7 @@ export function DirectoryExplorer({
         normalizedQuery.length === 0 ||
         insurer.name.toLocaleLowerCase("ko-KR").includes(normalizedQuery);
       const matchesCategory =
-        category === "all" || insurer.category === category;
+        category === "all" || getDisplayCategory(insurer) === category;
       const matchesStatus =
         status === "all" || insurer.verificationStatus === status;
       const matchesFeatured = featured === "all" || insurer.isFeatured === true;
