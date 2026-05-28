@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
+import { getDisclosureLinksForInsurer } from "@/lib/content/disclosure-match";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
@@ -336,13 +337,7 @@ export function InsurerActionCard({
           </div>
 
           {/* 4) 자료 */}
-          <div className={groupDividerClass}>
-            <ActionGroup eyebrow="DATA" title="자료">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <ActionLink href={insurer.termsUrl} label="공시·약관 보기" />
-              </div>
-            </ActionGroup>
-          </div>
+          <DisclosureSection insurer={insurer} />
 
           {/* 정보 수정 요청 */}
           {onRequestCorrection ? (
@@ -538,6 +533,48 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
         {"\u2197"}
       </span>
     </ExternalTabAnchor>
+  );
+}
+
+function DisclosureSection({ insurer }: { insurer: PublicInsurer }) {
+  const disclosureLinks = useMemo(
+    () => getDisclosureLinksForInsurer(insurer.id),
+    [insurer.id],
+  );
+
+  const hasDisclosureData =
+    disclosureLinks.productDisclosure || disclosureLinks.policyTerms;
+
+  // If disclosure-links has matched data, show both product disclosure and
+  // policy terms links.  Otherwise fall back to insurer.termsUrl for backward
+  // compatibility.
+  if (hasDisclosureData) {
+    return (
+      <div className={groupDividerClass}>
+        <ActionGroup eyebrow="DATA" title="자료">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ActionLink
+              href={disclosureLinks.productDisclosure?.sourceUrl ?? null}
+              label="상품공시 보기"
+            />
+            <ActionLink
+              href={disclosureLinks.policyTerms?.sourceUrl ?? null}
+              label="약관 보기"
+            />
+          </div>
+        </ActionGroup>
+      </div>
+    );
+  }
+
+  return (
+    <div className={groupDividerClass}>
+      <ActionGroup eyebrow="DATA" title="자료">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ActionLink href={insurer.termsUrl} label="공시·약관 보기" />
+        </div>
+      </ActionGroup>
+    </div>
   );
 }
 

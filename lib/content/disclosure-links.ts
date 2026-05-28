@@ -922,152 +922,12 @@ export const disclosureLinkEntries = [
     "verificationStatus": "verified"
   },
   {
-    "id": "quick-link-5248dbd0-4c85-4e76-8803-be5b06f1658b",
-    "title": "보험학교 통계실",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/stats",
-    "description": "보험학교 통계실 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [통계 활용 세일즈] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-0e20cf8c-c633-4a59-85e0-8d8dcc3df272",
-    "title": "인수예외질환 검색",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/disease-search",
-    "description": "인수예외질환 검색 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [인수예외질환 검색] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-e7bd3e4b-8f26-4d19-9ed3-e55605edbc7e",
-    "title": "실손보험금",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/silbi-calculator",
-    "description": "실손보험금 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [보험계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-87378f46-8838-4df0-9939-035d8c24851f",
-    "title": "보험나이",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/insurance-age",
-    "description": "보험나이 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [보험계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-1a533e3e-90a9-461d-9afd-e2fd5f1f03e1",
-    "title": "BMI",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/bmi-calculator",
-    "description": "BMI 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [보험계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-20341c26-ee40-4462-a18b-35d24713dc61",
-    "title": "화폐가치",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/currency-value",
-    "description": "화폐가치 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-aa3dcc17-a478-459e-8e6d-f8e82ff04ba2",
-    "title": "대출 이자",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/loan",
-    "description": "대출 이자 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-3c9a5f21-6352-4890-af8b-767f8b126dfb",
-    "title": "예/적금 이자",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/savings",
-    "description": "예/적금 이자 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-f658b98c-5fe9-40f9-9cc6-7679b667dede",
-    "title": "연봉 실수령액",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/net-salary",
-    "description": "연봉 실수령액 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-1cc0304e-d4df-4a7b-a4b4-f79e43fe09fa",
-    "title": "간편 근로소득세",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/earned-tax",
-    "description": "간편 근로소득세 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-90051915-cd84-4921-8033-1fc195c2374c",
-    "title": "간편 종합소득세",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/comp-tax",
-    "description": "간편 종합소득세 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-66e3f159-cc63-46bc-9122-47460bf286e1",
-    "title": "간편 상속세",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/inheritance-tax",
-    "description": "간편 상속세 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-07fc3b0d-b22d-4902-adbd-c71b68a7eda9",
-    "title": "카드/현금 소득공제",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/card-deduction",
-    "description": "카드/현금 소득공제 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-3d371f54-de54-4f73-a119-5e2c0187fb5b",
-    "title": "부가세/공급가액",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/vat",
-    "description": "부가세/공급가액 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [금융계산기] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
     "id": "quick-link-b150eefc-0293-4f3e-aa91-fd93ac786a92",
     "title": "A+에셋",
     "category": "insurer_official_materials",
     "sourceUrl": "https://www.aplusga.com/tfa/login.do",
     "description": "A+에셋의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1077,7 +937,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://line.afg.kr/login",
     "description": "AFG의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1087,7 +947,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://erp.thebestfs.co.kr/login.go",
     "description": "더베스트금융의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1097,7 +957,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://pams.kr/",
     "description": "프라임에셋의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1107,7 +967,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://mega.megafn.com/",
     "description": "메가의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1117,7 +977,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://www1.ifacloud.co.kr/new_index.aspx?ReturnUrl=%2f",
     "description": "IFA의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1127,7 +987,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://nerp.gakorea.biz/login.go",
     "description": "지에이코리아의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1137,7 +997,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://www.globalgoms.co.kr/#/login",
     "description": "글로벌금융의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1147,7 +1007,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://meta-on.kr/#/login",
     "description": "메타리치의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1157,7 +1017,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://inskorea.net/irs/login/",
     "description": "FM에셋의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1167,7 +1027,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://ap2.gaiasystem.co.kr/mfweb/x_install2.jsp",
     "description": "엠금융의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1177,7 +1037,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://ktams.kgaasset.com/Install/newLauncher_XP.html",
     "description": "KGA에셋의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1187,7 +1047,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://erp.tossinsu.com/login.go",
     "description": "토스의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1197,7 +1057,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://rion-sales.goodrich.kr/",
     "description": "굿리치의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1207,7 +1067,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://login.valuemark.co.kr/login?reUrl=http://bokji.valuemark.co.kr/velueSSoTest",
     "description": "밸류마크의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1217,7 +1077,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://pines.peoplelife.co.kr/login;jsessionid=5C66FE4E633F62000CD83B9701933F25",
     "description": "한화피플라이프의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1227,27 +1087,7 @@ export const disclosureLinkEntries = [
     "category": "insurer_official_materials",
     "sourceUrl": "https://az.azlife.kr/login",
     "description": "AZ금융의 설계사용 공식 전산 포탈 로그인 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [GA 전산시스템] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-e1eec622-d392-49a7-b494-2f5503099db8",
-    "title": "수술분류표 검색",
-    "category": "claim_compensation_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/surgery-code",
-    "description": "보험금 청구 및 심사 청구를 돕기 위해 제공하는 수술분류표 검색 공식 안내 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [보험금청구] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-aec63f26-e76a-4709-a674-0037eceead29",
-    "title": "상병코드(KCD) 검색",
-    "category": "claim_compensation_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/disease-code",
-    "description": "보험금 청구 및 심사 청구를 돕기 위해 제공하는 상병코드(KCD) 검색 공식 안내 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [보험금청구] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [GA 전산시스템] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1257,7 +1097,7 @@ export const disclosureLinkEntries = [
     "category": "claim_compensation_reference",
     "sourceUrl": "https://www.hira.or.kr/ra/hosp/getHealthMap.do?WT.gnb=%EB%B3%91%EC%9B%90+%C2%B7+%EC%95%BD%EA%B5%AD%EC%B0%BE%EA%B8%B0&pgmid=HIRAA030002010000#a",
     "description": "보험금 청구 및 심사 청구를 돕기 위해 제공하는 병원/약국찾기 공식 안내 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [보험금청구] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [보험금청구] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1267,7 +1107,7 @@ export const disclosureLinkEntries = [
     "category": "claim_compensation_reference",
     "sourceUrl": "https://www.silson24.or.kr/claim/web/",
     "description": "보험금 청구 및 심사 청구를 돕기 위해 제공하는 실손24(전산간편청구) 공식 안내 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [보험금청구] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [보험금청구] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1277,7 +1117,7 @@ export const disclosureLinkEntries = [
     "category": "claim_compensation_reference",
     "sourceUrl": "https://cont.insure.or.kr/cont_web/intro.do",
     "description": "보험금 청구 및 심사 청구를 돕기 위해 제공하는 숨은보험금찾기 공식 안내 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [보험금청구] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [보험금청구] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1287,7 +1127,7 @@ export const disclosureLinkEntries = [
     "category": "claim_compensation_reference",
     "sourceUrl": "https://kpub.knia.or.kr/productDisc/lostHealth/lostHealthDisclosure.do",
     "description": "보험금 청구 및 심사 청구를 돕기 위해 제공하는 실손 인수기준 확인 공식 안내 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [실손보험] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [실손보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1296,8 +1136,8 @@ export const disclosureLinkEntries = [
     "title": "대면 간편견적",
     "category": "education_practice_reference",
     "sourceUrl": "https://kpub.knia.or.kr/carInsuranceDisc/insurance/carInsurance.do",
-    "description": "대면 간편견적 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [자동차보험] 분류에 포함된 자료입니다.",
+    "description": "대면 간편견적 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [자동차보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1306,8 +1146,8 @@ export const disclosureLinkEntries = [
     "title": "보험다모아 비교견적",
     "category": "education_practice_reference",
     "sourceUrl": "https://e-insmarket.or.kr/aimt/aimtRealIntro.knia",
-    "description": "보험다모아 비교견적 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [자동차보험] 분류에 포함된 자료입니다.",
+    "description": "보험다모아 비교견적 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [자동차보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1316,8 +1156,8 @@ export const disclosureLinkEntries = [
     "title": "할인/할증요인 조회",
     "category": "education_practice_reference",
     "sourceUrl": "https://prem.kidi.or.kr:1443/",
-    "description": "할인/할증요인 조회 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [자동차보험] 분류에 포함된 자료입니다.",
+    "description": "할인/할증요인 조회 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [자동차보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1326,8 +1166,8 @@ export const disclosureLinkEntries = [
     "title": "보험개발원 등록",
     "category": "education_practice_reference",
     "sourceUrl": "https://iics.kidi.or.kr/insuUserReal/viewInsuUserReal.do",
-    "description": "보험개발원 등록 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [자동차보험] 분류에 포함된 자료입니다.",
+    "description": "보험개발원 등록 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [자동차보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1336,8 +1176,8 @@ export const disclosureLinkEntries = [
     "title": "과실비율 정보포털",
     "category": "education_practice_reference",
     "sourceUrl": "https://accident.knia.or.kr/",
-    "description": "과실비율 정보포털 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [자동차보험] 분류에 포함된 자료입니다.",
+    "description": "과실비율 정보포털 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [자동차보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1346,8 +1186,8 @@ export const disclosureLinkEntries = [
     "title": "특수건물 정보조회",
     "category": "education_practice_reference",
     "sourceUrl": "https://bridge.kfpa.or.kr/#/",
-    "description": "특수건물 정보조회 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [화재보험] 분류에 포함된 자료입니다.",
+    "description": "특수건물 정보조회 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [화재보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1356,8 +1196,8 @@ export const disclosureLinkEntries = [
     "title": "건축물대장",
     "category": "education_practice_reference",
     "sourceUrl": "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=15000000098&HighCtgCD=A02004002&Mcode=10205",
-    "description": "건축물대장 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [화재보험] 분류에 포함된 자료입니다.",
+    "description": "건축물대장 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [화재보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1366,8 +1206,8 @@ export const disclosureLinkEntries = [
     "title": "승강기 정보 열람",
     "category": "education_practice_reference",
     "sourceUrl": "https://www.elevator.go.kr/opn/MainPage.do",
-    "description": "승강기 정보 열람 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [화재보험] 분류에 포함된 자료입니다.",
+    "description": "승강기 정보 열람 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [화재보험] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1376,8 +1216,8 @@ export const disclosureLinkEntries = [
     "title": "정부24(등본/초본)",
     "category": "education_practice_reference",
     "sourceUrl": "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000015&HighCtgCD=A01010001&tp_seq=01&Mcode=10200",
-    "description": "정부24(등본/초본) 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [온라인공문서] 분류에 포함된 자료입니다.",
+    "description": "정부24(등본/초본) 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [온라인공문서] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1386,8 +1226,8 @@ export const disclosureLinkEntries = [
     "title": "홈택스(소득금액증명)",
     "category": "education_practice_reference",
     "sourceUrl": "https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&menuCd=index3",
-    "description": "홈택스(소득금액증명) 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [온라인공문서] 분류에 포함된 자료입니다.",
+    "description": "홈택스(소득금액증명) 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [온라인공문서] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1396,8 +1236,8 @@ export const disclosureLinkEntries = [
     "title": "법원(가족관계증명)",
     "category": "education_practice_reference",
     "sourceUrl": "https://efamily.scourt.go.kr/index.jsp",
-    "description": "법원(가족관계증명) 관련 유용한 통계 및 금융/업무 실무 참고 도구입니다.",
-    "notes": "참고 사이트 자료실의 [온라인공문서] 분류에 포함된 자료입니다.",
+    "description": "법원(가족관계증명) 관련 유용한 외부 실무 참고 링크입니다.",
+    "notes": "공식 외부 [온라인공문서] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1407,7 +1247,7 @@ export const disclosureLinkEntries = [
     "category": "insurance_association",
     "sourceUrl": "https://isi.knia.or.kr/index.do",
     "description": "모집종사자 관리 및 지원을 위한 손해보험협회 공식 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [모집종사자] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [모집종사자] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1417,7 +1257,7 @@ export const disclosureLinkEntries = [
     "category": "insurance_association",
     "sourceUrl": "https://fp.insure.or.kr/",
     "description": "모집종사자 관리 및 지원을 위한 생명보험협회 공식 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [모집종사자] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [모집종사자] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1427,7 +1267,7 @@ export const disclosureLinkEntries = [
     "category": "insurance_association",
     "sourceUrl": "https://pcs.iaa.or.kr/comm/login.do;jsessionid=357FB2FFF6457E9A77A9080571C407B3",
     "description": "모집종사자 관리 및 지원을 위한 대리점협회 상품비교 공식 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [모집종사자] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [모집종사자] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   },
@@ -1437,77 +1277,7 @@ export const disclosureLinkEntries = [
     "category": "insurance_association",
     "sourceUrl": "https://www.in.or.kr",
     "description": "모집종사자 관리 및 지원을 위한 보험연수원 공식 페이지입니다.",
-    "notes": "참고 사이트 자료실의 [모집종사자] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-90720a59-9a00-44dd-ad38-9975e1c7ee0c",
-    "title": "손해보험교재",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/general-insurance-textbook",
-    "description": "설계사 자격시험 및 직무 역량 강화를 위한 손해보험교재 교재/문제지 다운로드 링크입니다.",
-    "notes": "참고 사이트 자료실의 [시험교재/모의고사] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-f6bee0c7-4a86-4cc7-b504-44d43f266325",
-    "title": "손해보험모의고사",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/general-insurance-mock-exam",
-    "description": "설계사 자격시험 및 직무 역량 강화를 위한 손해보험모의고사 교재/문제지 다운로드 링크입니다.",
-    "notes": "참고 사이트 자료실의 [시험교재/모의고사] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-428147fc-2568-4164-b3ee-14288590577d",
-    "title": "생명보험교재",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/life-insurance-textbook",
-    "description": "설계사 자격시험 및 직무 역량 강화를 위한 생명보험교재 교재/문제지 다운로드 링크입니다.",
-    "notes": "참고 사이트 자료실의 [시험교재/모의고사] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-6934f33a-794f-432e-b440-2d1cd81d61ed",
-    "title": "생명보험모의고사",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/life-insurance-mock-exam",
-    "description": "설계사 자격시험 및 직무 역량 강화를 위한 생명보험모의고사 교재/문제지 다운로드 링크입니다.",
-    "notes": "참고 사이트 자료실의 [시험교재/모의고사] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-b02775e5-58cd-47de-b091-a56d3b437712",
-    "title": "변액보험교재",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/variable-insurance-textbook",
-    "description": "설계사 자격시험 및 직무 역량 강화를 위한 변액보험교재 교재/문제지 다운로드 링크입니다.",
-    "notes": "참고 사이트 자료실의 [시험교재/모의고사] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-6da2c954-3c54-4604-b083-70eb6b971e25",
-    "title": "변액보험모의고사",
-    "category": "education_practice_reference",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/variable-insurance-mock-exam",
-    "description": "설계사 자격시험 및 직무 역량 강화를 위한 변액보험모의고사 교재/문제지 다운로드 링크입니다.",
-    "notes": "참고 사이트 자료실의 [시험교재/모의고사] 분류에 포함된 자료입니다.",
-    "lastVerifiedAt": "2026-05-28",
-    "verificationStatus": "verified"
-  },
-  {
-    "id": "quick-link-8cfdf2a3-3f04-4a12-b7df-d680569a5774",
-    "title": "2026년 5월",
-    "category": "insurer_official_materials",
-    "sourceUrl": "https://bohumschool-archive.pages.dev/quick-link-files/bulletin/202605",
-    "description": "보험사별 신상품 정보 및 마케팅 전략이 포함된 2026년 5월 소식지 모음입니다.",
-    "notes": "참고 사이트 자료실의 [보험사소식지] 분류에 포함된 자료입니다.",
+    "notes": "공식 외부 [모집종사자] 참고 리소스입니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
   }

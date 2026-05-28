@@ -2,6 +2,11 @@ export { claimDocumentEntries } from "./claim-documents";
 export { contentSafetyRules } from "./safety-rules";
 export { customerMessageTemplates } from "./message-templates";
 export { disclosureLinkEntries } from "./disclosure-links";
+export {
+  getDisclosureLinksForInsurer,
+  buildDisclosureLinkIndex,
+  type InsurerDisclosureLinks,
+} from "./disclosure-match";
 export { insurerDirectoryEntries } from "./insurers";
 export type {
   CardPaymentStatus,
