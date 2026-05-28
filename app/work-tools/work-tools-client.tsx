@@ -486,20 +486,264 @@ function numberValue(value: string) {
   return Number(value) || 0;
 }
 
-function taxByBracket(value: number) {
-  const brackets = [
-    [14_000_000, 0.06, 0],
-    [50_000_000, 0.15, 1_260_000],
-    [88_000_000, 0.24, 5_760_000],
-    [150_000_000, 0.35, 15_440_000],
-    [300_000_000, 0.38, 19_940_000],
-    [500_000_000, 0.4, 25_940_000],
-    [1_000_000_000, 0.42, 35_940_000],
-    [Infinity, 0.45, 65_940_000],
-  ] as const;
-  const [, rate, deduction] =
-    brackets.find(([limit]) => value <= limit) ?? brackets[0];
-  return value * rate - deduction;
+
+// ── Insurance Age ──
+function parseBirthDate(input: string): Date | null {
+  const digits = input.replace(/\D/g, '');
+  if (digits.length !== 8) return null;
+  const y = +digits.slice(0, 4), m = +digits.slice(4, 6), d = +digits.slice(6, 8);
+  if (y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const dt = new Date(y, m - 1, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d || dt > new Date()) return null;
+  return dt;
+}
+
+function calcInsuranceAge(birth: Date, base: Date) {
+  let realAge = base.getFullYear() - birth.getFullYear();
+  const bday = new Date(base.getFullYear(), birth.getMonth(), birth.getDate());
+  if (base < bday) --realAge;
+  const ref = base < bday ? bday : new Date(base.getFullYear() + 1, birth.getMonth(), birth.getDate());
+  const halfYear = new Date(ref);
+  halfYear.setMonth(halfYear.getMonth() - 6);
+  let insuranceAge: number, nextChange: Date;
+  if (base >= halfYear) {
+    insuranceAge = realAge + 1;
+    nextChange = new Date(ref.getFullYear() + 1, birth.getMonth(), birth.getDate());
+    nextChange.setMonth(nextChange.getMonth() - 6);
+  } else {
+    insuranceAge = realAge;
+    nextChange = halfYear;
+  }
+  const daysToNext = Math.ceil((nextChange.getTime() - base.getTime()) / 86_400_000);
+  return { realAge, insuranceAge, nextChange, daysToNext };
+}
+
+function fmtDate(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// ── 실손 의료비 (Silbi) ──
+type SilbiGen = '1' | '2' | '3' | '4';
+type SilbiType = 'outpatient' | 'inpatient';
+type SilbiFacility = 'clinic' | 'general' | 'tertiary';
+const silbiDeductible: Record<SilbiFacility, number> = { clinic: 10_000, general: 15_000, tertiary: 20_000 };
+
+function calcSilbi(gen: SilbiGen, treatType: SilbiType, facility: SilbiFacility, costs: { benefit: number; nonBenefit: number; pharmaBenefit: number; pharmaNonBenefit: number }) {
+  const { benefit, nonBenefit, pharmaBenefit, pharmaNonBenefit } = costs;
+  const ded = silbiDeductible[facility];
+  const rows: { label: string; selfPay: number; refund: number }[] = [];
+  let selfMedical = 0;
+  if (treatType === 'outpatient') {
+    if (gen === '4') { const s1 = Math.max(ded, benefit * 0.2); const s2 = Math.max(30_000, nonBenefit * 0.3); selfMedical = Math.min(benefit, s1) + Math.min(nonBenefit, s2); }
+    else if (gen === '3') { const tot = benefit + nonBenefit; selfMedical = Math.min(tot, Math.max(ded, tot * 0.2)); }
+    else if (gen === '2') { const tot = benefit + nonBenefit; selfMedical = tot <= ded ? tot : ded + (tot - ded) * 0.1; }
+    else selfMedical = 0;
+    rows.push({ label: '통원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical });
+  } else {
+    selfMedical = gen === '4' ? benefit * 0.2 + nonBenefit * 0.3 : gen === '3' ? (benefit + nonBenefit) * 0.2 : gen === '2' ? (benefit + nonBenefit) * 0.1 : 0;
+    rows.push({ label: '입원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical });
+  }
+  let selfPharma = 0;
+  if (treatType === 'outpatient' && (pharmaBenefit > 0 || pharmaNonBenefit > 0)) {
+    if (gen === '4') { const s1 = Math.max(8_000, pharmaBenefit * 0.2); const s2 = Math.max(30_000, pharmaNonBenefit * 0.3); selfPharma = Math.min(pharmaBenefit, s1) + Math.min(pharmaNonBenefit, s2); }
+    else if (gen === '3') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = Math.min(tot, Math.max(8_000, tot * 0.2)); }
+    else if (gen === '2') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = tot <= 8_000 ? tot : 8_000 + (tot - 8_000) * 0.1; }
+    else selfPharma = 0;
+    rows.push({ label: '약제비', selfPay: selfPharma, refund: pharmaBenefit + pharmaNonBenefit - selfPharma });
+  }
+  const totalPaid = benefit + nonBenefit + pharmaBenefit + pharmaNonBenefit;
+  const selfPayTotal = Math.round(selfMedical + selfPharma);
+  return { totalPaid, selfPay: selfPayTotal, refund: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
+}
+
+// ── 상속세 (Inheritance Tax) ──
+const inhBrackets: [number, number, number][] = [[3_000_000_000, 0.5, 460_000_000], [1_000_000_000, 0.4, 160_000_000], [500_000_000, 0.3, 60_000_000], [100_000_000, 0.2, 10_000_000], [0, 0.1, 0]];
+function calcInhTax(taxBase: number) { if (taxBase <= 0) return 0; for (const [th, r, d] of inhBrackets) if (taxBase > th) return Math.max(0, taxBase * r - d); return 0; }
+function calcSpouseDeduction(estate: number, children: number, mode: 'none' | 'legal' | 'actual', actual: number) {
+  if (mode === 'none') return 0;
+  const legalShare = estate * (1.5 / (1.5 + children));
+  if (mode === 'legal') return Math.max(500_000_000, Math.min(legalShare, 3_000_000_000));
+  return Math.max(500_000_000, Math.min(Math.min(actual, legalShare), 3_000_000_000));
+}
+function calcFinancialDeduction(fin: number) { return fin <= 0 ? 0 : Math.min(fin * 0.2, 200_000_000); }
+function calcInheritance(p: { estate: number; debts: number; priorGift: number; financialAssets: number; homeValue: number; spouseMode: 'none' | 'legal' | 'actual'; spouseActual: number; children: number }) {
+  const taxableEstate = Math.max(0, p.estate - p.debts);
+  const combined = taxableEstate + p.priorGift;
+  const personalPer = 50_000_000;
+  const personalTotal = 200_000_000 + personalPer * p.children;
+  const lumpOrPersonal = Math.max(500_000_000, personalTotal);
+  const spouse = calcSpouseDeduction(taxableEstate, p.children, p.spouseMode, p.spouseActual);
+  const financial = calcFinancialDeduction(p.financialAssets);
+  const home = p.homeValue > 0 ? Math.min(p.homeValue, 600_000_000) : 0;
+  const totalDeduction = lumpOrPersonal + spouse + financial + home;
+  const taxBase = Math.max(0, combined - totalDeduction);
+  const grossTax = calcInhTax(taxBase);
+  const reportCredit = grossTax * 0.03;
+  return { estate: p.estate, debts: p.debts, priorGift: p.priorGift, taxableEstate, combined, spouse, lumpOrPersonal, financial, home, totalDeduction, taxBase, grossTax, reportCredit, netTax: Math.max(0, grossTax - reportCredit) };
+}
+
+// ── 화폐가치 (Currency Value) ──
+function calcCurrencyValue(amount: number, ratePct: number, years: number, direction: 'future' | 'present') {
+  if (amount <= 0 || years <= 0 || ratePct < 0) return null;
+  const factor = (1 + ratePct / 100) ** years;
+  const cumulative = (factor - 1) * 100;
+  const purchasingLoss = (1 - 1 / factor) * 100;
+  return direction === 'future'
+    ? { nominal: amount * factor, real: amount / factor, cumulative, purchasingLoss }
+    : { nominal: amount, real: amount / factor, cumulative, purchasingLoss };
+}
+
+// ── 연봉 실수령액 (Net Salary) ──
+const PENSION_RATE = 0.045, PENSION_CAP = 6_170_000, HEALTH_RATE = 0.03545, LONGCARE_RATE = 0.1295, EMPLOY_RATE = 0.009, PERSONAL_DEDUCTION = 1_500_000, WORK_DEDUCTION_CAP = 20_000_000;
+function calcWorkDeduction(salary: number) {
+  if (salary <= 0) return 0;
+  let d: number;
+  if (salary <= 5_000_000) d = salary * 0.7;
+  else if (salary <= 15_000_000) d = 3_500_000 + (salary - 5_000_000) * 0.4;
+  else if (salary <= 45_000_000) d = 7_500_000 + (salary - 15_000_000) * 0.15;
+  else if (salary <= 100_000_000) d = 12_000_000 + (salary - 45_000_000) * 0.05;
+  else d = 14_750_000 + (salary - 100_000_000) * 0.02;
+  return Math.min(d, WORK_DEDUCTION_CAP);
+}
+function incomeTax8(taxBase: number) {
+  if (taxBase <= 0) return 0;
+  if (taxBase <= 14_000_000) return taxBase * 0.06;
+  if (taxBase <= 50_000_000) return 840_000 + (taxBase - 14_000_000) * 0.15;
+  if (taxBase <= 88_000_000) return 6_240_000 + (taxBase - 50_000_000) * 0.24;
+  if (taxBase <= 150_000_000) return 15_360_000 + (taxBase - 88_000_000) * 0.35;
+  if (taxBase <= 300_000_000) return 37_060_000 + (taxBase - 150_000_000) * 0.38;
+  if (taxBase <= 500_000_000) return 94_060_000 + (taxBase - 300_000_000) * 0.40;
+  if (taxBase <= 1_000_000_000) return 174_060_000 + (taxBase - 500_000_000) * 0.42;
+  return 384_060_000 + (taxBase - 1_000_000_000) * 0.45;
+}
+function calcWorkTaxCredit(salary: number, grossTax: number) {
+  let limit: number;
+  if (salary <= 33_000_000) limit = 740_000;
+  else if (salary <= 70_000_000) limit = Math.max(660_000, 740_000 - (salary - 33_000_000) * 0.008);
+  else if (salary <= 120_000_000) limit = Math.max(500_000, 660_000 - (salary - 70_000_000) * 0.005);
+  else limit = Math.max(200_000, 500_000 - (salary - 120_000_000) * 0.005);
+  let credit: number;
+  if (grossTax <= 1_300_000) credit = grossTax * 0.55;
+  else credit = 715_000 + (grossTax - 1_300_000) * 0.3;
+  return Math.min(credit, limit);
+}
+function calcChildCredit(n: number) { return n <= 0 ? 0 : n === 1 ? 250_000 : n === 2 ? 550_000 : 550_000 + (n - 2) * 400_000; }
+function calcNetSalary(p: { grossAnnual: number; nonTaxable: number; dependents: number; children: number }) {
+  if (p.grossAnnual <= 0) return null;
+  const taxable = Math.max(0, p.grossAnnual - p.nonTaxable);
+  const workDed = calcWorkDeduction(taxable);
+  const personalDed = Math.max(1, p.dependents) * PERSONAL_DEDUCTION;
+  const taxBase = Math.max(0, taxable - workDed - personalDed);
+  const gross = incomeTax8(taxBase);
+  const workCredit = calcWorkTaxCredit(p.grossAnnual, gross);
+  const childCr = calcChildCredit(p.children);
+  const finalTax = Math.max(0, gross - workCredit - childCr);
+  const localTax = Math.round(finalTax * 0.1);
+  const mSalary = taxable / 12;
+  const pension = Math.round(Math.min(mSalary, PENSION_CAP) * PENSION_RATE);
+  const health = Math.round(mSalary * HEALTH_RATE);
+  const longcare = Math.round(health * LONGCARE_RATE);
+  const employ = Math.round(mSalary * EMPLOY_RATE);
+  const ins = { pension: pension * 12, health: health * 12, longcare: longcare * 12, employment: employ * 12 };
+  const totalDed = finalTax + localTax + ins.pension + ins.health + ins.longcare + ins.employment;
+  const netAnnual = p.grossAnnual - totalDed;
+  return { grossAnnual: p.grossAnnual, taxable, workDed, personalDed, taxBase, gross, workCredit, childCr, finalTax, localTax, ins, totalDed, netAnnual, netMonthly: netAnnual / 12, mb: { pension, health, longcare, employment: employ, incomeTax: Math.round(finalTax / 12), localTax: Math.round(localTax / 12) } };
+}
+
+// ── 카드 소득공제 (Card Deduction) ──
+function cardDeductionCap(salary: number) { return salary <= 70_000_000 ? 3_000_000 : salary <= 120_000_000 ? 2_500_000 : 2_000_000; }
+function calcCardDeduction(p: { salary: number; card: number; cash: number }) {
+  if (p.salary <= 0) return null;
+  const minUsage = p.salary * 0.25;
+  const total = p.card + p.cash;
+  const excess = Math.max(0, total - minUsage);
+  const cardCovered = Math.min(p.card, minUsage);
+  const cardEligible = Math.max(0, p.card - cardCovered);
+  const cashCovered = minUsage - cardCovered;
+  const cashEligible = Math.max(0, p.cash - cashCovered);
+  const cardDed = cardEligible * 0.15;
+  const cashDed = cashEligible * 0.30;
+  const raw = cardDed + cashDed;
+  const cap = cardDeductionCap(p.salary);
+  const final = Math.min(raw, cap);
+  return { minUsage, total, excess, cardEligible, cashEligible, cardDed, cashDed, raw, cap, final, refund: final * 0.165 };
+}
+
+// ── 근로소득세 (Earned Tax) ──
+function bracketLabel(tb: number) {
+  if (tb <= 14_000_000) return '1,400만 이하 6%';
+  if (tb <= 50_000_000) return '1,400만~5,000만 15%';
+  if (tb <= 88_000_000) return '5,000만~8,800만 24%';
+  if (tb <= 150_000_000) return '8,800만~1.5억 35%';
+  if (tb <= 300_000_000) return '1.5억~3억 38%';
+  if (tb <= 500_000_000) return '3억~5억 40%';
+  if (tb <= 1_000_000_000) return '5억~10억 42%';
+  return '10억 초과 45%';
+}
+function calcEarnedTax(salary: number) {
+  if (salary <= 0) return null;
+  const wd = calcWorkDeduction(salary);
+  const tb = Math.max(0, salary - wd);
+  const gt = incomeTax8(tb);
+  const lt = Math.round(gt * 0.1);
+  return { salary, wd, tb, gt, lt, total: gt + lt, label: bracketLabel(tb), effectiveRate: salary > 0 ? (gt + lt) / salary * 100 : 0 };
+}
+
+// ── 종합소득세 (Comprehensive Tax) ──
+function calcCompTax(p: { rental: number; other: number; expense: number; dependents: number; otherDeduction: number; children: number; otherCredit: number }) {
+  const gross = Math.max(0, p.rental + p.other - p.expense);
+  if (gross <= 0) return null;
+  const personal = Math.max(1, p.dependents) * PERSONAL_DEDUCTION;
+  const totalDed = personal + p.otherDeduction;
+  const tb = Math.max(0, gross - totalDed);
+  const gt = incomeTax8(tb);
+  const childCr = calcChildCredit(p.children);
+  const totalCredit = childCr + p.otherCredit;
+  const finalTax = Math.max(0, gt - totalCredit);
+  const lt = Math.round(finalTax * 0.1);
+  const pensionRate = gross <= 45_000_000 ? 0.165 : 0.132;
+  return { gross, personal, totalDed, tb, gt, childCr, totalCredit, finalTax, lt, totalTax: finalTax + lt, pensionRate, pensionSaving: 9_000_000 * pensionRate };
+}
+
+// ── 부가세 (VAT) ──
+function calcVat(amount: number, direction: 'inclusive' | 'exclusive') {
+  if (amount <= 0) return null;
+  if (direction === 'inclusive') { const supply = Math.round(amount / 1.1); return { supply, vat: amount - supply, total: amount }; }
+  const vat = Math.round(amount * 0.1);
+  return { supply: amount, vat, total: amount + vat };
+}
+
+// ── 대출 이자 (Loan) ──
+type LoanMode = 'equal_payment' | 'equal_principal' | 'bullet';
+function calcLoan(p: { mode: LoanMode; principal: number; months: number; ratePct: number }) {
+  if (p.principal <= 0 || p.months <= 0 || p.ratePct < 0) return null;
+  const mr = p.ratePct / 100 / 12;
+  if (p.mode === 'equal_payment') {
+    const pmt = mr === 0 ? p.principal / p.months : p.principal * mr * (1 + mr) ** p.months / ((1 + mr) ** p.months - 1);
+    return { first: pmt, mid: pmt, last: pmt, totalInterest: pmt * p.months - p.principal, totalPayment: pmt * p.months };
+  }
+  if (p.mode === 'equal_principal') {
+    const pp = p.principal / p.months;
+    const first = pp + p.principal * mr;
+    const mid = pp + (p.principal - pp * Math.floor(p.months / 2)) * mr;
+    const last = pp + pp * mr;
+    const totalI = mr * pp * p.months * (p.months + 1) / 2;
+    return { first, mid, last, totalInterest: totalI, totalPayment: p.principal + totalI };
+  }
+  const interest = p.principal * mr;
+  return { first: interest, mid: interest, last: interest + p.principal, totalInterest: interest * p.months, totalPayment: p.principal + interest * p.months };
+}
+
+// ── 한국원 포맷 ──
+function krw(n: number) {
+  const v = Math.round(n);
+  if (v === 0) return '0원';
+  const eok = Math.floor(v / 100_000_000);
+  const man = Math.floor((v % 100_000_000) / 10_000);
+  if (eok > 0 && man > 0) return `${eok}억 ${man.toLocaleString('ko-KR')}만원`;
+  if (eok > 0) return `${eok}억원`;
+  if (man > 0) return `${man.toLocaleString('ko-KR')}만원`;
+  return `${v.toLocaleString('ko-KR')}원`;
 }
 
 function allTools() {
@@ -512,31 +756,10 @@ function getToolCopy(id: ToolId) {
 
 function inputsForTool(id: ToolId): InputSpec[] {
   switch (id) {
-    case "insurance-age":
-      return [{ key: "a", label: "생년월일 8자리", placeholder: "예: 19900115" }];
     case "bmi-calculator":
       return [
         { key: "a", label: "키(cm)", placeholder: "예: 170" },
         { key: "b", label: "체중(kg)", placeholder: "예: 65" },
-      ];
-    case "silbi-calculator":
-      return [
-        { key: "a", label: "총 진료비", placeholder: "예: 120000" },
-        { key: "b", label: "급여 공제", placeholder: "예: 10000" },
-        { key: "c", label: "비급여 공제", placeholder: "예: 20000" },
-        { key: "d", label: "보상 제외액", placeholder: "예: 0" },
-      ];
-    case "currency-value":
-      return [
-        { key: "a", label: "현재 금액", placeholder: "예: 10000000" },
-        { key: "b", label: "연 상승률(%)", placeholder: "예: 3" },
-        { key: "c", label: "기간(년)", placeholder: "예: 10" },
-      ];
-    case "loan":
-      return [
-        { key: "a", label: "대출 원금", placeholder: "예: 100000000" },
-        { key: "b", label: "연 금리(%)", placeholder: "예: 4.5" },
-        { key: "c", label: "기간(개월)", placeholder: "예: 360" },
       ];
     case "savings":
       return [
@@ -545,23 +768,8 @@ function inputsForTool(id: ToolId): InputSpec[] {
         { key: "c", label: "연 금리(%)", placeholder: "예: 3.5" },
         { key: "d", label: "기간(개월)", placeholder: "예: 24" },
       ];
-    case "net-salary":
-      return [{ key: "a", label: "연봉", placeholder: "예: 50000000" }];
-    case "inheritance-tax":
-      return [
-        { key: "a", label: "상속재산", placeholder: "예: 1000000000" },
-        { key: "b", label: "공제액", placeholder: "예: 500000000" },
-      ];
-    case "card-deduction":
-      return [
-        { key: "a", label: "연봉", placeholder: "예: 60000000" },
-        { key: "b", label: "카드 사용액", placeholder: "예: 18000000" },
-        { key: "c", label: "현금 사용액", placeholder: "예: 3000000" },
-      ];
-    case "vat":
-      return [{ key: "a", label: "합계금액", placeholder: "예: 110000" }];
     default:
-      return [{ key: "a", label: "과세표준", placeholder: "예: 50000000" }];
+      return [];
   }
 }
 
@@ -2161,7 +2369,478 @@ function calculateSavings(
   };
 }
 
+/* ── Shared row + tip components for calculator results ── */
+function ResultRow({ label, value, bold, highlight }: { label: string; value: string; bold?: boolean; highlight?: boolean }) {
+  return (
+    <div className={`flex justify-between py-1.5 ${bold ? 'border-b border-[#d9c9a8]' : 'border-b border-dashed border-[#e7ddc9]/80'} ${highlight ? 'text-[#aa8137] font-bold text-base sm:text-lg' : ''}`}>
+      <span className={bold ? 'font-semibold text-[#102235]' : 'text-[#5f6670]'}>{label}</span>
+      <span className={bold ? 'font-bold text-[#102235]' : 'font-medium text-[#102235]'}>{value}</span>
+    </div>
+  );
+}
+
+function TipBox({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-4 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+      <p className="text-xs font-bold text-[#7a612d] mb-2">💡 {title}</p>
+      <div className="text-xs leading-relaxed text-[#5f6670] break-keep">{children}</div>
+    </div>
+  );
+}
+
+const inputCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20";
+const selectCls = "mt-1.5 min-h-11 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30";
+const radioCls = (active: boolean) => `py-2 px-3 text-xs font-semibold rounded-lg border transition cursor-pointer text-center ${active ? 'bg-[#173f36] text-[#fbf7ee] border-transparent' : 'bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]'}`;
+
 function CalculatorTool({ id }: { id: ToolId }) {
+  switch (id) {
+    case "insurance-age": return <InsuranceAgeCalc />;
+    case "silbi-calculator": return <SilbiCalc />;
+    case "currency-value": return <CurrencyValueCalc />;
+    case "loan": return <LoanCalc />;
+    case "net-salary": return <NetSalaryCalc />;
+    case "earned-tax": return <EarnedTaxCalc />;
+    case "comp-tax": return <CompTaxCalc />;
+    case "inheritance-tax": return <InheritanceTaxCalc />;
+    case "card-deduction": return <CardDeductionCalc />;
+    case "vat": return <VatCalc />;
+    default: return <GenericCalc id={id} />;
+  }
+}
+
+/* ── Insurance Age ── */
+function InsuranceAgeCalc() {
+  const [birthInput, setBirthInput] = useState('');
+  const birth = useMemo(() => parseBirthDate(birthInput), [birthInput]);
+  const result = useMemo(() => birth ? calcInsuranceAge(birth, new Date()) : null, [birth]);
+  return (
+    <PanelShell description="생년월일 기준 만 나이와 보험나이를 계산하고, 보험나이 변경일까지 남은 일수를 알려줍니다." id="insurance-age" title="보험나이 계산기">
+      <label className="block max-w-xs">
+        <span className="text-sm font-semibold text-[#303845]">생년월일 8자리</span>
+        <input className={inputCls} placeholder="예: 19900115" value={birthInput} onChange={e => setBirthInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 8))} inputMode="numeric" />
+      </label>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="만 나이" value={`${result.realAge}세`} bold />
+            <ResultRow label="보험나이" value={`${result.insuranceAge}세`} highlight />
+            <ResultRow label="다음 보험나이 변경일" value={fmtDate(result.nextChange)} />
+            <ResultRow label="변경일까지 남은 일수" value={`${result.daysToNext}일`} />
+            <ResultRow label="기준일" value={fmtDate(new Date())} />
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-[#102235] font-semibold">생년월일 8자리를 입력하세요.</p>
+        )}
+      </div>
+      {result && result.daysToNext <= 30 && (
+        <TipBox title="보험나이 변경 임박">
+          보험나이가 {result.daysToNext}일 이내에 변경됩니다. 보험 가입/갱신을 서두르면 보험료를 절약할 수 있습니다.
+        </TipBox>
+      )}
+    </PanelShell>
+  );
+}
+
+/* ── Silbi (실손의료비) ── */
+function SilbiCalc() {
+  const [gen, setGen] = useState<SilbiGen>('4');
+  const [treatType, setTreatType] = useState<SilbiType>('outpatient');
+  const [facility, setFacility] = useState<SilbiFacility>('clinic');
+  const [benefit, setBenefit] = useState('');
+  const [nonBenefit, setNonBenefit] = useState('');
+  const [pharmaBenefit, setPharmaBenefit] = useState('');
+  const [pharmaNonBenefit, setPharmaNonBenefit] = useState('');
+  const result = useMemo(() => {
+    const b = Number(benefit) || 0, nb = Number(nonBenefit) || 0;
+    if (b + nb <= 0) return null;
+    return calcSilbi(gen, treatType, facility, { benefit: b, nonBenefit: nb, pharmaBenefit: Number(pharmaBenefit) || 0, pharmaNonBenefit: Number(pharmaNonBenefit) || 0 });
+  }, [gen, treatType, facility, benefit, nonBenefit, pharmaBenefit, pharmaNonBenefit]);
+  return (
+    <PanelShell description="세대별 실손의료보험 자기부담금과 예상 환급금을 계산합니다. 통원/입원, 의원급/종합병원/상급종합을 구분합니다." id="silbi-calculator" title="실손의료비 계산기">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div>
+          <span className="text-sm font-semibold text-[#303845]">실손 세대</span>
+          <div className="mt-1.5 grid grid-cols-4 gap-1">
+            {(['1','2','3','4'] as SilbiGen[]).map(g => <button key={g} type="button" className={radioCls(gen===g)} onClick={() => setGen(g)}>{g}세대</button>)}
+          </div>
+        </div>
+        <div>
+          <span className="text-sm font-semibold text-[#303845]">진료 구분</span>
+          <div className="mt-1.5 grid grid-cols-2 gap-1">
+            <button type="button" className={radioCls(treatType==='outpatient')} onClick={() => setTreatType('outpatient')}>통원</button>
+            <button type="button" className={radioCls(treatType==='inpatient')} onClick={() => setTreatType('inpatient')}>입원</button>
+          </div>
+        </div>
+        <div>
+          <span className="text-sm font-semibold text-[#303845]">의료기관</span>
+          <select className={selectCls} value={facility} onChange={e => setFacility(e.target.value as SilbiFacility)}>
+            <option value="clinic">의원급 (공제 1만원)</option>
+            <option value="general">종합병원 (공제 1.5만원)</option>
+            <option value="tertiary">상급종합 (공제 2만원)</option>
+          </select>
+        </div>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">급여 진료비</span><input className={inputCls} placeholder="예: 80000" value={benefit} onChange={e => setBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">비급여 진료비</span><input className={inputCls} placeholder="예: 40000" value={nonBenefit} onChange={e => setNonBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        {treatType === 'outpatient' && (
+          <>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">급여 약제비</span><input className={inputCls} placeholder="예: 5000" value={pharmaBenefit} onChange={e => setPharmaBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+            <label className="block"><span className="text-sm font-semibold text-[#303845]">비급여 약제비</span><input className={inputCls} placeholder="예: 10000" value={pharmaNonBenefit} onChange={e => setPharmaNonBenefit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+          </>
+        )}
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="총 진료비" value={money(result.totalPaid)} />
+            {result.breakdown.map(r => <ResultRow key={r.label} label={`${r.label} — 자기부담`} value={money(r.selfPay)} />)}
+            <ResultRow label="자기부담금 합계" value={money(result.selfPay)} bold />
+            <ResultRow label="예상 환급금" value={money(result.refund)} highlight />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">진료비를 입력하세요.</p>}
+      </div>
+      <TipBox title="실손 상담 팁">
+        {gen === '4' ? '4세대 실손은 급여/비급여 자기부담률이 다르고, 비급여 특약은 별도입니다. 비급여 특약 가입 여부도 같이 확인하세요.' : gen === '3' ? '3세대 실손은 급여+비급여 합산 20% 자기부담입니다. 4세대 전환 시 비교 안내가 필요합니다.' : gen === '2' ? '2세대 실손은 공제금액 초과분의 10%만 자기부담입니다. 갱신 보험료 인상률을 함께 확인하세요.' : '1세대 실손은 자기부담금 없이 전액 보상됩니다. 현재 갱신 보험료를 확인해보세요.'}
+      </TipBox>
+    </PanelShell>
+  );
+}
+
+/* ── Currency Value ── */
+function CurrencyValueCalc() {
+  const [amount, setAmount] = useState('');
+  const [rate, setRate] = useState('3');
+  const [years, setYears] = useState('10');
+  const [dir, setDir] = useState<'future' | 'present'>('future');
+  const result = useMemo(() => calcCurrencyValue(Number(amount) || 0, Number(rate) || 0, Number(years) || 0, dir), [amount, rate, years, dir]);
+  return (
+    <PanelShell description="현재 금액의 미래 명목가치와 구매력 변화를 계산합니다." id="currency-value" title="화폐가치 계산기">
+      <div className="grid gap-3 sm:grid-cols-4">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">금액</span><input className={inputCls} placeholder="예: 10000000" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">연 상승률(%)</span><input className={inputCls} placeholder="예: 3" value={rate} onChange={e => setRate(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">기간(년)</span><input className={inputCls} placeholder="예: 10" value={years} onChange={e => setYears(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <div>
+          <span className="text-sm font-semibold text-[#303845]">계산 방향</span>
+          <div className="mt-1.5 grid grid-cols-2 gap-1">
+            <button type="button" className={radioCls(dir==='future')} onClick={() => setDir('future')}>미래가치</button>
+            <button type="button" className={radioCls(dir==='present')} onClick={() => setDir('present')}>현재가치</button>
+          </div>
+        </div>
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="입력 금액" value={money(Number(amount))} />
+            <ResultRow label={`${years}년 후 명목가치`} value={money(result.nominal)} highlight />
+            <ResultRow label="실질 구매력" value={money(result.real)} bold />
+            <ResultRow label="누적 상승률" value={`${result.cumulative.toFixed(1)}%`} />
+            <ResultRow label="구매력 감소율" value={`${result.purchasingLoss.toFixed(1)}%`} />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">금액과 기간을 입력하세요.</p>}
+      </div>
+      <TipBox title="상담 활용 팁">
+        고객에게 보장 금액의 실질 가치 하락을 설명할 때 활용하세요. 예: &quot;지금 1억 보장이 {years}년 후에는 구매력 기준 {result ? money(result.real) : '-'}에 불과합니다.&quot;
+      </TipBox>
+    </PanelShell>
+  );
+}
+
+/* ── Loan ── */
+function LoanCalc() {
+  const [mode, setMode] = useState<LoanMode>('equal_payment');
+  const [principal, setPrincipal] = useState('');
+  const [ratePct, setRatePct] = useState('4.5');
+  const [months, setMonths] = useState('360');
+  const result = useMemo(() => calcLoan({ mode, principal: Number(principal) || 0, months: Number(months) || 0, ratePct: Number(ratePct) || 0 }), [mode, principal, ratePct, months]);
+  return (
+    <PanelShell description="원리금균등, 원금균등, 만기일시 상환 방식별 월 납입액과 총 이자를 계산합니다." id="loan" title="대출 이자 계산기">
+      <div className="mb-3">
+        <span className="text-sm font-semibold text-[#303845]">상환 방식</span>
+        <div className="mt-1.5 grid grid-cols-3 gap-1">
+          <button type="button" className={radioCls(mode==='equal_payment')} onClick={() => setMode('equal_payment')}>원리금균등</button>
+          <button type="button" className={radioCls(mode==='equal_principal')} onClick={() => setMode('equal_principal')}>원금균등</button>
+          <button type="button" className={radioCls(mode==='bullet')} onClick={() => setMode('bullet')}>만기일시</button>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">대출 원금</span><input className={inputCls} placeholder="예: 100000000" value={principal} onChange={e => setPrincipal(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">연 금리(%)</span><input className={inputCls} placeholder="예: 4.5" value={ratePct} onChange={e => setRatePct(e.target.value.replace(/[^0-9.]/g,''))} inputMode="decimal" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">기간(개월)</span><input className={inputCls} placeholder="예: 360" value={months} onChange={e => setMonths(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="첫 달 납입액" value={money(result.first)} bold />
+            {mode === 'equal_principal' && <ResultRow label="중간 달 납입액" value={money(result.mid)} />}
+            {mode !== 'equal_payment' && <ResultRow label="마지막 달 납입액" value={money(result.last)} />}
+            <ResultRow label="총 이자" value={money(result.totalInterest)} />
+            <ResultRow label="총 상환액" value={money(result.totalPayment)} highlight />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">대출 정보를 입력하세요.</p>}
+      </div>
+      <TipBox title="상환 방식 비교">
+        원리금균등은 매월 같은 금액, 원금균등은 초기 부담이 크지만 총 이자가 적고, 만기일시는 매월 이자만 납부하다 만기에 원금을 상환합니다.
+      </TipBox>
+    </PanelShell>
+  );
+}
+
+/* ── Net Salary ── */
+function NetSalaryCalc() {
+  const [grossAnnual, setGrossAnnual] = useState('');
+  const [nonTaxable, setNonTaxable] = useState('1200000');
+  const [dependents, setDependents] = useState('1');
+  const [children, setChildren] = useState('0');
+  const result = useMemo(() => calcNetSalary({ grossAnnual: Number(grossAnnual) || 0, nonTaxable: Number(nonTaxable) || 0, dependents: Number(dependents) || 1, children: Number(children) || 0 }), [grossAnnual, nonTaxable, dependents, children]);
+  return (
+    <PanelShell description="연봉 기준 4대 보험, 소득세, 지방소득세를 계산하여 월 실수령액을 알려줍니다." id="net-salary" title="연봉 실수령액 계산기">
+      <div className="grid gap-3 sm:grid-cols-4">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">연봉(세전)</span><input className={inputCls} placeholder="예: 50000000" value={grossAnnual} onChange={e => setGrossAnnual(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">비과세액(연)</span><input className={inputCls} placeholder="예: 1200000" value={nonTaxable} onChange={e => setNonTaxable(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">부양가족 수</span><input className={inputCls} placeholder="예: 1" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">20세 이하 자녀</span><input className={inputCls} placeholder="예: 0" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="연봉(세전)" value={money(result.grossAnnual)} />
+            <ResultRow label="과세 대상" value={money(result.taxable)} />
+            <ResultRow label="근로소득공제" value={money(result.workDed)} />
+            <ResultRow label="과세표준" value={money(result.taxBase)} />
+            <ResultRow label="산출세액" value={money(result.gross)} />
+            <ResultRow label="근로소득세액공제" value={`-${money(result.workCredit)}`} />
+            <ResultRow label="소득세(결정)" value={money(result.finalTax)} bold />
+            <ResultRow label="지방소득세" value={money(result.localTax)} />
+            <p className="text-[10px] font-bold text-[#5f6670] pt-2">월 공제 내역</p>
+            <ResultRow label="국민연금" value={money(result.mb.pension)} />
+            <ResultRow label="건강보험" value={money(result.mb.health)} />
+            <ResultRow label="장기요양" value={money(result.mb.longcare)} />
+            <ResultRow label="고용보험" value={money(result.mb.employment)} />
+            <ResultRow label="소득세" value={money(result.mb.incomeTax)} />
+            <ResultRow label="지방소득세" value={money(result.mb.localTax)} />
+            <ResultRow label="연간 총 공제" value={money(result.totalDed)} bold />
+            <ResultRow label="연 실수령액" value={money(result.netAnnual)} />
+            <ResultRow label="월 실수령액" value={money(result.netMonthly)} highlight />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">연봉을 입력하세요.</p>}
+      </div>
+      <TipBox title="상담 활용 팁">
+        연봉 대비 실수령액 차이를 보여주면 보장성 보험 보험료 부담 설명이 수월해집니다. 비과세 항목(식대 등)이 있다면 비과세액을 수정하세요.
+      </TipBox>
+    </PanelShell>
+  );
+}
+
+/* ── Earned Tax ── */
+function EarnedTaxCalc() {
+  const [salary, setSalary] = useState('');
+  const result = useMemo(() => calcEarnedTax(Number(salary) || 0), [salary]);
+  return (
+    <PanelShell description="총 급여에서 근로소득공제를 적용한 간편 소득세를 계산합니다." id="earned-tax" title="간편 근로소득세 계산기">
+      <label className="block max-w-xs">
+        <span className="text-sm font-semibold text-[#303845]">총 급여(연간)</span>
+        <input className={inputCls} placeholder="예: 50000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" />
+      </label>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="총 급여" value={money(result.salary)} />
+            <ResultRow label="근로소득공제" value={money(result.wd)} />
+            <ResultRow label="과세표준" value={money(result.tb)} />
+            <ResultRow label="적용 구간" value={result.label} />
+            <ResultRow label="산출세액" value={money(result.gt)} bold />
+            <ResultRow label="지방소득세" value={money(result.lt)} />
+            <ResultRow label="합계" value={money(result.total)} highlight />
+            <ResultRow label="실효세율" value={`${result.effectiveRate.toFixed(2)}%`} />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">총 급여를 입력하세요.</p>}
+      </div>
+    </PanelShell>
+  );
+}
+
+/* ── Comprehensive Tax ── */
+function CompTaxCalc() {
+  const [rental, setRental] = useState('');
+  const [other, setOther] = useState('');
+  const [expense, setExpense] = useState('');
+  const [dependents, setDependents] = useState('1');
+  const [otherDeduction, setOtherDeduction] = useState('0');
+  const [children, setChildren] = useState('0');
+  const [otherCredit, setOtherCredit] = useState('0');
+  const result = useMemo(() => calcCompTax({ rental: Number(rental) || 0, other: Number(other) || 0, expense: Number(expense) || 0, dependents: Number(dependents) || 1, otherDeduction: Number(otherDeduction) || 0, children: Number(children) || 0, otherCredit: Number(otherCredit) || 0 }), [rental, other, expense, dependents, otherDeduction, children, otherCredit]);
+  return (
+    <PanelShell description="종합소득 과세표준 기준 간편 산출세액과 절세 가능 연금저축 세액공제를 계산합니다." id="comp-tax" title="간편 종합소득세 계산기">
+      <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">임대소득</span><input className={inputCls} placeholder="예: 30000000" value={rental} onChange={e => setRental(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">기타소득</span><input className={inputCls} placeholder="예: 10000000" value={other} onChange={e => setOther(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">필요경비</span><input className={inputCls} placeholder="예: 5000000" value={expense} onChange={e => setExpense(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">부양가족</span><input className={inputCls} placeholder="예: 1" value={dependents} onChange={e => setDependents(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">기타공제</span><input className={inputCls} placeholder="예: 0" value={otherDeduction} onChange={e => setOtherDeduction(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 0" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">기타세액공제</span><input className={inputCls} placeholder="예: 0" value={otherCredit} onChange={e => setOtherCredit(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="종합소득금액" value={money(result.gross)} />
+            <ResultRow label="인적공제" value={money(result.personal)} />
+            <ResultRow label="과세표준" value={money(result.tb)} />
+            <ResultRow label="산출세액" value={money(result.gt)} bold />
+            <ResultRow label="자녀세액공제" value={money(result.childCr)} />
+            <ResultRow label="결정세액" value={money(result.finalTax)} />
+            <ResultRow label="지방소득세" value={money(result.lt)} />
+            <ResultRow label="총 납부세액" value={money(result.totalTax)} highlight />
+            <p className="text-[10px] text-[#5f6670] pt-2">※ 연금저축 세액공제 한도(900만원) 적용 시 절세 가능액: {money(result.pensionSaving)} (공제율 {(result.pensionRate * 100).toFixed(1)}%)</p>
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">소득 정보를 입력하세요.</p>}
+      </div>
+    </PanelShell>
+  );
+}
+
+/* ── Inheritance Tax ── */
+function InheritanceTaxCalc() {
+  const [estate, setEstate] = useState('');
+  const [debts, setDebts] = useState('0');
+  const [priorGift, setPriorGift] = useState('0');
+  const [financialAssets, setFinancialAssets] = useState('0');
+  const [homeValue, setHomeValue] = useState('0');
+  const [spouseMode, setSpouseMode] = useState<'none' | 'legal' | 'actual'>('legal');
+  const [spouseActual, setSpouseActual] = useState('0');
+  const [children, setChildren] = useState('2');
+  const result = useMemo(() => {
+    const e = Number(estate) || 0;
+    if (e <= 0) return null;
+    return calcInheritance({ estate: e, debts: Number(debts) || 0, priorGift: Number(priorGift) || 0, financialAssets: Number(financialAssets) || 0, homeValue: Number(homeValue) || 0, spouseMode, spouseActual: Number(spouseActual) || 0, children: Number(children) || 0 });
+  }, [estate, debts, priorGift, financialAssets, homeValue, spouseMode, spouseActual, children]);
+  return (
+    <PanelShell description="상속재산, 채무, 배우자 공제 등 주요 항목을 입력하여 참고 상속세를 계산합니다." id="inheritance-tax" title="간편 상속세 계산기">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">총 상속재산</span><input className={inputCls} placeholder="예: 2000000000" value={estate} onChange={e => setEstate(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">채무·장례비</span><input className={inputCls} placeholder="예: 100000000" value={debts} onChange={e => setDebts(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">사전증여(10년)</span><input className={inputCls} placeholder="예: 0" value={priorGift} onChange={e => setPriorGift(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">금융재산</span><input className={inputCls} placeholder="예: 300000000" value={financialAssets} onChange={e => setFinancialAssets(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">동거주택 가액</span><input className={inputCls} placeholder="예: 0" value={homeValue} onChange={e => setHomeValue(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">자녀 수</span><input className={inputCls} placeholder="예: 2" value={children} onChange={e => setChildren(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <div>
+          <span className="text-sm font-semibold text-[#303845]">배우자 공제</span>
+          <select className={selectCls} value={spouseMode} onChange={e => setSpouseMode(e.target.value as 'none' | 'legal' | 'actual')}>
+            <option value="none">배우자 없음</option>
+            <option value="legal">법정상속분</option>
+            <option value="actual">실제상속분</option>
+          </select>
+        </div>
+        {spouseMode === 'actual' && (
+          <label className="block"><span className="text-sm font-semibold text-[#303845]">배우자 실제 상속액</span><input className={inputCls} placeholder="예: 500000000" value={spouseActual} onChange={e => setSpouseActual(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        )}
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="총 상속재산" value={krw(result.estate)} />
+            <ResultRow label="채무·장례비" value={`-${krw(result.debts)}`} />
+            <ResultRow label="과세가액" value={krw(result.taxableEstate)} />
+            <ResultRow label="사전증여 합산" value={krw(result.priorGift)} />
+            <ResultRow label="합산 과세가액" value={krw(result.combined)} bold />
+            <p className="text-[10px] font-bold text-[#5f6670] pt-2">공제 내역</p>
+            <ResultRow label="일괄/인적공제" value={krw(result.lumpOrPersonal)} />
+            <ResultRow label="배우자 공제" value={krw(result.spouse)} />
+            <ResultRow label="금융재산 공제" value={krw(result.financial)} />
+            <ResultRow label="동거주택 공제" value={krw(result.home)} />
+            <ResultRow label="총 공제" value={krw(result.totalDeduction)} bold />
+            <ResultRow label="과세표준" value={krw(result.taxBase)} />
+            <ResultRow label="산출세액" value={krw(result.grossTax)} />
+            <ResultRow label="신고세액공제(3%)" value={`-${krw(result.reportCredit)}`} />
+            <ResultRow label="납부 상속세" value={krw(result.netTax)} highlight />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">상속재산을 입력하세요.</p>}
+      </div>
+      <TipBox title="상속세 상담 팁">
+        종신보험 사망보험금은 상속재산에 포함되지만, 상속세 납부 재원으로 활용할 수 있습니다. 상속세 납부 대비 종신보험 설계 시 이 계산기를 활용하세요.
+      </TipBox>
+    </PanelShell>
+  );
+}
+
+/* ── Card Deduction ── */
+function CardDeductionCalc() {
+  const [salary, setSalary] = useState('');
+  const [card, setCard] = useState('');
+  const [cash, setCash] = useState('');
+  const result = useMemo(() => calcCardDeduction({ salary: Number(salary) || 0, card: Number(card) || 0, cash: Number(cash) || 0 }), [salary, card, cash]);
+  return (
+    <PanelShell description="연봉, 신용카드, 현금영수증 사용액 기준 소득공제 가능 금액과 예상 환급액을 계산합니다." id="card-deduction" title="카드/현금 소득공제 계산기">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">총 급여(연간)</span><input className={inputCls} placeholder="예: 60000000" value={salary} onChange={e => setSalary(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">신용카드 사용액</span><input className={inputCls} placeholder="예: 18000000" value={card} onChange={e => setCard(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">현금영수증/체크카드</span><input className={inputCls} placeholder="예: 3000000" value={cash} onChange={e => setCash(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="최소 사용금액(25%)" value={money(result.minUsage)} />
+            <ResultRow label="총 사용액" value={money(result.total)} />
+            <ResultRow label="초과 사용액" value={money(result.excess)} />
+            <ResultRow label="카드 공제대상" value={`${money(result.cardEligible)} × 15%`} />
+            <ResultRow label="현금 공제대상" value={`${money(result.cashEligible)} × 30%`} />
+            <ResultRow label="산출 공제액" value={money(result.raw)} />
+            <ResultRow label="공제 한도" value={money(result.cap)} />
+            <ResultRow label="최종 공제액" value={money(result.final)} highlight />
+            <ResultRow label="예상 환급 참고액" value={money(result.refund)} bold />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">급여와 사용액을 입력하세요.</p>}
+      </div>
+      <TipBox title="절세 팁">
+        최소사용금액(25%)까지는 신용카드를 쓰고, 초과분은 현금영수증·체크카드(30% 공제)를 활용하면 공제 효과가 극대화됩니다.
+      </TipBox>
+    </PanelShell>
+  );
+}
+
+/* ── VAT ── */
+function VatCalc() {
+  const [amount, setAmount] = useState('');
+  const [dir, setDir] = useState<'inclusive' | 'exclusive'>('inclusive');
+  const result = useMemo(() => calcVat(Number(amount) || 0, dir), [amount, dir]);
+  return (
+    <PanelShell description="합계금액에서 공급가액과 부가세를 분리하거나, 공급가액에 부가세를 더합니다." id="vat" title="부가세/공급가액 계산기">
+      <div className="grid gap-3 sm:grid-cols-2 max-w-lg">
+        <label className="block"><span className="text-sm font-semibold text-[#303845]">금액</span><input className={inputCls} placeholder="예: 110000" value={amount} onChange={e => setAmount(e.target.value.replace(/[^0-9]/g,''))} inputMode="numeric" /></label>
+        <div>
+          <span className="text-sm font-semibold text-[#303845]">계산 방향</span>
+          <div className="mt-1.5 grid grid-cols-2 gap-1">
+            <button type="button" className={radioCls(dir==='inclusive')} onClick={() => setDir('inclusive')}>VAT 포함→분리</button>
+            <button type="button" className={radioCls(dir==='exclusive')} onClick={() => setDir('exclusive')}>VAT 별도→합산</button>
+          </div>
+        </div>
+      </div>
+      <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
+        <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
+        {result ? (
+          <div className="mt-3 space-y-0.5 text-sm">
+            <ResultRow label="공급가액" value={money(result.supply)} bold />
+            <ResultRow label="부가세(10%)" value={money(result.vat)} />
+            <ResultRow label="합계금액" value={money(result.total)} highlight />
+          </div>
+        ) : <p className="mt-2 text-sm text-[#102235] font-semibold">금액을 입력하세요.</p>}
+      </div>
+    </PanelShell>
+  );
+}
+
+/* ── Generic fallback (BMI + Savings still use this) ── */
+function GenericCalc({ id }: { id: ToolId }) {
   const [values, setValues] = useState({ a: "", b: "", c: "", d: "" });
   const [savingsMode, setSavingsMode] = useState<"simple" | "compound">("compound");
   const [savingsTaxType, setSavingsTaxType] = useState<"general" | "preferential" | "tax_free">("general");
@@ -2172,8 +2851,8 @@ function CalculatorTool({ id }: { id: ToolId }) {
   const result = useMemo<React.ReactNode>(() => {
     const x = numberValue(values.a);
     const y = numberValue(values.b);
-    const z = numberValue(values.c);
     const w = numberValue(values.d);
+    const z = numberValue(values.c);
 
     switch (id) {
       case "bmi-calculator": {
@@ -2187,7 +2866,7 @@ function CalculatorTool({ id }: { id: ToolId }) {
         const standardWeight = Math.round(heightM * heightM * 22 * 10) / 10;
         const underwriting = getBmiUnderwriting(bmi);
 
-        const toneBg = 
+        const toneBg =
           underwriting.tone === "success" ? "bg-green-50/70 border-green-200 text-green-800" :
           underwriting.tone === "danger" ? "bg-red-50/70 border-red-200 text-red-800" :
           "bg-amber-50/70 border-amber-200 text-amber-800";
@@ -2211,40 +2890,6 @@ function CalculatorTool({ id }: { id: ToolId }) {
             </div>
           </div>
         );
-      }
-      case "insurance-age": {
-        if (!/^\d{8}$/.test(values.a)) return "생년월일 8자리를 입력하세요.";
-        const birth = new Date(
-          Number(values.a.slice(0, 4)),
-          Number(values.a.slice(4, 6)) - 1,
-          Number(values.a.slice(6, 8)),
-        );
-        const today = new Date();
-        let age = today.getFullYear() - birth.getFullYear();
-        const birthday = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
-        if (today < birthday) age -= 1;
-        const nextBirthday = today < birthday ? birthday : new Date(today.getFullYear() + 1, birth.getMonth(), birth.getDate());
-        const daysToBirthday = Math.ceil((nextBirthday.getTime() - today.getTime()) / 86_400_000);
-        const insuranceAge = daysToBirthday <= 183 ? age + 1 : age;
-        return `만 나이 ${age}세 / 보험나이 ${insuranceAge}세 / 다음 생일까지 ${daysToBirthday}일`;
-      }
-      case "silbi-calculator":
-        return `참고 금액: ${money(Math.max(0, x - y - z - w))}`;
-      case "currency-value": {
-        const years = z || 10;
-        const future = x * Math.pow(1 + y / 100, years);
-        const presentPower = x / Math.pow(1 + y / 100, years);
-        return `${years}년 후 명목가치 ${money(future)} / 현재 구매력 기준 ${money(presentPower)}`;
-      }
-      case "loan": {
-        const monthlyRate = y / 100 / 12;
-        const months = z || 12;
-        const payment =
-          monthlyRate > 0
-            ? (x * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-              (Math.pow(1 + monthlyRate, months) - 1)
-            : x / months;
-        return `월 납입액 ${money(payment)} / 총 이자 ${money(payment * months - x)} / 총 상환 ${money(payment * months)}`;
       }
       case "savings": {
         const res = calculateSavings(savingsMode, savingsTaxType, x, y, w, z);
@@ -2277,19 +2922,6 @@ function CalculatorTool({ id }: { id: ToolId }) {
           </div>
         );
       }
-      case "net-salary": {
-        const estimatedDeductionRate = x >= 80_000_000 ? 0.2 : x >= 50_000_000 ? 0.17 : 0.14;
-        return `월 실수령 참고: ${money((x * (1 - estimatedDeductionRate)) / 12)} / 공제율 가정 ${(estimatedDeductionRate * 100).toFixed(0)}%`;
-      }
-      case "earned-tax":
-      case "comp-tax":
-        return `간편 산출세액: ${money(taxByBracket(x))}`;
-      case "inheritance-tax":
-        return `참고 상속세: ${money(taxByBracket(Math.max(0, x - y)))} / 과세표준 ${money(Math.max(0, x - y))}`;
-      case "card-deduction":
-        return `공제 가능 참고액: ${money(Math.max(0, y + z - x * 0.25) * 0.15)}`;
-      case "vat":
-        return `공급가액 ${money(x / 1.1)} / 부가세 ${money(x - x / 1.1)}`;
       default:
         return "-";
     }
