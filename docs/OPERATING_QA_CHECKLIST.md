@@ -91,6 +91,8 @@ If `BASE_URL` is omitted, the script defaults to `http://localhost:3000`.
   보장 여부 판단, 의학적 해석, 또는 손해사정 업무.
 - [ ] External links that open new tabs use
   `target="_blank" rel="noopener noreferrer"`.
+- [ ] Correction request wording and operation follow
+  `docs/CORRECTION_REQUEST_POLICY.md` (no PII/medical data intake, admin review before reflection).
 - [ ] No file upload, OCR flow, customer claim submission, or customer medical
   data field is present.
 
