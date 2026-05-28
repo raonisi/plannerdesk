@@ -97,6 +97,8 @@ If `BASE_URL` is omitted, the script defaults to `http://localhost:3000`.
   `docs/CORRECTION_REQUEST_DB_PLAN.md` and remains separated into explicit high-risk PR scopes.
 - [ ] Knowledge archive expansion follows
   `docs/KNOWLEDGE_ARCHIVE_IA.md`, and unreviewed/community content is not treated as verified knowledge.
+- [ ] Knowledge content drafting/review follows
+  `docs/KNOWLEDGE_CONTENT_POLICY.md` (no payout judgment, no medical interpretation, no PII/medical data handling).
 - [ ] No file upload, OCR flow, customer claim submission, or customer medical
   data field is present.
 

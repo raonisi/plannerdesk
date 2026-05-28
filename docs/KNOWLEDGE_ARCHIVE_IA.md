@@ -447,3 +447,4 @@ PlannerDesk 확장 구조에서 지식 아카이브는 다음 위치를 가진�
 - `docs/PRODUCT_ROADMAP.md`
 - `docs/CORRECTION_REQUEST_POLICY.md`
 - `docs/CORRECTION_REQUEST_DB_PLAN.md`
+- `docs/KNOWLEDGE_CONTENT_POLICY.md`
