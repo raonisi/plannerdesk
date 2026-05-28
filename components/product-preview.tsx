@@ -1,54 +1,82 @@
-const rows = [
-  ["S생명", "청구 서류", "최근 확인"],
-  ["H손보", "고객 안내", "템플릿 준비"],
-  ["K화재", "업무 링크", "검토 예정"]
-];
+import Link from "next/link";
 
-export function ProductPreview() {
+interface ProductPreviewProps {
+  insurerCount: number;
+  claimDocumentCount: number;
+  messageTemplateCount: number;
+  disclosureLinkCount: number;
+}
+
+export function ProductPreview({
+  insurerCount,
+  claimDocumentCount,
+  messageTemplateCount,
+  disclosureLinkCount,
+}: ProductPreviewProps) {
+  const stats = [
+    { label: "보험사 수", count: insurerCount },
+    { label: "청구서류", count: claimDocumentCount },
+    { label: "안내 문구", count: messageTemplateCount },
+    { label: "공시·약관", count: disclosureLinkCount },
+  ];
+
+  const actions = [
+    { label: "보험사 바로가기", href: "/directory", description: "전산접속 및 청구팩스 확인" },
+    { label: "청구서류 확인", href: "/claim-documents", description: "보험사별 필수서류 조회" },
+    { label: "공시·약관 찾기", href: "/disclosure-links", description: "상품공시 및 공식약관 연결" },
+    { label: "고객 문구 찾기", href: "/message-templates", description: "안내 상황별 멘트 참고" },
+  ];
+
   return (
-    <div className="w-full border border-[#efe4cf]/20 bg-[#fbf7ee] p-4 text-[#18202b] shadow-[0_30px_80px_rgba(0,0,0,0.24)] sm:p-6">
-      <div className="border-b border-[#d9c9a8] pb-5">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold text-[#7a612d]">Today Desk</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#102235]">
-              업무 시작 보드
-            </h2>
-          </div>
-          <p className="bg-[#173f36] px-3 py-2 text-sm font-semibold text-[#fbf7ee]">
-            Beta
-          </p>
-        </div>
+    <div className="w-full border border-[#efe4cf]/20 bg-[#fbf7ee] p-5 text-[#18202b] shadow-[0_30px_80px_rgba(0,0,0,0.24)] sm:p-6">
+      <div className="border-b border-[#d9c9a8] pb-4">
+        <h2 className="text-2xl font-semibold text-[#102235]">
+          실무 빠른 실행
+        </h2>
+        <p className="mt-1 text-sm text-[#5f6670]">
+          보험사 기준으로 필요한 업무를 빠르게 확인하세요.
+        </p>
       </div>
 
-      <div className="grid gap-3 py-5 sm:grid-cols-3">
-        {["보험사", "서류", "메시지"].map((item, index) => (
-          <div key={item} className="border border-[#d9c9a8] bg-[#f7f1e5] p-4">
-            <p className="text-3xl font-semibold text-[#102235]">{index + 8}</p>
-            <p className="mt-1 text-sm font-medium text-[#4f5661]">{item}</p>
+      {/* Stats Counter Grid */}
+      <div className="grid gap-3 py-5 grid-cols-2 sm:grid-cols-4">
+        {stats.map((stat) => (
+          <div key={stat.label} className="border border-[#d9c9a8] bg-[#f7f1e5] p-3 text-center">
+            <p className="text-2xl font-bold text-[#102235]">{stat.count}</p>
+            <p className="mt-1 text-xs font-semibold text-[#4f5661]">{stat.label}</p>
           </div>
         ))}
       </div>
 
+      {/* Quick Links Menu */}
       <div className="space-y-3">
-        {rows.map((row) => (
-          <div
-            key={row.join("-")}
-            className="grid grid-cols-[0.8fr_1fr_1fr] gap-3 border border-[#d9c9a8] bg-white px-4 py-3 text-sm"
+        {actions.map((action) => (
+          <Link
+            key={action.href}
+            href={action.href}
+            className="group flex flex-col justify-center border border-[#d9c9a8] bg-white px-4 py-3 transition hover:border-[#aa8137] hover:bg-[#fdfbf7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#aa8137]"
           >
-            <span className="font-semibold text-[#102235]">{row[0]}</span>
-            <span className="text-[#4f5661]">{row[1]}</span>
-            <span className="text-right text-[#7a612d]">{row[2]}</span>
-          </div>
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-[#102235] group-hover:text-[#7a612d]">
+                {action.label}
+              </span>
+              <span className="text-xs text-[#7a612d] transition-transform group-hover:translate-x-1">
+                바로가기 →
+              </span>
+            </div>
+            <span className="mt-0.5 text-xs text-[#5f6670]">{action.description}</span>
+          </Link>
         ))}
       </div>
 
-      <div className="mt-5 bg-[#102235] p-5 text-[#fbf7ee]">
-        <p className="text-sm text-[#d8c08f]">Next action</p>
-        <p className="mt-2 text-lg font-semibold">
-          고객 안내 전, 청구 서류 기준과 메시지 톤을 함께 확인합니다.
+      {/* Next Action / Guide */}
+      <div className="mt-5 bg-[#102235] p-4 text-[#fbf7ee]">
+        <p className="text-xs uppercase tracking-wider text-[#d8c08f]">안내 사항</p>
+        <p className="mt-1.5 text-sm leading-relaxed font-semibold break-keep">
+          보험사를 먼저 선택하면 전산 링크, 청구안내, 공시 자료를 함께 확인할 수 있습니다.
         </p>
       </div>
     </div>
   );
 }
+
