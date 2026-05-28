@@ -2055,12 +2055,121 @@ function FolderDownloadModal({
   );
 }
 
+function getBmiCategory(bmi: number) {
+  if (bmi < 18.5) return { key: "underweight", label: "저체중", tone: "info" };
+  if (bmi < 23) return { key: "normal", label: "정상", tone: "success" };
+  if (bmi < 25) return { key: "overweight", label: "과체중", tone: "warning" };
+  if (bmi < 30) return { key: "obese1", label: "비만 (1단계)", tone: "warning" };
+  return { key: "obese2", label: "고도비만", tone: "danger" };
+}
+
+function getBmiUnderwriting(bmi: number) {
+  if (bmi < 17) {
+    return {
+      label: "인수 거절 가능",
+      desc: "BMI 17 미만은 다수 보험사가 가입 거절·조건부 인수. 영양상태·기저질환 확인 필요.",
+      tone: "danger"
+    };
+  }
+  if (bmi < 18.5) {
+    return {
+      label: "조건부 가입",
+      desc: "저체중은 표준체 가입 어렵고 일부 보험사 할증·부담보 부과 가능.",
+      tone: "warning"
+    };
+  }
+  if (bmi < 25) {
+    return {
+      label: "표준체 가입 가능",
+      desc: "대부분 보험사에서 정상 인수 — 다른 고지사항이 없다면 표준 보험료.",
+      tone: "success"
+    };
+  }
+  if (bmi < 30) {
+    return {
+      label: "할증 가능성",
+      desc: "BMI 25–29 구간은 보험사별로 표준체 또는 소폭 할증(10–25%) 적용.",
+      tone: "warning"
+    };
+  }
+  if (bmi < 35) {
+    return {
+      label: "할증 또는 부담보",
+      desc: "BMI 30–34 는 대부분 할증(25–50%) 또는 특정 부담보. 사전 인수 문의 권장.",
+      tone: "warning"
+    };
+  }
+  return {
+    label: "인수 거절 가능",
+    desc: "BMI 35 이상은 다수 보험사가 신규 가입 거절. 인수 가능 보험사 선별 필요.",
+    tone: "danger"
+  };
+}
+
+const savingsTaxRates = {
+  general: 0.154,
+  tax_free: 0,
+  preferential: 0.095
+};
+
+function calculateSavings(
+  mode: "simple" | "compound",
+  taxType: "general" | "preferential" | "tax_free",
+  principal: number,
+  monthly: number,
+  months: number,
+  annualRatePct: number
+) {
+  if (months <= 0 || annualRatePct < 0 || (principal <= 0 && monthly <= 0)) return null;
+  const s = annualRatePct / 100;
+  let preTaxInterest = 0;
+  const totalPrincipal = principal + monthly * months;
+
+  if (mode === "simple") {
+    if (principal > 0) {
+      preTaxInterest += principal * s * (months / 12);
+    }
+    if (monthly > 0) {
+      preTaxInterest += (monthly * s / 12) * ((months * (months + 1)) / 2);
+    }
+  } else {
+    const e = s / 12;
+    if (principal > 0) {
+      preTaxInterest += principal * (Math.pow(1 + e, months) - 1);
+    }
+    if (monthly > 0) {
+      const term = e === 0 ? monthly * months : monthly * (Math.pow(1 + e, months) - 1) / e;
+      preTaxInterest += term - monthly * months;
+    }
+  }
+
+  const taxRate = savingsTaxRates[taxType];
+  const tax = preTaxInterest * taxRate;
+  const postTaxInterest = preTaxInterest - tax;
+  const maturityPreTax = totalPrincipal + preTaxInterest;
+  const maturityPostTax = totalPrincipal + postTaxInterest;
+  const effectiveRate = totalPrincipal > 0 ? (postTaxInterest / totalPrincipal) * (12 / months) * 100 : 0;
+
+  return {
+    totalPrincipal,
+    preTaxInterest,
+    tax,
+    postTaxInterest,
+    maturityPreTax,
+    maturityPostTax,
+    effectiveRate
+  };
+}
+
 function CalculatorTool({ id }: { id: ToolId }) {
   const [values, setValues] = useState({ a: "", b: "", c: "", d: "" });
+  const [savingsMode, setSavingsMode] = useState<"simple" | "compound">("compound");
+  const [savingsTaxType, setSavingsTaxType] = useState<"general" | "preferential" | "tax_free">("general");
+
   const inputs = inputsForTool(id);
   const copy = getToolCopy(id);
 
-  const result = useMemo(() => {
+  const result = useMemo<React.ReactNode>(() => {
     const x = numberValue(values.a);
     const y = numberValue(values.b);
     const z = numberValue(values.c);
@@ -2069,12 +2178,39 @@ function CalculatorTool({ id }: { id: ToolId }) {
     switch (id) {
       case "bmi-calculator": {
         const heightM = x / 100;
-        const bmi = heightM > 0 ? y / (heightM * heightM) : 0;
-        const status =
-          bmi >= 25 ? "비만 범위" : bmi >= 23 ? "과체중 범위" : bmi >= 18.5 ? "정상 범위" : "저체중 범위";
-        return `BMI ${bmi ? bmi.toFixed(1) : "-"} (${bmi ? status : "-"}) / 표준체중 ${
-          heightM ? (heightM * heightM * 22).toFixed(1) : "-"
-        }kg`;
+        const bmiVal = heightM > 0 ? y / (heightM * heightM) : 0;
+        if (bmiVal <= 0 || x < 80 || x > 250 || y < 20 || y > 400) {
+          return "키와 체중을 다시 확인해주세요.";
+        }
+        const bmi = Math.round(bmiVal * 10) / 10;
+        const category = getBmiCategory(bmi);
+        const standardWeight = Math.round(heightM * heightM * 22 * 10) / 10;
+        const underwriting = getBmiUnderwriting(bmi);
+
+        const toneBg = 
+          underwriting.tone === "success" ? "bg-green-50/70 border-green-200 text-green-800" :
+          underwriting.tone === "danger" ? "bg-red-50/70 border-red-200 text-red-800" :
+          "bg-amber-50/70 border-amber-200 text-amber-800";
+
+        return (
+          <div className="space-y-3.5 text-xs sm:text-sm text-[#102235]">
+            <div className="flex justify-between border-b border-[#e7ddc9] pb-2">
+              <span className="text-[#5f6670]">BMI 지수</span>
+              <span className="font-bold">{bmi} ({category.label})</span>
+            </div>
+            <div className="flex justify-between border-b border-[#e7ddc9] pb-2">
+              <span className="text-[#5f6670]">표준 체중 (BMI 22 기준)</span>
+              <span className="font-semibold">{standardWeight} kg</span>
+            </div>
+            <div className={`p-4 border rounded-xl space-y-1.5 ${toneBg}`}>
+              <div className="font-bold text-sm sm:text-base flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                인수 심사 예측: {underwriting.label}
+              </div>
+              <p className="text-[11px] leading-normal opacity-90 break-keep">{underwriting.desc}</p>
+            </div>
+          </div>
+        );
       }
       case "insurance-age": {
         if (!/^\d{8}$/.test(values.a)) return "생년월일 8자리를 입력하세요.";
@@ -2111,14 +2247,35 @@ function CalculatorTool({ id }: { id: ToolId }) {
         return `월 납입액 ${money(payment)} / 총 이자 ${money(payment * months - x)} / 총 상환 ${money(payment * months)}`;
       }
       case "savings": {
-        const months = w || 12;
-        const monthlyRate = z / 100 / 12;
-        const depositFuture = x * Math.pow(1 + monthlyRate, months);
-        const monthlyFuture =
-          monthlyRate > 0 ? y * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) : y * months;
-        const totalPrincipal = x + y * months;
-        const amount = depositFuture + monthlyFuture;
-        return `만기금액 ${money(amount)} / 원금 ${money(totalPrincipal)} / 이자 ${money(amount - totalPrincipal)}`;
+        const res = calculateSavings(savingsMode, savingsTaxType, x, y, w, z);
+        if (!res) return "금액과 이자율, 기간을 입력하세요.";
+        return (
+          <div className="space-y-2.5 text-xs sm:text-sm text-[#102235]">
+            <div className="flex justify-between border-b border-[#e7ddc9] pb-2 font-semibold">
+              <span className="text-[#5f6670]">총 납입 원금</span>
+              <span>{money(res.totalPrincipal)}</span>
+            </div>
+            <div className="flex justify-between border-b border-dashed border-[#e7ddc9]/80 pb-2">
+              <span className="text-[#5f6670]">세전 이자</span>
+              <span>{money(res.preTaxInterest)}</span>
+            </div>
+            <div className="flex justify-between border-b border-dashed border-[#e7ddc9]/80 pb-2 text-red-600">
+              <span className="text-red-500">이자 소득세 ({savingsTaxType === "general" ? "15.4%" : savingsTaxType === "preferential" ? "9.5%" : "0%"})</span>
+              <span>- {money(res.tax)}</span>
+            </div>
+            <div className="flex justify-between border-b border-dashed border-[#e7ddc9]/80 pb-2 text-green-700">
+              <span className="text-green-600">세후 수령 이자</span>
+              <span>{money(res.postTaxInterest)}</span>
+            </div>
+            <div className="flex justify-between border-b border-[#e7ddc9] pb-2.5 font-bold text-base sm:text-lg text-[#aa8137]">
+              <span>세후 만기 수령액</span>
+              <span>{money(res.maturityPostTax)}</span>
+            </div>
+            <div className="text-[10px] text-slate-400 text-right mt-1.5">
+              ※ 연 복리 환산 실효 수익률(세후): {res.effectiveRate.toFixed(2)}%
+            </div>
+          </div>
+        );
       }
       case "net-salary": {
         const estimatedDeductionRate = x >= 80_000_000 ? 0.2 : x >= 50_000_000 ? 0.17 : 0.14;
@@ -2136,7 +2293,7 @@ function CalculatorTool({ id }: { id: ToolId }) {
       default:
         return "-";
     }
-  }, [id, values]);
+  }, [id, values, savingsMode, savingsTaxType]);
 
   return (
     <PanelShell description={copy?.description ?? ""} id={id} title={copy?.label ?? ""}>
@@ -2153,11 +2310,56 @@ function CalculatorTool({ id }: { id: ToolId }) {
           />
         ))}
       </div>
+
+      {id === "savings" && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#e7ddc9]/80 pt-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-[#303845]">이자 단리/복리 방식</span>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                className={`py-2 text-xs font-semibold rounded-lg border transition ${
+                  savingsMode === "simple"
+                    ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                    : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
+                }`}
+                onClick={() => setSavingsMode("simple")}
+              >
+                단리 계산
+              </button>
+              <button
+                type="button"
+                className={`py-2 text-xs font-semibold rounded-lg border transition ${
+                  savingsMode === "compound"
+                    ? "bg-[#173f36] text-[#fbf7ee] border-transparent"
+                    : "bg-[#fbf7ee] text-[#173f36] border-[#d9c9a8] hover:bg-[#fff7e6]"
+                }`}
+                onClick={() => setSavingsMode("compound")}
+              >
+                복리 계산 (월)
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-[#303845]">이자 과세 구분</span>
+            <select
+              className="w-full px-3 py-2 text-sm border border-[#d9c9a8] bg-white rounded-lg outline-none focus:border-[#aa8137] focus:ring-1 focus:ring-[#aa8137]/30"
+              value={savingsTaxType}
+              onChange={(e) => setSavingsTaxType(e.target.value as "general" | "preferential" | "tax_free")}
+            >
+              <option value="general">일반과세 (15.4%)</option>
+              <option value="preferential">세금우대 (9.5%)</option>
+              <option value="tax_free">비과세 (0%)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       <div className="mt-5 rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-4">
         <p className="text-xs font-semibold text-[#7a612d]">계산 결과</p>
-        <p className="mt-2 break-keep text-lg font-semibold text-[#102235]">
+        <div className="mt-2 break-keep text-base sm:text-lg font-semibold text-[#102235]">
           {result}
-        </p>
+        </div>
       </div>
     </PanelShell>
   );
