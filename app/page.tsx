@@ -46,6 +46,12 @@ const featureCards = [
     actionLabel: "디렉토리 이동"
   },
   {
+    title: "업무 도구",
+    desc: "인수예외질환 검색, 보험나이, BMI, 실손보험금, 대출·세금 계산 업무를 빠르게 확인합니다.",
+    href: "/work-tools",
+    actionLabel: "도구 열기"
+  },
+  {
     title: "청구서류 창고",
     desc: "분산된 보험사별 청구 양식 PDF와 유형별 제출 필수 서류를 한눈에 모아 제공합니다.",
     href: "/claim-documents",
@@ -106,6 +112,12 @@ export default async function Home() {
               </Link>
               <Link
                 className="inline-flex min-h-12 items-center justify-center border border-[#efe4cf]/35 px-6 py-3 text-sm font-semibold text-[#fbf7ee] transition hover:border-[#efe4cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#efe4cf]"
+                href="/work-tools"
+              >
+                업무 도구 열기
+              </Link>
+              <Link
+                className="inline-flex min-h-12 items-center justify-center border border-[#efe4cf]/35 px-6 py-3 text-sm font-semibold text-[#fbf7ee] transition hover:border-[#efe4cf] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#efe4cf]"
                 href="/claim-documents"
               >
                 청구서류 검색하기
@@ -149,7 +161,7 @@ export default async function Home() {
             title="실무에 바로 사용하는 핵심 포털 도구"
             description="링크 팜이 아닌 실무 단위로 구조화된 콘텐츠를 통해 필요한 정보를 1초 만에 찾을 수 있습니다."
           />
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
             {featureCards.map((card) => (
               <PremiumCard key={card.title}>
                 <h3 className="text-xl font-semibold text-[#102235]">{card.title}</h3>
