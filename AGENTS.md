@@ -43,6 +43,37 @@ Current MVP excludes:
 - Avoid patterns that make the product feel like an insurance link farm or sales flyer.
 - Run `npm run typecheck`, `npm run lint`, and `npm run build` before release changes.
 
+## Specialist Agents (Codex + Cursor)
+
+Project-specific subagents live in `.codex/agents/` (from [awesome-codex-subagents](https://github.com/VoltAgent/awesome-codex-subagents)).
+
+- **Codex**: does not auto-spawn them; delegate explicitly in the prompt.
+- **Cursor**: use `.cursor/skills/plannerdesk-agents/` to pick lenses, then apply matching `.cursor/skills/codex-<name>/` skills (38 agents; sync via `node scripts/codex-agents-to-cursor-skills.mjs`).
+
+| Workstream | Agents |
+| --- | --- |
+| App routes, RSC, server actions | `nextjs-developer`, `react-specialist`, `typescript-pro`, `frontend-developer` |
+| Premium B2B UI (not link-farm tone) | `ui-designer`, `ui-fixer`, `frontend-developer` |
+| Prisma / PostgreSQL / admin data | `postgres-pro`, `database-optimizer`, `backend-developer`, `api-designer` |
+| PR review and architecture | `reviewer`, `code-reviewer`, `architect-reviewer`, `security-auditor` |
+| Privacy, RBAC, draft exposure | `gdpr-ccpa-compliance`, `security-auditor` |
+| Insurance product boundaries | `fintech-engineer`, `risk-manager` |
+| Templates, knowledge copy, docs | `content-quality-editor`, `technical-writer`, `documentation-engineer` |
+| Future AI answer assist (stage 5+) | `policy-guardrail-designer`, `responsible-ai-reviewer`, `eval-engineer`, `hallucination-investigator` |
+| Tests and route smoke | `test-automator`, `browser-debugger`, `accessibility-tester` |
+| Framework API verification | `docs-researcher` |
+| Branching and small PRs | `git-workflow-manager` |
+
+Example delegation:
+
+```text
+Review this PR in parallel: reviewer for correctness/regressions, security-auditor for RBAC and draft leakage, gdpr-ccpa-compliance for PII handling. Summarize with file references.
+```
+
+```text
+Implement /directory filter UX: nextjs-developer owns routing/data boundaries, ui-designer keeps premium B2B SaaS tone, accessibility-tester checks keyboard and contrast.
+```
+
 ## Codex Git Workflow
 
 For PR-scoped PlannerDesk tasks, Codex should handle the full low-risk Git workflow unless the user asks otherwise.

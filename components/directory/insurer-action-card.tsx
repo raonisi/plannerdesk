@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, useMemo, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
@@ -9,6 +17,8 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
   DIRECTORY_TEXT,
+  cardPaymentStatusLabel,
+  claimFaxDisplay,
   telHref,
 } from "@/lib/directory/formatting";
 
@@ -257,7 +267,11 @@ export function InsurerActionCard({
   onRequestCorrection,
 }: InsurerActionCardProps) {
   const [claimGuideOpen, setClaimGuideOpen] = useState(false);
+  const [cardPaymentOpen, setCardPaymentOpen] = useState(false);
+  const [mailAddressOpen, setMailAddressOpen] = useState(false);
   const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
+  const mailAddress = insurer.registeredMailAddress || insurer.mailingAddress;
+  const claimFax = claimFaxDisplay(insurer);
   const claimGuidePanelId = `claim-guide-${insurer.id}`;
 
   return (
@@ -322,7 +336,7 @@ export function InsurerActionCard({
           {/* 3) 지원 */}
           <div className={groupDividerClass}>
             <ActionGroup eyebrow="SUPPORT" title="지원">
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <PhoneRow
                   label="고객센터"
                   value={insurer.customerCenterPhone}
@@ -331,6 +345,26 @@ export function InsurerActionCard({
                 <PhoneRow
                   label="인물 모니터링"
                   value={insurer.callMonitoringPhone}
+                />
+                <DisplayRow
+                  label="청구팩스"
+                  secondary={claimFax.secondary}
+                  value={claimFax.primary}
+                />
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <InfoActionRow
+                  detail={cardPaymentStatusLabel(insurer.cardPaymentStatus)}
+                  label="카드납"
+                  onClick={() => setCardPaymentOpen(true)}
+                />
+                <InfoActionRow
+                  detail={
+                    mailAddress ? "주소 보기" : DIRECTORY_TEXT.missing
+                  }
+                  disabled={!mailAddress}
+                  label="등기우편"
+                  onClick={() => setMailAddressOpen(true)}
                 />
               </div>
             </ActionGroup>
@@ -355,6 +389,17 @@ export function InsurerActionCard({
           ) : null}
         </div>
       </div>
+      <CardPaymentDialog
+        insurer={insurer}
+        onClose={() => setCardPaymentOpen(false)}
+        open={cardPaymentOpen}
+      />
+      <MailAddressDialog
+        address={mailAddress}
+        insurerName={insurer.name}
+        onClose={() => setMailAddressOpen(false)}
+        open={mailAddressOpen}
+      />
     </article>
   );
 }
@@ -603,5 +648,267 @@ function PhoneRow({ label, value }: { label: string; value: string | null }) {
         </p>
       )}
     </div>
+  );
+}
+
+function parseCardPaymentRows(note: string | null) {
+  if (!note) return [];
+
+  return note
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match = /^\[([^\]]+)\]\s*(.*)$/.exec(line);
+      return match
+        ? { label: match[1], value: match[2] || DIRECTORY_TEXT.missing }
+        : { label: "메모", value: line };
+    });
+}
+
+function DisplayRow({
+  label,
+  secondary,
+  value,
+}: {
+  label: string;
+  secondary?: string | null;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg border border-[#e7ddc9] bg-white px-3 py-3">
+      <p className="text-xs font-semibold text-[#7a612d]">{label}</p>
+      <p className="mt-1 break-keep text-base font-semibold text-[#173f36]">
+        {value}
+      </p>
+      {secondary ? (
+        <p className="mt-1 break-keep text-xs leading-5 text-[#5f6670]">
+          문의: {secondary}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function InfoActionRow({
+  detail,
+  disabled = false,
+  label,
+  onClick,
+}: {
+  detail: string;
+  disabled?: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="flex min-h-12 items-center justify-between gap-3 rounded-lg border border-[#e7ddc9] bg-white px-3 py-3 text-left transition hover:border-[#aa8137] disabled:cursor-not-allowed disabled:bg-white/60 disabled:text-[#8b7660]"
+      disabled={disabled}
+      onClick={onClick}
+      type="button"
+    >
+      <span className="text-xs font-semibold text-[#7a612d]">{label}</span>
+      <span className="break-keep text-sm font-semibold text-[#173f36]">
+        {detail}
+      </span>
+    </button>
+  );
+}
+
+function DialogFrame({
+  children,
+  onClose,
+  open,
+  title,
+}: {
+  children: ReactNode;
+  onClose: () => void;
+  open: boolean;
+  title: string;
+}) {
+  const titleId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    restoreFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+
+      if (event.key === "Tab") {
+        const focusableElements = Array.from(
+          dialogRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+          ) ?? [],
+        ).filter((element) => !element.hasAttribute("disabled"));
+
+        if (focusableElements.length === 0) {
+          event.preventDefault();
+          return;
+        }
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      restoreFocusRef.current?.focus();
+    };
+  }, [onClose, open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      aria-labelledby={titleId}
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#102235]/45 p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      role="dialog"
+    >
+      <div
+        className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl border border-[#d9c9a8] bg-white shadow-[0_30px_80px_rgba(16,34,53,0.22)]"
+        ref={dialogRef}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-[#e7ddc9] px-5 py-4">
+          <h3
+            className="break-keep text-base font-semibold text-[#102235]"
+            id={titleId}
+          >
+            {title}
+          </h3>
+          <button
+            aria-label="닫기"
+            className="rounded-full px-2 py-1 text-sm font-semibold text-[#5f6670] transition hover:bg-[#f7f1e5]"
+            onClick={onClose}
+            ref={closeButtonRef}
+            type="button"
+          >
+            닫기
+          </button>
+        </div>
+        <div className="max-h-[65vh] overflow-y-auto px-5 py-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function CardPaymentDialog({
+  insurer,
+  onClose,
+  open,
+}: {
+  insurer: PublicInsurer;
+  onClose: () => void;
+  open: boolean;
+}) {
+  const rows = parseCardPaymentRows(insurer.cardPaymentNote);
+
+  return (
+    <DialogFrame
+      onClose={onClose}
+      open={open}
+      title={`${insurer.name} 카드납 정보`}
+    >
+      <p className="break-keep text-sm leading-6 text-[#5f6670]">
+        참고용으로만 사용하고, 고객 안내 전 보험사 공식 기준을 다시 확인해 주세요.
+      </p>
+      {rows.length > 0 ? (
+        <dl className="mt-4 grid gap-3 text-sm">
+          {rows.map((row) => (
+            <div
+              className="grid gap-1 rounded-lg border border-[#e7ddc9] bg-[#fbf7ee] p-3 sm:grid-cols-[7rem_1fr]"
+              key={`${row.label}-${row.value}`}
+            >
+              <dt className="font-semibold text-[#7a612d]">{row.label}</dt>
+              <dd className="whitespace-pre-wrap break-keep leading-6 text-[#303845]">
+                {row.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <p className="mt-4 break-keep text-sm leading-6 text-[#8b7660]">
+          {DIRECTORY_TEXT.missing}
+        </p>
+      )}
+    </DialogFrame>
+  );
+}
+
+function MailAddressDialog({
+  address,
+  insurerName,
+  onClose,
+  open,
+}: {
+  address: string | null;
+  insurerName: string;
+  onClose: () => void;
+  open: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+  const copyAddress = useCallback(async () => {
+    if (!address) return;
+
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  }, [address]);
+
+  return (
+    <DialogFrame
+      onClose={onClose}
+      open={open}
+      title={`${insurerName} 등기우편 주소`}
+    >
+      {address ? (
+        <div className="space-y-4">
+          <p className="whitespace-pre-wrap break-keep rounded-lg border border-[#e7ddc9] bg-[#fbf7ee] p-4 text-sm font-semibold leading-6 text-[#303845]">
+            {address}
+          </p>
+          <button
+            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-4 text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28]"
+            onClick={copyAddress}
+            type="button"
+          >
+            {copied ? "복사됨" : "주소 복사"}
+          </button>
+        </div>
+      ) : (
+        <p className="break-keep text-sm leading-6 text-[#8b7660]">
+          {DIRECTORY_TEXT.missing}
+        </p>
+      )}
+    </DialogFrame>
   );
 }

@@ -14,7 +14,8 @@
     "prisma:studio": "prisma studio",
     "claim-documents:import:dry-run": "node scripts/import-claim-document-candidates.mjs",
     "claim-documents:import:apply": "node scripts/import-claim-document-candidates.mjs --apply",
-    "smoke:public": "node scripts/smoke-public-routes.mjs"
+    "smoke:public": "node scripts/smoke-public-routes.mjs",
+    "skills:sync": "node scripts/codex-agents-to-cursor-skills.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

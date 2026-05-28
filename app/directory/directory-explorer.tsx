@@ -14,6 +14,7 @@ import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
 type TabType = "all" | "life" | "non_life" | "mutual" | "digital" | "favorites";
+type ViewMode = "grid" | "list";
 
 const tabOptions: { label: string; value: TabType }[] = [
   { label: "전체", value: "all" },
@@ -46,6 +47,44 @@ const FAVORITES_EMPTY_TITLE = "즐겨찾기한 보험사가 아직 없습니다.
 const FAVORITES_EMPTY_DESC =
   "보험사 카드 상단 오른쪽 별표 버튼을 눌러 자주 쓰는 보험사를 이 화면에 고정해 보세요.";
 
+const CHOSUNG_LIST = [
+  "ㄱ",
+  "ㄲ",
+  "ㄴ",
+  "ㄷ",
+  "ㄸ",
+  "ㄹ",
+  "ㅁ",
+  "ㅂ",
+  "ㅃ",
+  "ㅅ",
+  "ㅆ",
+  "ㅇ",
+  "ㅈ",
+  "ㅉ",
+  "ㅊ",
+  "ㅋ",
+  "ㅌ",
+  "ㅍ",
+  "ㅎ",
+] as const;
+
+function toChosung(value: string) {
+  let result = "";
+
+  for (const char of value) {
+    const code = char.charCodeAt(0);
+
+    if (code >= 44032 && code <= 55203) {
+      result += CHOSUNG_LIST[Math.floor((code - 44032) / 588)];
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+}
+
 export function DirectoryExplorer({
   insurers,
   claimDocuments,
@@ -59,6 +98,7 @@ export function DirectoryExplorer({
   );
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const { isFavorite, toggle, count: favoriteCount } = useFavorites();
 
@@ -76,9 +116,19 @@ export function DirectoryExplorer({
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
 
     return insurers.filter((insurer) => {
+      const matchText = [
+        insurer.name,
+        insurer.officialWebsiteUrl,
+        insurer.systemUrl,
+        insurer.customerCenterPhone,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("ko-KR");
       const matchesQuery =
         normalizedQuery.length === 0 ||
-        insurer.name.toLocaleLowerCase("ko-KR").includes(normalizedQuery);
+        matchText.includes(normalizedQuery) ||
+        toChosung(matchText).includes(normalizedQuery);
       
       const tabCategory = activeTab === "favorites" ? "all" : activeTab;
       const matchesCategory =
@@ -95,16 +145,30 @@ export function DirectoryExplorer({
   return (
     <div className="space-y-6">
       {/* 탭 영역 */}
-      <div className="flex flex-wrap items-center gap-2">
-        {tabOptions.map((tab) => (
-          <ViewTab
-            active={activeTab === tab.value}
-            key={tab.value}
-            label={tab.label}
-            onClick={() => setActiveTab(tab.value)}
-            count={tab.value === "favorites" ? favoriteCount : undefined}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          {tabOptions.map((tab) => (
+            <ViewTab
+              active={activeTab === tab.value}
+              key={tab.value}
+              label={tab.label}
+              onClick={() => setActiveTab(tab.value)}
+              count={tab.value === "favorites" ? favoriteCount : undefined}
+            />
+          ))}
+        </div>
+        <div className="hidden shrink-0 rounded-full border border-[#d9c9a8] bg-white p-1 sm:inline-flex">
+          <ViewModeButton
+            active={viewMode === "grid"}
+            label="그리드"
+            onClick={() => setViewMode("grid")}
           />
-        ))}
+          <ViewModeButton
+            active={viewMode === "list"}
+            label="리스트"
+            onClick={() => setViewMode("list")}
+          />
+        </div>
       </div>
 
       {/* 검색 영역 */}
@@ -116,7 +180,7 @@ export function DirectoryExplorer({
           <input
             className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="보험사 이름을 입력하세요"
+            placeholder="보험사명·초성 검색, 예: 삼성화재 또는 ㅅㅅㅎㅈ"
             type="search"
             value={query}
           />
@@ -132,7 +196,13 @@ export function DirectoryExplorer({
           description={FAVORITES_EMPTY_DESC}
         />
       ) : filteredInsurers.length > 0 ? (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid gap-5 lg:grid-cols-2"
+              : "grid gap-4"
+          }
+        >
           {filteredInsurers.map((insurer) => (
             <InsurerActionCard
               claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
@@ -218,6 +288,31 @@ function ViewTab({
           {count}
         </span>
       ) : null}
+    </button>
+  );
+}
+
+function ViewModeButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-pressed={active}
+      className={`min-h-9 rounded-full px-3 text-sm font-semibold transition ${
+        active
+          ? "bg-[#102235] text-[#fbf7ee]"
+          : "text-[#5f6670] hover:text-[#102235]"
+      }`}
+      onClick={onClick}
+      type="button"
+    >
+      {label}
     </button>
   );
 }
