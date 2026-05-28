@@ -6,6 +6,11 @@ import { CorrectionRequestDialog } from "@/components/directory/correction-reque
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
+import {
+  buildClaimLibraryItems,
+  getClaimItemsForInsurer,
+} from "@/lib/claim-documents/claim-library";
+import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
 type CategoryFilter = "all" | PublicInsurer["category"];
@@ -37,9 +42,15 @@ const FAVORITES_EMPTY_DESC =
 
 export function DirectoryExplorer({
   insurers,
+  claimDocuments,
 }: {
   insurers: PublicInsurer[];
+  claimDocuments: PublicClaimDocument[];
 }) {
+  const allClaimItems = useMemo(
+    () => buildClaimLibraryItems(claimDocuments),
+    [claimDocuments],
+  );
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -157,6 +168,7 @@ export function DirectoryExplorer({
         <div className="grid gap-5 lg:grid-cols-2">
           {filteredInsurers.map((insurer) => (
             <InsurerActionCard
+              claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
               insurer={insurer}
               isFavorite={isFavorite(insurer.id)}
               key={insurer.id}

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   ContentSection,
   EmptyState,
@@ -64,7 +65,9 @@ export default async function ClaimDocumentsPage() {
               description="관리자 검수 후 순차적으로 업데이트됩니다."
             />
           ) : (
-            <ClaimDocumentExplorer documents={visibleDocuments} />
+            <Suspense fallback={null}>
+              <ClaimDocumentExplorer documents={visibleDocuments} />
+            </Suspense>
           )}
 
           <section className="grid gap-4 border-y border-[#d9c9a8] py-8 lg:grid-cols-[0.8fr_1.2fr]">

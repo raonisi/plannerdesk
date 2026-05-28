@@ -7,6 +7,8 @@ import {
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { MvpModuleLinks, MvpSafetyNotice } from "@/components/mvp-navigation";
+import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
+import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { DirectoryExplorer } from "./directory-explorer";
 import { MajorWorkLinks } from "@/components/directory/major-work-links";
@@ -40,7 +42,14 @@ const t = {
 };
 
 export default async function DirectoryPage() {
-  const result = await getPublicInsurers();
+  const [result, claimResult] = await Promise.all([
+    getPublicInsurers(),
+    getPublicClaimDocuments(),
+  ]);
+  const claimDocuments =
+    claimResult.status === "ok" && claimResult.data.length > 0
+      ? claimResult.data
+      : claimDocumentCandidateFallback;
 
   return (
     <PageFrame>
@@ -69,7 +78,10 @@ export default async function DirectoryPage() {
               description={t.emptyDescription}
             />
           ) : (
-            <DirectoryExplorer insurers={result.insurers} />
+            <DirectoryExplorer
+              claimDocuments={claimDocuments}
+              insurers={result.insurers}
+            />
           )}
 
           <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
