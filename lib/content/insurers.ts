@@ -48,7 +48,8 @@ export const insurerDirectoryEntries: InsurerDirectoryEntry[] = [
     claimPageUrl: null,
     claimFormUrl:
       "https://www.hwgeneralins.com/fplaza/compensation/receipt01.do",
-    termsUrl: null,
+    termsUrl:
+      "https://www.hwgeneralins.com/notice/ir/product-ing01.do",
     customerCenterPhone: "1566-8000",
     helpdeskPhone: "02-316-0111",
     callMonitoringPhone: "1670-1882",
@@ -995,7 +996,8 @@ export const insurerDirectoryEntries: InsurerDirectoryEntry[] = [
     systemUrl: null,
     claimPageUrl: null,
     claimFormUrl: null,
-    termsUrl: null,
+    termsUrl:
+      "https://www.lina.co.kr/disclosure/product-public-announcement/product-guide",
     customerCenterPhone: "1588-0058",
     helpdeskPhone: "02-3781-2006",
     callMonitoringPhone: "1588-2442",

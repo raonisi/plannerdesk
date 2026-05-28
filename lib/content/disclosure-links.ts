@@ -282,6 +282,26 @@ export const disclosureLinkEntries = [
     "verificationStatus": "verified"
   },
   {
+    "id": "disclosure-product-hanwha-general",
+    "title": "한화손해보험 상품공시실",
+    "category": "product_disclosure",
+    "sourceUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do",
+    "description": "한화손해보험의 공식 상품공시실입니다. 현재 판매 중인 보험상품 목록, 상품요약서, 공시이율 및 공시실 안내 정보를 확인하실 수 있습니다.",
+    "notes": "한화손해보험 공식 공시 채널입니다. 상품 개정 시점 및 특약 구성에 따른 상세 요약서를 제공합니다.",
+    "lastVerifiedAt": "2026-05-28",
+    "verificationStatus": "verified"
+  },
+  {
+    "id": "disclosure-terms-hanwha-general",
+    "title": "한화손해보험 공식 약관실",
+    "category": "policy_terms",
+    "sourceUrl": "https://www.hwgeneralins.com/notice/ir/product-ing01.do",
+    "description": "한화손해보험의 공식 보험 약관 조회실입니다. 판매 중인 상품 및 과거에 판매되었던 상품의 상세 약관 PDF 파일을 검색하여 다운로드할 수 있습니다.",
+    "notes": "정확한 보장내용 해석을 위해 가입일자 기준의 약관 원문을 다운로드하여 확인하시기 바랍니다.",
+    "lastVerifiedAt": "2026-05-28",
+    "verificationStatus": "verified"
+  },
+  {
     "id": "disclosure-product-kyobo-life",
     "title": "교보생명 상품공시실",
     "category": "product_disclosure",
@@ -537,6 +557,26 @@ export const disclosureLinkEntries = [
     "category": "policy_terms",
     "sourceUrl": "https://www.dgbfnlife.com/BA/BA_A020.do",
     "description": "iM라이프의 공식 보험 약관 조회실입니다. 판매 중인 상품 및 과거에 판매되었던 상품의 상세 약관 PDF 파일을 검색하여 다운로드할 수 있습니다.",
+    "notes": "정확한 보장내용 해석을 위해 가입일자 기준의 약관 원문을 다운로드하여 확인하시기 바랍니다.",
+    "lastVerifiedAt": "2026-05-28",
+    "verificationStatus": "verified"
+  },
+  {
+    "id": "disclosure-product-lina-life",
+    "title": "라이나생명 상품공시실",
+    "category": "product_disclosure",
+    "sourceUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-guide",
+    "description": "라이나생명의 공식 상품공시실입니다. 현재 판매 중인 보험상품 목록, 상품요약서, 공시이율 및 공시실 안내 정보를 확인하실 수 있습니다.",
+    "notes": "라이나생명 공식 공시 채널입니다. 상품 개정 시점 및 특약 구성에 따른 상세 요약서를 제공합니다.",
+    "lastVerifiedAt": "2026-05-28",
+    "verificationStatus": "verified"
+  },
+  {
+    "id": "disclosure-terms-lina-life",
+    "title": "라이나생명 공식 약관실",
+    "category": "policy_terms",
+    "sourceUrl": "https://www.lina.co.kr/disclosure/product-public-announcement/product-guide",
+    "description": "라이나생명의 공식 보험 약관 조회실입니다. 판매 중인 상품 및 과거에 판매되었던 상품의 상세 약관 PDF 파일을 검색하여 다운로드할 수 있습니다.",
     "notes": "정확한 보장내용 해석을 위해 가입일자 기준의 약관 원문을 다운로드하여 확인하시기 바랍니다.",
     "lastVerifiedAt": "2026-05-28",
     "verificationStatus": "verified"
