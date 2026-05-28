@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import {
+  ExternalTabAnchor,
   LastVerifiedText,
   MissingFieldText,
-  VerificationStatusBadge
+  VerificationStatusBadge,
 } from "@/components/content-page";
 import type {
   DisclosureCategory,
@@ -318,14 +319,12 @@ function SourceAction({ href }: { href: string | null }) {
   }
 
   return (
-    <a
+    <ExternalTabAnchor
       className="inline-flex items-center justify-center border border-[#173f36] px-3 py-2 text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee]"
       href={href}
-      rel="noopener noreferrer"
-      target="_blank"
     >
       {text.openSource}
-    </a>
+    </ExternalTabAnchor>
   );
 }
 

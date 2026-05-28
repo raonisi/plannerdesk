@@ -1,6 +1,7 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import type { VerificationStatus } from "@/lib/content";
+import { externalLinkTabProps } from "@/lib/ui/external-link";
 import {
   borders,
   shadows,
@@ -199,12 +200,27 @@ export function ExternalSourceLink({
   }
 
   return (
-    <a
+    <ExternalTabAnchor
       className="font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4"
       href={href}
-      rel="noopener noreferrer"
-      target="_blank"
     >
+      {children}
+    </ExternalTabAnchor>
+  );
+}
+
+export function ExternalTabAnchor({
+  href,
+  children,
+  className,
+  ...rest
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+} & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "children" | "className">) {
+  return (
+    <a className={className} href={href} {...externalLinkTabProps} {...rest}>
       {children}
     </a>
   );

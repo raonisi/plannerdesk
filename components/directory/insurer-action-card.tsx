@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { ExternalTabAnchor } from "@/components/content-page";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
@@ -576,17 +577,15 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
       : "border-[#173f36] bg-white text-[#173f36] hover:bg-[#173f36] hover:text-[#fbf7ee]";
 
   return (
-    <a
+    <ExternalTabAnchor
       className={`inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border-2 px-4 py-3 text-sm font-bold tracking-[0.01em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:text-[15px] ${toneClass}`}
       href={href}
-      rel="noopener noreferrer"
-      target="_blank"
     >
       <span className="break-keep">{label}</span>
       <span aria-hidden="true" className="text-base leading-none">
         {"\u2197"}
       </span>
-    </a>
+    </ExternalTabAnchor>
   );
 }
 

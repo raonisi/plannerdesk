@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   EmptyState,
+  ExternalTabAnchor,
   LastVerified,
   PremiumCard,
   StatusBadge,
@@ -338,13 +339,11 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function SourceAction({ href, label }: { href: string; label: string }) {
   return (
-    <a
+    <ExternalTabAnchor
       className="inline-flex items-center justify-center border border-[#173f36] px-3 py-2 text-center text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee]"
       href={href}
-      rel="noopener noreferrer"
-      target="_blank"
     >
       {label} 열기
-    </a>
+    </ExternalTabAnchor>
   );
 }
