@@ -93,6 +93,8 @@ If `BASE_URL` is omitted, the script defaults to `http://localhost:3000`.
   `target="_blank" rel="noopener noreferrer"`.
 - [ ] Correction request wording and operation follow
   `docs/CORRECTION_REQUEST_POLICY.md` (no PII/medical data intake, admin review before reflection).
+- [ ] Correction request DB follow-up work follows
+  `docs/CORRECTION_REQUEST_DB_PLAN.md` and remains separated into explicit high-risk PR scopes.
 - [ ] No file upload, OCR flow, customer claim submission, or customer medical
   data field is present.
 
