@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   EmptyState,
@@ -311,9 +312,12 @@ function ClaimDocumentCard({ document }: { document: PublicClaimDocument }) {
           {document.claimFormUrl ? (
             <SourceAction href={document.claimFormUrl} label="청구서 양식" />
           ) : (
-            <span className="inline-flex items-center justify-center border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-2 text-center text-sm font-semibold text-[#8b7660]">
-              청구서 양식 없음
-            </span>
+            <Link
+              className="inline-flex items-center justify-center border border-[#173f36] bg-white px-3 py-2 text-center text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee]"
+              href="/directory"
+            >
+              {"보험사별 청구양식 확인"}
+            </Link>
           )}
           {document.officialSourceUrl ? (
             <SourceAction href={document.officialSourceUrl} label="공식 출처" />
