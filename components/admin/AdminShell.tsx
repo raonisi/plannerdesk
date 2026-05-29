@@ -34,6 +34,14 @@ export default function AdminShell({ session }: AdminShellProps) {
       link: "/admin/claim-documents",
     },
     {
+      title: "지식 아카이브 관리",
+      status: "운영 중",
+      description:
+        "청구·고지·해지·약관·고객응대 기준 문서를 작성하고 검수·공개 상태를 관리합니다.",
+      enabled: true,
+      link: "/admin/knowledge",
+    },
+    {
       title: "공시·약관 링크 관리",
       status: "준비 중",
       description: "공시실 및 필수 약관 링크의 최신화 상태를 모니터링하고 편집합니다.",
