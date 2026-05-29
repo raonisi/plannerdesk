@@ -359,7 +359,7 @@ export function InsurerActionCard({
                         {insurer.customerCenterPhone}
                       </a>
                     ) : (
-                      <span className="text-slate-400 font-medium">정보 없음</span>
+                      <span className="text-slate-400 font-medium">{DIRECTORY_TEXT.missing}</span>
                     )}
                   </div>
                 </div>
@@ -374,7 +374,7 @@ export function InsurerActionCard({
                         {insurer.helpdeskPhone}
                       </a>
                     ) : (
-                      <span className="text-slate-400 font-medium">정보 없음</span>
+                      <span className="text-slate-400 font-medium">{DIRECTORY_TEXT.missing}</span>
                     )}
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export function InsurerActionCard({
                         {insurer.callMonitoringPhone}
                       </a>
                     ) : (
-                      <span className="text-slate-400 font-medium">정보 없음</span>
+                      <span className="text-slate-400 font-medium">{DIRECTORY_TEXT.missing}</span>
                     )}
                   </div>
                 </div>
@@ -405,8 +405,8 @@ export function InsurerActionCard({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4">
                   <span className="text-xs font-semibold text-slate-500">청구 팩스</span>
-                  <span className={`mt-1 text-sm font-bold ${claimFax.primary ? "text-[#0F1D2E]" : "text-slate-400"}`}>
-                    {claimFax.primary || "정보 없음"}
+                  <span className={`mt-1 text-sm font-bold ${claimFax.primary && claimFax.primary !== DIRECTORY_TEXT.missing && claimFax.primary !== DIRECTORY_TEXT.unavailable ? "text-[#0F1D2E]" : "text-slate-400"}`}>
+                    {claimFax.primary}
                   </span>
                 </div>
                 <button
@@ -416,8 +416,8 @@ export function InsurerActionCard({
                   className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="text-xs font-semibold text-slate-500">우편 서류 접수처</span>
-                  <span className={`mt-1 text-sm font-bold underline ${mailAddress ? "text-[#B9975B]" : "text-slate-400 no-underline"}`}>
-                    {mailAddress ? "주소 확인" : "정보 없음"}
+                  <span className={`mt-1 text-sm font-bold underline ${mailAddress ? "text-[#B9975B]" : "text-slate-400 no-underline break-keep"}`}>
+                    {mailAddress ? "주소 확인" : DIRECTORY_TEXT.missing}
                   </span>
                 </button>
               </div>
@@ -429,12 +429,18 @@ export function InsurerActionCard({
                 </div>
               ) : null}
 
-              <div className="pt-2">
+              <div className="pt-2 flex flex-wrap gap-2">
                 <Link
                   href="/claim-documents"
                   className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
                 >
                   청구서류 확인 바로가기 ↗
+                </Link>
+                <Link
+                  href="/message-templates"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                >
+                  고객 안내문 작성 바로가기 ↗
                 </Link>
               </div>
             </section>
@@ -455,7 +461,7 @@ export function InsurerActionCard({
                   </ExternalTabAnchor>
                 ) : (
                   <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
-                    상품공시 자료 없음
+                    {DIRECTORY_TEXT.missing}
                   </span>
                 )}
                 
@@ -468,7 +474,7 @@ export function InsurerActionCard({
                   </ExternalTabAnchor>
                 ) : (
                   <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
-                    약관 자료 없음
+                    {DIRECTORY_TEXT.missing}
                   </span>
                 )}
               </div>
