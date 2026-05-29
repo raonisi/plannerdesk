@@ -29,22 +29,23 @@ export function InsurerClaimGroup({
 
   return (
     <section className="border border-[#d9c9a8] bg-white">
-      <button
-        aria-controls={panelId}
-        aria-expanded={isExpanded}
-        className="flex min-h-11 w-full items-center justify-between gap-4 px-4 py-3 text-left transition hover:bg-[#fbf7ee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#aa8137] sm:px-5"
-        id={buttonId}
-        onClick={onToggle}
-        type="button"
-      >
-        <span className="break-keep text-sm font-semibold leading-snug text-[#102235] sm:text-base">
+      <div className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 transition hover:bg-[#fbf7ee] sm:px-5">
+        <button
+          aria-controls={panelId}
+          aria-expanded={isExpanded}
+          className="min-h-9 flex-1 break-keep text-left text-sm font-semibold leading-snug text-[#102235] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:text-base"
+          id={buttonId}
+          onClick={onToggle}
+          type="button"
+        >
           {group.label}
-        </span>
+        </button>
         <div className="flex shrink-0 items-center gap-3">
           <button
             onClick={handleCopyNotice}
             className="inline-flex items-center justify-center rounded border border-[#173f36] px-2 py-1 text-[11px] font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee]"
             title="고객에게 보낼 서류 목록 텍스트를 복사합니다"
+            type="button"
           >
             {copied ? "✓ 복사완료" : "📋 안내문 복사"}
           </button>
@@ -62,7 +63,7 @@ export function InsurerClaimGroup({
             </span>
           </span>
         </div>
-      </button>
+      </div>
 
 
 

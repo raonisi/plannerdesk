@@ -72,7 +72,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
   return (
     <nav
       aria-label={uiLabels.mobileMenu}
-      className="flex gap-2 overflow-x-auto border-t border-[#E3DED4] bg-[#F8F7F3]/80 px-5 py-3 text-sm font-bold lg:hidden"
+      className="scrollbar-none flex gap-2 overflow-x-auto border-t border-[#E3DED4] bg-[#F8F7F3]/80 px-5 py-3 text-sm font-bold lg:hidden"
     >
       <MobileNavLink href="/" isActive={pathname === "/"}>
         홈

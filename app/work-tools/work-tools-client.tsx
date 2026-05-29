@@ -8,10 +8,18 @@ import {
   Search as SearchIcon,
   ExternalLink,
   FolderOpen,
-  Star,
   Sparkles,
   Wrench,
 } from "lucide-react";
+import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
+import { SectionHeader } from "@/components/launcher/section-header";
+import { ToolCard } from "@/components/launcher/tool-card";
+import {
+  WORK_TOOL_CATEGORIES,
+  getCategoryLabelForTool,
+  matchesWorkToolCategory,
+} from "@/lib/tool-display";
+import { SearchBar } from "@/components/content-page";
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder";
 
@@ -796,22 +804,6 @@ function getInitialToolFromUrl(): ToolId | null {
     : null;
 }
 
-const toolCategories = [
-  { id: "all", label: "전체" },
-  { id: "stats", label: "통계·상담 소재" },
-  { id: "search", label: "인수·질병 검색" },
-  { id: "insure-calc", label: "보험 계산기" },
-  { id: "finance-calc", label: "금융 계산기" },
-  { id: "claim", label: "보험금 청구" },
-  { id: "silbi", label: "실손보험" },
-  { id: "car", label: "자동차보험" },
-  { id: "fire", label: "화재보험" },
-  { id: "docs", label: "공문서" },
-  { id: "recruits", label: "모집종사자" },
-  { id: "exam", label: "시험·교육" },
-  { id: "news", label: "보험사 소식지" },
-] as const;
-
 const toolToCategoryId: Record<ToolId, string> = {
   "planner-stats": "stats",
   "disease-search": "search",
@@ -867,20 +859,32 @@ const PINNED_TOOL_IDS: ToolId[] = [
 ];
 
 export function WorkToolsClient() {
-  const [activeTool, setActiveTool] = useState<ToolId | null>(() =>
-    getInitialToolFromUrl(),
-  );
+  const [activeTool, setActiveTool] = useState<ToolId | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [favorites, setFavorites] = useState<ToolId[]>(() => {
-    if (typeof window === "undefined") return [];
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as ToolId[]) : [];
-  });
+  const [favorites, setFavorites] = useState<ToolId[]>([]);
 
   const [isFolderOpen, setIsFolderOpen] = useState(false);
   const [folderTarget, setFolderTarget] = useState("");
   const [folderTitle, setFolderTitle] = useState("");
+
+  useEffect(() => {
+    const initialTool = getInitialToolFromUrl();
+    if (initialTool) {
+      setTimeout(() => setActiveTool(initialTool), 0);
+    }
+  }, []);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as ToolId[];
+      setTimeout(() => setFavorites(parsed), 0);
+    } catch {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
 
   useEffect(() => {
     if (!activeTool) return;
@@ -893,7 +897,9 @@ export function WorkToolsClient() {
       const next = current.includes(id)
         ? current.filter((item) => item !== id)
         : [...current, id];
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      }
       return next;
     });
   }
@@ -922,181 +928,128 @@ export function WorkToolsClient() {
       );
     }
 
-    // 2. Category Tab filter
-    if (selectedCategory !== "all") {
-      list = list.filter((t) => toolToCategoryId[t.id] === selectedCategory);
-    }
+    list = list.filter((t) =>
+      matchesWorkToolCategory(
+        toolToCategoryId[t.id],
+        selectedCategory,
+        t.id,
+        favorites
+      )
+    );
 
     return list;
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, favorites]);
 
-  const pinnedTools = useMemo(() => {
+  const showFeaturedSection =
+    !searchQuery.trim() &&
+    (selectedCategory === "all" || selectedCategory === "favorites");
+
+  const featuredTools = useMemo(() => {
+    if (selectedCategory === "favorites") {
+      return allTools().filter((t) => favorites.includes(t.id));
+    }
     return allTools().filter((t) => PINNED_TOOL_IDS.includes(t.id));
-  }, []);
+  }, [favorites, selectedCategory]);
+
+  const gridTools = useMemo(() => {
+    if (!showFeaturedSection) return filteredTools;
+    const pinnedSet = new Set<string>(PINNED_TOOL_IDS);
+    return filteredTools.filter((t) => !pinnedSet.has(t.id));
+  }, [filteredTools, showFeaturedSection]);
 
   const getToolIcon = (kind: ToolKind) => {
     switch (kind) {
       case "stats":
-        return <TrendingUp className="h-5 w-5 text-indigo-600" />;
+        return <TrendingUp className="h-5 w-5 text-[#B9975B]" />;
       case "search":
-        return <SearchIcon className="h-5 w-5 text-emerald-600" />;
+        return <SearchIcon className="h-5 w-5 text-[#16382C]" />;
       case "calculator":
-        return <Calculator className="h-5 w-5 text-blue-600" />;
+        return <Calculator className="h-5 w-5 text-[#0F1D2E]" />;
       case "folder":
-        return <FolderOpen className="h-5 w-5 text-amber-600" />;
+        return <FolderOpen className="h-5 w-5 text-[#7a612d]" />;
       case "external":
-        return <ExternalLink className="h-5 w-5 text-purple-600" />;
+        return <ExternalLink className="h-5 w-5 text-[#16382C]" />;
       default:
-        return <Wrench className="h-5 w-5 text-slate-500" />;
+        return <Wrench className="h-5 w-5 text-[#5B6470]" />;
     }
   };
 
   return (
-    <div className="space-y-8">
-      {/* 1. Page Header */}
-      <section className="rounded-2xl border border-[#E3DED4] bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
-              업무 도구 모음
-            </span>
-            <h2 className="mt-1 text-2xl font-bold text-[#0F1D2E]">
-              실무 앱 런처
-            </h2>
-            <p className="mt-2 text-sm text-[#5B6470] break-keep">
-              보험나이 계산, 실손 계산기, 상병 및 수술 검색 등 설계사들이 매일 사용하는 42가지의 업무 도구를 모았습니다.
-            </p>
-          </div>
-          
-          {/* Integrated Search Box */}
-          <div className="relative w-full max-w-sm">
-            <div className="flex min-h-11 items-center rounded-lg border border-[#E3DED4] bg-white px-3 focus-within:ring-2 focus-within:ring-[#B9975B]">
-              <SearchIcon className="h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="도구 이름 또는 기능 검색..."
-                className="ml-2 w-full text-xs font-medium outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
+    <div className="space-y-10 pb-6">
+      <section className="space-y-5">
+        <label className="block max-w-xl" htmlFor="work-tools-search">
+          <span className="sr-only">업무 도구 검색</span>
+          <SearchBar
+            onChange={setSearchQuery}
+            onClear={() => setSearchQuery("")}
+            placeholder="보험나이, 실손보험금, 상병코드, 정부24 검색"
+            value={searchQuery}
+          />
+        </label>
+        <CategoryPillBar
+          categories={WORK_TOOL_CATEGORIES}
+          onSelect={setSelectedCategory}
+          selectedId={selectedCategory}
+        />
       </section>
 
-      {/* 2. 상단 고정 추천 도구 (6개 고정) */}
-      {!searchQuery && selectedCategory === "all" && (
-        <section>
+      {showFeaturedSection && featuredTools.length > 0 ? (
+        <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#B9975B] fill-[#B9975B]/20" />
-            <h3 className="text-sm font-bold text-[#0F1D2E]">자주 쓰는 실무 핵심 도구</h3>
+            <Sparkles
+              aria-hidden
+              className="h-4 w-4 text-[#B9975B] fill-[#B9975B]/20"
+            />
+            <h2 className="text-lg font-bold text-[#0F1D2E]">
+              자주 쓰는 실무 핵심 도구
+            </h2>
           </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {pinnedTools.map((tool) => (
-              <div
-                key={"pinned-" + tool.id}
-                className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${activeTool === tool.id ? "ring-2 ring-[#B9975B]" : ""}`}
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
-                      {getToolIcon(tool.kind)}
-                    </div>
-                    <button
-                      onClick={() => toggleFavorite(tool.id)}
-                      className="text-slate-300 hover:text-[#B9975B] transition"
-                      aria-label={`${tool.label} 즐겨찾기 토글`}
-                    >
-                      <Star className={`h-4.5 w-4.5 ${favorites.includes(tool.id) ? "fill-[#B9975B] text-[#B9975B]" : ""}`} />
-                    </button>
-                  </div>
-                  <h4 className="mt-3 text-sm font-bold text-[#0F1D2E]">{tool.label}</h4>
-                  <p className="mt-1 text-xs text-[#5B6470] break-keep leading-relaxed">{tool.description}</p>
-                </div>
-                <div className="mt-5 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5">
-                    {tool.kind === "external" ? "외부 공식 링크" : "내부 도구"}
-                  </span>
-                  <button
-                    onClick={() => handleToolSelect(tool)}
-                    className="inline-flex items-center text-xs font-bold text-[#B9975B] hover:underline"
-                  >
-                    실행하기 →
-                  </button>
-                </div>
-              </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {featuredTools.map((tool) => (
+              <ToolCard
+                key={"featured-" + tool.id}
+                categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                description={tool.description}
+                icon={getToolIcon(tool.kind)}
+                isActive={activeTool === tool.id}
+                isFavorite={favorites.includes(tool.id)}
+                kind={tool.kind}
+                onRun={() => handleToolSelect(tool)}
+                onToggleFavorite={() => toggleFavorite(tool.id)}
+                size="featured"
+                source={tool.source}
+                title={tool.label}
+              />
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* 3. 카테고리 탭 분류 */}
       <section className="space-y-4">
-        <h3 className="text-sm font-bold text-[#0F1D2E]">카테고리별 업무 도구</h3>
-        
-        {/* Horizontal Scrollable Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {toolCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold transition ${
-                selectedCategory === cat.id
-                  ? "border-[#0F1D2E] bg-[#0F1D2E] text-white shadow-sm"
-                  : "border-[#E3DED4] bg-white text-[#5B6470] hover:bg-slate-50 hover:text-[#0F1D2E]"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 4. 앱 런처 카드 목록 */}
-        {filteredTools.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredTools.map((tool) => (
-              <div
+        <SectionHeader
+          description="전체 업무 도구를 카테고리별로 탐색하고 실행할 수 있습니다."
+          title="전체 업무 도구"
+        />
+        {gridTools.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {gridTools.map((tool) => (
+              <ToolCard
                 key={tool.id}
-                className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${activeTool === tool.id ? "ring-2 ring-[#B9975B]" : ""}`}
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
-                      {getToolIcon(tool.kind)}
-                    </div>
-                    <button
-                      onClick={() => toggleFavorite(tool.id)}
-                      className="text-slate-300 hover:text-[#B9975B] transition"
-                      aria-label={`${tool.label} 즐겨찾기 토글`}
-                    >
-                      <Star className={`h-4.5 w-4.5 ${favorites.includes(tool.id) ? "fill-[#B9975B] text-[#B9975B]" : ""}`} />
-                    </button>
-                  </div>
-                  <h4 className="mt-3 text-sm font-bold text-[#0F1D2E]">{tool.label}</h4>
-                  <p className="mt-1 text-xs text-[#5B6470] break-keep leading-relaxed">{tool.description}</p>
-                </div>
-                <div className="mt-5 flex items-center justify-between">
-                  <span className={`text-[10px] font-bold border rounded px-2 py-0.5 ${
-                    tool.kind === "external"
-                      ? "text-purple-700 bg-purple-50 border-purple-100"
-                      : tool.kind === "folder"
-                      ? "text-amber-700 bg-amber-50 border-amber-100"
-                      : "text-indigo-700 bg-indigo-50 border-indigo-100"
-                  }`}>
-                    {tool.kind === "external" ? "외부 공식 채널" : tool.kind === "folder" ? "다운로드 폴더" : "내부 도구"}
-                  </span>
-                  <button
-                    onClick={() => handleToolSelect(tool)}
-                    className="inline-flex items-center text-xs font-bold text-[#B9975B] hover:underline"
-                  >
-                    {tool.kind === "external" ? "링크 열기 ↗" : "실행하기 →"}
-                  </button>
-                </div>
-              </div>
+                categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                description={tool.description}
+                icon={getToolIcon(tool.kind)}
+                isActive={activeTool === tool.id}
+                isFavorite={favorites.includes(tool.id)}
+                kind={tool.kind}
+                onRun={() => handleToolSelect(tool)}
+                onToggleFavorite={() => toggleFavorite(tool.id)}
+                source={tool.source}
+                title={tool.label}
+              />
             ))}
           </div>
         ) : (
-          <p className="py-8 text-center text-xs text-[#5B6470]">
+          <p className="rounded-xl border border-dashed border-[#E3DED4] bg-[#F7F4EE] py-10 text-center text-sm text-[#5B6470]">
             선택한 필터와 검색어에 일치하는 도구가 없습니다.
           </p>
         )}
@@ -3363,7 +3316,7 @@ function BmiCalc() {
             </div>
           ) : (
             <div className="h-full min-h-[200px] rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
-               <p className="text-sm font-semibold text-slate-400">고객의 신체 정보와 질환을 입력하여<br/>가입 심사 결과를 예측해보세요.</p>
+               <p className="text-sm font-semibold text-slate-400">고객의 신체 정보와 질환을 입력하여<br/>인수 확인 포인트를 참고하세요.</p>
             </div>
           )}
         </div>

@@ -43,3 +43,11 @@ select {
   background: #e8d4b0;
   color: #0f1d2e;
 }
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
