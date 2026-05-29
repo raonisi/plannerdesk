@@ -209,7 +209,7 @@ export function MajorWorkLinks() {
   return (
     <section aria-labelledby="major-work-links-heading" className="space-y-10">
       <header className="space-y-3">
-        <p className={textStyles.eyebrow}>WORK HUB</p>
+        <p className={textStyles.eyebrow}>오늘의 업무 진입점</p>
         <h2
           className="text-2xl font-bold text-slate-900 sm:text-3xl"
           id="major-work-links-heading"
@@ -227,9 +227,7 @@ export function MajorWorkLinks() {
       >
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600">
-              Today&apos;s hub
-            </p>
+            <p className={textStyles.eyebrow}>바로가기</p>
             <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
               오늘의 업무 진입점
             </h3>
@@ -274,7 +272,7 @@ export function MajorWorkLinks() {
       >
         <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
           <div className="space-y-3">
-            <p className={textStyles.eyebrow}>QUICK TOOLS</p>
+            <p className={textStyles.eyebrow}>자주 쓰는 업무 도구</p>
             <h3 className="break-keep text-xl font-bold text-slate-900 sm:text-2xl leading-snug">
               보험학교 주요 업무 링크를 플래너데스크 도구로 정리했습니다
             </h3>

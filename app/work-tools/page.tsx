@@ -1,12 +1,10 @@
-import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
+import { AppShell } from "@/components/app-shell";
+import { ContentSection, PageHero } from "@/components/content-page";
 import { WorkToolsClient } from "./work-tools-client";
 
 export default function WorkToolsPage() {
   return (
-    <PageFrame>
-      <Header />
+    <AppShell>
       <PageHero
         eyebrow="업무 도구"
         title="업무 도구"
@@ -15,7 +13,6 @@ export default function WorkToolsPage() {
       <ContentSection>
         <WorkToolsClient />
       </ContentSection>
-      <Footer />
-    </PageFrame>
+    </AppShell>
   );
 }

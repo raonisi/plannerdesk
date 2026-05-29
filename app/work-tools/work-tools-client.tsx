@@ -786,6 +786,15 @@ function getToolCopy(id: ToolId) {
   return allTools().find((tool) => tool.id === id);
 }
 
+function getInitialToolFromUrl(): ToolId | null {
+  if (typeof window === "undefined") return null;
+  const candidate =
+    new URLSearchParams(window.location.search).get("tool") ||
+    window.location.hash.replace(/^#/, "");
+  return allTools().some((tool) => tool.id === candidate)
+    ? (candidate as ToolId)
+    : null;
+}
 
 const toolCategories = [
   { id: "all", label: "전체" },
@@ -858,7 +867,9 @@ const PINNED_TOOL_IDS: ToolId[] = [
 ];
 
 export function WorkToolsClient() {
-  const [activeTool, setActiveTool] = useState<ToolId | null>(null);
+  const [activeTool, setActiveTool] = useState<ToolId | null>(() =>
+    getInitialToolFromUrl(),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [favorites, setFavorites] = useState<ToolId[]>(() => {
@@ -870,6 +881,12 @@ export function WorkToolsClient() {
   const [isFolderOpen, setIsFolderOpen] = useState(false);
   const [folderTarget, setFolderTarget] = useState("");
   const [folderTitle, setFolderTitle] = useState("");
+
+  useEffect(() => {
+    if (!activeTool) return;
+    const panelEl = document.getElementById("active-tool-panel");
+    panelEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeTool]);
 
   function toggleFavorite(id: ToolId) {
     setFavorites((current) => {
@@ -888,13 +905,6 @@ export function WorkToolsClient() {
       setIsFolderOpen(true);
     } else {
       setActiveTool(tool.id);
-      // Auto-scroll to panel
-      setTimeout(() => {
-        const panelEl = document.getElementById("active-tool-panel");
-        if (panelEl) {
-          panelEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 100);
     }
   }
 
@@ -1120,7 +1130,7 @@ export function WorkToolsClient() {
 
       {/* 6. 접이식 안전 안내 */}
       <aside className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5">
-        <h2 className="text-xs font-bold text-[#0F1D2E] uppercase tracking-wider">주의 사항 및 안전 안내</h2>
+        <h2 className="text-[11px] font-bold tracking-[0.12em] text-[#B9975B]">주의 사항 및 안전 안내</h2>
         <p className="mt-2 text-xs leading-relaxed text-[#5B6470] break-keep">
           계산 및 검색 결과는 설계사 업무 참고 가이드라인입니다. 보험금 지급 여부, 지급 금액, 손해사정, 진단서 해석을 결정하지 않습니다. 개인정보나 민감한 질병 자료 원본은 입력하지 않도록 주의해 주세요.
         </p>
@@ -3306,7 +3316,7 @@ function BmiCalc() {
   }, [height, weight, hasDiabetes, hasHypertension]);
 
   return (
-    <PanelShell description="고객의 체질량지수(BMI)를 계산하고, 기저질환 여부를 결합하여 표준체 보험 가입 가능성(언더라이팅)을 실시간으로 예측합니다." id="bmi-calculator" title="프리미엄 BMI 언더라이팅 진단기">
+    <PanelShell description="고객의 체질량지수(BMI)를 계산하고, 기저질환 여부에 따라 인수 확인 포인트를 참고용으로 정리합니다." id="bmi-calculator" title="BMI 인수 확인 도구">
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -3331,7 +3341,7 @@ function BmiCalc() {
         <div>
           {result ? (
             <div className={`h-full rounded-xl border p-5 shadow-sm transition-colors duration-500 ${result.underwriting.tone === 'success' ? 'bg-emerald-50 border-emerald-200' : result.underwriting.tone === 'danger' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
-               <p className="text-xs font-bold text-slate-500 mb-4 uppercase">Analysis Result</p>
+               <p className="text-xs font-bold text-slate-500 mb-4">분석 결과</p>
                <div className="flex justify-between items-end mb-4">
                  <div>
                    <span className="text-3xl font-black block" style={{ color: result.category.color }}>{result.bmi}</span>
@@ -3346,7 +3356,7 @@ function BmiCalc() {
                <div className="mt-4 p-4 rounded-lg bg-white/60 border border-white backdrop-blur-sm">
                  <div className="font-bold text-sm flex items-center gap-2 mb-1 text-slate-800">
                    {result.underwriting.tone === 'success' ? '✅' : result.underwriting.tone === 'danger' ? '⛔' : '⚠️'}
-                   인수 심사 예측: {result.underwriting.label}
+                   인수 확인 참고: {result.underwriting.label}
                  </div>
                  <p className="text-xs leading-relaxed text-slate-600 break-keep">{result.underwriting.desc}</p>
                </div>

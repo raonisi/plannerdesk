@@ -10,14 +10,14 @@ import {
   MessageSquare,
   BookOpen,
   Star,
-  ChevronDown,
-  ChevronUp,
   ArrowRight,
   ShieldCheck,
   Clock,
 } from "lucide-react";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import { launcherIconTone, notices, sectionEyebrow, shadows, spacing, surfaces, textStyles } from "@/lib/design-system";
+import { uiLabels } from "@/lib/ui-labels";
 
 interface HomeClientProps {
   insurers: PublicInsurer[];
@@ -27,7 +27,6 @@ interface HomeClientProps {
 export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [showSafety, setShowSafety] = useState(false);
   
   // Local storage favorites and recents
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -131,7 +130,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
         <div className="max-w-3xl">
           <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-[#B9975B]/20 px-3 py-1 text-xs font-bold text-[#B9975B]">
             <ShieldCheck className="h-3.5 w-3.5" />
-            보험설계사 전용 실무 커맨드센터
+            {uiLabels.brandTagline}
           </span>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
             보험설계사의 실무를<br className="sm:hidden" /> 빠르게 정리하는 업무 포털
@@ -168,9 +167,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
             {/* Live Search Results Dropdown */}
             {showResults && searchQuery.trim() && (
               <div className="absolute left-0 right-0 top-full z-30 mt-2 rounded-xl border border-[#E3DED4] bg-white p-2 shadow-lg text-slate-900">
-                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  검색 결과
-                </p>
+                <p className={`px-3 py-1.5 ${sectionEyebrow}`}>검색 결과</p>
                 {searchResults.length > 0 ? (
                   <div className="divide-y divide-slate-100">
                     {searchResults.map((res) => (
@@ -201,16 +198,14 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
 
       {/* 2. 오늘의 빠른 실행 (App Launcher style) */}
       <section className="mt-10">
-        <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-[#B9975B]">
-          오늘의 빠른 실행
-        </h2>
+        <h2 className={sectionEyebrow}>{uiLabels.homeHub}</h2>
         <div className="mt-4 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
           {[
-            { label: "보험사 바로가기", href: "/directory", desc: "공식 전산 및 고객센터", icon: Building2, color: "text-[#16382C] bg-emerald-50 border-emerald-100" },
-            { label: "청구서류 찾기", href: "/claim-documents", desc: "보험사별 필요서류 PDF", icon: FileText, color: "text-blue-700 bg-blue-50 border-blue-100" },
-            { label: "업무 도구 열기", href: "/work-tools", desc: "각종 계산기 및 상병 검색", icon: Wrench, color: "text-indigo-700 bg-indigo-50 border-indigo-100" },
-            { label: "고객 문구 복사", href: "/message-templates", desc: "상황별 카톡 알림 멘트", icon: MessageSquare, color: "text-amber-700 bg-amber-50 border-amber-100" },
-            { label: "공시·약관 확인", href: "/disclosure-links", desc: "상품공시실 및 통합 약관", icon: BookOpen, color: "text-purple-700 bg-purple-50 border-purple-100" },
+            { label: "보험사 바로가기", href: "/directory", desc: "공식 전산 및 고객센터", icon: Building2, color: launcherIconTone.green },
+            { label: "청구서류 찾기", href: "/claim-documents", desc: "보험사별 필요서류 PDF", icon: FileText, color: launcherIconTone.navy },
+            { label: "업무 도구 열기", href: "/work-tools", desc: "각종 계산기 및 상병 검색", icon: Wrench, color: launcherIconTone.navy },
+            { label: "고객 문구 복사", href: "/message-templates", desc: "상황별 카톡 알림 멘트", icon: MessageSquare, color: launcherIconTone.gold },
+            { label: "공시·약관 확인", href: "/disclosure-links", desc: "상품공시실 및 통합 약관", icon: BookOpen, color: launcherIconTone.gold },
           ].map((item) => (
             <Link
               key={item.label}
@@ -232,9 +227,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
         
         {/* 자주 쓰는 업무 */}
         <section className="lg:col-span-2">
-          <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-[#B9975B]">
-            자주 쓰는 업무
-          </h2>
+          <h2 className={sectionEyebrow}>{uiLabels.quickTools}</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {[
               { label: "보험나이 계산", href: "/work-tools?tool=insurance-age", desc: "만 나이와 보험나이 즉시 산출" },
@@ -263,7 +256,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
         {/* 개인화 사이드바: 즐겨찾기 및 최근 사용 */}
         <div className="space-y-6">
           <section className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5">
-            <h2 className="flex items-center gap-1.5 text-xs font-bold text-[#0F1D2E] uppercase tracking-wider">
+            <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
               <Star className="h-3.5 w-3.5 fill-[#B9975B] text-[#B9975B]" />
               즐겨찾기한 업무 도구
             </h2>
@@ -300,8 +293,8 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
 
           {/* 최근 사용한 기록 */}
           <section className="rounded-xl border border-[#E3DED4] bg-white p-5">
-            <h2 className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
-              <Clock className="h-3.5 w-3.5 text-slate-400" />
+            <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
+              <Clock className="h-3.5 w-3.5 text-[#B9975B]" />
               최근 사용한 링크
             </h2>
             {recents.length > 0 ? (
@@ -326,42 +319,40 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
         </div>
       </div>
 
-      {/* 4. 접이식 실무 참고 기준 */}
-      <section className="mt-12 rounded-xl border border-[#E3DED4] bg-white p-5">
-        <button
-          onClick={() => setShowSafety(!showSafety)}
-          className="flex w-full items-center justify-between text-left focus:outline-none"
-        >
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-amber-50 border border-amber-200">
-              <span className="text-xs font-bold text-amber-800">⚠️</span>
+      <details
+        className={`group mt-12 ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
+      >
+        <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className={notices.safetyTitle}>{uiLabels.safetyBoundary}</p>
+              <p className={`mt-1 ${textStyles.small}`}>
+                본 정보는 실무 참고용이며, 최종 기준은 보험사 공식 자료를 확인해야 합니다.
+              </p>
             </div>
-            <h3 className="text-sm font-bold text-[#0F1D2E]">
-              실무 안내 및 면책 공지
-            </h3>
+            <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
+              펼치기
+            </span>
+            <span className="hidden shrink-0 text-xs font-bold text-[#B9975B] group-open:inline">
+              접기
+            </span>
           </div>
-          {showSafety ? (
-            <ChevronUp className="h-4 w-4 text-slate-400" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-slate-400" />
-          )}
-        </button>
-        
-        {/* Collapsible Content */}
-        {showSafety && (
-          <div className="mt-4 border-t border-[#E3DED4] pt-4 text-xs leading-relaxed text-slate-500 space-y-2 break-keep">
-            <p>
-              • 플래너데스크의 모든 정보는 설계사의 단순 반복 검색을 줄이기 위한 참고용 가이드 자료입니다.
-            </p>
-            <p>
-              • 보험사별 서류와 접수 기준은 수시로 변경될 수 있으므로, 최종 제출 전에 해당 보험사 공식 안내를 재확인해야 합니다.
-            </p>
-            <p>
-              • 플래너데스크는 개별 보험금 지급 판단, 금액 산정 등의 어떠한 권한도 갖지 않으며 책임지지 않습니다.
-            </p>
-          </div>
-        )}
-      </section>
+        </summary>
+        <ul className={`mt-4 border-t border-[#E3DED4] pt-4 space-y-2 break-keep ${textStyles.small}`}>
+          <li>
+            플래너데스크의 모든 정보는 설계사의 단순 반복 검색을 줄이기 위한 참고용 가이드
+            자료입니다.
+          </li>
+          <li>
+            보험사별 서류와 접수 기준은 수시로 변경될 수 있으므로, 최종 제출 전에 해당 보험사
+            공식 안내를 재확인해야 합니다.
+          </li>
+          <li>
+            플래너데스크는 개별 보험금 지급 판단, 금액 산정 등의 어떠한 권한도 갖지 않으며
+            책임지지 않습니다.
+          </li>
+        </ul>
+      </details>
     </div>
   );
 }

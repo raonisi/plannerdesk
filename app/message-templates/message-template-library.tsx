@@ -298,7 +298,7 @@ function SearchAndFilters({
         type="search"
         value={query}
       />
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2">
         <FilterGroup
           label="상황"
           onChange={(value) => onSituationChange(value as SituationFilter)}
@@ -331,9 +331,9 @@ function FilterGroup({
   value: string;
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <span className="text-xs font-bold text-slate-700">{label}</span>
-      <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      <div className="mt-2 flex max-w-full gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {options.map((option) => {
           const isSelected = option.value === value;
 
@@ -407,7 +407,7 @@ function TemplateCard({
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-indigo-50 border border-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+            <span className="rounded border border-[#E3DED4] bg-[#F7F4EE] px-2 py-0.5 text-[10px] font-bold text-[#16382C]">
               {situationLabels[template.situationCategory]}
             </span>
             <span className="rounded bg-[#F8F7F3] border border-[#E3DED4] px-2 py-0.5 text-[10px] font-bold text-slate-500">

@@ -36,14 +36,14 @@ export function ClaimFormsFilters({
 }) {
   return (
     <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5">
-      <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-        <div className="space-y-4">
-          <label className="block">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[1fr_0.9fr]">
+        <div className="min-w-0 space-y-4">
+          <label className="block min-w-0">
             <span className="text-sm font-semibold text-[#303845]">
               서류 검색
             </span>
             <input
-              className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
+              className="mt-2 w-full min-w-0 border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder="서류명, 보험사명, 설명, 청구 유형을 입력하세요"
               type="search"
@@ -51,12 +51,12 @@ export function ClaimFormsFilters({
             />
           </label>
 
-          <label className="block">
+          <label className="block min-w-0">
             <span className="text-sm font-semibold text-[#303845]">
               보험사 선택
             </span>
             <select
-              className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition focus:border-[#aa8137]"
+              className="mt-2 w-full min-w-0 border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition focus:border-[#aa8137]"
               onChange={(event) => onInsurerChange(event.target.value)}
               value={selectedInsurerKey}
             >
@@ -71,7 +71,7 @@ export function ClaimFormsFilters({
           </label>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid min-w-0 gap-4">
           <FilterGroup
             label="청구 유형"
             onChange={onCategoryChange}
@@ -114,9 +114,9 @@ function FilterGroup({
   value: string;
 }) {
   return (
-    <fieldset>
+    <fieldset className="min-w-0">
       <legend className="text-sm font-semibold text-[#303845]">{label}</legend>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+      <div className="mt-2 flex max-w-full gap-2 overflow-x-auto pb-1">
         {options.map((option) => {
           const isSelected = option.value === value;
 

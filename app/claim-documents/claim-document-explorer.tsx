@@ -20,8 +20,9 @@ export function ClaimDocumentExplorer({
 }) {
   const searchParams = useSearchParams();
   const insurerFromQuery = searchParams.get("insurer");
+  const searchFromQuery = searchParams.get("search");
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchFromQuery ?? "");
   const [category, setCategory] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
   const [selectedInsurerKey, setSelectedInsurerKey] = useState(

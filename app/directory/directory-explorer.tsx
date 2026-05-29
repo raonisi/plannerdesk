@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
@@ -92,11 +93,13 @@ export function DirectoryExplorer({
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
 }) {
+  const searchParams = useSearchParams();
+  const searchFromQuery = searchParams.get("search");
   const allClaimItems = useMemo(
     () => buildClaimLibraryItems(claimDocuments),
     [claimDocuments],
   );
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchFromQuery ?? "");
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
@@ -225,7 +228,7 @@ export function DirectoryExplorer({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a612d]">
-              FEEDBACK
+              제보 및 검수
             </p>
             <h3 className="mt-1 text-lg font-semibold text-[#102235]">
               {CORRECTION_REQUEST_COPY.triggerLabel}

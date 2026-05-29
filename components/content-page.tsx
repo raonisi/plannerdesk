@@ -4,6 +4,9 @@ import type { VerificationStatus } from "@/lib/content";
 import { externalLinkTabProps } from "@/lib/ui/external-link";
 import {
   borders,
+  buttons,
+  notices,
+  sectionEyebrow,
   shadows,
   spacing,
   statusBadgeClasses,
@@ -21,7 +24,7 @@ const uiText = {
   lastVerified: "최근 검수",
   safetyTitle: "검수 및 안전 안내",
   generalSafety:
-    "이 MVP는 필요한 경우 초안 placeholder 데이터를 사용합니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 공개 전 공식 출처 확인이 필요합니다.",
+    "일부 항목은 검수 전 초안 데이터를 사용할 수 있습니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 공개 전 공식 출처 확인이 필요합니다.",
   messageSafety:
     "메시지 템플릿은 실무 참고용 초안입니다. 발송 전 고객 상황, 상품 기준, 보험사 기준에 맞게 검토하고 수정해야 합니다.",
   noPayoutJudge:
@@ -31,7 +34,7 @@ const uiText = {
   noAdjusting:
     "플래너데스크는 손해사정 업무를 수행하지 않습니다.",
   noMedicalDocs:
-    "현재 MVP에서는 고객 의료서류를 처리하지 않습니다.",
+    "고객 의료서류를 수집·저장하지 않습니다.",
   referenceOnly:
     "본 자료는 실무 참고와 업무 정리를 위한 용도입니다.",
   directory: "보험사 바로가기",
@@ -56,7 +59,7 @@ export function PageHero({
         <h1 className={`mt-6 max-w-4xl break-keep tracking-tight ${textStyles.heroTitle}`}>
           {title}
         </h1>
-        <p className="mt-6 max-w-3xl break-keep text-lg leading-relaxed text-indigo-100/80 sm:text-xl">
+        <p className="mt-6 max-w-3xl break-keep text-lg leading-relaxed text-slate-300 sm:text-xl">
           {description}
         </p>
       </div>
@@ -76,6 +79,40 @@ export function ContentSection({ children }: { children: ReactNode }) {
   return (
     <section className={`mx-auto max-w-7xl ${spacing.pageX} ${spacing.sectionY}`}>
       {children}
+    </section>
+  );
+}
+
+export function WorkflowStepsSection({
+  eyebrow = "설계사 실무 흐름",
+  title,
+  steps,
+  columnsClass = "sm:grid-cols-2 lg:grid-cols-4"
+}: {
+  eyebrow?: string;
+  title: string;
+  steps: string[];
+  columnsClass?: string;
+}) {
+  return (
+    <section className={`${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}>
+      <p className={sectionEyebrow}>{eyebrow}</p>
+      <h2 className={`mt-2 break-keep text-base font-bold text-[#0F1D2E] sm:text-lg`}>
+        {title}
+      </h2>
+      <div className={`mt-5 grid gap-4 ${columnsClass}`}>
+        {steps.map((step, index) => (
+          <div
+            className="rounded-lg border border-[#E3DED4] bg-[#F8F7F3] p-4"
+            key={step}
+          >
+            <p className={sectionEyebrow}>{index + 1}단계</p>
+            <p className={`mt-2 break-keep text-xs font-semibold leading-relaxed text-[#5B6470]`}>
+              {step}
+            </p>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -201,7 +238,7 @@ export function ExternalSourceLink({
 
   return (
     <ExternalTabAnchor
-      className="font-bold text-indigo-600 underline decoration-indigo-300 underline-offset-4 transition-colors hover:text-indigo-800 hover:decoration-indigo-600"
+      className="font-bold text-[#16382C] underline decoration-[#B9975B]/50 underline-offset-4 transition-colors hover:text-[#0F1D2E] hover:decoration-[#B9975B]"
       href={href}
     >
       {children}
@@ -226,6 +263,18 @@ export function ExternalTabAnchor({
   );
 }
 
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost";
+
+function buttonClassName(variant: ButtonVariant) {
+  const map: Record<ButtonVariant, string> = {
+    primary: `${buttons.base} ${buttons.primary}`,
+    secondary: `${buttons.base} ${buttons.secondary}`,
+    outline: `${buttons.base} ${buttons.outline}`,
+    ghost: `${buttons.base} ${buttons.ghost}`
+  };
+  return map[variant];
+}
+
 export function LinkButton({
   href,
   children,
@@ -233,15 +282,13 @@ export function LinkButton({
 }: {
   href: string;
   children: ReactNode;
-  variant?: "outline" | "solid";
+  variant?: ButtonVariant | "solid";
 }) {
-  const className =
-    variant === "solid"
-      ? "inline-flex min-h-11 items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-indigo-700 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-      : "inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-slate-900 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2";
+  const resolved: ButtonVariant =
+    variant === "solid" ? "primary" : variant;
 
   return (
-    <Link className={className} href={href}>
+    <Link className={buttonClassName(resolved)} href={href}>
       {children}
     </Link>
   );
@@ -250,11 +297,11 @@ export function LinkButton({
 export function ActionButton({
   href,
   children,
-  variant
+  variant = "outline"
 }: {
   href: string;
   children: ReactNode;
-  variant?: "outline" | "solid";
+  variant?: ButtonVariant | "solid";
 }) {
   return (
     <LinkButton href={href} variant={variant}>
@@ -263,22 +310,219 @@ export function ActionButton({
   );
 }
 
+export function PrimaryButton(
+  props: Omit<Parameters<typeof LinkButton>[0], "variant">
+) {
+  return <LinkButton {...props} variant="primary" />;
+}
+
+export function SecondaryButton(
+  props: Omit<Parameters<typeof LinkButton>[0], "variant">
+) {
+  return <LinkButton {...props} variant="secondary" />;
+}
+
+export function OutlineButton(
+  props: Omit<Parameters<typeof LinkButton>[0], "variant">
+) {
+  return <LinkButton {...props} variant="outline" />;
+}
+
+export function GhostButton(
+  props: Omit<Parameters<typeof LinkButton>[0], "variant">
+) {
+  return <LinkButton {...props} variant="ghost" />;
+}
+
+export function ExternalLinkButton({
+  href,
+  children = uiText.officialSource,
+  className = ""
+}: {
+  href: string | null;
+  children?: ReactNode;
+  className?: string;
+}) {
+  if (!href) {
+    return <MissingFieldText />;
+  }
+
+  return (
+    <ExternalTabAnchor
+      className={`${buttonClassName("outline")} ${className}`.trim()}
+      href={href}
+    >
+      {children}
+    </ExternalTabAnchor>
+  );
+}
+
+export function SearchBar({
+  value,
+  onChange,
+  placeholder,
+  onClear,
+  className = ""
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  onClear?: () => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex min-h-12 items-center rounded-xl border border-[#E3DED4] bg-white px-4 shadow-sm focus-within:ring-2 focus-within:ring-[#B9975B]/40 ${className}`.trim()}
+    >
+      <input
+        className="w-full bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470]"
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        type="search"
+        value={value}
+      />
+      {value && onClear ? (
+        <button
+          className="ml-2 shrink-0 text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E]"
+          onClick={onClear}
+          type="button"
+        >
+          지우기
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function QuickActionCard({
+  href,
+  title,
+  description,
+  iconToneClass = "text-[#16382C] bg-emerald-50/80 border-emerald-100"
+}: {
+  href: string;
+  title: string;
+  description: string;
+  iconToneClass?: string;
+}) {
+  return (
+    <Link
+      className={`flex flex-col rounded-xl border border-[#E3DED4] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-md ${shadows.card}`}
+      href={href}
+    >
+      <span
+        className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border ${iconToneClass}`}
+        aria-hidden
+      />
+      <h3 className="mt-4 text-sm font-bold text-[#0F1D2E]">{title}</h3>
+      <p className="mt-1 text-xs leading-relaxed text-[#5B6470]">{description}</p>
+    </Link>
+  );
+}
+
+export function StatCard({
+  label,
+  value,
+  hint
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
+  return (
+    <article className={`${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}>
+      <p className={sectionEyebrow}>{label}</p>
+      <p className="mt-2 text-2xl font-bold text-[#0F1D2E]">{value}</p>
+      {hint ? <p className={`mt-2 ${textStyles.small}`}>{hint}</p> : null}
+    </article>
+  );
+}
+
+export function FeatureCard({
+  title,
+  description,
+  href,
+  actionLabel = "바로가기"
+}: {
+  title: string;
+  description: string;
+  href: string;
+  actionLabel?: string;
+}) {
+  return (
+    <PremiumCard>
+      <h3 className={textStyles.cardTitle}>{title}</h3>
+      <p className={`mt-3 ${textStyles.body}`}>{description}</p>
+      <div className="mt-5">
+        <OutlineButton href={href}>{actionLabel}</OutlineButton>
+      </div>
+    </PremiumCard>
+  );
+}
+
+export function NoticeBox({
+  title,
+  children
+}: {
+  title?: string;
+  children: ReactNode;
+}) {
+  return (
+    <aside className={notices.box}>
+      <p className={notices.boxTitle}>{title ?? uiText.safetyTitle}</p>
+      <div className={notices.boxBody}>{children}</div>
+    </aside>
+  );
+}
+
+export function CollapsibleNotice({
+  title,
+  summary,
+  children,
+  defaultOpen = false
+}: {
+  title: string;
+  summary: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details
+      className={`group ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
+      open={defaultOpen}
+    >
+      <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className={notices.safetyTitle}>{title}</p>
+            <p className={`mt-1 ${textStyles.small}`}>{summary}</p>
+          </div>
+          <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
+            펼치기
+          </span>
+          <span className="hidden shrink-0 text-xs font-bold text-[#B9975B] group-open:inline">
+            접기
+          </span>
+        </div>
+      </summary>
+      <div className={`mt-4 border-t border-[#E3DED4] pt-4 ${textStyles.small}`}>
+        {children}
+      </div>
+    </details>
+  );
+}
+
 export function DraftDataNotice({ children }: { children?: ReactNode }) {
   return (
-    <aside className={`border-l-4 border-amber-500 bg-amber-50 p-5 rounded-r-xl shadow-sm`}>
-      <p className="text-sm font-bold text-amber-900 flex items-center gap-2">
-        <span aria-hidden="true">⚠️</span> {uiText.safetyTitle}
-      </p>
-      <p className="mt-2 break-keep text-sm leading-relaxed text-amber-800/90">
-        {children ?? uiText.generalSafety}
-      </p>
-    </aside>
+    <NoticeBox title="검수 및 초안 안내">
+      <p>{children ?? uiText.generalSafety}</p>
+    </NoticeBox>
   );
 }
 
 export function OfficialSourceNotice({ children }: { children?: ReactNode }) {
   return (
-    <p className="break-keep border-l-2 border-indigo-500 pl-4 text-sm font-medium leading-relaxed text-slate-600">
+    <p className="break-keep border-l-2 border-[#B9975B] pl-4 text-sm font-medium leading-relaxed text-[#5B6470]">
       {children ?? uiText.generalSafety}
     </p>
   );
@@ -293,21 +537,17 @@ export function SafetyNotice({
     variant === "message" ? uiText.messageSafety : uiText.generalSafety;
 
   return (
-    <aside className={`border-l-4 border-amber-500 bg-amber-50 p-6 rounded-r-xl shadow-sm`}>
-      <p className="text-sm font-bold text-amber-900 flex items-center gap-2">
-        <span aria-hidden="true">⚠️</span> {uiText.safetyTitle}
-      </p>
-      <p className="mt-3 break-keep text-sm font-medium leading-relaxed text-amber-800">
-        {message}
-      </p>
-      <ul className="mt-4 grid gap-3 text-sm leading-relaxed text-amber-800/80 sm:grid-cols-2 list-inside list-disc">
+    <aside className={notices.safety}>
+      <p className={notices.safetyTitle}>{uiText.safetyTitle}</p>
+      <p className={`${notices.safetyBody} font-medium`}>{message}</p>
+      <ul className="mt-4 grid gap-2 text-sm leading-relaxed text-[#5B6470] sm:grid-cols-2 list-inside list-disc">
         <li>{uiText.noPayoutJudge}</li>
         <li>{uiText.noPayoutEstimate}</li>
         <li>{uiText.noAdjusting}</li>
         <li>{uiText.noMedicalDocs}</li>
       </ul>
       {variant === "claim" ? (
-        <p className="mt-5 break-keep text-sm font-bold text-amber-900">
+        <p className="mt-4 break-keep text-sm font-bold text-[#0F1D2E]">
           {uiText.referenceOnly}
         </p>
       ) : null}
@@ -330,7 +570,7 @@ export function RelatedPageLinks() {
       >
         {links.map((link) => (
           <Link
-            className="shrink-0 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition-all hover:border-indigo-600 hover:text-indigo-600 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+            className={`shrink-0 whitespace-nowrap ${buttons.base} ${buttons.outline} px-4`}
             href={link.href}
             key={link.href}
           >

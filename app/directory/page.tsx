@@ -1,11 +1,9 @@
+import { AppShell } from "@/components/app-shell";
 import {
   ContentSection,
   EmptyState,
-  PageFrame,
   PageHero,
 } from "@/components/content-page";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
 import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
@@ -50,8 +48,7 @@ export default async function DirectoryPage() {
       : claimDocumentCandidateFallback;
 
   return (
-    <PageFrame>
-      <Header />
+    <AppShell>
       <PageHero
         eyebrow={t.eyebrow}
         title={t.title}
@@ -89,7 +86,6 @@ export default async function DirectoryPage() {
           </p>
         </div>
       </ContentSection>
-      <Footer />
-    </PageFrame>
+    </AppShell>
   );
 }

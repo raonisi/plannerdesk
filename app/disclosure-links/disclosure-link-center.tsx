@@ -190,13 +190,13 @@ function SearchAndFilters({
 }) {
   return (
     <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
-      <div className="grid gap-5 lg:grid-cols-[1fr_0.95fr]">
-        <label className="block">
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[1fr_0.95fr]">
+        <label className="block min-w-0">
           <span className="text-sm font-semibold text-[#303845]">
             {text.searchLabel}
           </span>
           <input
-            className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
+            className="mt-2 w-full min-w-0 border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder={text.searchPlaceholder}
             type="search"
@@ -204,7 +204,7 @@ function SearchAndFilters({
           />
         </label>
 
-        <div className="grid gap-4">
+        <div className="grid min-w-0 gap-4">
           <FilterGroup
             label={text.category}
             onChange={(value) => onCategoryChange(value as CategoryFilter)}
@@ -239,9 +239,9 @@ function FilterGroup({
   value: string;
 }) {
   return (
-    <fieldset>
+    <fieldset className="min-w-0">
       <legend className="text-sm font-semibold text-[#303845]">{label}</legend>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+      <div className="mt-2 flex max-w-full gap-2 overflow-x-auto pb-1">
         {options.map((option) => {
           const isSelected = option.value === value;
 
