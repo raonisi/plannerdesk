@@ -14,6 +14,7 @@
     "prisma:studio": "prisma studio",
     "claim-documents:import:dry-run": "node scripts/import-claim-document-candidates.mjs",
     "claim-documents:import:apply": "node scripts/import-claim-document-candidates.mjs --apply",
+    "knowledge:import:drafts": "npx tsx scripts/import-knowledge-drafts.ts",
     "smoke:public": "node scripts/smoke-public-routes.mjs",
     "skills:sync": "node scripts/codex-agents-to-cursor-skills.mjs"
   },
