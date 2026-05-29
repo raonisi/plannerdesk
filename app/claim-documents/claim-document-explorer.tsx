@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { EmptyState } from "@/components/content-page";
 import {
   buildClaimLibraryItems,
   buildInsurerFilterOptions,
@@ -93,7 +92,7 @@ export function ClaimDocumentExplorer({
   }, []);
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="space-y-6">
       <ClaimFormsFilters
         category={category}
         hasActiveFilters={hasActiveFilters}
@@ -108,11 +107,16 @@ export function ClaimDocumentExplorer({
         status={status}
       />
 
+      <p className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm font-semibold leading-6 text-[#5B6470]">
+        본 자료는 설계사 실무 참고용입니다. 최종 기준은 보험사 공식 안내와
+        약관을 확인해 주세요.
+      </p>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-[#102235]">
+        <h2 className="text-lg font-bold text-[#0F1D2E]">
           보험사별 청구서류
         </h2>
-        <p className="whitespace-nowrap text-xs font-semibold text-[#5f6670]">
+        <p className="whitespace-nowrap text-sm font-semibold text-[#5f6670]">
           {insurerGroups.length}개 보험사 · {totalItemCount}개 서류
         </p>
       </div>
@@ -129,10 +133,21 @@ export function ClaimDocumentExplorer({
           ))}
         </div>
       ) : (
-        <EmptyState
-          description="검색어를 줄이거나 청구 유형·보험사·검수 상태 필터를 변경해 주세요."
-          title="조건에 맞는 청구서류가 없습니다."
-        />
+        <div className="rounded-xl border border-dashed border-[#E3DED4] bg-white p-8 text-center shadow-sm">
+          <p className="text-xl font-bold text-[#0F1D2E]">
+            검색 결과가 없습니다
+          </p>
+          <p className="mt-3 break-keep text-sm leading-6 text-[#5B6470]">
+            보험사명, 청구 유형, 서류명을 다시 확인해 주세요.
+          </p>
+          <button
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+            onClick={resetFilters}
+            type="button"
+          >
+            필터 초기화
+          </button>
+        </div>
       )}
     </div>
   );
