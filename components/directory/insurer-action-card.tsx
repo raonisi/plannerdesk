@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useId,
-  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -23,14 +22,12 @@ import {
   telHref,
 } from "@/lib/directory/formatting";
 
-const cardClass =
-  "group/insurer relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-all hover:shadow-lg hover:-translate-y-0.5";
 
-const sectionEyebrowClass =
-  "text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600";
-const sectionHeadingClass = "text-sm font-bold text-slate-900";
-const sectionContainerClass = "space-y-4";
-const groupDividerClass = "border-t border-slate-200 pt-6 mt-2";
+
+
+
+
+
 
 const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
   {
@@ -267,20 +264,22 @@ export function InsurerActionCard({
   onToggleFavorite,
   onRequestCorrection,
 }: InsurerActionCardProps) {
-  const [claimGuideOpen, setClaimGuideOpen] = useState(false);
+  const [detailedOpen, setDetailedOpen] = useState(false);
   const [cardPaymentOpen, setCardPaymentOpen] = useState(false);
   const [mailAddressOpen, setMailAddressOpen] = useState(false);
+  
   const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
   const mailAddress = insurer.registeredMailAddress || insurer.mailingAddress;
   const claimFax = claimFaxDisplay(insurer);
-  const claimGuidePanelId = `claim-guide-${insurer.id}`;
+  const disclosureLinks = getDisclosureLinksForInsurer(insurer.id);
+  const primaryDisclosureHref = disclosureLinks.productDisclosure?.sourceUrl ?? insurer.termsUrl;
 
   return (
-    <article className={cardClass}>
+    <article className="group/insurer relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-white shadow-[0_4px_20px_rgba(15,29,46,0.02)] transition-all hover:shadow-[0_10px_30px_rgba(15,29,46,0.06)] hover:-translate-y-0.5">
       {insurer.isFeatured ? (
         <span
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"
+          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#B9975B] via-[#0F1D2E] to-[#B9975B]"
         />
       ) : null}
 
@@ -291,105 +290,183 @@ export function InsurerActionCard({
           onToggleFavorite={onToggleFavorite}
         />
 
-        <div className="mt-6 space-y-5">
-          {/* 1) 업무 바로가기 */}
-          <ActionGroup eyebrow="ACCESS" title="업무 바로가기">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <ActionLink href={accessHref} label="전산접속" tone="primary" />
-                {insurer.supportedBrowsers &&
-                insurer.supportedBrowsers.length > 0 ? (
-                  <span className="text-[11px] font-semibold text-slate-500 pl-1">
-                    권장 브라우저:{" "}
-                    {insurer.supportedBrowsers
-                      .map((b) => (b === "chrome" ? "Chrome" : "Edge"))
-                      .join(", ")}
-                  </span>
-                ) : null}
-              </div>
-              <ActionLink
-                href={insurer.officialWebsiteUrl}
-                label="공식 홈페이지"
-              />
-            </div>
-          </ActionGroup>
+        {/* 4대 핵심 액션 버튼 모음 */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          {/* 1. 전산접속 */}
+          <div className="flex flex-col">
+            {accessHref ? (
+              <ExternalTabAnchor
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[#0F1D2E] text-xs font-bold !text-white shadow-sm transition hover:bg-[#1C3552]"
+                href={accessHref}
+              >
+                전산접속 ↗
+              </ExternalTabAnchor>
+            ) : (
+              <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-xs font-semibold text-slate-400">
+                전산 미지원
+              </span>
+            )}
+            {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 && (
+              <span className="mt-1 text-[10px] text-slate-400 text-center">
+                ({insurer.supportedBrowsers.map((b) => (b === "chrome" ? "크롬" : "엣지")).join("/")} 권장)
+              </span>
+            )}
+          </div>
 
-          {/* 2) 청구 */}
-          <div className={groupDividerClass}>
-            <ActionGroup eyebrow="CLAIM" title="청구">
-              <div className="space-y-3">
-                <ClaimGuideToggleButton
-                  count={claimItems.length}
-                  isOpen={claimGuideOpen}
-                  onToggle={() => setClaimGuideOpen((open) => !open)}
-                  panelId={claimGuidePanelId}
-                />
-                <div hidden={!claimGuideOpen}>
-                  <InsurerClaimGuidePanel
-                    claimItems={claimItems}
-                    insurer={insurer}
-                  />
+          {/* 2. 청구안내 (자체 토글 또는 페이지 이동) */}
+          <button
+            onClick={() => setDetailedOpen(!detailedOpen)}
+            className={`inline-flex min-h-12 items-center justify-center rounded-lg border text-xs font-bold transition ${
+              detailedOpen
+                ? "border-[#B9975B] bg-[#F7F4EE] text-[#B9975B]"
+                : "border-[#E3DED4] bg-white text-[#0F1D2E] hover:bg-slate-50"
+            }`}
+          >
+            청구안내 {detailedOpen ? "닫기 ▲" : "열기 ▼"}
+          </button>
+
+          {/* 3. 고객센터 / 팩스 */}
+          <div className="col-span-2 sm:col-span-1">
+            {insurer.customerCenterPhone ? (
+              <a
+                href={telHref(insurer.customerCenterPhone) || "#"}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50"
+              >
+                고객센터: {insurer.customerCenterPhone}
+              </a>
+            ) : (
+              <span className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-xs font-semibold text-slate-400">
+                고객센터 미지원
+              </span>
+            )}
+          </div>
+
+          {/* 4. 공시·약관 */}
+          <div className="col-span-2 sm:col-span-1">
+            {primaryDisclosureHref ? (
+              <ExternalTabAnchor
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50"
+                href={primaryDisclosureHref}
+              >
+                공시·약관 확인 ↗
+              </ExternalTabAnchor>
+            ) : (
+              <span className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-xs font-semibold text-slate-400">
+                자료 준비 중
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* 아코디언 상세 정보 영역 (기본 닫힘) */}
+        {detailedOpen && (
+          <div className="mt-6 space-y-6 border-t border-[#E3DED4] pt-6 animate-in fade-in duration-200">
+            {/* 1) 상세 연락처 및 팩스 요약 표 */}
+            <section className="space-y-3">
+              <h4 className="text-xs font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
+                실무 지원 및 접수 정보
+              </h4>
+              <div className="overflow-hidden rounded-xl border border-[#E3DED4] bg-[#F8F7F3] text-xs">
+                <div className="grid grid-cols-2 border-b border-[#E3DED4] p-3">
+                  <span className="font-semibold text-slate-500">고객 콜센터</span>
+                  <span className="font-bold text-[#0F1D2E] text-right">{insurer.customerCenterPhone || "-"}</span>
+                </div>
+                <div className="grid grid-cols-2 border-b border-[#E3DED4] p-3">
+                  <span className="font-semibold text-slate-500">설계사 전산헬프</span>
+                  <span className="font-bold text-[#0F1D2E] text-right">{insurer.helpdeskPhone || "-"}</span>
+                </div>
+                <div className="grid grid-cols-2 border-b border-[#E3DED4] p-3">
+                  <span className="font-semibold text-slate-500">모니터링 콜센터</span>
+                  <span className="font-bold text-[#0F1D2E] text-right">{insurer.callMonitoringPhone || "-"}</span>
+                </div>
+                <div className="grid grid-cols-2 p-3">
+                  <span className="font-semibold text-slate-500">청구 팩스번호</span>
+                  <span className="font-bold text-[#0F1D2E] text-right">{claimFax.primary || "-"}</span>
                 </div>
               </div>
-            </ActionGroup>
-          </div>
+            </section>
 
-          {/* 3) 지원 */}
-          <div className={groupDividerClass}>
-            <ActionGroup eyebrow="SUPPORT" title="지원">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <PhoneRow
-                  label="고객센터"
-                  value={insurer.customerCenterPhone}
-                />
-                <PhoneRow label="전산 헬프" value={insurer.helpdeskPhone} />
-                <PhoneRow
-                  label="인물 모니터링"
-                  value={insurer.callMonitoringPhone}
-                />
-                <DisplayRow
-                  label="청구팩스"
-                  secondary={claimFax.secondary}
-                  value={claimFax.primary}
-                />
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <InfoActionRow
-                  detail={cardPaymentStatusLabel(insurer.cardPaymentStatus)}
-                  label="카드납"
-                  onClick={() => setCardPaymentOpen(true)}
-                />
-                <InfoActionRow
-                  detail={
-                    mailAddress ? "주소 보기" : DIRECTORY_TEXT.missing
-                  }
-                  disabled={!mailAddress}
-                  label="등기우편"
-                  onClick={() => setMailAddressOpen(true)}
-                />
-              </div>
-            </ActionGroup>
-          </div>
-
-          {/* 4) 자료 */}
-          <DisclosureSection insurer={insurer} />
-
-          {/* 정보 수정 요청 */}
-          {onRequestCorrection ? (
-            <div className="flex justify-end pt-1">
+            {/* 2) 등기 및 카드납 간편 조회 */}
+            <div className="grid gap-3 sm:grid-cols-2">
               <button
-                aria-label={`${insurer.name} 수정 요청`}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-                onClick={() => onRequestCorrection(insurer.id)}
                 type="button"
+                onClick={() => setCardPaymentOpen(true)}
+                className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30"
               >
-                <span aria-hidden="true">{"\u270e"}</span>
-                <span>{"정보 수정 요청"}</span>
+                <span className="text-xs font-bold text-slate-500">카드납 가능 여부</span>
+                <span className="text-xs font-bold text-[#0F1D2E] bg-slate-100 px-2 py-1 rounded">
+                  {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                disabled={!mailAddress}
+                onClick={() => setMailAddressOpen(true)}
+                className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="text-xs font-bold text-slate-500">우편 서류 접수처</span>
+                <span className="text-xs font-bold text-[#B9975B] underline">
+                  {mailAddress ? "주소 확인" : "정보 없음"}
+                </span>
               </button>
             </div>
-          ) : null}
-        </div>
+
+            {/* 3) 청구서류 PDF 목록 */}
+            {claimItems.length > 0 && (
+              <section className="space-y-3">
+                <h4 className="text-xs font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
+                  필요 청구서류 양식 ({claimItems.length}건)
+                </h4>
+                <InsurerClaimGuidePanel claimItems={claimItems} insurer={insurer} />
+              </section>
+            )}
+
+            {/* 4) 상품 공시 및 개별 약관 링크 */}
+            <section className="space-y-3 border-t border-[#E3DED4] pt-4">
+              <h4 className="text-xs font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
+                세부 공식 공시 링크
+              </h4>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {disclosureLinks.productDisclosure?.sourceUrl ? (
+                  <ExternalTabAnchor
+                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    href={disclosureLinks.productDisclosure.sourceUrl}
+                  >
+                    공식 상품공시실 ↗
+                  </ExternalTabAnchor>
+                ) : null}
+                {disclosureLinks.policyTerms?.sourceUrl ? (
+                  <ExternalTabAnchor
+                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    href={disclosureLinks.policyTerms.sourceUrl}
+                  >
+                    공식 통합약관실 ↗
+                  </ExternalTabAnchor>
+                ) : null}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* 정보 수정 요청 */}
+        {onRequestCorrection ? (
+          <div className="flex justify-end pt-3 mt-2 border-t border-slate-100">
+            <button
+              aria-label={`${insurer.name} 수정 요청`}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition"
+              onClick={() => onRequestCorrection(insurer.id)}
+              type="button"
+            >
+              <span>✍ 정보 수정 요청</span>
+            </button>
+          </div>
+        ) : null}
       </div>
+
       <CardPaymentDialog
         insurer={insurer}
         onClose={() => setCardPaymentOpen(false)}
@@ -420,7 +497,7 @@ function CardHeader({
         <div className="flex min-w-0 items-start gap-4">
           <InsurerLogo insurer={insurer} />
           <div className="min-w-0 pt-1">
-            <p className={sectionEyebrowClass}>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
               {CATEGORY_LABELS[insurer.category]}
             </p>
             <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
@@ -499,156 +576,6 @@ function FavoriteButton({
   );
 }
 
-function ActionGroup({
-  eyebrow,
-  title,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className={sectionContainerClass}>
-      <div className="flex items-baseline gap-3">
-        <p className={sectionEyebrowClass}>{eyebrow}</p>
-        <p className={sectionHeadingClass}>{title}</p>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function ClaimGuideToggleButton({
-  count,
-  isOpen,
-  onToggle,
-  panelId,
-}: {
-  count: number;
-  isOpen: boolean;
-  onToggle: () => void;
-  panelId: string;
-}) {
-  return (
-    <button
-      aria-controls={panelId}
-      aria-expanded={isOpen}
-      className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-indigo-600 bg-indigo-600 px-5 py-3 text-left text-sm font-bold text-white shadow-md shadow-indigo-600/10 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-      onClick={onToggle}
-      type="button"
-    >
-      <span className="break-keep">청구안내 보기</span>
-      <span className="shrink-0 text-xs font-semibold text-indigo-200">
-        {count}건 {isOpen ? "▲" : "▼"}
-      </span>
-    </button>
-  );
-}
-
-interface ActionLinkProps {
-  href: string | null;
-  label: string;
-  tone?: "primary" | "default";
-}
-
-function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
-  if (!href) {
-    return (
-      <span className="inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-400">
-        <span className="break-keep">{label}</span>
-        <span className="text-xs font-normal text-slate-400">
-          {DIRECTORY_TEXT.missing}
-        </span>
-      </span>
-    );
-  }
-
-  const toneClass =
-    tone === "primary"
-      ? "border-indigo-600 bg-indigo-600 !text-white shadow-md shadow-indigo-600/10 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:translate-y-0"
-      : "border-slate-300 bg-white !text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:!text-slate-900";
-
-  return (
-    <ExternalTabAnchor
-      className={`inline-flex min-h-12 items-center justify-between gap-2 rounded-lg border-2 px-5 py-3 text-sm font-bold tracking-[0.01em] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:text-[15px] ${toneClass}`}
-      href={href}
-    >
-      <span className="break-keep">{label}</span>
-      <span aria-hidden="true" className="text-base leading-none">
-        {"\u2197"}
-      </span>
-    </ExternalTabAnchor>
-  );
-}
-
-function DisclosureSection({ insurer }: { insurer: PublicInsurer }) {
-  const disclosureLinks = useMemo(
-    () => getDisclosureLinksForInsurer(insurer.id),
-    [insurer.id],
-  );
-
-  const hasDisclosureData =
-    disclosureLinks.productDisclosure || disclosureLinks.policyTerms;
-
-  if (hasDisclosureData) {
-    return (
-      <div className={groupDividerClass}>
-        <ActionGroup eyebrow="DATA" title="자료">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <ActionLink
-              href={disclosureLinks.productDisclosure?.sourceUrl ?? null}
-              label="상품공시 보기"
-            />
-            <ActionLink
-              href={disclosureLinks.policyTerms?.sourceUrl ?? null}
-              label="약관 보기"
-            />
-          </div>
-        </ActionGroup>
-      </div>
-    );
-  }
-
-  return (
-    <div className={groupDividerClass}>
-      <ActionGroup eyebrow="DATA" title="자료">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ActionLink href={insurer.termsUrl} label="공시·약관 보기" />
-        </div>
-      </ActionGroup>
-    </div>
-  );
-}
-
-function PhoneRow({ label, value }: { label: string; value: string | null }) {
-  const href = telHref(value);
-  const hasValue = Boolean(value && value.trim().length > 0);
-
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:bg-white hover:border-slate-200 hover:shadow-sm transition-all duration-200">
-      <p className="text-xs font-bold text-slate-500">{label}</p>
-      {hasValue && href ? (
-        <a
-          className="mt-1 inline-flex min-h-10 items-center text-[17px] font-bold text-slate-900 underline decoration-indigo-400 decoration-2 underline-offset-4 hover:text-indigo-600 transition-colors"
-          href={href}
-          rel="noopener noreferrer"
-        >
-          {value}
-        </a>
-      ) : hasValue ? (
-        <p className="mt-1 break-keep text-[17px] font-bold text-slate-900">
-          {value}
-        </p>
-      ) : (
-        <p className="mt-1 break-keep text-sm font-semibold text-slate-400">
-          {DIRECTORY_TEXT.missing}
-        </p>
-      )}
-    </div>
-  );
-}
-
 function parseCardPaymentRows(note: string | null) {
   if (!note) return [];
 
@@ -662,56 +589,6 @@ function parseCardPaymentRows(note: string | null) {
         ? { label: match[1], value: match[2] || DIRECTORY_TEXT.missing }
         : { label: "메모", value: line };
     });
-}
-
-function DisplayRow({
-  label,
-  secondary,
-  value,
-}: {
-  label: string;
-  secondary?: string | null;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:bg-white hover:border-slate-200 hover:shadow-sm transition-all duration-200">
-      <p className="text-xs font-bold text-slate-500">{label}</p>
-      <p className="mt-1 break-keep text-[17px] font-bold text-slate-900">
-        {value}
-      </p>
-      {secondary ? (
-        <p className="mt-1.5 break-keep text-xs font-semibold leading-5 text-indigo-500">
-          문의: {secondary}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function InfoActionRow({
-  detail,
-  disabled = false,
-  label,
-  onClick,
-}: {
-  detail: string;
-  disabled?: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3.5 text-left transition-all hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50/60 disabled:text-slate-400"
-      disabled={disabled}
-      onClick={onClick}
-      type="button"
-    >
-      <span className="text-xs font-bold text-slate-500">{label}</span>
-      <span className="break-keep text-sm font-bold text-slate-900">
-        {detail}
-      </span>
-    </button>
-  );
 }
 
 function DialogFrame({

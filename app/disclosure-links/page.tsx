@@ -10,89 +10,90 @@ import { DisclosureLinkCenter } from "./disclosure-link-center";
 const t = {
   title: "공시·약관 링크센터",
   note:
-    "현재 일부 정보는 검수 전 샘플 데이터입니다. 실제 고객 상담 또는 자료 안내 전 공식 출처 확인이 필요합니다.",
-  workflowTitle: "상담 전 자료 확인 순서",
+    "보험 상품공시실과 약관 정보는 수시로 변경될 수 있으므로, 최종 안내 전 공식 채널을 다시 확인해 주세요.",
+  workflowTitle: "실무 약관 및 공시 자료 확인 흐름",
   directory: "보험사 바로가기",
   claim: "청구서류 확인"
 };
 
 const workflowSteps = [
-  "Check the official source first.",
-  "Reconfirm product and insurer-specific details.",
-  "Use the information only as a practical reference.",
-  "Avoid presenting it as a final legal, payout, or insurer review conclusion."
+  "공식 상품공시실/약관실 링크를 먼저 클릭합니다.",
+  "해당 상품의 개정 일자와 세부 보장 한도를 확인합니다.",
+  "협회 공시 자료나 참고 소식지를 비교 검토합니다.",
+  "최종 안내 시 법적 결론이나 지급 보장이 아님을 명시합니다."
 ];
 
 export default function DisclosureLinksPage() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <Header />
-      <section className="border-b border-slate-800 bg-slate-900 text-white">
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-400">
-            Disclosure & Policy Link Center
-          </p>
-          <h1 className="mt-5 break-keep text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            {t.title}
-          </h1>
-          <p className="mt-6 max-w-3xl break-keep text-lg leading-relaxed text-slate-300 sm:text-xl">
-            A practical reference hub for official disclosure, policy terms,
-            product pages, association references, and insurer material paths.
-          </p>
-          <p className="mt-8 max-w-3xl border-l-2 border-indigo-500 pl-4 text-sm font-medium leading-relaxed text-indigo-100/70">
-            {t.note}
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl space-y-8 px-5 py-10 sm:px-8 lg:px-10">
-        <DisclosureLinkCenter entries={disclosureLinkEntries} />
-        <PlannerWorkflow />
-        <MvpModuleLinks
-          description="After checking disclosure and policy references, continue to official insurer channels or claim document references."
-          items={[
-            {
-              href: "/directory",
-              label: t.directory,
-              description:
-                "Open insurer official websites, customer centers, and claim page paths."
-            },
-            {
-              href: "/claim-documents",
-              label: t.claim,
-              description:
-                "Review claim document references before preparing customer guidance."
-            }
-          ]}
-        />
-        <MvpSafetyNotice />
-      </section>
-      <Footer />
-    </main>
-  );
-}
-
-function PlannerWorkflow() {
-  return (
-    <section className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600">
-        Planner workflow
-      </p>
-      <h2 className="mt-3 break-keep text-2xl font-bold tracking-tight text-slate-900">
-        {t.workflowTitle}
-      </h2>
-      <div className="mt-8 grid gap-4 md:grid-cols-4">
-        {workflowSteps.map((step, index) => (
-          <div className="rounded-lg border border-slate-100 bg-slate-50 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md" key={step}>
-            <p className="text-[13px] font-bold tracking-widest text-indigo-600">
-              STEP {index + 1}
+    <main className="min-h-screen bg-[#F8F7F3] text-[#17202A] flex flex-col justify-between">
+      <div>
+        <Header />
+        
+        {/* 히어로 영역 - B2B Premium SaaS Style */}
+        <section className="bg-[#0F1D2E] text-white">
+          <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              Disclosure & Policy
+            </span>
+            <h1 className="mt-4 break-keep text-3xl font-extrabold tracking-tight sm:text-4xl">
+              {t.title}
+            </h1>
+            <p className="mt-4 max-w-3xl break-keep text-sm leading-relaxed text-slate-300">
+              보험사별 공식 상품공시실, 통합약관실, 보험협회 공시실 및 유용한 실무 자료 링크를 한눈에 볼 수 있도록 정리했습니다.
             </p>
-            <p className="mt-3 break-keep text-sm font-medium leading-relaxed text-slate-600">
-              {step}
+            <p className="mt-6 max-w-3xl border-l-2 border-[#B9975B] pl-4 text-xs font-medium leading-relaxed text-slate-400">
+              {t.note}
             </p>
           </div>
-        ))}
+        </section>
+
+        {/* 컨텐츠 메인 */}
+        <section className="mx-auto max-w-7xl space-y-8 px-5 py-8 sm:px-8 lg:px-10">
+          <DisclosureLinkCenter entries={disclosureLinkEntries} />
+          
+          {/* 실무 약관 및 공시 자료 확인 흐름 */}
+          <section className="rounded-xl border border-[#E3DED4] bg-white p-6 shadow-sm">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              Planner workflow
+            </span>
+            <h2 className="mt-2 break-keep text-base font-bold text-[#0F1D2E]">
+              {t.workflowTitle}
+            </h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {workflowSteps.map((step, index) => (
+                <div className="rounded-lg border border-slate-100 bg-[#F8F7F3] p-4 shadow-sm" key={step}>
+                  <p className="text-[11px] font-bold tracking-widest text-[#B9975B]">
+                    STEP {index + 1}
+                  </p>
+                  <p className="mt-2 break-keep text-xs font-semibold leading-relaxed text-slate-600">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <MvpModuleLinks
+            description="공시 약관 및 상품 채널 확인 후, 보험사 공식 연락처 또는 필요 청구서류 항목을 빠르게 이어 확인해 보세요."
+            items={[
+              {
+                href: "/directory",
+                label: t.directory,
+                description:
+                  "보험사 공식 웹사이트, 콜센터, 전산 접속 및 팩스 정보를 확인합니다."
+              },
+              {
+                href: "/claim-documents",
+                label: t.claim,
+                description:
+                  "유형별 필요 청구서류와 제출 방법을 종합 비교합니다."
+              }
+            ]}
+          />
+          <MvpSafetyNotice />
+        </section>
       </div>
-    </section>
+      <Footer />
+    </main>
   );
 }
