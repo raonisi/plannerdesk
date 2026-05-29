@@ -67,6 +67,48 @@ enum ClaimDocumentCategory {
   other
 }
 
+enum KnowledgeArticleStatus {
+  draft
+  needs_review
+  verified
+  archived
+  rejected
+}
+
+enum KnowledgeArticleCategory {
+  claim
+  underwriting
+  cancellation
+  disclosure
+  customer_message
+  operation_safety
+  plannerdesk_usage
+}
+
+enum KnowledgeArticleType {
+  faq
+  practical_standard
+  checklist
+  message_sample
+  link_guide
+  safety_boundary
+}
+
+enum KnowledgeRiskLevel {
+  low
+  medium
+  high
+  blocked
+}
+
+enum KnowledgeSourceType {
+  internal
+  official
+  insurer
+  regulator
+  mixed
+}
+
 model User {
   id                 String             @id @default(cuid())
   name               String?
@@ -191,4 +233,48 @@ model ClaimDocument {
   @@index([verificationStatus])
   @@index([isPublished])
   @@index([sortOrder])
+}
+
+// Knowledge archive articles for future admin CRUD and DB-backed /knowledge.
+// Public read and Admin UI are out of scope for PR-KNOW-DB-01.
+model KnowledgeArticle {
+  id              String                   @id @default(cuid())
+  slug            String                   @unique
+  title           String
+  summary         String
+  content         String                   @db.Text
+
+  category        KnowledgeArticleCategory
+  type            KnowledgeArticleType
+  riskLevel       KnowledgeRiskLevel       @default(medium)
+  status          KnowledgeArticleStatus   @default(draft)
+
+  isPublished     Boolean                  @default(false)
+  aiUsable        Boolean                  @default(false)
+
+  sourceType      KnowledgeSourceType      @default(internal)
+  sourceTitle     String?
+  sourceUrl       String?
+  sourceCheckedAt DateTime?
+
+  workflowLabel   String?
+  tags            String[]                 @default([])
+  safeCopy        String?                  @db.Text
+  forbiddenClaims String[]                 @default([])
+
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  publishedAt     DateTime?
+
+  createdById     String?
+  updatedById     String?
+  reviewedById    String?
+
+  @@index([status])
+  @@index([isPublished])
+  @@index([category])
+  @@index([type])
+  @@index([riskLevel])
+  @@index([aiUsable])
+  @@index([slug])
 }
