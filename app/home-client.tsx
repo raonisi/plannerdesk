@@ -202,7 +202,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-8 pb-14 sm:px-8 lg:px-10">
+    <div className="mx-auto min-w-0 max-w-7xl px-5 py-8 pb-14 sm:px-8 lg:px-10">
       {/* Hero */}
       <section
         className={`relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-gradient-to-br from-[#F8F7F3] via-white to-[#F7F4EE] p-6 shadow-sm sm:p-10 md:p-12`}
@@ -240,8 +240,9 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
               {searchQuery ? (
                 <button
                   type="button"
+                  aria-label="검색어 지우기"
                   onClick={() => setSearchQuery("")}
-                  className="ml-2 shrink-0 text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 rounded px-1"
+                  className="ml-2 inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
                 >
                   지우기
                 </button>
@@ -314,7 +315,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
       {/* 빠른 실행 */}
       <section className="mt-12">
         <SectionHeader eyebrow={uiLabels.homeHub} title="오늘의 빠른 실행" />
-        <div className="mt-5 grid gap-4 grid-cols-2 lg:grid-cols-5">
+        <div className="mt-5 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-5">
           <HomeQuickLaunchCard
             actionLabel="보험사 찾기"
             description="공식 전산·고객센터·팩스"

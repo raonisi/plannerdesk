@@ -82,7 +82,7 @@ export function ClaimFormsFilters({
 
       <div className="mt-5 flex flex-col gap-3 border-t border-[#E3DED4] pt-4 sm:flex-row sm:items-center sm:justify-between">
         <details className="rounded-lg border border-[#E3DED4] bg-[#F8F7F3] p-3">
-          <summary className="cursor-pointer list-none text-sm font-bold text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-bold text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
             고급 필터
             {status !== "all" ? (
               <span className="ml-2 rounded-full bg-[#0F1D2E] px-2 py-0.5 text-[11px] text-white">

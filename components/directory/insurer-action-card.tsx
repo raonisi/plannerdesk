@@ -296,7 +296,8 @@ export function InsurerActionCard({
           <div className="flex flex-col">
             {accessHref ? (
               <ExternalTabAnchor
-                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-[#0F1D2E] text-xs font-bold !text-white shadow-sm transition hover:bg-[#1C3552]"
+                aria-label={`${insurer.name} 전산접속`}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#0F1D2E] text-xs font-bold !text-white shadow-sm transition hover:bg-[#1C3552] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
                 href={accessHref}
               >
                 전산접속 ↗
@@ -315,8 +316,11 @@ export function InsurerActionCard({
 
           {/* 2. 상세 실무 정보 (자체 토글 또는 페이지 이동) */}
           <button
+            type="button"
+            aria-expanded={detailedOpen}
+            aria-label={`${insurer.name} 상세 실무 정보 ${detailedOpen ? "닫기" : "열기"}`}
             onClick={() => setDetailedOpen(!detailedOpen)}
-            className={`inline-flex min-h-12 items-center justify-center rounded-lg border text-xs font-bold transition ${
+            className={`inline-flex min-h-12 w-full items-center justify-center rounded-lg border text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
               detailedOpen
                 ? "border-[#B9975B] bg-[#F7F4EE] text-[#B9975B]"
                 : "border-[#E3DED4] bg-white text-[#0F1D2E] hover:bg-slate-50"
@@ -330,7 +334,8 @@ export function InsurerActionCard({
             {insurer.customerCenterPhone ? (
               <a
                 href={telHref(insurer.customerCenterPhone) || "#"}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50"
+                aria-label={`${insurer.name} 고객센터 전화 ${insurer.customerCenterPhone}`}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
               >
                 고객센터: {insurer.customerCenterPhone}
               </a>
@@ -345,7 +350,8 @@ export function InsurerActionCard({
           <div className="col-span-2 sm:col-span-1">
             {primaryDisclosureHref ? (
               <ExternalTabAnchor
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50"
+                aria-label={`${insurer.name} 공시·약관 확인`}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
                 href={primaryDisclosureHref}
               >
                 공시·약관 확인 ↗

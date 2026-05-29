@@ -1,7 +1,10 @@
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import type { VerificationStatus } from "@/lib/content";
-import { externalLinkTabProps } from "@/lib/ui/external-link";
+import {
+  externalLinkAriaLabel,
+  externalLinkTabProps,
+} from "@/lib/ui/external-link";
 import {
   borders,
   buttons,
@@ -21,7 +24,7 @@ const uiText = {
   emptyDescription:
     "검색어를 줄이거나 필터를 변경해 주세요.",
   officialSource: "공식 출처 열기",
-  lastVerified: "최근 검수",
+  lastVerified: "최근 확인일",
   safetyTitle: "검수 및 안전 안내",
   generalSafety:
     "일부 항목은 검수 전 초안 데이터를 사용할 수 있습니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 공개 전 공식 출처 확인이 필요합니다.",
@@ -68,16 +71,18 @@ export function PageHero({
 }
 
 export function PageFrame({ children }: { children: ReactNode }) {
-  return <main className={`min-h-screen ${surfaces.page}`}>{children}</main>;
+  return <div className={`min-h-screen ${surfaces.page}`}>{children}</div>;
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
-  return <PageFrame>{children}</PageFrame>;
+  return <main className={`min-h-screen ${surfaces.page}`}>{children}</main>;
 }
 
 export function ContentSection({ children }: { children: ReactNode }) {
   return (
-    <section className={`mx-auto max-w-7xl ${spacing.pageX} ${spacing.sectionY}`}>
+    <section
+      className={`mx-auto max-w-7xl min-w-0 ${spacing.pageX} ${spacing.sectionY} pb-14 sm:pb-16`}
+    >
       {children}
     </section>
   );
@@ -218,8 +223,11 @@ export function EmptyState({
   description?: string;
 }) {
   return (
-    <div className={`${borders.default} ${surfaces.card} rounded-xl p-10 text-center shadow-sm`}>
-      <p className="break-keep text-xl font-bold tracking-tight text-slate-900">{title}</p>
+    <div
+      className={`rounded-xl border border-dashed border-[#E3DED4] bg-[#F7F4EE] p-8 text-center sm:p-10`}
+      role="status"
+    >
+      <p className="break-keep text-lg font-bold text-[#0F1D2E] sm:text-xl">{title}</p>
       <p className={`mt-3 break-keep ${textStyles.small}`}>{description}</p>
     </div>
   );
@@ -250,14 +258,27 @@ export function ExternalTabAnchor({
   href,
   children,
   className,
+  "aria-label": ariaLabel,
   ...rest
 }: {
   href: string;
   children: ReactNode;
   className?: string;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "children" | "className">) {
+  const resolvedAriaLabel =
+    ariaLabel ??
+    (typeof children === "string"
+      ? externalLinkAriaLabel(children)
+      : externalLinkAriaLabel(uiText.officialSource));
+
   return (
-    <a className={className} href={href} {...externalLinkTabProps} {...rest}>
+    <a
+      aria-label={resolvedAriaLabel}
+      className={className}
+      href={href}
+      {...externalLinkTabProps}
+      {...rest}
+    >
       {children}
     </a>
   );
@@ -362,20 +383,26 @@ export function SearchBar({
   onChange,
   placeholder,
   onClear,
-  className = ""
+  className = "",
+  id,
+  ariaLabel
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   onClear?: () => void;
   className?: string;
+  id?: string;
+  ariaLabel?: string;
 }) {
   return (
     <div
-      className={`flex min-h-12 items-center rounded-xl border border-[#E3DED4] bg-white px-4 shadow-sm focus-within:ring-2 focus-within:ring-[#B9975B]/40 ${className}`.trim()}
+      className={`flex min-h-12 min-w-0 items-center rounded-xl border border-[#E3DED4] bg-white px-4 shadow-sm focus-within:ring-2 focus-within:ring-[#B9975B]/40 ${className}`.trim()}
     >
       <input
-        className="w-full bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470]"
+        aria-label={ariaLabel ?? placeholder}
+        className="min-w-0 flex-1 bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470] focus-visible:outline-none"
+        id={id}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         type="search"
@@ -383,7 +410,8 @@ export function SearchBar({
       />
       {value && onClear ? (
         <button
-          className="ml-2 shrink-0 text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E]"
+          aria-label="검색어 지우기"
+          className="ml-2 inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
           onClick={onClear}
           type="button"
         >
@@ -491,7 +519,7 @@ export function CollapsibleNotice({
       className={`group ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
       open={defaultOpen}
     >
-      <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className={notices.safetyTitle}>{title}</p>
@@ -566,7 +594,7 @@ export function RelatedPageLinks() {
   return (
     <div className={`border-y ${borders.divider} ${surfaces.card}`}>
       <div
-        className={`mx-auto flex max-w-7xl gap-2 overflow-x-auto ${spacing.pageX} py-4`}
+        className={`mx-auto flex max-w-7xl flex-wrap gap-2 ${spacing.pageX} py-4`}
       >
         {links.map((link) => (
           <Link

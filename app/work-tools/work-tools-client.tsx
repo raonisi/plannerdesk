@@ -19,7 +19,7 @@ import {
   getCategoryLabelForTool,
   matchesWorkToolCategory,
 } from "@/lib/tool-display";
-import { SearchBar } from "@/components/content-page";
+import { EmptyState, SearchBar } from "@/components/content-page";
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder";
 
@@ -980,6 +980,8 @@ export function WorkToolsClient() {
         <label className="block max-w-xl" htmlFor="work-tools-search">
           <span className="sr-only">업무 도구 검색</span>
           <SearchBar
+            ariaLabel="업무 도구 검색"
+            id="work-tools-search"
             onChange={setSearchQuery}
             onClear={() => setSearchQuery("")}
             placeholder="보험나이, 실손보험금, 상병코드, 정부24 검색"
@@ -987,6 +989,7 @@ export function WorkToolsClient() {
           />
         </label>
         <CategoryPillBar
+          ariaLabel="업무 도구 카테고리"
           categories={WORK_TOOL_CATEGORIES}
           onSelect={setSelectedCategory}
           selectedId={selectedCategory}
@@ -1049,9 +1052,10 @@ export function WorkToolsClient() {
             ))}
           </div>
         ) : (
-          <p className="rounded-xl border border-dashed border-[#E3DED4] bg-[#F7F4EE] py-10 text-center text-sm text-[#5B6470]">
-            선택한 필터와 검색어에 일치하는 도구가 없습니다.
-          </p>
+          <EmptyState
+            description="검색어를 줄이거나 다른 카테고리를 선택해 주세요."
+            title="조건에 맞는 업무 도구가 없습니다."
+          />
         )}
       </section>
 
@@ -1069,8 +1073,10 @@ export function WorkToolsClient() {
               </h3>
             </div>
             <button
+              type="button"
+              aria-label="실행 화면 닫기"
               onClick={() => setActiveTool(null)}
-              className="text-xs font-bold text-slate-400 hover:text-slate-600 border border-slate-200 rounded px-2 py-1"
+              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
             >
               닫기
             </button>

@@ -43,6 +43,10 @@ function toIsoDate(value: Date | null): string | null {
 //
 // Records sorted by sortOrder asc, title asc.
 export async function getPublicClaimDocuments(): Promise<PublicClaimDocumentsResult> {
+  if (!process.env.DATABASE_URL?.trim()) {
+    return { status: "error" };
+  }
+
   try {
     const records = await prisma.claimDocument.findMany({
       where: {
@@ -86,9 +90,9 @@ export async function getPublicClaimDocuments(): Promise<PublicClaimDocumentsRes
     });
 
     return { status: "ok", data };
-  } catch (error) {
+  } catch {
     // Never expose raw DB errors to the browser page.
-    console.error("[plannerdesk] getPublicClaimDocuments failed", error);
+    console.warn("[plannerdesk] getPublicClaimDocuments failed.");
     return { status: "error" };
   }
 }

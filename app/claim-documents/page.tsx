@@ -60,7 +60,7 @@ export default async function ClaimDocumentsPage() {
 function ClaimPracticeNotice() {
   return (
     <details className="group rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
         <div>
           <p className="text-sm font-bold text-[#0F1D2E]">실무 참고 기준</p>
           <p className="mt-1 break-keep text-sm leading-6 text-[#5B6470]">

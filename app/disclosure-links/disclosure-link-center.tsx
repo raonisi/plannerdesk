@@ -75,6 +75,8 @@ export function DisclosureLinkCenter({
         <label className="block" htmlFor="disclosure-search">
           <span className="sr-only">공시·약관 검색</span>
           <SearchBar
+            ariaLabel="보험사명, 자료명, 약관, 상품공시 검색"
+            id="disclosure-search"
             onChange={setQuery}
             onClear={() => setQuery("")}
             placeholder="보험사명, 자료명, 약관, 상품공시 검색"
@@ -86,6 +88,7 @@ export function DisclosureLinkCenter({
           <p className={sectionEyebrow}>자료 분류</p>
           <div className="mt-2">
             <CategoryPillBar
+              ariaLabel="자료 분류"
               categories={disclosureFilterTabs}
               onSelect={(id) => setCategory(id as DisclosureFilterTabId)}
               selectedId={category}
@@ -96,8 +99,9 @@ export function DisclosureLinkCenter({
         <div className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE]">
           <button
             type="button"
+            aria-controls="disclosure-advanced-filter"
             aria-expanded={advancedOpen}
-            className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 rounded-xl"
+            className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
             onClick={() => setAdvancedOpen(!advancedOpen)}
           >
             <span className="text-sm font-bold text-[#0F1D2E]">고급 필터</span>
@@ -107,9 +111,13 @@ export function DisclosureLinkCenter({
             />
           </button>
           {advancedOpen ? (
-            <div className="border-t border-[#E3DED4] px-4 pb-4 pt-3">
+            <div
+              className="border-t border-[#E3DED4] px-4 pb-4 pt-3"
+              id="disclosure-advanced-filter"
+            >
               <p className="text-xs text-[#5B6470] mb-2">확인 상태 (운영 참고)</p>
               <CategoryPillBar
+                ariaLabel="확인 상태"
                 categories={statusFilterOptions}
                 onSelect={(id) => setStatus(id as StatusFilter)}
                 selectedId={status}

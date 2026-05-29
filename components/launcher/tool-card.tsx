@@ -6,6 +6,7 @@ import {
   getToolTypeLabel,
   type ToolKind,
 } from "@/lib/tool-display";
+import { externalLinkAriaLabel } from "@/lib/ui/external-link";
 import { shadows } from "@/lib/design-system";
 import { FavoriteButton } from "./favorite-button";
 
@@ -79,6 +80,11 @@ export function ToolCard({
         <button
           type="button"
           onClick={onRun}
+          aria-label={
+            kind === "external"
+              ? externalLinkAriaLabel(`${title} ${actionLabel}`)
+              : `${title} ${actionLabel}`
+          }
           className={`inline-flex min-h-11 w-full items-center justify-center rounded-lg text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
             kind === "external"
               ? "border border-[#16382C] bg-white text-[#16382C] hover:bg-[#F7F4EE]"

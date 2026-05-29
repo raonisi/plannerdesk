@@ -187,7 +187,21 @@ function toIsoDate(value: Date | null): string | null {
   return value.toISOString().slice(0, 10);
 }
 
+function getMockInsurers(): PublicInsurer[] {
+  const rawInsurers: PublicInsurer[] = insurerDirectoryEntries.map((record) => ({
+    ...record,
+    lastVerifiedAt: record.lastVerifiedAt ? record.lastVerifiedAt : null,
+    supportedBrowsers: getSupportedBrowsersForId(record.id),
+  })) as PublicInsurer[];
+
+  return dedupePublicInsurers(rawInsurers);
+}
+
 export async function getPublicInsurers(): Promise<PublicInsurersResult> {
+  if (!process.env.DATABASE_URL?.trim()) {
+    return { status: "ok", insurers: getMockInsurers() };
+  }
+
   try {
     const records = await prisma.insurer.findMany({
       where: {
@@ -236,16 +250,8 @@ export async function getPublicInsurers(): Promise<PublicInsurersResult> {
     const insurers = dedupePublicInsurers(rawInsurers);
 
     return { status: "ok", insurers };
-  } catch (error) {
-    console.error("[plannerdesk] DB query failed, falling back to mock data:", error);
-    const rawInsurers: PublicInsurer[] = insurerDirectoryEntries.map((record) => ({
-      ...record,
-      lastVerifiedAt: record.lastVerifiedAt ? record.lastVerifiedAt : null,
-      supportedBrowsers: getSupportedBrowsersForId(record.id),
-    })) as PublicInsurer[];
-
-    const insurers = dedupePublicInsurers(rawInsurers);
-
-    return { status: "ok", insurers };
+  } catch {
+    console.warn("[plannerdesk] DB query failed, falling back to mock data.");
+    return { status: "ok", insurers: getMockInsurers() };
   }
 }

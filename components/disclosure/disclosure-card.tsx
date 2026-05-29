@@ -41,6 +41,7 @@ export function DisclosureCard({
       <div className="mt-5 space-y-2">
         {entry.sourceUrl ? (
           <ExternalTabAnchor
+            aria-label={`${entry.title} 공식 출처 열기`}
             className={`${buttons.base} ${buttons.primary} w-full gap-2`}
             href={entry.sourceUrl}
           >
@@ -61,6 +62,7 @@ export function DisclosureCard({
           {onRequestCorrection ? (
             <button
               type="button"
+              aria-label={`${entry.title} 정보 수정 요청`}
               className={`${buttons.base} ${buttons.ghost} px-3 text-xs`}
               onClick={() => onRequestCorrection(insurerTerm)}
             >
@@ -70,7 +72,7 @@ export function DisclosureCard({
         </div>
       </div>
 
-      <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] leading-relaxed text-[#5B6470]">
+      <p className="mt-4 flex flex-wrap gap-x-1.5 gap-y-0.5 border-t border-[#E3DED4] pt-3 text-[10px] leading-relaxed text-[#5B6470]">
         최근 확인일 {formatVerifiedDate(entry.lastVerifiedAt)}
         <span className="mx-1.5 text-[#E3DED4]">·</span>
         <span className="text-[#5B6470]/90">{verificationMetaLabel(entry.verificationStatus)}</span>

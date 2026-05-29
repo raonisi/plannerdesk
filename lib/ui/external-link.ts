@@ -29,3 +29,9 @@ export const externalLinkTabProps = {
   rel: EXTERNAL_LINK_REL,
   target: EXTERNAL_LINK_TARGET,
 } as const;
+
+/** Screen-reader label for links opened in a new tab. */
+export function externalLinkAriaLabel(label: string): string {
+  const trimmed = label.replace(/\s*↗\s*$/, "").trim();
+  return `${trimmed} (새 탭에서 열림)`;
+}

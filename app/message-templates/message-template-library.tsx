@@ -262,6 +262,7 @@ export function MessageTemplateLibrary({
           <p className="text-xs font-bold text-[#17202A]">문구 검색</p>
           <div className="mt-1.5">
             <SearchBar
+              ariaLabel="문구 검색"
               onChange={setQuery}
               onClear={() => setQuery("")}
               placeholder="청구, 보완 요청, 해지 고민, 상담 일정 검색"
@@ -276,6 +277,7 @@ export function MessageTemplateLibrary({
           <p className={sectionEyebrow}>상황</p>
           <div className="mt-2">
             <CategoryPillBar
+              ariaLabel="상황 필터"
               categories={situationOptions}
               onSelect={(id) => setSituation(id as SituationFilter)}
               selectedId={situation}
@@ -286,6 +288,7 @@ export function MessageTemplateLibrary({
           <p className={sectionEyebrow}>톤</p>
           <div className="mt-2">
             <CategoryPillBar
+              ariaLabel="톤 필터"
               categories={toneOptions}
               onSelect={(id) => setTone(id as ToneFilter)}
               selectedId={tone}
@@ -382,14 +385,14 @@ function TemplateCard({
 
   async function handleCopy(style: CopyStyle) {
     const finalVal = convertMessageStyle(replacedOriginal, style);
-    await navigator.clipboard.writeText(finalVal);
+    await copyTextToClipboard(finalVal);
     onToast(copyToastMessages[style]);
   }
 
   const copyActions: Array<{ style: CopyStyle; label: string; primary?: boolean }> =
     [
       { style: "original", label: "기본 복사", primary: true },
-      { style: "kakao", label: "짧은 카톡 복사" },
+      { style: "kakao", label: "카카오톡 복사" },
       { style: "careful", label: "정중한 버전 복사" },
       { style: "professional", label: "전문가용 복사" },
     ];
@@ -468,4 +471,32 @@ function TemplateCard({
       </p>
     </article>
   );
+}
+
+async function copyTextToClipboard(text: string): Promise<void> {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  try {
+    document.execCommand("copy");
+    return;
+  } catch {
+    // Fall through to Clipboard API for browsers where execCommand is blocked.
+  } finally {
+    document.body.removeChild(textarea);
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    }
+  } catch {
+    return;
+  }
 }

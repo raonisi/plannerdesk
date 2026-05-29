@@ -175,13 +175,12 @@ export function DirectoryExplorer({
       </div>
 
       {/* 검색 영역 */}
-      <section className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">
+      <section className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 shadow-sm sm:p-6">
         <label className="block">
-          <span className="text-sm font-semibold text-[#303845]">
-            보험사 검색
-          </span>
+          <span className="text-sm font-bold text-[#0F1D2E]">보험사 검색</span>
           <input
-            className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
+            aria-label="보험사명·초성 검색"
+            className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-[#E3DED4] bg-white px-4 py-3 text-base text-[#17202A] outline-none transition placeholder:text-[#5B6470] focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#B9975B]/30"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="보험사명·초성 검색, 예: 삼성화재 또는 ㅅㅅㅎㅈ"
             type="search"
@@ -202,8 +201,8 @@ export function DirectoryExplorer({
         <div
           className={
             viewMode === "grid"
-              ? "grid gap-5 lg:grid-cols-2"
-              : "grid gap-4"
+              ? "grid grid-cols-1 gap-5 lg:grid-cols-2"
+              : "grid grid-cols-1 gap-4"
           }
         >
           {filteredInsurers.map((insurer) => (
@@ -306,8 +305,9 @@ function ViewModeButton({
 }) {
   return (
     <button
+      aria-label={`${label} 보기`}
       aria-pressed={active}
-      className={`min-h-9 rounded-full px-3 text-sm font-semibold transition ${
+      className={`min-h-10 rounded-full px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
         active
           ? "bg-[#102235] text-[#fbf7ee]"
           : "text-[#5f6670] hover:text-[#102235]"

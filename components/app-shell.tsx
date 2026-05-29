@@ -15,7 +15,7 @@ export function AppShell({
     <PageFrame>
       <div className={`flex min-h-screen flex-col ${className}`.trim()}>
         <Header />
-        <div className="flex-1">{children}</div>
+        <main className="flex min-w-0 flex-1 flex-col">{children}</main>
         <Footer />
       </div>
     </PageFrame>
