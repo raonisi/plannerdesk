@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import {
   ContentSection,
@@ -51,6 +52,17 @@ export default async function ClaimDocumentsPage() {
           )}
 
           <ClaimPracticeNotice />
+
+          <div className="mt-8 rounded-xl border border-[#E3DED4] bg-slate-50 p-5 text-center">
+            <p className="text-sm font-semibold text-slate-900">안내문이 필요하신가요?</p>
+            <p className="mt-1 text-xs text-slate-500 break-keep">보험금 판단 유보 문구나 필수 서류 안내 등 고객에게 보낼 수 있는 문구를 확인해 보세요.</p>
+            <Link
+              href="/message-templates"
+              className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#0F1D2E] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#17202A]"
+            >
+              고객 안내문 작성하기
+            </Link>
+          </div>
         </div>
       </ContentSection>
     </AppShell>

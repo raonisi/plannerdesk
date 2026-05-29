@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import {
   CollapsibleNotice,
@@ -34,6 +35,27 @@ export default function MessageTemplatesPage() {
               <li>카카오톡 등 메신저에 붙여넣기 전 최종 문구를 한 번 더 검토해 주세요.</li>
             </ul>
           </CollapsibleNotice>
+
+          <div className="mt-8 flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 rounded-xl border border-[#E3DED4] bg-slate-50 p-5 text-center">
+              <p className="text-sm font-semibold text-slate-900">청구서류 확인이 필요하신가요?</p>
+              <Link
+                href="/claim-documents"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-white border border-[#E3DED4] px-4 py-2 text-sm font-bold text-[#0F1D2E] transition hover:bg-slate-50"
+              >
+                청구서류 기준 확인하기
+              </Link>
+            </div>
+            <div className="flex-1 rounded-xl border border-[#E3DED4] bg-slate-50 p-5 text-center">
+              <p className="text-sm font-semibold text-slate-900">약관·공시 확인이 필요하신가요?</p>
+              <Link
+                href="/disclosure-links"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-white border border-[#E3DED4] px-4 py-2 text-sm font-bold text-[#0F1D2E] transition hover:bg-slate-50"
+              >
+                공시·약관 바로가기
+              </Link>
+            </div>
+          </div>
         </div>
       </ContentSection>
     </AppShell>

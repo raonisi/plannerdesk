@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, PieChart, Pie } from 'recharts';
 import {
   TrendingUp,
@@ -21,7 +22,7 @@ import {
 } from "@/lib/tool-display";
 import { EmptyState, SearchBar } from "@/components/content-page";
 
-type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder";
+type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder" | "internal";
 
 type ToolId =
   | "planner-stats"
@@ -71,7 +72,15 @@ type ToolId =
   | "fss-fine"
   | "efine-driver"
   | "payinfo"
-  | "credit4u";
+  | "credit4u"
+  | "claim-docs-guide"
+  | "claim-channel-guide"
+  | "claim-msg-guide"
+  | "disclosure-guide"
+  | "disclosure-msg-guide"
+  | "request-msg-guide"
+  | "hold-msg-guide"
+  | "privacy-msg-guide";
 
 type ToolItem = {
   id: ToolId;
@@ -80,6 +89,7 @@ type ToolItem = {
   kind: ToolKind;
   href?: string;
   source?: string;
+  auxText?: string;
 };
 
 type ToolGroup = {
@@ -516,6 +526,96 @@ const toolGroups: ToolGroup[] = [
       },
     ],
   },
+  {
+    title: "청구 실무",
+    description: "청구서류 확인부터 안내문 발송까지의 업무 흐름을 지원합니다.",
+    tools: [
+      {
+        id: "claim-docs-guide",
+        label: "보험사별 청구서류 확인",
+        description: "보험사별·청구 유형별로 필요한 서류와 공식 확인 기준을 정리합니다.",
+        kind: "internal",
+        href: "/claim-documents",
+        source: "청구서류센터",
+        auxText: "지급 여부와 지급 금액은 보험사 심사 후 결정됩니다.",
+      },
+      {
+        id: "claim-channel-guide",
+        label: "청구 접수 채널 확인",
+        description: "청구 팩스, 우편 주소, 공식 청구양식 확인이 필요한 경우 보험사 정보를 함께 확인합니다.",
+        kind: "internal",
+        href: "/directory",
+        source: "보험사 디렉토리",
+        auxText: "고객 의료자료는 PlannerDesk에 입력하거나 업로드하지 않습니다.",
+      },
+      {
+        id: "claim-msg-guide",
+        label: "청구 안내문 작성",
+        description: "고객에게 필요한 서류를 안내할 때 사용할 수 있는 중립 문구를 확인합니다.",
+        kind: "internal",
+        href: "/message-templates",
+        source: "고객문구센터",
+        auxText: "보험금 지급 가능 여부를 단정하지 않는 문구를 사용합니다.",
+      }
+    ]
+  },
+  {
+    title: "공시·약관 확인",
+    description: "고객에게 정확한 약관 기준을 안내하기 위한 업무 흐름을 지원합니다.",
+    tools: [
+      {
+        id: "disclosure-guide",
+        label: "약관·공시 공식 링크 확인",
+        description: "보험사 공식 홈페이지, 상품공시, 약관 링크를 기준으로 확인합니다.",
+        kind: "internal",
+        href: "/disclosure-links",
+        source: "공시링크센터",
+        auxText: "비공식 블로그·카페 링크를 확정 자료처럼 사용하지 않습니다.",
+      },
+      {
+        id: "disclosure-msg-guide",
+        label: "고객에게 약관 확인 안내",
+        description: "약관 확인이 필요한 고객에게 차분하게 안내할 수 있는 문구를 확인합니다.",
+        kind: "internal",
+        href: "/message-templates",
+        source: "고객문구센터",
+        auxText: "약관 해석을 단정하지 않고 공식 기준 확인으로 안내합니다.",
+      }
+    ]
+  },
+  {
+    title: "고객 안내문",
+    description: "업무 시 활용할 수 있는 차분하고 전문적인 고객 안내 문구 모음입니다.",
+    tools: [
+      {
+        id: "request-msg-guide",
+        label: "청구서류 요청 문구",
+        description: "고객에게 서류를 요청할 때 부담을 줄이고, 필요한 확인사항을 명확히 전달합니다.",
+        kind: "internal",
+        href: "/message-templates",
+        source: "고객문구센터",
+        auxText: "의료 진단 해석이나 손해사정 업무를 연상케 하는 표현은 피합니다.",
+      },
+      {
+        id: "hold-msg-guide",
+        label: "보험금 판단 유보 문구",
+        description: "“보험금 받을 수 있나요?”라는 질문에 지급 여부를 단정하지 않고 답하는 기준을 확인합니다.",
+        kind: "internal",
+        href: "/message-templates",
+        source: "고객문구센터",
+        auxText: "보험사별 기준 확인이 필요함을 안내합니다.",
+      },
+      {
+        id: "privacy-msg-guide",
+        label: "개인정보·의료자료 금지 안내",
+        description: "주민등록번호, 진단서, 처방전 등 민감자료를 플랫폼에 입력하지 않도록 안내합니다.",
+        kind: "internal",
+        href: "/message-templates",
+        source: "고객문구센터",
+        auxText: "원본 자료는 별도의 안전한 채널로 수신해야 합니다.",
+      }
+    ]
+  }
 ];
 
 
@@ -913,6 +1013,14 @@ const toolToCategoryId: Record<ToolId, string> = {
   "efine-driver": "docs",
   "payinfo": "docs",
   "credit4u": "docs",
+  "claim-docs-guide": "claim",
+  "claim-channel-guide": "claim",
+  "claim-msg-guide": "claim",
+  "disclosure-guide": "search",
+  "disclosure-msg-guide": "search",
+  "request-msg-guide": "docs",
+  "hold-msg-guide": "docs",
+  "privacy-msg-guide": "docs",
 };
 
 const PINNED_TOOL_IDS: ToolId[] = [
@@ -1178,6 +1286,7 @@ function ToolPanel({ id }: { id: ToolId }) {
   if (copy.kind === "search") return <SearchTool id={id} />;
   if (copy.kind === "calculator") return <CalculatorTool id={id} />;
   if (copy.kind === "newsletter") return <NewsletterTool copy={copy} />;
+  if (copy.kind === "internal") return <InternalTool copy={copy} />;
   return <ExternalTool copy={copy} />;
 }
 
@@ -3570,3 +3679,24 @@ function PanelShell({
   );
 }
 
+function InternalTool({ copy }: { copy: ToolItem }) {
+  return (
+    <PanelShell description={copy.description} id={copy.id} title={copy.label}>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+        <p className="text-xs font-semibold text-indigo-600">내부 업무 이동</p>
+        <p className="mt-1 text-lg font-semibold text-slate-900">{copy.source}</p>
+        {copy.auxText && (
+          <p className="mt-2 break-keep text-sm leading-6 text-slate-500 font-medium">
+            {copy.auxText}
+          </p>
+        )}
+        <Link
+          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-indigo-600 bg-indigo-600 px-5 text-sm font-semibold !text-slate-50 transition hover:bg-indigo-700"
+          href={copy.href || ""}
+        >
+          해당 업무로 이동
+        </Link>
+      </div>
+    </PanelShell>
+  );
+}
