@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import {
   useCallback,
   useEffect,
@@ -272,7 +274,6 @@ export function InsurerActionCard({
   const mailAddress = insurer.registeredMailAddress || insurer.mailingAddress;
   const claimFax = claimFaxDisplay(insurer);
   const disclosureLinks = getDisclosureLinksForInsurer(insurer.id);
-  const primaryDisclosureHref = disclosureLinks.productDisclosure?.sourceUrl ?? insurer.termsUrl;
 
   return (
     <article className="group/insurer relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-white shadow-[0_4px_20px_rgba(15,29,46,0.02)] transition-all hover:shadow-[0_10px_30px_rgba(15,29,46,0.06)] hover:-translate-y-0.5">
@@ -290,37 +291,35 @@ export function InsurerActionCard({
           onToggleFavorite={onToggleFavorite}
         />
 
-        {/* 4대 핵심 액션 버튼 모음 */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          {/* 1. 전산접속 */}
+        <div className="mt-6 space-y-4">
+          {/* 1순위: 전산 업무 */}
           <div className="flex flex-col">
             {accessHref ? (
               <ExternalTabAnchor
                 aria-label={`${insurer.name} 전산접속`}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#0F1D2E] text-xs font-bold !text-white shadow-sm transition hover:bg-[#1C3552] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#0F1D2E] text-sm font-bold !text-white shadow-sm transition hover:bg-[#1C3552] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
                 href={accessHref}
               >
-                전산접속 ↗
+                전산 접속 ↗
               </ExternalTabAnchor>
             ) : (
-              <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-xs font-semibold text-slate-400">
+              <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
                 전산 미지원
               </span>
             )}
             {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 && (
-              <span className="mt-1 text-[10px] text-slate-400 text-center">
+              <span className="mt-1 text-[11px] text-slate-500 text-center font-medium">
                 ({insurer.supportedBrowsers.map((b) => (b === "chrome" ? "크롬" : "엣지")).join("/")} 권장)
               </span>
             )}
           </div>
 
-          {/* 2. 상세 실무 정보 (자체 토글 또는 페이지 이동) */}
           <button
             type="button"
             aria-expanded={detailedOpen}
             aria-label={`${insurer.name} 상세 실무 정보 ${detailedOpen ? "닫기" : "열기"}`}
             onClick={() => setDetailedOpen(!detailedOpen)}
-            className={`inline-flex min-h-12 w-full items-center justify-center rounded-lg border text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+            className={`inline-flex min-h-12 w-full items-center justify-center rounded-lg border text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
               detailedOpen
                 ? "border-[#B9975B] bg-[#F7F4EE] text-[#B9975B]"
                 : "border-[#E3DED4] bg-white text-[#0F1D2E] hover:bg-slate-50"
@@ -328,139 +327,190 @@ export function InsurerActionCard({
           >
             상세 실무 정보 {detailedOpen ? "닫기 ▲" : "열기 ▼"}
           </button>
-
-          {/* 3. 고객센터 / 팩스 */}
-          <div className="col-span-2 sm:col-span-1">
-            {insurer.customerCenterPhone ? (
-              <a
-                href={telHref(insurer.customerCenterPhone) || "#"}
-                aria-label={`${insurer.name} 고객센터 전화 ${insurer.customerCenterPhone}`}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
-              >
-                고객센터: {insurer.customerCenterPhone}
-              </a>
-            ) : (
-              <span className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-xs font-semibold text-slate-400">
-                고객센터 미지원
-              </span>
-            )}
-          </div>
-
-          {/* 4. 공시·약관 */}
-          <div className="col-span-2 sm:col-span-1">
-            {primaryDisclosureHref ? (
-              <ExternalTabAnchor
-                aria-label={`${insurer.name} 공시·약관 확인`}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-bold text-[#0F1D2E] hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
-                href={primaryDisclosureHref}
-              >
-                공시·약관 확인 ↗
-              </ExternalTabAnchor>
-            ) : (
-              <span className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-xs font-semibold text-slate-400">
-                자료 준비 중
-              </span>
-            )}
-          </div>
         </div>
 
         {/* 아코디언 상세 정보 영역 (기본 닫힘) */}
         {detailedOpen && (
-          <div className="mt-6 space-y-6 border-t border-[#E3DED4] pt-6 animate-in fade-in duration-200">
-            {/* 1) 상세 연락처 및 팩스 요약 표 */}
+          <div className="mt-6 space-y-8 border-t border-[#E3DED4] pt-6 animate-in fade-in duration-200">
+            {/* 안전 안내문구 */}
+            <div className="rounded-xl border border-[#c5b08a] bg-[#fff9ed] p-4 text-sm font-medium leading-relaxed text-[#7a612d]">
+              <ul className="list-inside list-disc space-y-1">
+                <li>보험사별 링크와 연락처는 공식 출처 기준으로 확인 후 사용하세요.</li>
+                <li>PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않습니다.</li>
+                <li>고객 개인정보와 의료자료는 PlannerDesk에 입력하지 마세요.</li>
+              </ul>
+            </div>
+
+            {/* 2순위: 상담·문의 */}
             <section className="space-y-3">
-              <h4 className="text-xs font-bold text-[#0F1D2E] flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
-                실무 지원 및 접수 정보
+              <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
+                상담·문의
               </h4>
-              <div className="overflow-hidden rounded-xl border border-[#E3DED4] bg-[#F8F7F3] text-xs">
-                <div className="grid grid-cols-2 border-b border-[#E3DED4] p-3">
-                  <span className="font-semibold text-slate-500">고객 콜센터</span>
-                  <span className="font-bold text-[#0F1D2E] text-right">{insurer.customerCenterPhone || "-"}</span>
+              <div className="overflow-hidden rounded-xl border border-[#E3DED4] bg-white text-sm">
+                <div className="grid grid-cols-[100px_1fr] border-b border-[#E3DED4] p-3 items-center">
+                  <span className="font-semibold text-slate-500">고객센터</span>
+                  <div className="text-right">
+                    {insurer.customerCenterPhone ? (
+                      <a
+                        href={telHref(insurer.customerCenterPhone) || "#"}
+                        className="font-bold text-[#0F1D2E] underline decoration-slate-300 underline-offset-4 hover:decoration-[#0F1D2E]"
+                      >
+                        {insurer.customerCenterPhone}
+                      </a>
+                    ) : (
+                      <span className="text-slate-400 font-medium">정보 없음</span>
+                    )}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 border-b border-[#E3DED4] p-3">
-                  <span className="font-semibold text-slate-500">설계사 전산헬프</span>
-                  <span className="font-bold text-[#0F1D2E] text-right">{insurer.helpdeskPhone || "-"}</span>
+                <div className="grid grid-cols-[100px_1fr] border-b border-[#E3DED4] p-3 items-center">
+                  <span className="font-semibold text-slate-500">헬프데스크</span>
+                  <div className="text-right">
+                    {insurer.helpdeskPhone ? (
+                      <a
+                        href={telHref(insurer.helpdeskPhone) || "#"}
+                        className="font-bold text-[#0F1D2E] underline decoration-slate-300 underline-offset-4 hover:decoration-[#0F1D2E]"
+                      >
+                        {insurer.helpdeskPhone}
+                      </a>
+                    ) : (
+                      <span className="text-slate-400 font-medium">정보 없음</span>
+                    )}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 border-b border-[#E3DED4] p-3">
-                  <span className="font-semibold text-slate-500">모니터링 콜센터</span>
-                  <span className="font-bold text-[#0F1D2E] text-right">{insurer.callMonitoringPhone || "-"}</span>
-                </div>
-                <div className="grid grid-cols-2 p-3">
-                  <span className="font-semibold text-slate-500">청구 팩스번호</span>
-                  <span className="font-bold text-[#0F1D2E] text-right">{claimFax.primary || "-"}</span>
+                <div className="grid grid-cols-[100px_1fr] p-3 items-center bg-[#F8F7F3]">
+                  <span className="font-semibold text-slate-500">모니터링</span>
+                  <div className="text-right">
+                    {insurer.callMonitoringPhone ? (
+                      <a
+                        href={telHref(insurer.callMonitoringPhone) || "#"}
+                        className="font-bold text-[#0F1D2E] underline decoration-slate-300 underline-offset-4 hover:decoration-[#0F1D2E]"
+                      >
+                        {insurer.callMonitoringPhone}
+                      </a>
+                    ) : (
+                      <span className="text-slate-400 font-medium">정보 없음</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </section>
 
-            {/* 2) 등기 및 카드납 간편 조회 */}
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setCardPaymentOpen(true)}
-                className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30"
-              >
-                <span className="text-xs font-bold text-slate-500">카드납 가능 여부</span>
-                <span className="text-xs font-bold text-[#0F1D2E] bg-slate-100 px-2 py-1 rounded">
-                  {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
-                </span>
-              </button>
+            {/* 3순위: 청구 접수 */}
+            <section className="space-y-3">
+              <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
+                청구 접수
+              </h4>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4">
+                  <span className="text-xs font-semibold text-slate-500">청구 팩스</span>
+                  <span className={`mt-1 text-sm font-bold ${claimFax.primary ? "text-[#0F1D2E]" : "text-slate-400"}`}>
+                    {claimFax.primary || "정보 없음"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  disabled={!mailAddress}
+                  onClick={() => setMailAddressOpen(true)}
+                  className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="text-xs font-semibold text-slate-500">우편 서류 접수처</span>
+                  <span className={`mt-1 text-sm font-bold underline ${mailAddress ? "text-[#B9975B]" : "text-slate-400 no-underline"}`}>
+                    {mailAddress ? "주소 확인" : "정보 없음"}
+                  </span>
+                </button>
+              </div>
 
-              <button
-                type="button"
-                disabled={!mailAddress}
-                onClick={() => setMailAddressOpen(true)}
-                className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="text-xs font-bold text-slate-500">우편 서류 접수처</span>
-                <span className="text-xs font-bold text-[#B9975B] underline">
-                  {mailAddress ? "주소 확인" : "정보 없음"}
-                </span>
-              </button>
-            </div>
+              {claimItems.length > 0 ? (
+                <div className="mt-4 space-y-3">
+                  <p className="text-xs font-semibold text-slate-500">필요 청구서류 양식 ({claimItems.length}건)</p>
+                  <InsurerClaimGuidePanel claimItems={claimItems} insurer={insurer} />
+                </div>
+              ) : null}
 
-            {/* 3) 청구서류 PDF 목록 */}
-            {claimItems.length > 0 && (
-              <section className="space-y-3">
-                <h4 className="text-xs font-bold text-[#0F1D2E] flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
-                  필요 청구서류 양식 ({claimItems.length}건)
-                </h4>
-                <InsurerClaimGuidePanel claimItems={claimItems} insurer={insurer} />
-              </section>
-            )}
+              <div className="pt-2">
+                <Link
+                  href="/claim-documents"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                >
+                  청구서류 확인 바로가기 ↗
+                </Link>
+              </div>
+            </section>
 
-            {/* 4) 상품 공시 및 개별 약관 링크 */}
-            <section className="space-y-3 border-t border-[#E3DED4] pt-4">
-              <h4 className="text-xs font-bold text-[#0F1D2E] flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
-                세부 공식 공시 링크
+            {/* 4순위: 약관·공시 */}
+            <section className="space-y-3 border-t border-[#E3DED4] pt-6">
+              <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
+                약관·공시
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
                 {disclosureLinks.productDisclosure?.sourceUrl ? (
                   <ExternalTabAnchor
-                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] hover:text-[#B9975B]"
                     href={disclosureLinks.productDisclosure.sourceUrl}
                   >
                     공식 상품공시실 ↗
                   </ExternalTabAnchor>
-                ) : null}
+                ) : (
+                  <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
+                    상품공시 자료 없음
+                  </span>
+                )}
+                
                 {disclosureLinks.policyTerms?.sourceUrl ? (
                   <ExternalTabAnchor
-                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] hover:text-[#B9975B]"
                     href={disclosureLinks.policyTerms.sourceUrl}
                   >
                     공식 통합약관실 ↗
                   </ExternalTabAnchor>
-                ) : null}
+                ) : (
+                  <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
+                    약관 자료 없음
+                  </span>
+                )}
               </div>
+              <div className="pt-2 flex flex-wrap gap-2">
+                <Link
+                  href="/disclosure-links"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                >
+                  모든 공시·약관 바로가기 ↗
+                </Link>
+                <Link
+                  href="/work-tools"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                >
+                  업무 허브 바로가기 ↗
+                </Link>
+              </div>
+            </section>
+
+            {/* 5순위: 카드납 정보 */}
+            <section className="space-y-3 border-t border-[#E3DED4] pt-6">
+              <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
+                카드납 정보
+              </h4>
+              <button
+                type="button"
+                onClick={() => setCardPaymentOpen(true)}
+                className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30"
+              >
+                <span className="text-sm font-bold text-slate-500">카드납 가능 여부</span>
+                <span className="text-xs font-bold text-[#0F1D2E] bg-slate-100 px-2.5 py-1.5 rounded">
+                  {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
+                </span>
+              </button>
             </section>
           </div>
         )}
 
         {/* 정보 수정 요청 */}
         {onRequestCorrection ? (
-          <div className="flex justify-end pt-3 mt-2 border-t border-slate-100">
+          <div className="flex justify-end pt-3 mt-4 border-t border-slate-100">
             <button
               aria-label={`${insurer.name} 수정 요청`}
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition"
@@ -503,9 +553,16 @@ function CardHeader({
         <div className="flex min-w-0 items-start gap-4">
           <InsurerLogo insurer={insurer} />
           <div className="min-w-0 pt-1">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
-              {CATEGORY_LABELS[insurer.category]}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+                {CATEGORY_LABELS[insurer.category]}
+              </p>
+              {insurer.verificationStatus === "needs_review" && (
+                <span className="rounded-md bg-[#fff9ed] px-1.5 py-0.5 text-[10px] font-semibold text-[#c5b08a] border border-[#c5b08a]">
+                  검수 필요
+                </span>
+              )}
+            </div>
             <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
               {insurer.name}
             </h2>
