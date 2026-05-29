@@ -39,6 +39,7 @@ export default async function ClaimDocumentsPage() {
   const documents = result.status === "ok" ? result.data : [];
   const visibleDocuments =
     documents.length > 0 ? documents : claimDocumentCandidateFallback;
+  const dbError = result.status === "error" && claimDocumentCandidateFallback.length === 0;
 
   return (
     <PageFrame>
@@ -54,7 +55,7 @@ export default async function ClaimDocumentsPage() {
             {t.subcopy}
           </p>
 
-          {result.status === "error" ? (
+          {dbError ? (
             <EmptyState
               title="청구서류 정보를 불러오지 못했습니다."
               description="잠시 후 다시 확인해 주세요."

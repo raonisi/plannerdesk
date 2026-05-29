@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
@@ -478,14 +479,14 @@ function FavoriteButton({
 }) {
   const label = isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가";
   const toneClass = isFavorite
-    ? "border-[#aa8137] bg-[#fff7e6] text-[#7a612d]"
-    : "border-[#d9c9a8] bg-white text-[#5f6670] hover:border-[#aa8137] hover:text-[#7a612d]";
+    ? "border-amber-200 bg-amber-50 text-amber-500 hover:bg-amber-100 hover:border-amber-300"
+    : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600";
 
   return (
     <button
       aria-label={label}
       aria-pressed={isFavorite}
-      className={`inline-flex h-9 min-w-9 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] ${toneClass}`}
+      className={`inline-flex h-9 min-w-9 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${toneClass}`}
       onClick={() => onToggle(id)}
       title={label}
       type="button"
@@ -533,12 +534,12 @@ function ClaimGuideToggleButton({
     <button
       aria-controls={panelId}
       aria-expanded={isOpen}
-      className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-slate-900 bg-slate-900 px-5 py-3 text-left text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+      className="inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-lg border border-indigo-600 bg-indigo-600 px-5 py-3 text-left text-sm font-bold text-white shadow-md shadow-indigo-600/10 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
       onClick={onToggle}
       type="button"
     >
       <span className="break-keep">청구안내 보기</span>
-      <span className="shrink-0 text-xs font-semibold text-indigo-300">
+      <span className="shrink-0 text-xs font-semibold text-indigo-200">
         {count}건 {isOpen ? "▲" : "▼"}
       </span>
     </button>
@@ -565,7 +566,7 @@ function ActionLink({ href, label, tone = "default" }: ActionLinkProps) {
 
   const toneClass =
     tone === "primary"
-      ? "border-slate-900 bg-slate-900 !text-white shadow-md hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg"
+      ? "border-indigo-600 bg-indigo-600 !text-white shadow-md shadow-indigo-600/10 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 active:translate-y-0"
       : "border-slate-300 bg-white !text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:!text-slate-900";
 
   return (
@@ -590,9 +591,6 @@ function DisclosureSection({ insurer }: { insurer: PublicInsurer }) {
   const hasDisclosureData =
     disclosureLinks.productDisclosure || disclosureLinks.policyTerms;
 
-  // If disclosure-links has matched data, show both product disclosure and
-  // policy terms links.  Otherwise fall back to insurer.termsUrl for backward
-  // compatibility.
   if (hasDisclosureData) {
     return (
       <div className={groupDividerClass}>
@@ -628,11 +626,11 @@ function PhoneRow({ label, value }: { label: string; value: string | null }) {
   const hasValue = Boolean(value && value.trim().length > 0);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
+    <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:bg-white hover:border-slate-200 hover:shadow-sm transition-all duration-200">
       <p className="text-xs font-bold text-slate-500">{label}</p>
       {hasValue && href ? (
         <a
-          className="mt-1 inline-flex min-h-10 items-center text-[17px] font-bold text-slate-900 underline decoration-indigo-400 underline-offset-4 hover:text-indigo-600 transition-colors"
+          className="mt-1 inline-flex min-h-10 items-center text-[17px] font-bold text-slate-900 underline decoration-indigo-400 decoration-2 underline-offset-4 hover:text-indigo-600 transition-colors"
           href={href}
           rel="noopener noreferrer"
         >
@@ -676,7 +674,7 @@ function DisplayRow({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
+    <div className="rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-4 hover:bg-white hover:border-slate-200 hover:shadow-sm transition-all duration-200">
       <p className="text-xs font-bold text-slate-500">{label}</p>
       <p className="mt-1 break-keep text-[17px] font-bold text-slate-900">
         {value}
@@ -703,7 +701,7 @@ function InfoActionRow({
 }) {
   return (
     <button
-      className="flex min-h-12 items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left transition-all hover:border-slate-400 hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50/60 disabled:text-slate-400"
+      className="flex min-h-12 items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3.5 text-left transition-all hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50/60 disabled:text-slate-400"
       disabled={disabled}
       onClick={onClick}
       type="button"
@@ -731,6 +729,12 @@ function DialogFrame({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -779,42 +783,45 @@ function DialogFrame({
     };
   }, [onClose, open]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       aria-labelledby={titleId}
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#102235]/45 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 transition-opacity duration-200"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
       role="dialog"
     >
       <div
-        className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl border border-[#d9c9a8] bg-white shadow-[0_30px_80px_rgba(16,34,53,0.22)]"
+        className="max-h-[85vh] w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200"
         ref={dialogRef}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-[#e7ddc9] px-5 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-6 py-4.5">
           <h3
-            className="break-keep text-base font-semibold text-[#102235]"
+            className="break-keep text-base sm:text-lg font-bold text-slate-900"
             id={titleId}
           >
             {title}
           </h3>
           <button
             aria-label="닫기"
-            className="rounded-full px-2 py-1 text-sm font-semibold text-[#5f6670] transition hover:bg-[#f7f1e5]"
+            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
             onClick={onClose}
             ref={closeButtonRef}
             type="button"
           >
-            닫기
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
-        <div className="max-h-[65vh] overflow-y-auto px-5 py-4">{children}</div>
+        <div className="max-h-[65vh] overflow-y-auto px-6 py-5 flex-1">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -835,25 +842,25 @@ function CardPaymentDialog({
       open={open}
       title={`${insurer.name} 카드납 정보`}
     >
-      <p className="break-keep text-sm leading-6 text-[#5f6670]">
+      <p className="break-keep text-sm leading-relaxed text-slate-500">
         참고용으로만 사용하고, 고객 안내 전 보험사 공식 기준을 다시 확인해 주세요.
       </p>
       {rows.length > 0 ? (
-        <dl className="mt-4 grid gap-3 text-sm">
+        <dl className="mt-5 space-y-3.5 text-sm">
           {rows.map((row) => (
             <div
-              className="grid gap-1 rounded-lg border border-[#e7ddc9] bg-[#fbf7ee] p-3 sm:grid-cols-[7rem_1fr]"
+              className="grid gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-4 sm:grid-cols-[8rem_1fr] hover:bg-slate-50 hover:border-slate-200 transition-all duration-200"
               key={`${row.label}-${row.value}`}
             >
-              <dt className="font-semibold text-[#7a612d]">{row.label}</dt>
-              <dd className="whitespace-pre-wrap break-keep leading-6 text-[#303845]">
+              <dt className="font-bold text-slate-700 sm:pt-0.5">{row.label}</dt>
+              <dd className="whitespace-pre-wrap break-keep leading-relaxed text-slate-600">
                 {row.value}
               </dd>
             </div>
           ))}
         </dl>
       ) : (
-        <p className="mt-4 break-keep text-sm leading-6 text-[#8b7660]">
+        <p className="mt-5 break-keep text-sm leading-relaxed text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl bg-slate-50/30">
           {DIRECTORY_TEXT.missing}
         </p>
       )}
@@ -892,20 +899,24 @@ function MailAddressDialog({
       title={`${insurerName} 등기우편 주소`}
     >
       {address ? (
-        <div className="space-y-4">
-          <p className="whitespace-pre-wrap break-keep rounded-lg border border-[#e7ddc9] bg-[#fbf7ee] p-4 text-sm font-semibold leading-6 text-[#303845]">
+        <div className="space-y-5">
+          <div className="whitespace-pre-wrap break-keep rounded-xl border border-slate-200 bg-slate-50 p-5 text-[15px] font-semibold leading-relaxed text-slate-800 shadow-inner">
             {address}
-          </p>
+          </div>
           <button
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#173f36] bg-[#173f36] px-4 text-sm font-semibold text-[#fbf7ee] transition hover:bg-[#0f2f28]"
+            className={`inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
+              copied
+                ? "bg-emerald-600 shadow-emerald-600/10 hover:bg-emerald-700 hover:shadow-emerald-600/20"
+                : "bg-indigo-600 shadow-indigo-600/10 hover:bg-indigo-700 hover:shadow-indigo-600/20"
+            }`}
             onClick={copyAddress}
             type="button"
           >
-            {copied ? "복사됨" : "주소 복사"}
+            {copied ? "주소 복사 완료!" : "주소 복사하기"}
           </button>
         </div>
       ) : (
-        <p className="break-keep text-sm leading-6 text-[#8b7660]">
+        <p className="break-keep text-sm leading-relaxed text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl bg-slate-50/30">
           {DIRECTORY_TEXT.missing}
         </p>
       )}

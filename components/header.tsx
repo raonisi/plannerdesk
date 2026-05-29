@@ -67,8 +67,9 @@ export function Header() {
         </nav>
 
         <Link
-          className="hidden min-h-10 items-center justify-center rounded-full bg-slate-900 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-md sm:inline-flex"
+          className="hidden min-h-10 items-center justify-center rounded-full bg-slate-900 px-5 py-2 text-sm font-bold !text-white shadow-sm transition-all hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow-md sm:inline-flex"
           href="/message-templates"
+          style={{ color: "white" }}
         >
           {label.findMessage}
         </Link>
@@ -133,7 +134,7 @@ function MobileNavLink({
       aria-current={isActive ? "page" : undefined}
       className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
         isActive
-          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+          ? "border-slate-900 bg-slate-900 !text-white shadow-sm"
           : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       }`}
       href={href}
