@@ -563,11 +563,6 @@ function CardHeader({
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
                 {CATEGORY_LABELS[insurer.category]}
               </p>
-              {insurer.verificationStatus === "needs_review" && (
-                <span className="rounded-md bg-[#fff9ed] px-1.5 py-0.5 text-[10px] font-semibold text-[#c5b08a] border border-[#c5b08a]">
-                  검수 필요
-                </span>
-              )}
             </div>
             <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
               {insurer.name}

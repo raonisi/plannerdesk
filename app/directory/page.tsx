@@ -20,8 +20,7 @@ const t = {
     "공식 확인 후 업데이트되는 정보부터 순차적으로 반영됩니다.",
   footerNote:
     "보험사별 링크와 연락처는 공식 출처 확인 후 업데이트됩니다.",
-  verificationNote:
-    "“검수 완료” 배지는 공식 출처 검수가 끝난 정보입니다. “검수 필요” 배지가 붙은 보험사는 행동 전 공식 출처를 다시 확인해 주세요.",
+
   emptyTitle: "공개된 보험사 정보가 아직 없습니다.",
   emptyDescription:
     "관리자 검수 후 순차적으로 업데이트됩니다.",
@@ -80,9 +79,6 @@ export default async function DirectoryPage() {
 
           <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
             {t.footerNote}
-          </p>
-          <p className="break-keep border-l border-[#c8d2dc] pl-4 text-sm leading-6 text-[#5f6670]">
-            {t.verificationNote}
           </p>
         </div>
       </ContentSection>
