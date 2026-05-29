@@ -284,7 +284,7 @@ export function MajorWorkLinks() {
             </p>
             <div className="pt-4">
               <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-bold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-bold !text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
                 href="/work-tools"
               >
                 업무 도구 열기
