@@ -31,6 +31,7 @@ export interface KnowledgeSeedItem {
   riskLevel: KnowledgeRiskLevel;
   aiUsable: boolean;
   tags: string[];
+  workflowLabel?: string;
 }
 
 export const KNOWLEDGE_CATEGORIES: KnowledgeCategory[] = [
@@ -56,6 +57,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "low",
     aiUsable: false,
     tags: ["전산", "브라우저", "헬프데스크", "링크오류"],
+    workflowLabel: "운영 안전",
   },
   {
     id: "knowledge-2",
@@ -68,6 +70,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "low",
     aiUsable: false,
     tags: ["헬프데스크", "고객센터", "전산"],
+    workflowLabel: "운영 안전",
   },
   {
     id: "knowledge-3",
@@ -80,6 +83,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "medium",
     aiUsable: false,
     tags: ["청구서류", "공식출처", "보험사확인"],
+    workflowLabel: "청구 실무",
   },
   {
     id: "knowledge-4",
@@ -92,6 +96,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "high",
     aiUsable: false,
     tags: ["실손", "청구서류", "고객안내"],
+    workflowLabel: "청구 실무",
   },
   {
     id: "knowledge-5",
@@ -104,6 +109,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "medium",
     aiUsable: false,
     tags: ["약관", "공시", "공식링크"],
+    workflowLabel: "공시·약관",
   },
   {
     id: "knowledge-6",
@@ -116,6 +122,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "high",
     aiUsable: false,
     tags: ["고객안내문", "청구서류", "응대문구"],
+    workflowLabel: "고객 안내",
   },
   {
     id: "knowledge-7",
@@ -129,6 +136,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "high",
     aiUsable: false,
     tags: ["보험금판단", "고객응대", "안전문구"],
+    workflowLabel: "고객 안내",
   },
   {
     id: "knowledge-8",
@@ -142,6 +150,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "high",
     aiUsable: false,
     tags: ["해지", "감액", "계약유지"],
+    workflowLabel: "계약 유지",
   },
   {
     id: "knowledge-9",
@@ -155,6 +164,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "high",
     aiUsable: false,
     tags: ["고지", "심사", "투약", "건강고지"],
+    workflowLabel: "고지·심사",
   },
   {
     id: "knowledge-10",
@@ -167,6 +177,7 @@ export const KNOWLEDGE_SEED_ITEMS: KnowledgeSeedItem[] = [
     riskLevel: "low",
     aiUsable: false,
     tags: ["검수상태", "사용법", "신뢰도"],
+    workflowLabel: "운영 안전",
   },
 ];
 

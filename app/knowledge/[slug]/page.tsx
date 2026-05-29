@@ -53,15 +53,28 @@ export default async function KnowledgeDetailPage({
       <Header />
       <ContentSection>
         <div className="space-y-8">
-          <Link
-            className="inline-flex min-h-10 items-center rounded-full border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
-            href="/knowledge"
-          >
-            지식 아카이브로 돌아가기
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              className="inline-flex min-h-10 items-center rounded-full border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+              href="/knowledge"
+            >
+              지식 아카이브로 돌아가기
+            </Link>
+            <Link
+              className="inline-flex min-h-10 items-center rounded-full border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+              href="/work-tools"
+            >
+              업무 허브로 돌아가기
+            </Link>
+          </div>
 
           <section className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-6 shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
             <div className="flex flex-wrap items-center gap-2">
+              {document.workflowLabel && (
+                <span className="rounded-full bg-[#102235] px-3 py-1 text-xs font-semibold text-white">
+                  {document.workflowLabel}
+                </span>
+              )}
               <span className="rounded-full border border-[#d9c9a8] bg-white px-3 py-1 text-xs font-semibold text-[#7a612d]">
                 {document.category}
               </span>
@@ -101,15 +114,14 @@ export default async function KnowledgeDetailPage({
               전에는 확정 자료로 사용하지 마세요.
             </p>
             {document.status === "needs_review" ? (
-              <p className="mt-2 break-keep text-sm leading-6 text-[#7a612d]">
-                검수 필요: 공식 출처 또는 관리자 검수 전 자료입니다.
-              </p>
+              <div className="mt-3 rounded-lg border border-[#c5b08a] bg-[#fff9ed] p-3 text-sm font-semibold leading-6 text-[#7a612d]">
+                검수 필요: 공식 출처 또는 관리자 검수 전 자료이므로 확정 자료로 사용하지 마세요.
+              </div>
             ) : null}
             {!document.aiUsable ? (
-              <p className="mt-2 break-keep text-sm leading-6 text-[#5f6670]">
-                AI 참조 제외: 검수 완료 전에는 AI 답변 보조의 근거 문서로
-                사용하지 않습니다.
-              </p>
+              <div className="mt-2 rounded-lg border border-[#d6d8dc] bg-[#f4f5f6] p-3 text-sm font-semibold leading-6 text-[#5f6670]">
+                AI 참조 제외: 검수 완료 전에는 AI 답변 보조의 근거 문서로 사용하지 않습니다.
+              </div>
             ) : null}
           </aside>
 
