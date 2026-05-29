@@ -313,7 +313,7 @@ export function InsurerActionCard({
             )}
           </div>
 
-          {/* 2. 청구안내 (자체 토글 또는 페이지 이동) */}
+          {/* 2. 상세 실무 정보 (자체 토글 또는 페이지 이동) */}
           <button
             onClick={() => setDetailedOpen(!detailedOpen)}
             className={`inline-flex min-h-12 items-center justify-center rounded-lg border text-xs font-bold transition ${
@@ -322,7 +322,7 @@ export function InsurerActionCard({
                 : "border-[#E3DED4] bg-white text-[#0F1D2E] hover:bg-slate-50"
             }`}
           >
-            청구안내 {detailedOpen ? "닫기 ▲" : "열기 ▼"}
+            상세 실무 정보 {detailedOpen ? "닫기 ▲" : "열기 ▼"}
           </button>
 
           {/* 3. 고객센터 / 팩스 */}
