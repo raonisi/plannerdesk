@@ -8,92 +8,93 @@ import { customerMessageTemplates } from "@/lib/content";
 import { MessageTemplateLibrary } from "./message-template-library";
 
 const t = {
-  title: "고객 안내 문구",
+  title: "고객 안내 문구 라이브러리",
   note:
-    "현재 문구는 실무 참고용 초안입니다. 실제 고객 발송 전 상황과 상품 기준에 맞게 반드시 수정해 주세요.",
-  workflowTitle: "고객 발송 전 확인 순서",
+    "※ 제공되는 안내 문구는 실무 참고용 템플릿입니다. 실제 고객 발송 전에 고객별 특이사항과 상품 기준을 반드시 반영해 주시기 바랍니다.",
+  workflowTitle: "고객 안내문 복사 및 발송 순서",
   claim: "청구서류 확인",
   directory: "보험사 바로가기"
 };
 
 const workflowSteps = [
-  "Choose the customer situation.",
-  "Review the tone.",
-  "Copy the draft.",
-  "Edit for the customer's real context.",
-  "Check product and insurer standards before sending."
+  "고객이 처한 보험 청구 또는 문의 상황을 선택합니다.",
+  "상단에 고객명과 설계사명을 입력하여 문구를 실시간 치환합니다.",
+  "상황에 맞게 기본/카톡/정중/전문 버전 버튼을 눌러 복사합니다.",
+  "카카오톡이나 메신저 창을 열고 붙여넣기(Ctrl+V) 하여 발송합니다.",
+  "최종 발송 전 개별 상품 약관 및 한도를 반드시 확인합니다."
 ];
 
 export default function MessageTemplatesPage() {
   return (
-    <main className="min-h-screen bg-[#f7f1e5] text-[#18202b]">
-      <Header />
-      <section className="border-b border-[#d9c9a8] bg-[#102235] text-[#fbf7ee]">
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#d8c08f]">
-            Customer Message Template Library
-          </p>
-          <h1 className="mt-4 break-keep text-4xl font-semibold leading-tight sm:text-5xl">
-            {t.title}
-          </h1>
-          <p className="mt-5 max-w-3xl break-keep text-base leading-7 text-[#d8d0c3] sm:text-lg">
-            A field-ready draft library for finding customer-facing message
-            templates, reviewing tone, and editing before sending.
-          </p>
-          <p className="mt-6 max-w-3xl border-l border-[#d8c08f] pl-4 text-sm leading-6 text-[#eee4d2]">
-            {t.note}
-          </p>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl space-y-8 px-5 py-10 sm:px-8 lg:px-10">
-        <MessageTemplateLibrary templates={customerMessageTemplates} />
-        <PlannerWorkflow />
-        <MvpModuleLinks
-          description="After choosing a customer message, continue to claim document references or insurer official channels."
-          items={[
-            {
-              href: "/claim-documents",
-              label: t.claim,
-              description:
-                "Review document requirements before requesting or supplementing claim materials."
-            },
-            {
-              href: "/directory",
-              label: t.directory,
-              description:
-                "Open insurer official channels, customer centers, and claim pages for final checks."
-            }
-          ]}
-        />
-        <MvpSafetyNotice />
-      </section>
-      <Footer />
-    </main>
-  );
-}
-
-function PlannerWorkflow() {
-  return (
-    <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5 sm:p-6">
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]">
-        Planner workflow
-      </p>
-      <h2 className="mt-2 break-keep text-2xl font-semibold text-[#102235]">
-        {t.workflowTitle}
-      </h2>
-      <div className="mt-5 grid gap-3 md:grid-cols-5">
-        {workflowSteps.map((step, index) => (
-          <div className="border border-[#e3d5b8] bg-white p-4" key={step}>
-            <p className="text-sm font-semibold text-[#7a612d]">
-              Step {index + 1}
+    <main className="min-h-screen bg-[#F8F7F3] text-[#17202A] flex flex-col justify-between">
+      <div>
+        <Header />
+        
+        {/* 히어로 영역 - B2B Premium SaaS Style */}
+        <section className="bg-[#0F1D2E] text-white">
+          <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              Message Center
+            </span>
+            <h1 className="mt-4 break-keep text-3xl font-extrabold tracking-tight sm:text-4xl">
+              {t.title}
+            </h1>
+            <p className="mt-4 max-w-3xl break-keep text-sm leading-relaxed text-slate-300">
+              고객용 필요서류 요청 알림톡, 보완 요청 멘트, 지급 완료 알림 등 설계사가 하루에 수십 번 반복 발송하는 문구를 클릭 한 번으로 개인화 복사하세요.
             </p>
-            <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
-              {step}
+            <p className="mt-6 max-w-3xl border-l-2 border-[#B9975B] pl-4 text-xs font-medium leading-relaxed text-slate-400">
+              {t.note}
             </p>
           </div>
-        ))}
+        </section>
+
+        {/* 메인 컨텐츠 영역 */}
+        <section className="mx-auto max-w-7xl space-y-8 px-5 py-8 sm:px-8 lg:px-10">
+          <MessageTemplateLibrary templates={customerMessageTemplates} />
+          
+          {/* 고객 발송 프로세스 안내 */}
+          <section className="rounded-xl border border-[#E3DED4] bg-white p-6 shadow-sm">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              Planner workflow
+            </span>
+            <h2 className="mt-2 break-keep text-base font-bold text-[#0F1D2E]">
+              {t.workflowTitle}
+            </h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {workflowSteps.map((step, index) => (
+                <div className="rounded-lg border border-slate-100 bg-[#F8F7F3] p-4 shadow-sm" key={step}>
+                  <p className="text-[11px] font-bold tracking-widest text-[#B9975B]">
+                    STEP {index + 1}
+                  </p>
+                  <p className="mt-2 break-keep text-xs font-semibold leading-relaxed text-slate-600">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <MvpModuleLinks
+            description="안내 메시지를 복사한 뒤, 필요 서류 규정을 한 번 더 검토하거나 해당 보험사 연락처 정보를 이어서 확인해 보세요."
+            items={[
+              {
+                href: "/claim-documents",
+                label: t.claim,
+                description:
+                  "청구 필수 서류 리스트와 공식 PDF 접수 양식을 확인합니다."
+              },
+              {
+                href: "/directory",
+                label: t.directory,
+                description:
+                  "보험사 전산 접속 주소와 콜센터 헬프데스크 연락처로 연결합니다."
+              }
+            ]}
+          />
+          <MvpSafetyNotice />
+        </section>
       </div>
-    </section>
+      <Footer />
+    </main>
   );
 }

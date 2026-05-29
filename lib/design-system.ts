@@ -1,47 +1,47 @@
 import type { VerificationStatus } from "@/lib/content";
 
 export const colors = {
-  navy: "#0f172a",       // slate-900
-  deepGreen: "#3730a3",  // indigo-800
-  ivory: "#f8fafc",      // slate-50
-  cream: "#f1f5f9",      // slate-100
-  border: "#e2e8f0",     // slate-200
-  gold: "#4f46e5",       // indigo-600
-  deepGray: "#334155",   // slate-700
-  bodyGray: "#64748b"    // slate-500
+  navy: "#0F1D2E",       // 딥 네이비
+  deepGreen: "#16382C",  // 차분한 그린
+  ivory: "#F8F7F3",      // 아이보리
+  cream: "#F7F4EE",      // 아이보리 2
+  border: "#E3DED4",     // 테두리
+  gold: "#B9975B",       // 절제된 골드 포인트
+  deepGray: "#17202A",   // 메인 텍스트
+  bodyGray: "#5B6470"    // 서브 텍스트
 } as const;
 
 export const surfaces = {
-  page: "bg-slate-50 text-slate-900",
-  hero: "bg-slate-900 text-white",
-  card: "bg-white",
-  inset: "bg-slate-50",
+  page: "bg-[#F8F7F3] text-[#17202A]",
+  hero: "bg-[#0F1D2E] text-white",
+  card: "bg-white border border-[#E3DED4] rounded-xl shadow-sm",
+  inset: "bg-[#F7F4EE]",
   muted: "bg-slate-100"
 } as const;
 
 export const borders = {
-  default: "border border-slate-200",
+  default: "border border-[#E3DED4]",
   subtle: "border border-slate-100",
-  divider: "border-slate-200"
+  divider: "border-[#E3DED4]"
 } as const;
 
 export const shadows = {
-  card: "shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5",
-  elevated: "shadow-lg"
+  card: "shadow-[0_4px_20px_rgba(15,29,46,0.04)] transition-all hover:shadow-[0_10px_30px_rgba(15,29,46,0.08)] hover:-translate-y-0.5",
+  elevated: "shadow-[0_15px_40px_rgba(15,29,46,0.12)]"
 } as const;
 
 export const textStyles = {
   eyebrow:
-    "text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600",
+    "text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]",
   heroEyebrow:
-    "inline-flex border border-indigo-500/50 px-3 py-1 text-sm font-medium text-indigo-200",
-  heroTitle: "text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl text-white",
-  sectionTitle: "text-3xl font-bold leading-tight text-slate-900 sm:text-4xl",
-  cardTitle: "text-2xl font-bold text-slate-900",
-  body: "text-base leading-7 text-slate-600",
-  small: "text-sm leading-6 text-slate-500",
-  label: "text-sm font-bold text-slate-900",
-  accent: "text-sm font-bold text-indigo-600"
+    "inline-flex border border-[#B9975B]/40 px-3 py-1 text-sm font-medium text-[#F7F4EE]/90 rounded-md bg-[#F7F4EE]/5",
+  heroTitle: "text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl text-white tracking-tight",
+  sectionTitle: "text-3xl font-bold leading-tight text-[#0F1D2E] sm:text-4xl tracking-tight",
+  cardTitle: "text-2xl font-bold text-[#0F1D2E]",
+  body: "text-base leading-7 text-[#5B6470]",
+  small: "text-sm leading-6 text-[#5B6470]",
+  label: "text-sm font-bold text-[#17202A]",
+  accent: "text-sm font-bold text-[#B9975B]"
 } as const;
 
 export const spacing = {
@@ -54,12 +54,12 @@ export const spacing = {
 
 export const verificationLabels: Record<VerificationStatus, string> = {
   draft: "초안",
-  verified: "검수 완료",
-  needs_review: "검수 필요"
+  verified: "공식 확인",
+  needs_review: "검수 대기"
 };
 
 export const statusBadgeClasses: Record<VerificationStatus, string> = {
-  draft: "border-slate-200 bg-slate-50 text-slate-500 rounded-md",
-  verified: "border-indigo-200 bg-indigo-50 text-indigo-700 rounded-md",
-  needs_review: "border-amber-200 bg-amber-50 text-amber-700 rounded-md"
+  draft: "border-[#E3DED4] bg-slate-50 text-slate-500 rounded-md text-xs px-2 py-0.5",
+  verified: "border-emerald-200 bg-emerald-50 text-emerald-800 rounded-md text-xs px-2 py-0.5",
+  needs_review: "border-amber-200 bg-amber-50 text-amber-700 rounded-md text-xs px-2 py-0.5"
 };

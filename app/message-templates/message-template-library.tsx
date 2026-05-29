@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { formatVerifiedDate } from "@/components/content-page";
+import { Star, Copy, Send, Check } from "lucide-react";
 import type {
   CustomerMessageTemplate,
   MessageSituation,
@@ -60,6 +61,33 @@ const toneOptions: Array<{ label: string; value: ToneFilter }> = [
   { label: "신뢰형", value: "trustworthy" }
 ];
 
+// Helper to convert text dynamically to different styles
+function convertMessageStyle(text: string, style: "original" | "kakao" | "careful" | "professional"): string {
+  let processed = text;
+  
+  if (style === "kakao") {
+    // Make concise, add friendly emojis
+    processed = "⚡ " + processed
+      .replace(/하겠습니다\./g, "할게요 🙂")
+      .replace(/드립니다\./g, "드려요 😊")
+      .replace(/바랍니다\./g, "부탁드립니다 🙏")
+      .replace(/\n\n/g, "\n");
+    processed += "\n\n💬 혹시 궁금하신 점이 있으시면 언제든지 편하게 말씀해 주세요! 🍀";
+  } else if (style === "careful") {
+    // Ultra formal and polite
+    processed = processed
+      .replace(/안녕하세요/g, "안녕하십니까 고객님, PlannerDesk를 통해 믿고 맡겨주셔서 대단히 감사드립니다.")
+      .replace(/부탁드립니다\./g, "바쁘시겠지만 번거로우시더라도 확인 후 정중한 협조를 간곡히 부탁드리는 바입니다.")
+      .replace(/안내해 드립니다\./g, "안내해 드리오니 너른 이해와 검토를 희망합니다.");
+  } else if (style === "professional") {
+    // Authoritative and structured
+    processed = `[알림: 담당 금융설계사 안내]\n\n귀하의 보장 계약 관리 및 공식 청구 프로세스를 위해 전해드리는 핵심 안내문입니다.\n\n${processed}`;
+    processed += "\n\n※ 본 안내 내용은 관련 법령 및 상품 약관 가이드라인에 기초하였습니다.";
+  }
+  
+  return processed;
+}
+
 export function MessageTemplateLibrary({
   templates
 }: {
@@ -69,9 +97,42 @@ export function MessageTemplateLibrary({
   const [situation, setSituation] = useState<SituationFilter>("all");
   const [tone, setTone] = useState<ToneFilter>("all");
   
-  // 개인화(Personalization) 변수 상태
+  // Personalization fields
   const [customerName, setCustomerName] = useState("");
   const [plannerName, setPlannerName] = useState("");
+
+  // Favorites state
+  const [favorites, setFavorites] = useState<string[]>([]);
+  // Toast alert state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = window.localStorage.getItem("plannerdesk.messages.favorites");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved) as string[];
+          setTimeout(() => setFavorites(parsed), 0);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, []);
+
+  const toggleFavorite = (id: string) => {
+    const next = favorites.includes(id)
+      ? favorites.filter((x) => x !== id)
+      : [...favorites, id];
+    setFavorites(next);
+    window.localStorage.setItem("plannerdesk.messages.favorites", JSON.stringify(next));
+    showToast(favorites.includes(id) ? "즐겨찾기에서 제거되었습니다." : "자주 쓰는 문구로 등록되었습니다.");
+  };
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    window.setTimeout(() => setToastMessage(null), 2500);
+  };
 
   const filteredTemplates = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
@@ -97,6 +158,11 @@ export function MessageTemplateLibrary({
     });
   }, [query, situation, templates, tone]);
 
+  // Priority group: Favorite Templates
+  const favoriteItems = useMemo(() => {
+    return filteredTemplates.filter((t) => favorites.includes(t.id));
+  }, [filteredTemplates, favorites]);
+
   const groups = situationOrder
     .map((situationKey) => ({
       situation: situationKey,
@@ -108,26 +174,37 @@ export function MessageTemplateLibrary({
 
   return (
     <div className="space-y-8">
-      {/* 개인화 정보 입력 패널 */}
-      <section className="rounded-xl border border-blue-100 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
-          ✨ 개인화 템플릿 설정
-          <span className="text-xs font-normal text-slate-500">입력하신 이름이 아래 모든 템플릿에 실시간으로 적용됩니다.</span>
-        </h3>
-        <div className="grid gap-4 sm:grid-cols-2">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div className="fixed bottom-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-xl bg-[#0F1D2E] px-6 py-3.5 text-xs font-bold text-white shadow-lg animate-in fade-in slide-in-from-bottom-5 duration-200">
+          <Check className="h-4 w-4 text-[#B9975B]" />
+          {toastMessage}
+        </div>
+      )}
+
+      {/* 개인화 정보 입력 패널 - B2B Premium Frame */}
+      <section className="rounded-2xl border border-[#E3DED4] bg-[#0F1D2E] p-6 text-white shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[#B9975B] animate-pulse" />
+          <h3 className="text-sm font-bold text-white">개인화 안내문 실시간 치환</h3>
+        </div>
+        <p className="mt-1 text-xs text-slate-400 break-keep">
+          고객명과 설계사명을 입력하시면, 아래 모든 템플릿의 변수 영역이 입력값으로 실시간 변경되어 복사 시 자동으로 반영됩니다.
+        </p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-semibold text-slate-600 block mb-1.5">고객 이름</span>
+            <span className="text-xs font-bold text-slate-300 block mb-1.5">고객명 입력</span>
             <input 
-              className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg"
+              className="w-full border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-xs text-white outline-none rounded-lg focus:border-[#B9975B]"
               placeholder="예: 홍길동"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
             />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold text-slate-600 block mb-1.5">담당 설계사 이름</span>
+            <span className="text-xs font-bold text-slate-300 block mb-1.5">설계사명 입력</span>
             <input 
-              className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg"
+              className="w-full border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-xs text-white outline-none rounded-lg focus:border-[#B9975B]"
               placeholder="예: 김설계"
               value={plannerName}
               onChange={(e) => setPlannerName(e.target.value)}
@@ -136,6 +213,7 @@ export function MessageTemplateLibrary({
         </div>
       </section>
 
+      {/* 검색 및 필터 패널 */}
       <SearchAndFilters
         onQueryChange={setQuery}
         onSituationChange={setSituation}
@@ -146,30 +224,47 @@ export function MessageTemplateLibrary({
         tone={tone}
       />
 
+      {/* 즐겨찾기 고정 그룹 */}
+      {favoriteItems.length > 0 && !query && situation === "all" && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-1.5">
+            <Star className="h-4 w-4 text-[#B9975B] fill-[#B9975B]" />
+            <h3 className="text-sm font-bold text-[#0F1D2E]">자주 쓰는 안내 문구</h3>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {favoriteItems.map((template) => (
+              <TemplateCard 
+                key={"fav-" + template.id} 
+                template={template} 
+                customerName={customerName} 
+                plannerName={plannerName}
+                isFav={true}
+                onToggleFav={toggleFavorite}
+                onToast={showToast}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 일반 문구 상황별 그룹 */}
       {groups.length > 0 ? (
         <div className="space-y-10">
           {groups.map((group) => (
-            <section key={group.situation}>
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-[#7a612d]">
-                    Customer situation
-                  </p>
-                  <h2 className="mt-1 break-keep text-2xl font-semibold text-[#102235]">
-                    {situationLabels[group.situation]}
-                  </h2>
-                </div>
-                <p className="whitespace-nowrap text-sm text-[#5f6670]">
-                  {group.templates.length}개 문구
-                </p>
-              </div>
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <section key={group.situation} className="space-y-4">
+              <h3 className="text-sm font-bold text-[#0F1D2E] border-l-4 border-[#B9975B] pl-2">
+                {situationLabels[group.situation]}
+              </h3>
+              <div className="grid gap-6 md:grid-cols-2">
                 {group.templates.map((template) => (
                   <TemplateCard 
                     key={template.id} 
                     template={template} 
                     customerName={customerName} 
-                    plannerName={plannerName} 
+                    plannerName={plannerName}
+                    isFav={favorites.includes(template.id)}
+                    onToggleFav={toggleFavorite}
+                    onToast={showToast}
                   />
                 ))}
               </div>
@@ -201,16 +296,16 @@ function SearchAndFilters({
   tone: ToneFilter;
 }) {
   return (
-    <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
+    <section className="rounded-2xl border border-[#E3DED4] bg-white p-5 shadow-sm">
       <div className="grid gap-5 lg:grid-cols-[1fr_0.95fr]">
         <label className="block">
-          <span className="text-sm font-semibold text-[#303845]">
-            고객 안내 문구 검색
+          <span className="text-xs font-bold text-slate-700">
+            문구 통합 검색
           </span>
           <input
-            className="mt-2 w-full border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137]"
+            className="mt-2 w-full border border-[#E3DED4] bg-white px-4 py-2.5 text-xs text-[#17202A] outline-none rounded-lg focus:border-[#B9975B] placeholder:text-slate-400"
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="제목, 상황, 톤, 문구 내용을 입력해 주세요"
+            placeholder="검색어(제목, 상황, 내용 등)를 입력하세요..."
             type="search"
             value={query}
           />
@@ -218,22 +313,21 @@ function SearchAndFilters({
 
         <div className="grid gap-4">
           <FilterGroup
-            label="상황"
+            label="상황별 분류"
             onChange={(value) => onSituationChange(value as SituationFilter)}
             options={situationOptions}
             value={situation}
           />
           <FilterGroup
-            label="톤"
+            label="기본 톤"
             onChange={(value) => onToneChange(value as ToneFilter)}
             options={toneOptions}
             value={tone}
           />
         </div>
       </div>
-      <p className="mt-4 text-sm leading-6 text-[#4f5661]">
-        {resultCount}개 문구가 표시됩니다. 문구는 실무 참고용 초안이며, 발송
-        전 고객 상황과 상품별 기준에 맞게 수정해야 합니다.
+      <p className="mt-4 text-[11px] text-slate-400">
+        검색 결과 총 <span className="font-bold text-[#0F1D2E]">{resultCount}</span>개의 템플릿이 조회되었습니다.
       </p>
     </section>
   );
@@ -251,18 +345,18 @@ function FilterGroup({
   value: string;
 }) {
   return (
-    <fieldset>
-      <legend className="text-sm font-semibold text-[#303845]">{label}</legend>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+    <div>
+      <span className="text-xs font-bold text-slate-700">{label}</span>
+      <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {options.map((option) => {
           const isSelected = option.value === value;
 
           return (
             <button
-              className={`shrink-0 whitespace-nowrap border px-3 py-2 text-sm font-semibold transition ${
+              className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                 isSelected
-                  ? "border-[#173f36] bg-[#173f36] text-[#fbf7ee]"
-                  : "border-[#d9c9a8] bg-white text-[#303845] hover:border-[#aa8137]"
+                  ? "border-[#0F1D2E] bg-[#0F1D2E] text-white"
+                  : "border-[#E3DED4] bg-white text-slate-600 hover:border-[#B9975B] hover:text-[#B9975B]"
               }`}
               key={option.value}
               onClick={() => onChange(option.value)}
@@ -273,108 +367,141 @@ function FilterGroup({
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }
 
 function TemplateCard({ 
   template, 
   customerName, 
-  plannerName 
+  plannerName,
+  isFav,
+  onToggleFav,
+  onToast
 }: { 
   template: CustomerMessageTemplate;
   customerName: string;
   plannerName: string;
+  isFav: boolean;
+  onToggleFav: (id: string) => void;
+  onToast: (msg: string) => void;
 }) {
-  const [copied, setCopied] = useState(false);
-  const [kakaoCopied, setKakaoCopied] = useState(false);
+  const [activeStyle, setActiveStyle] = useState<"original" | "kakao" | "careful" | "professional">("original");
 
   // OOO, 고객명 등을 치환하는 로직
-  const replacedBody = useMemo(() => {
+  const replacedOriginal = useMemo(() => {
     let text = template.body;
     if (customerName) {
-      text = text.replace(/O+고객|O+님|\[고객명\]|\{고객명\}|OOO/g, `${customerName}`);
+      text = text.replace(/O+고객|O+님|\[고객명\]|\{고객명\}|OOO/g, customerName);
     }
     if (plannerName) {
-      text = text.replace(/\[설계사명\]|\{설계사명\}|담당자 OOO/g, `${plannerName}`);
+      text = text.replace(/\[설계사명\]|\{설계사명\}|담당자 OOO/g, plannerName);
     }
     return text;
   }, [template.body, customerName, plannerName]);
 
-  async function handleCopy() {
-    await navigator.clipboard.writeText(replacedBody);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
-  }
-  
-  async function handleKakaoShare() {
-    await navigator.clipboard.writeText(replacedBody);
-    setKakaoCopied(true);
-    alert('문구가 복사되었습니다. 카카오톡 창을 열어 붙여넣기 해주세요!');
-    window.setTimeout(() => setKakaoCopied(false), 1800);
+  const activeBody = useMemo(() => {
+    return convertMessageStyle(replacedOriginal, activeStyle);
+  }, [replacedOriginal, activeStyle]);
+
+  async function handleCopy(style: typeof activeStyle) {
+    const finalVal = convertMessageStyle(replacedOriginal, style);
+    await navigator.clipboard.writeText(finalVal);
+    
+    let styleName = "기본 문구";
+    if (style === "kakao") styleName = "짧은 카톡 버전";
+    if (style === "careful") styleName = "정중한 버전";
+    if (style === "professional") styleName = "전문가 버전";
+    
+    onToast(`💬 ${styleName}가 복사되었습니다.`);
   }
 
   return (
-    <article className="border border-[#d9c9a8] bg-[#fbf7ee] p-6 shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="whitespace-nowrap border border-[#d9c9a8] bg-[#f7f1e5] px-2.5 py-1 text-xs font-semibold text-[#7a612d]">
+    <article className="rounded-2xl border border-[#E3DED4] bg-white p-5 shadow-sm transition hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded bg-indigo-50 border border-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
               {situationLabels[template.situationCategory]}
             </span>
-            <span className="whitespace-nowrap border border-[#9fb7a4] bg-[#edf4ee] px-2.5 py-1 text-xs font-semibold text-[#173f36]">
+            <span className="rounded bg-[#F8F7F3] border border-[#E3DED4] px-2 py-0.5 text-[10px] font-bold text-slate-500">
               {toneLabels[template.tone]}
             </span>
-            <span className="whitespace-nowrap border border-[#d9c9a8] bg-white px-2.5 py-1 text-xs font-semibold text-[#7a612d]">
-              실무 참고용 초안
-            </span>
           </div>
-          <h3 className="mt-3 break-keep text-2xl font-semibold leading-snug text-[#102235]">
+          <h4 className="mt-3 text-base font-bold text-[#0F1D2E] leading-snug">
             {template.title}
-          </h3>
+          </h4>
         </div>
+        
+        {/* Favorite Star Button */}
+        <button
+          onClick={() => onToggleFav(template.id)}
+          className="text-slate-300 hover:text-[#B9975B] transition shrink-0"
+          aria-label={`${template.title} 즐겨찾기 토글`}
+        >
+          <Star className={`h-4.5 w-4.5 ${isFav ? "fill-[#B9975B] text-[#B9975B]" : ""}`} />
+        </button>
       </div>
 
-      <p className="mt-4 break-keep text-sm leading-6 text-[#4f5661]">
+      <p className="mt-2 text-xs text-[#5B6470] leading-relaxed break-keep">
         {template.situation}
       </p>
 
-      <div className="mt-5 border border-[#e3d5b8] bg-white p-4 rounded-lg relative group">
-        <p className="whitespace-pre-wrap break-keep text-base leading-8 text-[#303845]">
-          {replacedBody}
-        </p>
+      {/* 다중 스타일 버전 탭 */}
+      <div className="mt-5 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-[#E3DED4]">
+        {[
+          { id: "original", label: "기본 버전" },
+          { id: "kakao", label: "짧은 카톡" },
+          { id: "careful", label: "정중한 버전" },
+          { id: "professional", label: "전문가용" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveStyle(tab.id as "original" | "kakao" | "careful" | "professional")}
+            className={`shrink-0 rounded-t-lg px-3 py-1.5 text-[11px] font-bold transition-all -mb-px border-b-2 ${
+              activeStyle === tab.id
+                ? "border-[#B9975B] text-[#B9975B] font-extrabold"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {template.safetyNote ? (
-        <p className="mt-4 border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
-          {template.safetyNote}
-        </p>
-      ) : null}
+      {/* 실시간 적용된 본문 프리뷰 윈도우 */}
+      <div className="mt-4 rounded-xl border border-dashed border-[#E3DED4] bg-[#F8F7F3] p-4 font-mono text-xs leading-relaxed text-[#17202A] whitespace-pre-wrap break-keep min-h-[120px]">
+        {activeBody}
+      </div>
 
-      <div className="mt-6 flex flex-col gap-3 border-t border-[#d9c9a8] pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="whitespace-nowrap text-sm text-[#5f6670]">
-          최근 수정: {formatVerifiedDate(template.lastUpdatedAt)}
+      {template.safetyNote && (
+        <p className="mt-3 border-l-2 border-amber-300 pl-3 text-[11px] text-amber-700 leading-normal break-keep">
+          📌 {template.safetyNote}
         </p>
-        <div className="flex flex-col gap-2 sm:items-end">
-          <div className="flex gap-2">
-            <button
-              className="inline-flex items-center justify-center border border-[#173f36] px-4 py-2 text-sm font-semibold text-[#173f36] transition hover:bg-[#173f36] hover:text-[#fbf7ee] rounded"
-              onClick={handleCopy}
-              type="button"
-            >
-              {copied ? "✓ 복사 완료" : "문구 복사"}
-            </button>
-            <button
-              className="inline-flex items-center justify-center bg-[#FEE500] text-[#000000] px-4 py-2 text-sm font-semibold transition hover:bg-[#F4DC00] rounded"
-              onClick={handleKakaoShare}
-              type="button"
-            >
-              {kakaoCopied ? "✓ 준비 완료" : "카카오톡 전송"}
-            </button>
-          </div>
-          <p className="break-keep text-xs leading-5 text-[#5f6670]">
-            버튼을 누르면 고객 맞춤형으로 치환된 텍스트가 즉시 복사됩니다.
-          </p>
+      )}
+
+      {/* 액션 실행 영역 */}
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+        <span className="text-[10px] text-slate-400">
+          최근 검수: {formatVerifiedDate(template.lastUpdatedAt)}
+        </span>
+        
+        {/* 복사 버튼 트리거 */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleCopy(activeStyle)}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#0F1D2E] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#1C3552] shadow-sm"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            치환본 복사
+          </button>
+          <button
+            onClick={() => handleCopy("kakao")}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-xs font-bold text-[#0F1D2E] transition hover:bg-slate-50"
+          >
+            <Send className="h-3.5 w-3.5 text-amber-600" />
+            카톡용 복사
+          </button>
         </div>
       </div>
     </article>
@@ -383,12 +510,12 @@ function TemplateCard({
 
 function EmptyState() {
   return (
-    <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-8 text-center shadow-[0_18px_40px_rgba(16,34,53,0.05)]">
-      <p className="break-keep text-lg font-semibold text-[#102235]">
-        조건에 맞는 고객 안내 문구가 없습니다.
+    <section className="rounded-xl border border-dashed border-[#E3DED4] bg-white p-10 text-center">
+      <p className="break-keep text-sm font-bold text-[#0F1D2E]">
+        선택한 상황이나 조건에 맞는 안내 문구가 없습니다.
       </p>
-      <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
-        검색어를 줄이거나 상황·톤 필터를 변경해 주세요.
+      <p className="mt-2 text-xs text-slate-400">
+        통합 검색 창을 초기화하거나 필터 버튼을 클릭해 다시 시도해 주세요.
       </p>
     </section>
   );

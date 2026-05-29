@@ -3,7 +3,6 @@ import {
   ContentSection,
   EmptyState,
   PageFrame,
-  PageHero,
 } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -15,23 +14,21 @@ import { ClaimDocumentExplorer } from "./claim-document-explorer";
 export const dynamic = "force-dynamic";
 
 const t = {
-  eyebrow: "Claim Document Desk",
+  eyebrow: "Claim Document",
   title: "청구서류 라이브러리",
-  description: "청구 유형별 필요서류와 공식 출처를 한 곳에서 확인해 주세요.",
+  description: "보험사별·청구 유형별 필요서류와 공식 PDF 양식을 한 곳에서 빠르게 확인하세요.",
   subcopy:
-    "보험금 지급 여부나 지급 금액을 판단하는 내용이 아닙니다. 청구 전 보험사 또는 약관 확인이 필요합니다.",
-  workflowTitle: "고객 안내 전 공식 기준을 다시 확인하는 흐름",
+    "※ 보험금 지급 여부나 지급 금액을 최종 판단하는 기준이 아닙니다. 실제 청구 접수 전 해당 보험사 약관을 다시 확인해 주세요.",
+  workflowTitle: "고객 안내 전 공식 기준 필요서류 확인 흐름",
   directory: "보험사 바로가기",
   message: "고객 문구 확인",
-  footerNote:
-    "필요서류는 보험사 및 약관에 따라 달라질 수 있습니다. 공개 정보는 공식 확인 후 업데이트 예정 상태를 포함할 수 있으므로 청구 전 다시 확인해 주세요.",
 };
 
 const workflowSteps = [
-  "청구 유형과 카테고리를 먼저 확인합니다.",
-  "보험사 공식 안내와 제출 경로를 함께 검토합니다.",
-  "필수 서류와 선택 또는 추가 서류 목록을 구분해 안내합니다.",
-  "보험금 지급 여부나 지급 금액을 판단하는 표현은 사용하지 않습니다.",
+  "고객의 청구 유형과 사고 원인 카테고리를 먼저 분류합니다.",
+  "보험사 공식 제출 경로와 팩스/우편 번호를 재확인합니다.",
+  "필수 제출 서류와 상황별 선택/추가 서류 목록을 구분해 정리합니다.",
+  "보험금 지급 판단 또는 임의의 추정 금액을 안내하지 않도록 유의합니다."
 ];
 
 export default async function ClaimDocumentsPage() {
@@ -44,17 +41,27 @@ export default async function ClaimDocumentsPage() {
   return (
     <PageFrame>
       <Header />
-      <PageHero
-        eyebrow={t.eyebrow}
-        title={t.title}
-        description={t.description}
-      />
-      <ContentSection>
-        <div className="space-y-8">
-          <p className="break-keep text-sm font-medium leading-relaxed text-slate-500">
+      
+      {/* 히어로 영역 - B2B Premium SaaS Style */}
+      <section className="bg-[#0F1D2E] text-white">
+        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+            {t.eyebrow}
+          </span>
+          <h1 className="mt-4 break-keep text-3xl font-extrabold tracking-tight sm:text-4xl">
+            {t.title}
+          </h1>
+          <p className="mt-4 max-w-3xl break-keep text-sm leading-relaxed text-slate-300">
+            {t.description}
+          </p>
+          <p className="mt-6 max-w-3xl border-l-2 border-[#B9975B] pl-4 text-xs font-medium leading-relaxed text-slate-400">
             {t.subcopy}
           </p>
+        </div>
+      </section>
 
+      <ContentSection>
+        <div className="space-y-8">
           {dbError ? (
             <EmptyState
               title="청구서류 정보를 불러오지 못했습니다."
@@ -71,26 +78,21 @@ export default async function ClaimDocumentsPage() {
             </Suspense>
           )}
 
-          <section className="grid gap-6 border-y border-slate-200 py-12 lg:grid-cols-[0.8fr_1.2fr]">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600">
-                Planner workflow
-              </p>
-              <h2 className="mt-3 break-keep text-3xl font-bold tracking-tight leading-tight text-slate-900">
-                {t.workflowTitle}
-              </h2>
-              <p className="mt-5 break-keep text-sm font-medium leading-relaxed text-slate-500">
-                이 안내 서류 정보는 실무 참고용이며, 실제 보험금 지급 여부나
-                지급 금액은 보험사 기준과 최종 심사 결과가 우선합니다.
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+          {/* 실무자 확인 프로세스 */}
+          <section className="rounded-xl border border-[#E3DED4] bg-white p-6 shadow-sm">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              Planner workflow
+            </span>
+            <h2 className="mt-2 break-keep text-base font-bold text-[#0F1D2E]">
+              {t.workflowTitle}
+            </h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {workflowSteps.map((step, index) => (
-                <div className="rounded-lg border border-slate-100 bg-slate-50 p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md" key={step}>
-                  <p className="text-[13px] font-bold tracking-widest text-indigo-600">
+                <div className="rounded-lg border border-slate-100 bg-[#F8F7F3] p-4 shadow-sm" key={step}>
+                  <p className="text-[11px] font-bold tracking-widest text-[#B9975B]">
                     STEP {index + 1}
                   </p>
-                  <p className="mt-3 break-keep text-sm font-medium leading-relaxed text-slate-600">
+                  <p className="mt-2 break-keep text-xs font-semibold leading-relaxed text-slate-600">
                     {step}
                   </p>
                 </div>
@@ -98,24 +100,20 @@ export default async function ClaimDocumentsPage() {
             </div>
           </section>
 
-          <p className="break-keep border-l-2 border-indigo-500 pl-4 text-sm font-medium leading-relaxed text-slate-600">
-            {t.footerNote}
-          </p>
-
           <MvpModuleLinks
-            description="청구 필요서류 확인 후에는 보험사 공식 채널과 고객 안내 메시지 템플릿 화면으로 연결해 사용할 수 있습니다."
+            description="청구 필요서류 확인 후에는 공식 팩스/우편 접수처 주소 및 고객 상황별 안내 메시지 발송 기능으로 바로 연결할 수 있습니다."
             items={[
               {
                 href: "/directory",
                 label: t.directory,
                 description:
-                  "보험사 공식 웹사이트, 콜센터, 팩스 및 청구 접수 페이지 정보를 확인합니다.",
+                  "보험사 공식 콜센터 번호와 팩스/우편접수처 정보를 확인합니다.",
               },
               {
                 href: "/message-templates",
                 label: t.message,
                 description:
-                  "고객에게 서류를 요청하기 전 차분한 상황별 문구 템플릿을 참고합니다.",
+                  "고객 상황(서류 보완, 신규 접수 등)에 맞춰 준비된 알림 톡 멘트 템플릿으로 연결합니다.",
               },
             ]}
           />

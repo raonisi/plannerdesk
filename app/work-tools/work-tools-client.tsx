@@ -2,6 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, PieChart, Pie } from 'recharts';
+import {
+  TrendingUp,
+  Calculator,
+  Search as SearchIcon,
+  ExternalLink,
+  FolderOpen,
+  Star,
+  Sparkles,
+  Wrench,
+} from "lucide-react";
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder";
 
@@ -777,8 +787,80 @@ function getToolCopy(id: ToolId) {
 }
 
 
+const toolCategories = [
+  { id: "all", label: "전체" },
+  { id: "stats", label: "통계·상담 소재" },
+  { id: "search", label: "인수·질병 검색" },
+  { id: "insure-calc", label: "보험 계산기" },
+  { id: "finance-calc", label: "금융 계산기" },
+  { id: "claim", label: "보험금 청구" },
+  { id: "silbi", label: "실손보험" },
+  { id: "car", label: "자동차보험" },
+  { id: "fire", label: "화재보험" },
+  { id: "docs", label: "공문서" },
+  { id: "recruits", label: "모집종사자" },
+  { id: "exam", label: "시험·교육" },
+  { id: "news", label: "보험사 소식지" },
+] as const;
+
+const toolToCategoryId: Record<ToolId, string> = {
+  "planner-stats": "stats",
+  "disease-search": "search",
+  "silbi-calculator": "insure-calc",
+  "insurance-age": "insure-calc",
+  "bmi-calculator": "insure-calc",
+  "currency-value": "finance-calc",
+  "loan": "finance-calc",
+  "savings": "finance-calc",
+  "net-salary": "finance-calc",
+  "earned-tax": "finance-calc",
+  "comp-tax": "finance-calc",
+  "inheritance-tax": "finance-calc",
+  "card-deduction": "finance-calc",
+  "vat": "finance-calc",
+  "surgery-code": "claim",
+  "disease-code": "claim",
+  "hospital-pharmacy": "claim",
+  "silson24": "claim",
+  "hidden-insurance": "claim",
+  "lost-health-standard": "silbi",
+  "car-face-quote": "car",
+  "car-einsmarket": "car",
+  "car-premium-factor": "car",
+  "car-kidi-register": "car",
+  "car-fault-ratio": "car",
+  "fire-special-building": "fire",
+  "building-register": "fire",
+  "elevator-info": "fire",
+  "gov-resident": "docs",
+  "hometax-income": "docs",
+  "court-family": "docs",
+  "knia-agent": "recruits",
+  "klia-agent": "recruits",
+  "iaa-product": "recruits",
+  "insurance-institute": "recruits",
+  "nonlife-textbook": "exam",
+  "nonlife-mock": "exam",
+  "life-textbook": "exam",
+  "life-mock": "exam",
+  "variable-textbook": "exam",
+  "variable-mock": "exam",
+  "insurer-newsletter": "news",
+};
+
+const PINNED_TOOL_IDS: ToolId[] = [
+  "insurance-age",
+  "bmi-calculator",
+  "silbi-calculator",
+  "disease-code",
+  "surgery-code",
+  "hidden-insurance",
+];
+
 export function WorkToolsClient() {
-  const [activeTool, setActiveTool] = useState<ToolId>("planner-stats");
+  const [activeTool, setActiveTool] = useState<ToolId | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [favorites, setFavorites] = useState<ToolId[]>(() => {
     if (typeof window === "undefined") return [];
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -806,87 +888,241 @@ export function WorkToolsClient() {
       setIsFolderOpen(true);
     } else {
       setActiveTool(tool.id);
+      // Auto-scroll to panel
+      setTimeout(() => {
+        const panelEl = document.getElementById("active-tool-panel");
+        if (panelEl) {
+          panelEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
     }
   }
 
-  const favoriteTools = allTools().filter((tool) => favorites.includes(tool.id));
+  // Get matching tools based on query & category
+  const filteredTools = useMemo(() => {
+    let list = allTools();
+
+    // 1. Search Query filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().replace(/\s+/g, "");
+      list = list.filter(
+        (t) =>
+          t.label.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q)
+      );
+    }
+
+    // 2. Category Tab filter
+    if (selectedCategory !== "all") {
+      list = list.filter((t) => toolToCategoryId[t.id] === selectedCategory);
+    }
+
+    return list;
+  }, [searchQuery, selectedCategory]);
+
+  const pinnedTools = useMemo(() => {
+    return allTools().filter((t) => PINNED_TOOL_IDS.includes(t.id));
+  }, []);
+
+  const getToolIcon = (kind: ToolKind) => {
+    switch (kind) {
+      case "stats":
+        return <TrendingUp className="h-5 w-5 text-indigo-600" />;
+      case "search":
+        return <SearchIcon className="h-5 w-5 text-emerald-600" />;
+      case "calculator":
+        return <Calculator className="h-5 w-5 text-blue-600" />;
+      case "folder":
+        return <FolderOpen className="h-5 w-5 text-amber-600" />;
+      case "external":
+        return <ExternalLink className="h-5 w-5 text-purple-600" />;
+      default:
+        return <Wrench className="h-5 w-5 text-slate-500" />;
+    }
+  };
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      {/* 1. Page Header */}
+      <section className="rounded-2xl border border-[#E3DED4] bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-indigo-600">
-              Work Links
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold text-slate-900">
-              주요 업무 링크 전체
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              업무 도구 모음
+            </span>
+            <h2 className="mt-1 text-2xl font-bold text-[#0F1D2E]">
+              실무 앱 런처
             </h2>
-            <p className="mt-2 break-keep text-sm leading-6 text-slate-500">
-              보험학교 주요업무링크 항목 중 전산 로그인 그룹만 제외하고, 플래너데스크
-              안에서 실행할 수 있는 기능과 공식 외부 링크로 다시 구성했습니다.
+            <p className="mt-2 text-sm text-[#5B6470] break-keep">
+              보험나이 계산, 실손 계산기, 상병 및 수술 검색 등 설계사들이 매일 사용하는 42가지의 업무 도구를 모았습니다.
             </p>
           </div>
-          <p className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-indigo-600">
-            {allTools().length}개 업무 기능
-          </p>
+          
+          {/* Integrated Search Box */}
+          <div className="relative w-full max-w-sm">
+            <div className="flex min-h-11 items-center rounded-lg border border-[#E3DED4] bg-white px-3 focus-within:ring-2 focus-within:ring-[#B9975B]">
+              <SearchIcon className="h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="도구 이름 또는 기능 검색..."
+                className="ml-2 w-full text-xs font-medium outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
-      {favoriteTools.length > 0 ? (
-        <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <h2 className="text-sm font-semibold text-slate-900">즐겨찾기</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {favoriteTools.map((tool) => (
-              <ToolChip
-                active={activeTool === tool.id}
-                favorite
-                key={tool.id}
-                onClick={() => handleToolSelect(tool)}
-                onFavorite={() => toggleFavorite(tool.id)}
-                tool={tool}
-              />
+      {/* 2. 상단 고정 추천 도구 (6개 고정) */}
+      {!searchQuery && selectedCategory === "all" && (
+        <section>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#B9975B] fill-[#B9975B]/20" />
+            <h3 className="text-sm font-bold text-[#0F1D2E]">자주 쓰는 실무 핵심 도구</h3>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pinnedTools.map((tool) => (
+              <div
+                key={"pinned-" + tool.id}
+                className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${activeTool === tool.id ? "ring-2 ring-[#B9975B]" : ""}`}
+              >
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
+                      {getToolIcon(tool.kind)}
+                    </div>
+                    <button
+                      onClick={() => toggleFavorite(tool.id)}
+                      className="text-slate-300 hover:text-[#B9975B] transition"
+                      aria-label={`${tool.label} 즐겨찾기 토글`}
+                    >
+                      <Star className={`h-4.5 w-4.5 ${favorites.includes(tool.id) ? "fill-[#B9975B] text-[#B9975B]" : ""}`} />
+                    </button>
+                  </div>
+                  <h4 className="mt-3 text-sm font-bold text-[#0F1D2E]">{tool.label}</h4>
+                  <p className="mt-1 text-xs text-[#5B6470] break-keep leading-relaxed">{tool.description}</p>
+                </div>
+                <div className="mt-5 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5">
+                    {tool.kind === "external" ? "외부 공식 링크" : "내부 도구"}
+                  </span>
+                  <button
+                    onClick={() => handleToolSelect(tool)}
+                    className="inline-flex items-center text-xs font-bold text-[#B9975B] hover:underline"
+                  >
+                    실행하기 →
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
-      ) : null}
+      )}
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        {toolGroups.map((group) => (
-          <article
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_8px_22px_rgba(16,34,53,0.03)]"
-            key={group.title}
-          >
-            <h2 className="text-base font-semibold text-slate-900">
-              {group.title}
-            </h2>
-            <p className="mt-2 break-keep text-xs leading-5 text-slate-500">
-              {group.description}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {group.tools.map((tool) => (
-                <ToolChip
-                  active={activeTool === tool.id}
-                  favorite={favorites.includes(tool.id)}
-                  key={tool.id}
-                  onClick={() => handleToolSelect(tool)}
-                  onFavorite={() => toggleFavorite(tool.id)}
-                  tool={tool}
-                />
-              ))}
-            </div>
-          </article>
-        ))}
+      {/* 3. 카테고리 탭 분류 */}
+      <section className="space-y-4">
+        <h3 className="text-sm font-bold text-[#0F1D2E]">카테고리별 업무 도구</h3>
+        
+        {/* Horizontal Scrollable Tabs */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {toolCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold transition ${
+                selectedCategory === cat.id
+                  ? "border-[#0F1D2E] bg-[#0F1D2E] text-white shadow-sm"
+                  : "border-[#E3DED4] bg-white text-[#5B6470] hover:bg-slate-50 hover:text-[#0F1D2E]"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 4. 앱 런처 카드 목록 */}
+        {filteredTools.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredTools.map((tool) => (
+              <div
+                key={tool.id}
+                className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${activeTool === tool.id ? "ring-2 ring-[#B9975B]" : ""}`}
+              >
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
+                      {getToolIcon(tool.kind)}
+                    </div>
+                    <button
+                      onClick={() => toggleFavorite(tool.id)}
+                      className="text-slate-300 hover:text-[#B9975B] transition"
+                      aria-label={`${tool.label} 즐겨찾기 토글`}
+                    >
+                      <Star className={`h-4.5 w-4.5 ${favorites.includes(tool.id) ? "fill-[#B9975B] text-[#B9975B]" : ""}`} />
+                    </button>
+                  </div>
+                  <h4 className="mt-3 text-sm font-bold text-[#0F1D2E]">{tool.label}</h4>
+                  <p className="mt-1 text-xs text-[#5B6470] break-keep leading-relaxed">{tool.description}</p>
+                </div>
+                <div className="mt-5 flex items-center justify-between">
+                  <span className={`text-[10px] font-bold border rounded px-2 py-0.5 ${
+                    tool.kind === "external"
+                      ? "text-purple-700 bg-purple-50 border-purple-100"
+                      : tool.kind === "folder"
+                      ? "text-amber-700 bg-amber-50 border-amber-100"
+                      : "text-indigo-700 bg-indigo-50 border-indigo-100"
+                  }`}>
+                    {tool.kind === "external" ? "외부 공식 채널" : tool.kind === "folder" ? "다운로드 폴더" : "내부 도구"}
+                  </span>
+                  <button
+                    onClick={() => handleToolSelect(tool)}
+                    className="inline-flex items-center text-xs font-bold text-[#B9975B] hover:underline"
+                  >
+                    {tool.kind === "external" ? "링크 열기 ↗" : "실행하기 →"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="py-8 text-center text-xs text-[#5B6470]">
+            선택한 필터와 검색어에 일치하는 도구가 없습니다.
+          </p>
+        )}
       </section>
 
-      <ToolPanel id={activeTool} />
+      {/* 5. 실행 중인 기능 화면 (Active tool view) */}
+      {activeTool && (
+        <section
+          id="active-tool-panel"
+          className="rounded-2xl border-2 border-[#B9975B] bg-white p-6 shadow-md transition-all scroll-mt-24"
+        >
+          <div className="flex items-center justify-between border-b border-[#E3DED4] pb-4">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <h3 className="text-base font-bold text-[#0F1D2E]">
+                {allTools().find((t) => t.id === activeTool)?.label} 실행 화면
+              </h3>
+            </div>
+            <button
+              onClick={() => setActiveTool(null)}
+              className="text-xs font-bold text-slate-400 hover:text-slate-600 border border-slate-200 rounded px-2 py-1"
+            >
+              닫기
+            </button>
+          </div>
+          <div className="mt-6">
+            <ToolPanel id={activeTool} />
+          </div>
+        </section>
+      )}
 
-      <aside className="rounded-xl border border-slate-200 border-l-4 border-l-indigo-500 bg-slate-50 p-5">
-        <h2 className="text-sm font-semibold text-slate-900">안전 안내</h2>
-        <p className="mt-2 break-keep text-sm leading-6 text-slate-500">
-          계산 결과와 검색 결과는 설계사 업무 참고용입니다. 보험금 지급 여부,
-          지급 금액, 손해사정, 의료 진단 해석을 판단하지 않습니다. 고객 개인정보,
-          의료자료, 진단서 원본은 입력하지 마세요.
+      {/* 6. 접이식 안전 안내 */}
+      <aside className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5">
+        <h2 className="text-xs font-bold text-[#0F1D2E] uppercase tracking-wider">주의 사항 및 안전 안내</h2>
+        <p className="mt-2 text-xs leading-relaxed text-[#5B6470] break-keep">
+          계산 및 검색 결과는 설계사 업무 참고 가이드라인입니다. 보험금 지급 여부, 지급 금액, 손해사정, 진단서 해석을 결정하지 않습니다. 개인정보나 민감한 질병 자료 원본은 입력하지 않도록 주의해 주세요.
         </p>
       </aside>
 
@@ -897,42 +1133,6 @@ export function WorkToolsClient() {
         title={folderTitle}
       />
     </div>
-  );
-}
-
-function ToolChip({
-  active,
-  favorite,
-  onClick,
-  onFavorite,
-  tool,
-}: {
-  active: boolean;
-  favorite: boolean;
-  onClick: () => void;
-  onFavorite: () => void;
-  tool: ToolItem;
-}) {
-  return (
-    <span
-      className={`inline-flex min-h-10 overflow-hidden rounded-full border text-xs font-semibold ${
-        active
-          ? "border-indigo-600 bg-indigo-600 !text-slate-50"
-          : "border-slate-200 bg-slate-50 text-indigo-600"
-      }`}
-    >
-      <button className="px-3 py-2" onClick={onClick} type="button">
-        {tool.label}
-      </button>
-      <button
-        aria-label={`${tool.label} 즐겨찾기 ${favorite ? "해제" : "추가"}`}
-        className={`border-l px-2 ${active ? "border-slate-50/25" : "border-slate-200"}`}
-        onClick={onFavorite}
-        type="button"
-      >
-        {favorite ? "★" : "☆"}
-      </button>
-    </span>
   );
 }
 

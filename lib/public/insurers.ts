@@ -118,6 +118,70 @@ export function isInsurerPubliclyVisible(
   return flags.isPublished && isPublicVerificationStatus(flags.verificationStatus);
 }
 
+const CANONICAL_MAPPING: Record<string, string> = {
+  "db-insurance": "db-general",
+  "kb-insurance": "kb-general",
+  "lotte-fire": "lotte-general",
+  "lina-general": "chubb-general",
+  "yebyeol-insurance": "yebyeol-general",
+};
+
+export function dedupePublicInsurers(rawInsurers: PublicInsurer[]): PublicInsurer[] {
+  const map = new Map<string, PublicInsurer>();
+  
+  for (const item of rawInsurers) {
+    const canonicalId = CANONICAL_MAPPING[item.id] ?? item.id;
+    const existing = map.get(canonicalId);
+    
+    if (!existing) {
+      map.set(canonicalId, { ...item, id: canonicalId });
+    } else {
+      const merged = { ...existing };
+      
+      const fieldsToMerge: (keyof PublicInsurer)[] = [
+        "officialWebsiteUrl",
+        "plannerPortalUrl",
+        "systemUrl",
+        "customerCenterPhone",
+        "helpdeskPhone",
+        "callMonitoringPhone",
+        "claimPageUrl",
+        "claimFaxNumber",
+        "faxNumber",
+        "mailingAddress",
+        "registeredMailAddress",
+        "claimFormUrl",
+        "termsUrl",
+        "cardPaymentNote",
+      ];
+      
+      for (const field of fieldsToMerge) {
+        const canonicalVal = existing[field];
+        const duplicateVal = item[field];
+        
+        if (!canonicalVal || canonicalVal === "-" || canonicalVal === "해당사항 없음" || canonicalVal === "해당없음") {
+          if (duplicateVal && duplicateVal !== "-" && duplicateVal !== "해당사항 없음" && duplicateVal !== "해당없음") {
+            Object.assign(merged, { [field]: duplicateVal });
+          }
+        } else if (field === "cardPaymentNote" && duplicateVal && (duplicateVal as string).length > (canonicalVal as string).length) {
+          Object.assign(merged, { [field]: duplicateVal });
+        }
+      }
+      
+      const combinedBrowsers = new Set([
+        ...(existing.supportedBrowsers || []),
+        ...(item.supportedBrowsers || []),
+      ]);
+      merged.supportedBrowsers = Array.from(combinedBrowsers) as SupportedBrowser[];
+      merged.isFeatured = existing.isFeatured || item.isFeatured;
+      
+      map.set(canonicalId, merged);
+    }
+  }
+  
+  return Array.from(map.values());
+}
+
 function toIsoDate(value: Date | null): string | null {
   if (!value) return null;
   return value.toISOString().slice(0, 10);
@@ -163,21 +227,24 @@ export async function getPublicInsurers(): Promise<PublicInsurersResult> {
       },
     });
 
-    const insurers: PublicInsurer[] = records.map((record) => ({
+    const rawInsurers: PublicInsurer[] = records.map((record) => ({
       ...record,
       lastVerifiedAt: toIsoDate(record.lastVerifiedAt),
       supportedBrowsers: getSupportedBrowsersForId(record.id),
     }));
 
+    const insurers = dedupePublicInsurers(rawInsurers);
+
     return { status: "ok", insurers };
   } catch (error) {
-    // DB 연결이 불가능한 MVP 단계이므로, 실패 시 모의(Mock) 데이터를 반환합니다.
     console.error("[plannerdesk] DB query failed, falling back to mock data:", error);
-    const insurers: PublicInsurer[] = insurerDirectoryEntries.map((record) => ({
+    const rawInsurers: PublicInsurer[] = insurerDirectoryEntries.map((record) => ({
       ...record,
       lastVerifiedAt: record.lastVerifiedAt ? record.lastVerifiedAt : null,
       supportedBrowsers: getSupportedBrowsersForId(record.id),
     })) as PublicInsurer[];
+
+    const insurers = dedupePublicInsurers(rawInsurers);
 
     return { status: "ok", insurers };
   }
