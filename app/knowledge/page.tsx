@@ -2,7 +2,10 @@ import Link from "next/link";
 import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
 import { KnowledgeArchiveList } from "./knowledge-archive-list";
+
+export const dynamic = "force-dynamic";
 
 const t = {
   eyebrow: "지식 아카이브",
@@ -16,7 +19,11 @@ const t = {
     "PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.\nPlannerDesk는 보험금 지급 금액을 산정하지 않습니다.\nPlannerDesk는 손해사정 업무를 수행하지 않습니다.\nPlannerDesk는 의료 진단을 해석하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하거나 업로드하지 마세요.",
 };
 
-export default function KnowledgeArchivePage() {
+export default async function KnowledgeArchivePage() {
+  const result = await getPublicKnowledgeArticles();
+  const articles = result.status === "ok" ? result.articles : [];
+  const isCatalogEmpty = articles.length === 0;
+
   return (
     <PageFrame>
       <Header />
@@ -42,7 +49,10 @@ export default function KnowledgeArchivePage() {
 
           <KnowledgeWorkflows />
 
-          <KnowledgeArchiveList />
+          <KnowledgeArchiveList
+            items={articles}
+            isCatalogEmpty={isCatalogEmpty}
+          />
         </div>
       </ContentSection>
       <Footer />

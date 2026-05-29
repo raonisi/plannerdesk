@@ -2,90 +2,77 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  KnowledgeArticleCategory,
+  KnowledgeArticleType,
+  KnowledgeRiskLevel,
+} from "@prisma/client";
 import { EmptyState, SearchBar } from "@/components/content-page";
 import {
-  KNOWLEDGE_SEED_ITEMS,
-  type KnowledgeCategory,
-  type KnowledgeRiskLevel,
-  type KnowledgeSeedItem,
-  type KnowledgeStatus,
-  type KnowledgeType,
-} from "./knowledge-seed";
+  PUBLIC_CATEGORY_LABEL,
+  PUBLIC_TYPE_LABEL,
+  type PublicKnowledgeStatus,
+} from "@/lib/public/knowledge-display";
+import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 
-type CategoryFilter = "all" | KnowledgeCategory;
-type StatusFilter = "all" | KnowledgeStatus;
+type CategoryFilter = "all" | KnowledgeArticleCategory;
+type StatusFilter = "all" | PublicKnowledgeStatus;
 type RiskFilter = "all" | KnowledgeRiskLevel | "blocked";
-type TypeFilter = "all" | KnowledgeType;
+type TypeFilter = "all" | KnowledgeArticleType;
 
 const categoryOptions: Array<{ label: string; value: CategoryFilter }> = [
   { label: "전체", value: "all" },
-  { label: "청구 기준", value: "청구서류·접수 기준" },
-  { label: "고지·심사", value: "고지·심사 전 확인" },
-  { label: "해지·유지", value: "계약관리·유지 실무" },
-  { label: "공시·약관", value: "공시·약관·공식 링크" },
-  { label: "고객 안내문", value: "고객 안내문·응대 문구" },
-  { label: "운영 안전", value: "운영 안전·금지 영역" },
-  { label: "PlannerDesk 사용법", value: "PlannerDesk 사용법" },
+  ...Object.values(KnowledgeArticleCategory).map((value) => ({
+    label: PUBLIC_CATEGORY_LABEL[value],
+    value,
+  })),
 ];
 
 const typeOptions: Array<{ label: string; value: TypeFilter }> = [
   { label: "전체", value: "all" },
-  { label: "FAQ", value: "FAQ" },
-  { label: "실무 기준", value: "실무 기준" },
-  { label: "체크리스트", value: "체크리스트" },
-  { label: "안내문 샘플", value: "안내문 샘플" },
-  { label: "링크 가이드", value: "링크 가이드" },
-  { label: "안전 경계", value: "안전 경계" },
+  ...Object.values(KnowledgeArticleType).map((value) => ({
+    label: PUBLIC_TYPE_LABEL[value],
+    value,
+  })),
 ];
 
 const statusOptions: Array<{ label: string; value: StatusFilter }> = [
   { label: "전체", value: "all" },
   { label: "검수 필요", value: "needs_review" },
   { label: "검수 완료", value: "verified" },
-  { label: "작성 중", value: "draft" },
-  { label: "보관됨", value: "archived" },
 ];
 
 const riskOptions: Array<{ label: string; value: RiskFilter }> = [
   { label: "전체", value: "all" },
-  { label: "낮음", value: "low" },
-  { label: "주의", value: "medium" },
-  { label: "높음", value: "high" },
-  { label: "차단", value: "blocked" },
+  { label: "낮음", value: KnowledgeRiskLevel.low },
+  { label: "주의", value: KnowledgeRiskLevel.medium },
+  { label: "높음", value: KnowledgeRiskLevel.high },
+  { label: "차단", value: KnowledgeRiskLevel.blocked },
 ];
 
-const statusLabels: Record<KnowledgeStatus, string> = {
-  draft: "작성 중",
-  needs_review: "검수 필요",
-  verified: "검수 완료",
-  archived: "보관됨",
-};
-
-const riskLabels: Record<KnowledgeRiskLevel, string> = {
-  low: "낮음",
-  medium: "주의",
-  high: "높음",
-};
-
-const statusClasses: Record<KnowledgeStatus, string> = {
-  draft: "border-[#d9c9a8] bg-[#f7f1e5] text-[#5f6670]",
+const statusClasses: Record<PublicKnowledgeStatus, string> = {
   needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
   verified: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-  archived: "border-[#d6d8dc] bg-[#f4f5f6] text-[#5f6670]",
 };
 
 const riskClasses: Record<KnowledgeRiskLevel, string> = {
-  low: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-  medium: "border-[#d9c9a8] bg-[#fff7e6] text-[#7a612d]",
-  high: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
+  [KnowledgeRiskLevel.low]: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
+  [KnowledgeRiskLevel.medium]: "border-[#d9c9a8] bg-[#fff7e6] text-[#7a612d]",
+  [KnowledgeRiskLevel.high]: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
+  [KnowledgeRiskLevel.blocked]: "border-[#d6d8dc] bg-[#f4f5f6] text-[#5f6670]",
 };
+
+interface KnowledgeArchiveListProps {
+  items: PublicKnowledgeArticleListItem[];
+  isCatalogEmpty: boolean;
+}
 
 function resetFilters(
   setQuery: (v: string) => void,
   setCategory: (v: CategoryFilter) => void,
   setTypeFilter: (v: TypeFilter) => void,
   setStatus: (v: StatusFilter) => void,
-  setRisk: (v: RiskFilter) => void
+  setRisk: (v: RiskFilter) => void,
 ) {
   setQuery("");
   setCategory("all");
@@ -94,7 +81,10 @@ function resetFilters(
   setRisk("all");
 }
 
-export function KnowledgeArchiveList() {
+export function KnowledgeArchiveList({
+  items,
+  isCatalogEmpty,
+}: KnowledgeArchiveListProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -104,27 +94,30 @@ export function KnowledgeArchiveList() {
   const filteredItems = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
 
-    return KNOWLEDGE_SEED_ITEMS.filter((item) => {
+    return items.filter((item) => {
       const searchTarget = [
         item.title,
         item.summary,
-        item.category,
-        item.type,
+        item.categoryLabel,
+        item.typeLabel,
         ...(item.tags || []),
         item.workflowLabel || "",
+        item.sourceTitle || "",
       ]
         .join(" ")
         .toLocaleLowerCase("ko-KR");
 
       const matchesQuery =
         normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
-      const matchesCategory = category === "all" || item.category === category;
+      const matchesCategory =
+        category === "all" || item.category === category;
       const matchesType = typeFilter === "all" || item.type === typeFilter;
       const matchesStatus = status === "all" || item.status === status;
       const matchesRisk =
         risk === "all" ||
         (risk === "blocked"
-          ? item.type === "안전 경계"
+          ? item.type === KnowledgeArticleType.safety_boundary ||
+            item.riskLevel === KnowledgeRiskLevel.blocked
           : item.riskLevel === risk);
 
       return (
@@ -135,10 +128,19 @@ export function KnowledgeArchiveList() {
         matchesRisk
       );
     });
-  }, [category, query, risk, status, typeFilter]);
+  }, [category, items, query, risk, status, typeFilter]);
 
   const handleReset = () =>
     resetFilters(setQuery, setCategory, setTypeFilter, setStatus, setRisk);
+
+  if (isCatalogEmpty) {
+    return (
+      <EmptyState
+        title="현재 공개된 지식 문서가 없습니다."
+        description="관리자 검수와 공개 설정이 완료된 문서만 표시됩니다."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -194,9 +196,7 @@ export function KnowledgeArchiveList() {
             role="status"
           >
             총{" "}
-            <strong className="text-[#102235]">
-              {KNOWLEDGE_SEED_ITEMS.length}
-            </strong>
+            <strong className="text-[#102235]">{items.length}</strong>
             개 중{" "}
             <strong className="text-[#102235]">{filteredItems.length}</strong>
             개 문서를 표시 중입니다.
@@ -269,15 +269,15 @@ function FilterGroup({
   );
 }
 
-function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
+function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
   return (
     <article className="flex h-full flex-col rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-[#d9c9a8] bg-white px-3 py-1 text-xs font-semibold text-[#7a612d]">
-          {item.category}
+          {item.categoryLabel}
         </span>
         <span className="rounded-full border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-1 text-xs font-semibold text-[#5f6670]">
-          {item.type}
+          {item.typeLabel}
         </span>
       </div>
 
@@ -292,28 +292,24 @@ function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
         <span
           className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses[item.status]}`}
         >
-          상태: {statusLabels[item.status]}
+          상태: {item.statusLabel}
         </span>
         <span
           className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${riskClasses[item.riskLevel]}`}
         >
-          위험도: {riskLabels[item.riskLevel]}
+          위험도: {item.riskLabel}
         </span>
       </div>
 
       <p className="mt-3 text-xs leading-5 text-[#5f6670]">
         {item.aiUsable ? "AI 참조 가능" : "AI 참조 전 검수 필요"}
       </p>
-      {item.slug ? (
-        <Link
-          className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2"
-          href={`/knowledge/${item.slug}`}
-        >
-          상세 보기
-        </Link>
-      ) : (
-        <p className="mt-1 text-xs leading-5 text-[#8a909a]">상세 보기 준비 중</p>
-      )}
+      <Link
+        className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2"
+        href={`/knowledge/${item.slug}`}
+      >
+        상세 보기
+      </Link>
 
       {item.tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
