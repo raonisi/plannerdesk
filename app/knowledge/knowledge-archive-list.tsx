@@ -4,34 +4,54 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/content-page";
 import {
-  KNOWLEDGE_CATEGORIES,
   KNOWLEDGE_SEED_ITEMS,
   type KnowledgeCategory,
   type KnowledgeRiskLevel,
   type KnowledgeSeedItem,
   type KnowledgeStatus,
+  type KnowledgeType,
 } from "./knowledge-seed";
 
 type CategoryFilter = "all" | KnowledgeCategory;
-type StatusFilter = "all" | "needs_review" | "verified";
-type RiskFilter = "all" | KnowledgeRiskLevel;
+type StatusFilter = "all" | KnowledgeStatus | "rejected";
+type RiskFilter = "all" | KnowledgeRiskLevel | "blocked";
+type TypeFilter = "all" | KnowledgeType;
 
 const categoryOptions: Array<{ label: string; value: CategoryFilter }> = [
   { label: "전체", value: "all" },
-  ...KNOWLEDGE_CATEGORIES.map((category) => ({ label: category, value: category })),
+  { label: "청구 기준", value: "청구서류·접수 기준" },
+  { label: "고지·심사", value: "고지·심사 전 확인" },
+  { label: "해지·유지", value: "계약관리·유지 실무" },
+  { label: "공시·약관", value: "공시·약관·공식 링크" },
+  { label: "고객 안내문", value: "고객 안내문·응대 문구" },
+  { label: "운영 안전", value: "운영 안전·금지 영역" },
+  { label: "PlannerDesk 사용법", value: "PlannerDesk 사용법" },
+];
+
+const typeOptions: Array<{ label: string; value: TypeFilter }> = [
+  { label: "전체", value: "all" },
+  { label: "FAQ", value: "FAQ" },
+  { label: "실무 기준", value: "실무 기준" },
+  { label: "체크리스트", value: "체크리스트" },
+  { label: "안내문 샘플", value: "안내문 샘플" },
+  { label: "링크 가이드", value: "링크 가이드" },
+  { label: "안전 경계", value: "안전 경계" },
 ];
 
 const statusOptions: Array<{ label: string; value: StatusFilter }> = [
   { label: "전체", value: "all" },
   { label: "검수 필요", value: "needs_review" },
   { label: "검수 완료", value: "verified" },
+  { label: "작성 중", value: "draft" },
+  { label: "보관됨", value: "archived" },
 ];
 
 const riskOptions: Array<{ label: string; value: RiskFilter }> = [
   { label: "전체", value: "all" },
-  { label: "low", value: "low" },
-  { label: "medium", value: "medium" },
-  { label: "high", value: "high" },
+  { label: "낮음", value: "low" },
+  { label: "주의", value: "medium" },
+  { label: "높음", value: "high" },
+  { label: "차단", value: "blocked" },
 ];
 
 const statusLabels: Record<KnowledgeStatus, string> = {
@@ -57,6 +77,7 @@ const riskClasses: Record<KnowledgeRiskLevel, string> = {
 export function KnowledgeArchiveList() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [risk, setRisk] = useState<RiskFilter>("all");
 
@@ -69,7 +90,8 @@ export function KnowledgeArchiveList() {
         item.summary,
         item.category,
         item.type,
-        ...item.tags,
+        ...(item.tags || []),
+        item.workflowLabel || "",
       ]
         .join(" ")
         .toLocaleLowerCase("ko-KR");
@@ -77,12 +99,13 @@ export function KnowledgeArchiveList() {
       const matchesQuery =
         normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
       const matchesCategory = category === "all" || item.category === category;
+      const matchesType = typeFilter === "all" || item.type === typeFilter;
       const matchesStatus = status === "all" || item.status === status;
       const matchesRisk = risk === "all" || item.riskLevel === risk;
 
-      return matchesQuery && matchesCategory && matchesStatus && matchesRisk;
+      return matchesQuery && matchesCategory && matchesType && matchesStatus && matchesRisk;
     });
-  }, [category, query, risk, status]);
+  }, [category, query, risk, status, typeFilter]);
 
   return (
     <div className="space-y-6">
@@ -93,13 +116,13 @@ export function KnowledgeArchiveList() {
             aria-label="지식 아카이브 검색"
             className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="제목, 요약, 태그를 입력하세요"
+            placeholder="지식 문서, 태그, 업무 기준을 검색하세요"
             type="search"
             value={query}
           />
         </label>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="mt-4 grid gap-4 lg:grid-cols-4">
           <FilterGroup
             label="카테고리"
             onChange={(value) => setCategory(value as CategoryFilter)}
@@ -107,7 +130,13 @@ export function KnowledgeArchiveList() {
             value={category}
           />
           <FilterGroup
-            label="상태"
+            label="문서 유형"
+            onChange={(value) => setTypeFilter(value as TypeFilter)}
+            options={typeOptions}
+            value={typeFilter}
+          />
+          <FilterGroup
+            label="검수상태"
             onChange={(value) => setStatus(value as StatusFilter)}
             options={statusOptions}
             value={status}
@@ -120,9 +149,25 @@ export function KnowledgeArchiveList() {
           />
         </div>
 
-        <p className="mt-4 text-sm leading-6 text-[#4f5661]">
-          {filteredItems.length}개의 정적 샘플이 표시됩니다.
-        </p>
+        <div className="mt-6 flex items-center justify-between border-t border-[#e3d5b8] pt-4">
+          <p className="text-sm font-medium text-[#4f5661]">
+            총 <strong className="text-[#102235]">{KNOWLEDGE_SEED_ITEMS.length}</strong>개 중{" "}
+            <strong className="text-[#102235]">{filteredItems.length}</strong>개 문서를 표시 중입니다.
+          </p>
+          <button
+            type="button"
+            className="text-sm font-semibold text-[#7a612d] underline underline-offset-4 transition hover:text-[#aa8137]"
+            onClick={() => {
+              setQuery("");
+              setCategory("all");
+              setTypeFilter("all");
+              setStatus("all");
+              setRisk("all");
+            }}
+          >
+            필터 초기화
+          </button>
+        </div>
       </section>
 
       {filteredItems.length > 0 ? (
