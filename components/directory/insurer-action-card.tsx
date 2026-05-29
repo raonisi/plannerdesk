@@ -19,10 +19,14 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 import {
   CATEGORY_LABELS,
   DIRECTORY_TEXT,
+  cardPaymentLegLabel,
   cardPaymentStatusLabel,
   claimFaxDisplay,
+  lastVerifiedLabel,
   telHref,
+  verificationStatusLabel,
 } from "@/lib/directory/formatting";
+import { buttons } from "@/lib/design-system";
 
 
 
@@ -291,28 +295,42 @@ export function InsurerActionCard({
           onToggleFavorite={onToggleFavorite}
         />
 
-        <div className="mt-6 space-y-4">
-          {/* 1순위: 전산 업무 */}
-          <div className="flex flex-col">
+        <div className="mt-6 space-y-5">
+          <section className="space-y-2">
+            <CardSectionTitle>전산 업무</CardSectionTitle>
             {accessHref ? (
               <ExternalTabAnchor
-                aria-label={`${insurer.name} 전산접속`}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-[#0F1D2E] text-sm font-bold !text-white shadow-sm transition hover:bg-[#1C3552] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
+                aria-label={`${insurer.name} 전산 접속`}
+                className={`${buttons.base} ${buttons.primary} w-full gap-2`}
                 href={accessHref}
               >
                 전산 접속 ↗
               </ExternalTabAnchor>
             ) : (
-              <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
-                전산 미지원
+              <span className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-4 text-sm font-semibold text-[#5B6470] break-keep">
+                {DIRECTORY_TEXT.missing}
               </span>
             )}
-            {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 && (
-              <span className="mt-1 text-[11px] text-slate-500 text-center font-medium">
+            {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 ? (
+              <p className="text-center text-[11px] font-medium text-[#5B6470]">
                 ({insurer.supportedBrowsers.map((b) => (b === "chrome" ? "크롬" : "엣지")).join("/")} 권장)
-              </span>
-            )}
-          </div>
+              </p>
+            ) : null}
+          </section>
+
+          <section className="space-y-2">
+            <CardSectionTitle>상담·문의</CardSectionTitle>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <PhoneActionButton
+                label="고객센터 전화"
+                phone={insurer.customerCenterPhone}
+              />
+              <PhoneActionButton
+                label="헬프데스크 전화"
+                phone={insurer.helpdeskPhone}
+              />
+            </div>
+          </section>
 
           <button
             type="button"
@@ -379,7 +397,7 @@ export function InsurerActionCard({
                   </div>
                 </div>
                 <div className="grid grid-cols-[100px_1fr] p-3 items-center bg-[#F8F7F3]">
-                  <span className="font-semibold text-slate-500">모니터링</span>
+                  <span className="font-semibold text-slate-500">인콜/모니터링</span>
                   <div className="text-right">
                     {insurer.callMonitoringPhone ? (
                       <a
@@ -405,21 +423,58 @@ export function InsurerActionCard({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4">
                   <span className="text-xs font-semibold text-slate-500">청구 팩스</span>
-                  <span className={`mt-1 text-sm font-bold ${claimFax.primary && claimFax.primary !== DIRECTORY_TEXT.missing && claimFax.primary !== DIRECTORY_TEXT.unavailable ? "text-[#0F1D2E]" : "text-slate-400"}`}>
+                  <span
+                    className={`mt-1 break-all text-sm font-bold ${
+                      claimFax.primary !== DIRECTORY_TEXT.missing &&
+                      claimFax.primary !== DIRECTORY_TEXT.unavailable
+                        ? "text-[#0F1D2E]"
+                        : "text-[#5B6470]"
+                    }`}
+                  >
                     {claimFax.primary}
                   </span>
+                  {claimFax.secondary ? (
+                    <span className="mt-1 text-[11px] font-medium text-[#5B6470] break-all">
+                      {claimFax.secondary}
+                    </span>
+                  ) : null}
                 </div>
                 <button
                   type="button"
                   disabled={!mailAddress}
                   onClick={() => setMailAddressOpen(true)}
-                  className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label={`${insurer.name} 등기우편 주소 확인`}
+                  className="flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span className="text-xs font-semibold text-slate-500">우편 서류 접수처</span>
-                  <span className={`mt-1 text-sm font-bold underline ${mailAddress ? "text-[#B9975B]" : "text-slate-400 no-underline break-keep"}`}>
+                  <span className="text-xs font-semibold text-slate-500">등기우편 주소</span>
+                  <span
+                    className={`mt-1 text-sm font-bold break-keep ${mailAddress ? "text-[#B9975B] underline" : "text-[#5B6470] no-underline"}`}
+                  >
                     {mailAddress ? "주소 확인" : DIRECTORY_TEXT.missing}
                   </span>
                 </button>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {insurer.claimFormUrl ? (
+                  <ExternalTabAnchor
+                    aria-label={`${insurer.name} 청구양식 열기`}
+                    className={`${buttons.base} ${buttons.outline} w-full text-xs`}
+                    href={insurer.claimFormUrl}
+                  >
+                    청구양식 열기 ↗
+                  </ExternalTabAnchor>
+                ) : (
+                  <span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-3 text-xs font-semibold text-[#5B6470] break-keep">
+                    {DIRECTORY_TEXT.missing}
+                  </span>
+                )}
+                <Link
+                  href={`/claim-documents?insurer=${encodeURIComponent(insurer.id)}`}
+                  className={`${buttons.base} ${buttons.outline} w-full text-xs`}
+                >
+                  청구서류 확인
+                </Link>
               </div>
 
               {claimItems.length > 0 ? (
@@ -431,16 +486,10 @@ export function InsurerActionCard({
 
               <div className="pt-2 flex flex-wrap gap-2">
                 <Link
-                  href="/claim-documents"
-                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-                >
-                  청구서류 확인 바로가기 ↗
-                </Link>
-                <Link
                   href="/message-templates"
-                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                  className={`${buttons.base} ${buttons.ghost} px-3 text-xs`}
                 >
-                  고객 안내문 작성 바로가기 ↗
+                  고객 안내문 확인
                 </Link>
               </div>
             </section>
@@ -452,6 +501,15 @@ export function InsurerActionCard({
                 약관·공시
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
+                {insurer.termsUrl ? (
+                  <ExternalTabAnchor
+                    aria-label={`${insurer.name} 약관 확인`}
+                    className={`${buttons.base} ${buttons.outline} w-full text-sm`}
+                    href={insurer.termsUrl}
+                  >
+                    약관 확인 ↗
+                  </ExternalTabAnchor>
+                ) : null}
                 {disclosureLinks.productDisclosure?.sourceUrl ? (
                   <ExternalTabAnchor
                     className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] hover:text-[#B9975B]"
@@ -481,15 +539,15 @@ export function InsurerActionCard({
               <div className="pt-2 flex flex-wrap gap-2">
                 <Link
                   href="/disclosure-links"
-                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                  className={`${buttons.base} ${buttons.ghost} px-3 text-xs`}
                 >
-                  모든 공시·약관 바로가기 ↗
+                  공시·약관 확인
                 </Link>
                 <Link
                   href="/work-tools"
-                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                  className={`${buttons.base} ${buttons.ghost} px-3 text-xs`}
                 >
-                  업무 허브 바로가기 ↗
+                  업무 도구로 이동
                 </Link>
               </div>
             </section>
@@ -503,11 +561,18 @@ export function InsurerActionCard({
               <button
                 type="button"
                 onClick={() => setCardPaymentOpen(true)}
-                className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30"
+                aria-label={`${insurer.name} 카드납 가능 여부 상세`}
+                className="flex min-h-12 w-full flex-col gap-2 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 sm:flex-row sm:items-center sm:justify-between"
               >
                 <span className="text-sm font-bold text-slate-500">카드납 가능 여부</span>
-                <span className="text-xs font-bold text-[#0F1D2E] bg-slate-100 px-2.5 py-1.5 rounded">
-                  {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
+                <span className="inline-flex flex-wrap items-center gap-2">
+                  <span className="rounded-md bg-[#F7F4EE] px-2.5 py-1 text-xs font-bold text-[#0F1D2E]">
+                    {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
+                  </span>
+                  <span className="text-[11px] font-medium text-[#5B6470]">
+                    초회 {cardPaymentLegLabel(insurer.cardPaymentInitialAvailable)} · 계속{" "}
+                    {cardPaymentLegLabel(insurer.cardPaymentRecurringAvailable)}
+                  </span>
                 </span>
               </button>
             </section>
@@ -544,6 +609,42 @@ export function InsurerActionCard({
   );
 }
 
+function CardSectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h3 className="text-xs font-bold uppercase tracking-wide text-[#B9975B]">
+      {children}
+    </h3>
+  );
+}
+
+function PhoneActionButton({
+  label,
+  phone,
+}: {
+  label: string;
+  phone: string | null;
+}) {
+  const href = telHref(phone);
+
+  if (href) {
+    return (
+      <a
+        aria-label={`${label} ${phone}`}
+        className={`${buttons.base} ${buttons.outline} w-full break-all px-3 text-xs`}
+        href={href}
+      >
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <span className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-3 text-xs font-semibold text-[#5B6470] break-keep">
+      {DIRECTORY_TEXT.missing}
+    </span>
+  );
+}
+
 function CardHeader({
   insurer,
   isFavorite,
@@ -567,6 +668,11 @@ function CardHeader({
             <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
               {insurer.name}
             </h2>
+            <p className="mt-2 text-xs font-medium text-[#5B6470]">
+              {verificationStatusLabel(insurer.verificationStatus)}
+              <span className="mx-1.5 text-[#E3DED4]">·</span>
+              최근 확인 {lastVerifiedLabel(insurer.lastVerifiedAt)}
+            </p>
           </div>
         </div>
 
@@ -627,7 +733,7 @@ function FavoriteButton({
     <button
       aria-label={label}
       aria-pressed={isFavorite}
-      className={`inline-flex h-9 min-w-9 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${toneClass}`}
+      className={`inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${toneClass}`}
       onClick={() => onToggle(id)}
       title={label}
       type="button"
