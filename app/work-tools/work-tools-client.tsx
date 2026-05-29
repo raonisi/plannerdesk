@@ -65,7 +65,13 @@ type ToolId =
   | "life-mock"
   | "variable-textbook"
   | "variable-mock"
-  | "insurer-newsletter";
+  | "insurer-newsletter"
+  | "nhis-health"
+  | "nps-pension"
+  | "fss-fine"
+  | "efine-driver"
+  | "payinfo"
+  | "credit4u";
 
 type ToolItem = {
   id: ToolId;
@@ -354,6 +360,60 @@ const toolGroups: ToolGroup[] = [
         kind: "external",
         href: "https://efamily.scourt.go.kr/index.jsp",
         source: "대한민국 법원",
+      },
+    ],
+  },
+  {
+    title: "공공/금융 조회",
+    description: "고객 보장 분석 및 재무 설계 시 함께 확인하는 공공/금융기관 공식 링크입니다.",
+    tools: [
+      {
+        id: "nhis-health",
+        label: "국민건강보험(건강iN)",
+        description: "고객의 건강검진 결과 및 진료 내역 확인을 위한 공식 페이지로 연결합니다.",
+        kind: "external",
+        href: "https://www.nhis.or.kr/",
+        source: "국민건강보험공단",
+      },
+      {
+        id: "nps-pension",
+        label: "내연금알아보기",
+        description: "고객의 예상 연금액 조회를 위한 국민연금공단 공식 페이지로 연결합니다.",
+        kind: "external",
+        href: "https://csa.nps.or.kr/",
+        source: "국민연금공단",
+      },
+      {
+        id: "fss-fine",
+        label: "금융소비자포털 파인",
+        description: "각종 금융상품 정보와 제도를 확인할 수 있는 금융감독원 공식 포털입니다.",
+        kind: "external",
+        href: "https://fine.fss.or.kr/",
+        source: "금융감독원",
+      },
+      {
+        id: "efine-driver",
+        label: "경찰청 교통민원24",
+        description: "운전경력증명서 발급 및 조회를 위한 경찰청 이파인 공식 페이지로 연결합니다.",
+        kind: "external",
+        href: "https://www.efine.go.kr/",
+        source: "경찰청",
+      },
+      {
+        id: "payinfo",
+        label: "계좌정보통합관리(페이인포)",
+        description: "휴면계좌 및 숨은 금융자산 조회를 위한 금융결제원 공식 페이지로 연결합니다.",
+        kind: "external",
+        href: "https://www.payinfo.or.kr/",
+        source: "금융결제원",
+      },
+      {
+        id: "credit4u",
+        label: "한국신용정보원(크레딧포유)",
+        description: "본인 신용정보 및 보험가입내역 조회를 위한 공식 페이지로 연결합니다.",
+        kind: "external",
+        href: "https://www.credit4u.or.kr/",
+        source: "한국신용정보원",
       },
     ],
   },
@@ -847,6 +907,12 @@ const toolToCategoryId: Record<ToolId, string> = {
   "variable-textbook": "exam",
   "variable-mock": "exam",
   "insurer-newsletter": "news",
+  "nhis-health": "docs",
+  "nps-pension": "docs",
+  "fss-fine": "docs",
+  "efine-driver": "docs",
+  "payinfo": "docs",
+  "credit4u": "docs",
 };
 
 const PINNED_TOOL_IDS: ToolId[] = [
@@ -1091,7 +1157,7 @@ export function WorkToolsClient() {
       <aside className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5">
         <h2 className="text-[11px] font-bold tracking-[0.12em] text-[#B9975B]">주의 사항 및 안전 안내</h2>
         <p className="mt-2 text-xs leading-relaxed text-[#5B6470] break-keep">
-          계산 및 검색 결과는 설계사 업무 참고 가이드라인입니다. 보험금 지급 여부, 지급 금액, 손해사정, 진단서 해석을 결정하지 않습니다. 개인정보나 민감한 질병 자료 원본은 입력하지 않도록 주의해 주세요.
+          계산 및 검색 결과는 설계사 업무 참고 가이드라인입니다. 보험금 지급 여부, 지급 금액, 손해사정, 진단서 해석을 결정하지 않습니다. PlannerDesk는 조회 결과를 저장하지 않으며, 고객 개인정보와 의료자료를 처리하지 않습니다. 개인정보나 민감한 질병 자료 원본은 절대 입력하지 않도록 주의해 주세요.
         </p>
       </aside>
 
