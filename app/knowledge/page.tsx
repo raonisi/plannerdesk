@@ -10,10 +10,10 @@ const t = {
   description:
     "보험설계사가 반복해서 확인하는 청구, 고지, 해지, 약관, 고객응대 기준을 검수 상태와 함께 정리합니다.",
   subcopy:
-    "현재 자료는 실무 참고용이며, 보험금 지급 여부와 지급 금액은 보험사 심사 후 결정됩니다.",
-  safetyTitle: "안전한 실무 참고 기준",
+    "현재 자료는 설계사 실무 참고용입니다. 보험금 지급 여부와 지급 금액은 보험사 심사 후 결정됩니다.",
+  safetyTitle: "안전 안내 박스",
   safetyBody:
-    "플래너데스크는 보험금 지급 여부를 판단하지 않으며, 보험금 지급 금액을 산정하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하지 마세요.\n지식 문서는 공식 출처와 관리자 검수 후 신뢰 상태가 갱신됩니다.",
+    "PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.\nPlannerDesk는 보험금 지급 금액을 산정하지 않습니다.\nPlannerDesk는 손해사정 업무를 수행하지 않습니다.\nPlannerDesk는 의료 진단을 해석하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하거나 업로드하지 마세요.",
 };
 
 export default function KnowledgeArchivePage() {
@@ -53,47 +53,52 @@ export default function KnowledgeArchivePage() {
 function KnowledgeWorkflows() {
   const workflows = [
     {
-      title: "청구 기준 확인",
-      description: "청구서류, 접수 채널, 고객 안내문 기준을 함께 확인합니다.",
+      title: "1. 청구 기준 확인",
+      description: "청구서류, 접수 채널, 고객 안내문 기준을 함께 확인합니다.\n보험사별 기준과 공식 안내를 먼저 확인하세요.",
       links: [
-        { href: "/claim-documents", label: "청구서류" },
-        { href: "/message-templates", label: "고객안내문" }
+        { href: "/claim-documents", label: "청구서류 확인" },
+        { href: "/message-templates", label: "고객 안내문 확인" },
+        { href: "/directory", label: "보험사 정보 확인" }
       ]
     },
     {
-      title: "고지·심사 전 확인",
-      description: "청약서 질문, 진단·투약 기간, 최근 병원 이력 등 확인 순서를 정리합니다.",
+      title: "2. 고지·심사 전 확인",
+      description: "청약서 질문, 진단·투약 기간, 최근 병원 이력 등 확인 순서를 정리합니다.\n가입 가능 여부, 할증, 부담보, 거절 여부는 보험사 심사 후 결정됩니다.",
       links: [
-        { href: "/knowledge", label: "지식 아카이브" }
+        { href: "/knowledge", label: "고지 관련 지식 보기" },
+        { href: "/message-templates", label: "고객 안내문 확인" }
       ]
     },
     {
-      title: "해지·유지 상담 전 확인",
-      description: "보장 공백, 환급금, 감액, 납입유예, 재가입 조건을 점검합니다.",
+      title: "3. 해지·유지 상담 전 확인",
+      description: "보장 공백, 환급금, 감액, 납입유예, 재가입 조건을 먼저 확인합니다.\n해지 또는 유지를 무조건 권유하지 않고, 선택지를 비교할 수 있도록 돕습니다.",
       links: [
-        { href: "/knowledge", label: "지식 아카이브" }
+        { href: "/knowledge", label: "해지 전 기준 보기" },
+        { href: "/message-templates", label: "고객 안내문 확인" }
       ]
     },
     {
-      title: "공시·약관 기준 확인",
-      description: "공식 약관과 상품공시 기준을 먼저 확인합니다.",
+      title: "4. 공시·약관 기준 확인",
+      description: "보험사 공식 홈페이지, 상품공시, 약관 링크를 기준으로 확인합니다.\n비공식 블로그·카페 링크를 확정 자료처럼 사용하지 않습니다.",
       links: [
-        { href: "/disclosure-links", label: "공시·약관" },
-        { href: "/message-templates", label: "고객안내문" }
+        { href: "/disclosure-links", label: "공시·약관 확인" },
+        { href: "/message-templates", label: "약관 안내문 확인" }
       ]
     },
     {
-      title: "고객 안내문 확인",
-      description: "지급 여부를 단정하지 않는 중립 문구를 확인합니다.",
+      title: "5. 고객 안내문 확인",
+      description: "고객에게 보낼 수 있는 중립 문구를 확인합니다.\n보험금 지급 가능 여부를 단정하지 않고, 공식 기준 확인으로 안내합니다.",
       links: [
-        { href: "/message-templates", label: "고객안내문" }
+        { href: "/message-templates", label: "고객 안내문 보기" },
+        { href: "/claim-documents", label: "청구서류 확인" }
       ]
     },
     {
-      title: "운영 안전 기준",
-      description: "개인정보, 의료자료, 보험금 판단, 손해사정 오인 위험을 차단합니다.",
+      title: "6. 운영 안전 기준",
+      description: "개인정보, 의료자료, 보험금 판단, 손해사정 오인 위험을 차단하기 위한 기준입니다.\nPlannerDesk 안에는 주민등록번호, 진단서, 처방전, 검사결과지, 청구서류 원본을 입력하지 않습니다.",
       links: [
-        { href: "/knowledge", label: "지식 아카이브" }
+        { href: "/knowledge", label: "안전 기준 보기" },
+        { href: "/work-tools", label: "업무 도구로 이동" }
       ]
     }
   ];

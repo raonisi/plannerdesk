@@ -64,7 +64,7 @@ export default async function KnowledgeDetailPage({
               className="inline-flex min-h-10 items-center rounded-full border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
               href="/work-tools"
             >
-              업무 허브로 돌아가기
+              업무 도구로 이동
             </Link>
           </div>
 
@@ -110,8 +110,8 @@ export default async function KnowledgeDetailPage({
           <aside className="rounded-xl border border-[#d9c9a8] bg-white p-5">
             <h2 className="text-sm font-semibold text-[#102235]">검수 안내</h2>
             <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
-              이 문서는 현재 검수 상태를 기준으로 제공됩니다. 공식 출처 확인
-              전에는 확정 자료로 사용하지 마세요.
+              이 문서는 현재 검수 상태를 기준으로 제공됩니다.
+              공식 출처 또는 관리자 검수 전까지 확정 자료로 사용하지 마세요.
             </p>
             {document.status === "needs_review" ? (
               <div className="mt-3 rounded-lg border border-[#c5b08a] bg-[#fff9ed] p-3 text-sm font-semibold leading-6 text-[#7a612d]">
@@ -186,7 +186,7 @@ export default async function KnowledgeDetailPage({
           </section>
 
           <aside className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5">
-            <h2 className="text-sm font-semibold text-[#102235]">안전 경계</h2>
+            <h2 className="text-sm font-semibold text-[#102235]">안전 안내 박스</h2>
             <p className="mt-3 break-keep text-sm leading-6 text-[#5f6670]">
               PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.
               <br />
@@ -194,21 +194,31 @@ export default async function KnowledgeDetailPage({
               <br />
               PlannerDesk는 손해사정 업무를 수행하지 않습니다.
               <br />
-              고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하지 마세요.
+              PlannerDesk는 의료 진단을 해석하지 않습니다.
+              <br />
+              고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하거나 업로드하지 마세요.
             </p>
           </aside>
 
           <section className="rounded-xl border border-[#d9c9a8] bg-white p-5">
             <h2 className="text-sm font-semibold text-[#102235]">
-              고객 안내용 안전 문구
+              고객 안내용 문구 설명
             </h2>
+            <p className="mt-2 break-keep text-sm text-[#5f6670]">
+              아래 문구는 고객에게 안내할 때 참고할 수 있는 중립 문구입니다.
+              실제 안내 전 보험사 기준과 고객 상황을 함께 확인하세요.
+            </p>
             <p className="mt-3 break-keep text-sm leading-6 text-[#4f5661]">
               {document.safeCopy}
             </p>
           </section>
 
           <section className="rounded-xl border border-[#d9c9a8] bg-[#fbf7ee] p-5">
-            <h2 className="text-sm font-semibold text-[#102235]">금지 표현</h2>
+            <h2 className="text-sm font-semibold text-[#102235]">금지 표현 설명</h2>
+            <p className="mt-2 break-keep text-sm text-[#5f6670]">
+              이 문서에서 피해야 할 표현입니다.
+              보험금 지급 단정, 손해사정 오인, 의료 판단, 개인정보 입력 유도 표현은 사용하지 않습니다.
+            </p>
             <ul className="mt-3 space-y-1 text-sm leading-6 text-[#5f6670]">
               {document.forbiddenClaims.map((claim) => (
                 <li key={`${document.slug}-${claim}`}>- {claim}</li>
