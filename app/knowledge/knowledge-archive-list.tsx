@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { EmptyState } from "@/components/content-page";
+import { EmptyState, SearchBar } from "@/components/content-page";
 import {
   KNOWLEDGE_SEED_ITEMS,
   type KnowledgeCategory,
@@ -13,7 +13,7 @@ import {
 } from "./knowledge-seed";
 
 type CategoryFilter = "all" | KnowledgeCategory;
-type StatusFilter = "all" | KnowledgeStatus | "rejected";
+type StatusFilter = "all" | KnowledgeStatus;
 type RiskFilter = "all" | KnowledgeRiskLevel | "blocked";
 type TypeFilter = "all" | KnowledgeType;
 
@@ -61,6 +61,12 @@ const statusLabels: Record<KnowledgeStatus, string> = {
   archived: "보관됨",
 };
 
+const riskLabels: Record<KnowledgeRiskLevel, string> = {
+  low: "낮음",
+  medium: "주의",
+  high: "높음",
+};
+
 const statusClasses: Record<KnowledgeStatus, string> = {
   draft: "border-[#d9c9a8] bg-[#f7f1e5] text-[#5f6670]",
   needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
@@ -73,6 +79,20 @@ const riskClasses: Record<KnowledgeRiskLevel, string> = {
   medium: "border-[#d9c9a8] bg-[#fff7e6] text-[#7a612d]",
   high: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
 };
+
+function resetFilters(
+  setQuery: (v: string) => void,
+  setCategory: (v: CategoryFilter) => void,
+  setTypeFilter: (v: TypeFilter) => void,
+  setStatus: (v: StatusFilter) => void,
+  setRisk: (v: RiskFilter) => void
+) {
+  setQuery("");
+  setCategory("all");
+  setTypeFilter("all");
+  setStatus("all");
+  setRisk("all");
+}
 
 export function KnowledgeArchiveList() {
   const [query, setQuery] = useState("");
@@ -101,28 +121,46 @@ export function KnowledgeArchiveList() {
       const matchesCategory = category === "all" || item.category === category;
       const matchesType = typeFilter === "all" || item.type === typeFilter;
       const matchesStatus = status === "all" || item.status === status;
-      const matchesRisk = risk === "all" || item.riskLevel === risk;
+      const matchesRisk =
+        risk === "all" ||
+        (risk === "blocked"
+          ? item.type === "안전 경계"
+          : item.riskLevel === risk);
 
-      return matchesQuery && matchesCategory && matchesType && matchesStatus && matchesRisk;
+      return (
+        matchesQuery &&
+        matchesCategory &&
+        matchesType &&
+        matchesStatus &&
+        matchesRisk
+      );
     });
   }, [category, query, risk, status, typeFilter]);
 
+  const handleReset = () =>
+    resetFilters(setQuery, setCategory, setTypeFilter, setStatus, setRisk);
+
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">
-        <label className="block">
+      <section
+        aria-label="지식 아카이브 검색 및 필터"
+        className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6"
+      >
+        <label className="block" htmlFor="knowledge-archive-search">
           <span className="text-sm font-semibold text-[#303845]">검색</span>
-          <input
-            aria-label="지식 아카이브 검색"
-            className="mt-2 min-h-12 w-full rounded-lg border border-[#d9c9a8] bg-white px-4 py-3 text-base text-[#18202b] outline-none transition placeholder:text-[#8b7660] focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/20"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="지식 문서, 태그, 업무 기준을 검색하세요"
-            type="search"
-            value={query}
-          />
+          <div className="mt-2">
+            <SearchBar
+              ariaLabel="지식 문서, 태그, 업무 기준 검색"
+              id="knowledge-archive-search"
+              onChange={setQuery}
+              onClear={() => setQuery("")}
+              placeholder="지식 문서, 태그, 업무 기준을 검색하세요"
+              value={query}
+            />
+          </div>
         </label>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-4">
+        <div className="mt-4 grid gap-5 sm:gap-4 lg:grid-cols-2 xl:grid-cols-4">
           <FilterGroup
             label="카테고리"
             onChange={(value) => setCategory(value as CategoryFilter)}
@@ -149,21 +187,25 @@ export function KnowledgeArchiveList() {
           />
         </div>
 
-        <div className="mt-6 flex items-center justify-between border-t border-[#e3d5b8] pt-4">
-          <p className="text-sm font-medium text-[#4f5661]">
-            총 <strong className="text-[#102235]">{KNOWLEDGE_SEED_ITEMS.length}</strong>개 중{" "}
-            <strong className="text-[#102235]">{filteredItems.length}</strong>개 문서를 표시 중입니다.
+        <div className="mt-6 flex flex-col gap-3 border-t border-[#e3d5b8] pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p
+            aria-live="polite"
+            className="text-sm font-medium text-[#4f5661]"
+            role="status"
+          >
+            총{" "}
+            <strong className="text-[#102235]">
+              {KNOWLEDGE_SEED_ITEMS.length}
+            </strong>
+            개 중{" "}
+            <strong className="text-[#102235]">{filteredItems.length}</strong>
+            개 문서를 표시 중입니다.
           </p>
           <button
             type="button"
-            className="text-sm font-semibold text-[#7a612d] underline underline-offset-4 transition hover:text-[#aa8137]"
-            onClick={() => {
-              setQuery("");
-              setCategory("all");
-              setTypeFilter("all");
-              setStatus("all");
-              setRisk("all");
-            }}
+            aria-label="검색어 및 필터 초기화"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-4 text-sm font-semibold text-[#7a612d] transition hover:border-[#aa8137] hover:text-[#aa8137] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2"
+            onClick={handleReset}
           >
             필터 초기화
           </button>
@@ -171,11 +213,13 @@ export function KnowledgeArchiveList() {
       </section>
 
       {filteredItems.length > 0 ? (
-        <div className="grid gap-5 lg:grid-cols-2">
+        <ul className="grid list-none gap-5 p-0 lg:grid-cols-2">
           {filteredItems.map((item) => (
-            <KnowledgeCard item={item} key={item.id} />
+            <li key={item.id}>
+              <KnowledgeCard item={item} />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
         <EmptyState
           title="조건에 맞는 지식 문서가 없습니다."
@@ -198,15 +242,16 @@ function FilterGroup({
   value: string;
 }) {
   return (
-    <fieldset>
+    <fieldset className="min-w-0">
       <legend className="text-sm font-semibold text-[#303845]">{label}</legend>
-      <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+      <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
             <button
               aria-pressed={isSelected}
-              className={`min-h-11 shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] ${
+              aria-label={`${label} ${option.label}`}
+              className={`min-h-11 rounded-full border px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2 ${
                 isSelected
                   ? "border-[#173f36] bg-[#173f36] text-[#fbf7ee]"
                   : "border-[#d9c9a8] bg-white text-[#303845] hover:border-[#aa8137]"
@@ -226,7 +271,7 @@ function FilterGroup({
 
 function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
   return (
-    <article className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
+    <article className="flex h-full flex-col rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-[#d9c9a8] bg-white px-3 py-1 text-xs font-semibold text-[#7a612d]">
           {item.category}
@@ -236,10 +281,10 @@ function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
         </span>
       </div>
 
-      <h3 className="mt-3 break-keep text-xl font-semibold leading-snug text-[#102235]">
+      <h3 className="mt-3 break-keep text-lg font-semibold leading-snug text-[#102235] sm:text-xl">
         {item.title}
       </h3>
-      <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
+      <p className="mt-2 line-clamp-3 break-keep text-sm leading-6 text-[#4f5661]">
         {item.summary}
       </p>
 
@@ -252,7 +297,7 @@ function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
         <span
           className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${riskClasses[item.riskLevel]}`}
         >
-          위험도: {item.riskLevel}
+          위험도: {riskLabels[item.riskLevel]}
         </span>
       </div>
 
@@ -261,7 +306,7 @@ function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
       </p>
       {item.slug ? (
         <Link
-          className="mt-1 inline-flex text-xs font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+          className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2"
           href={`/knowledge/${item.slug}`}
         >
           상세 보기
@@ -270,16 +315,18 @@ function KnowledgeCard({ item }: { item: KnowledgeSeedItem }) {
         <p className="mt-1 text-xs leading-5 text-[#8a909a]">상세 보기 준비 중</p>
       )}
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {item.tags.map((tag) => (
-          <span
-            className="rounded-full border border-[#e3d5b8] bg-white px-2.5 py-1 text-xs text-[#4f5661]"
-            key={`${item.id}-${tag}`}
-          >
-            #{tag}
-          </span>
-        ))}
-      </div>
+      {item.tags.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {item.tags.map((tag) => (
+            <span
+              className="rounded-full border border-[#e3d5b8] bg-white px-2.5 py-1 text-xs text-[#4f5661]"
+              key={`${item.id}-${tag}`}
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }
