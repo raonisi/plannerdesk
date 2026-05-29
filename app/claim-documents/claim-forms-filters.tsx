@@ -46,7 +46,7 @@ export function ClaimFormsFilters({
             aria-label="보험사명, 청구유형, 서류명 검색"
             className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-[#E3DED4] bg-white px-4 text-base text-[#18202b] outline-none transition placeholder:text-[#8A8F98] focus:border-[#B9975B] focus:ring-2 focus:ring-[#B9975B]/20"
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="보험사명, 청구유형, 서류명 검색"
+            placeholder="보험사, 청구유형, 서류명을 검색하세요"
             type="search"
             value={query}
           />

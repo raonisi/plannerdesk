@@ -117,7 +117,7 @@ export function ClaimDocumentExplorer({
           보험사별 청구서류
         </h2>
         <p className="whitespace-nowrap text-sm font-semibold text-[#5f6670]">
-          {insurerGroups.length}개 보험사 · {totalItemCount}개 서류
+          총 {allItems.length}개 중 {totalItemCount}개 서류를 표시 중입니다.
         </p>
       </div>
 
@@ -135,10 +135,10 @@ export function ClaimDocumentExplorer({
       ) : (
         <div className="rounded-xl border border-dashed border-[#E3DED4] bg-white p-8 text-center shadow-sm">
           <p className="text-xl font-bold text-[#0F1D2E]">
-            검색 결과가 없습니다
+            조건에 맞는 청구서류가 없습니다.
           </p>
           <p className="mt-3 break-keep text-sm leading-6 text-[#5B6470]">
-            보험사명, 청구 유형, 서류명을 다시 확인해 주세요.
+            검색어를 줄이거나 필터를 초기화해보세요.
           </p>
           <button
             className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"

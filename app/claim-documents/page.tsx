@@ -53,15 +53,39 @@ export default async function ClaimDocumentsPage() {
 
           <ClaimPracticeNotice />
 
-          <div className="mt-8 rounded-xl border border-[#E3DED4] bg-slate-50 p-5 text-center">
-            <p className="text-sm font-semibold text-slate-900">안내문이 필요하신가요?</p>
-            <p className="mt-1 text-xs text-slate-500 break-keep">보험금 판단 유보 문구나 필수 서류 안내 등 고객에게 보낼 수 있는 문구를 확인해 보세요.</p>
-            <Link
-              href="/message-templates"
-              className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#0F1D2E] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#17202A]"
-            >
-              고객 안내문 작성하기
-            </Link>
+          <div className="mt-8 rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-5 sm:p-6">
+            <h3 className="text-base font-bold text-[#0F1D2E]">관련 업무 바로가기</h3>
+            <p className="mt-1 text-sm text-[#5B6470] break-keep">청구서류 확인 후 다음 단계 실무를 빠르게 진행하세요.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <Link
+                href="/message-templates"
+                className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
+              >
+                <span className="text-sm font-bold text-[#0F1D2E]">고객 안내문 작성</span>
+                <span className="mt-1 text-xs text-[#5B6470]">청구 안내 문구 복사</span>
+              </Link>
+              <Link
+                href="/directory"
+                className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
+              >
+                <span className="text-sm font-bold text-[#0F1D2E]">보험사 연락처</span>
+                <span className="mt-1 text-xs text-[#5B6470]">콜센터·팩스번호 조회</span>
+              </Link>
+              <Link
+                href="/disclosure-links"
+                className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
+              >
+                <span className="text-sm font-bold text-[#0F1D2E]">공시·약관 확인</span>
+                <span className="mt-1 text-xs text-[#5B6470]">공식 약관 원문 연결</span>
+              </Link>
+              <Link
+                href="/work-tools"
+                className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
+              >
+                <span className="text-sm font-bold text-[#0F1D2E]">전체 실무 도구</span>
+                <span className="mt-1 text-xs text-[#5B6470]">기타 계산기 및 도구</span>
+              </Link>
+            </div>
           </div>
         </div>
       </ContentSection>
