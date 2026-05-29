@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import type { ReactNode } from "react";
 
 const text = {
@@ -6,7 +9,9 @@ const text = {
   draftTitle: "검수 및 초안 안내",
   draftBody:
     "이 MVP는 필요한 경우 초안 placeholder 데이터를 사용합니다. 공식 링크, 연락처, 팩스번호, 주소, 상품 참조, 문서 링크는 공개 전 검수되어야 합니다.",
-  safetyTitle: "MVP 업무 범위 안내",
+  safetyTitle: "업무 범위 안내",
+  safetySummary:
+    "본 정보는 실무 참고용이며, 최종 기준은 보험사 공식 자료를 확인해야 합니다.",
   safetyA:
     "청구 관련 정보와 약관 관련 정보는 실무 참고용입니다. 최종 기준은 보험사, 협회, 약관, 공식 공시와 개별 심사 기준을 확인해야 합니다.",
   safetyB:
@@ -40,8 +45,8 @@ export function MvpModuleLinks({
     <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]">
-            Workflow links
+          <p className="text-sm font-semibold tracking-[0.14em] text-[#7a612d]">
+            다음 실무 연결
           </p>
           <h2 className="mt-2 break-keep text-2xl font-semibold text-[#102235]">
             {title}
@@ -85,24 +90,42 @@ export function MvpDraftNotice({ children }: { children?: ReactNode }) {
 }
 
 export function MvpSafetyNotice() {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <section className="border border-[#d9c9a8] bg-[#fbf7ee] p-5 sm:p-6">
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#7a612d]">
-        Safety boundary
-      </p>
-      <h2 className="mt-2 break-keep text-2xl font-semibold text-[#102235]">
-        {text.safetyTitle}
-      </h2>
-      <div className="mt-4 grid gap-3 text-sm leading-6 text-[#4f5661] md:grid-cols-2">
-        <p>{text.safetyA}</p>
-        <p>{text.safetyB}</p>
-      </div>
-      <ul className="mt-5 grid gap-2 text-sm leading-6 text-[#4f5661] md:grid-cols-2">
-        <li>{text.noPayoutJudge}</li>
-        <li>{text.noPayoutEstimate}</li>
-        <li>{text.noAdjusting}</li>
-        <li>{text.noMedicalDocs}</li>
-      </ul>
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="flex w-full items-center justify-between text-left focus:outline-none"
+      >
+        <div>
+          <p className="text-sm font-semibold tracking-[0.14em] text-[#7a612d]">
+            업무 범위 안내
+          </p>
+          <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
+            {text.safetySummary}
+          </p>
+        </div>
+        <span className="ml-4 shrink-0 text-xs font-semibold text-[#7a612d]">
+          {expanded ? "접기" : "펼치기"}
+        </span>
+      </button>
+
+      {expanded && (
+        <div className="mt-4 border-t border-[#d9c9a8] pt-4">
+          <div className="grid gap-3 text-sm leading-6 text-[#4f5661] md:grid-cols-2">
+            <p>{text.safetyA}</p>
+            <p>{text.safetyB}</p>
+          </div>
+          <ul className="mt-4 grid gap-2 text-sm leading-6 text-[#4f5661] md:grid-cols-2">
+            <li>• {text.noPayoutJudge}</li>
+            <li>• {text.noPayoutEstimate}</li>
+            <li>• {text.noAdjusting}</li>
+            <li>• {text.noMedicalDocs}</li>
+          </ul>
+        </div>
+      )}
     </section>
   );
 }

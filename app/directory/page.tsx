@@ -14,7 +14,7 @@ import { DirectoryExplorer } from "./directory-explorer";
 export const dynamic = "force-dynamic";
 
 const t = {
-  eyebrow: "Insurer Work Portal",
+  eyebrow: "보험사 디렉토리",
   title: "보험사 디렉토리",
   description:
     "전산·청구·고객센터 정보를 한 곳에서 확인하세요.",

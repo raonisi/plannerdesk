@@ -182,34 +182,28 @@ export function MessageTemplateLibrary({
         </div>
       )}
 
-      {/* 개인화 정보 입력 패널 - B2B Premium Frame */}
-      <section className="rounded-2xl border border-[#E3DED4] bg-[#0F1D2E] p-6 text-white shadow-sm">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#B9975B] animate-pulse" />
-          <h3 className="text-sm font-bold text-white">개인화 안내문 실시간 치환</h3>
+      {/* 개인화 정보 입력 패널 */}
+      <section className="rounded-xl border border-[#E3DED4] bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#B9975B]" />
+            <h3 className="text-xs font-bold text-[#0F1D2E]">고객명·설계사명 실시간 치환</h3>
+          </div>
+          <span className="text-[10px] text-slate-400">입력하면 복사 시 자동 반영</span>
         </div>
-        <p className="mt-1 text-xs text-slate-400 break-keep">
-          고객명과 설계사명을 입력하시면, 아래 모든 템플릿의 변수 영역이 입력값으로 실시간 변경되어 복사 시 자동으로 반영됩니다.
-        </p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="text-xs font-bold text-slate-300 block mb-1.5">고객명 입력</span>
-            <input 
-              className="w-full border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-xs text-white outline-none rounded-lg focus:border-[#B9975B]"
-              placeholder="예: 홍길동"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs font-bold text-slate-300 block mb-1.5">설계사명 입력</span>
-            <input 
-              className="w-full border border-slate-700 bg-slate-800/60 px-4 py-2.5 text-xs text-white outline-none rounded-lg focus:border-[#B9975B]"
-              placeholder="예: 김설계"
-              value={plannerName}
-              onChange={(e) => setPlannerName(e.target.value)}
-            />
-          </label>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <input 
+            className="w-full rounded-lg border border-[#E3DED4] bg-[#F8F7F3] px-3 py-2 text-xs text-[#17202A] outline-none focus:border-[#B9975B] placeholder:text-slate-400"
+            placeholder="고객명 (예: 홍길동)"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+          />
+          <input 
+            className="w-full rounded-lg border border-[#E3DED4] bg-[#F8F7F3] px-3 py-2 text-xs text-[#17202A] outline-none focus:border-[#B9975B] placeholder:text-slate-400"
+            placeholder="설계사명 (예: 김설계)"
+            value={plannerName}
+            onChange={(e) => setPlannerName(e.target.value)}
+          />
         </div>
       </section>
 
@@ -296,38 +290,30 @@ function SearchAndFilters({
   tone: ToneFilter;
 }) {
   return (
-    <section className="rounded-2xl border border-[#E3DED4] bg-white p-5 shadow-sm">
-      <div className="grid gap-5 lg:grid-cols-[1fr_0.95fr]">
-        <label className="block">
-          <span className="text-xs font-bold text-slate-700">
-            문구 통합 검색
-          </span>
-          <input
-            className="mt-2 w-full border border-[#E3DED4] bg-white px-4 py-2.5 text-xs text-[#17202A] outline-none rounded-lg focus:border-[#B9975B] placeholder:text-slate-400"
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="검색어(제목, 상황, 내용 등)를 입력하세요..."
-            type="search"
-            value={query}
-          />
-        </label>
-
-        <div className="grid gap-4">
-          <FilterGroup
-            label="상황별 분류"
-            onChange={(value) => onSituationChange(value as SituationFilter)}
-            options={situationOptions}
-            value={situation}
-          />
-          <FilterGroup
-            label="기본 톤"
-            onChange={(value) => onToneChange(value as ToneFilter)}
-            options={toneOptions}
-            value={tone}
-          />
-        </div>
+    <section className="rounded-xl border border-[#E3DED4] bg-white p-4 shadow-sm">
+      <input
+        className="w-full rounded-lg border border-[#E3DED4] bg-[#F8F7F3] px-3 py-2 text-xs text-[#17202A] outline-none focus:border-[#B9975B] placeholder:text-slate-400"
+        onChange={(event) => onQueryChange(event.target.value)}
+        placeholder="문구 검색 (제목, 상황, 내용)..."
+        type="search"
+        value={query}
+      />
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <FilterGroup
+          label="상황"
+          onChange={(value) => onSituationChange(value as SituationFilter)}
+          options={situationOptions}
+          value={situation}
+        />
+        <FilterGroup
+          label="톤"
+          onChange={(value) => onToneChange(value as ToneFilter)}
+          options={toneOptions}
+          value={tone}
+        />
       </div>
-      <p className="mt-4 text-[11px] text-slate-400">
-        검색 결과 총 <span className="font-bold text-[#0F1D2E]">{resultCount}</span>개의 템플릿이 조회되었습니다.
+      <p className="mt-3 text-[10px] text-slate-400">
+        {resultCount}개 문구
       </p>
     </section>
   );

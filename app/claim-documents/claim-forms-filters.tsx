@@ -87,21 +87,17 @@ export function ClaimFormsFilters({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm leading-6 text-[#4f5661]">
-          보험사별로 청구 양식 PDF와 필요서류 안내를 묶어 확인할 수 있습니다.
-          공식 출처 검토 후 순차 반영됩니다.
-        </p>
-        {hasActiveFilters ? (
+      {hasActiveFilters ? (
+        <div className="mt-3 flex justify-end">
           <button
-            className="min-h-11 shrink-0 border border-[#d9c9a8] bg-white px-4 py-2.5 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+            className="min-h-9 shrink-0 rounded border border-[#d9c9a8] bg-white px-3 py-2 text-xs font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
             onClick={onReset}
             type="button"
           >
             검색·필터 초기화
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -29,19 +29,16 @@ export default function DisclosureLinksPage() {
       <div>
         <Header />
         
-        {/* 히어로 영역 - B2B Premium SaaS Style */}
+        {/* 히어로 영역 */}
         <section className="bg-[#0F1D2E] text-white">
-          <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
-              Disclosure & Policy
+          <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
+            <span className="text-[11px] font-bold tracking-[0.18em] text-[#B9975B]">
+              공시·약관
             </span>
-            <h1 className="mt-4 break-keep text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <h1 className="mt-3 break-keep text-2xl font-extrabold tracking-tight sm:text-3xl">
               {t.title}
             </h1>
-            <p className="mt-4 max-w-3xl break-keep text-sm leading-relaxed text-slate-300">
-              보험사별 공식 상품공시실, 통합약관실, 보험협회 공시실 및 유용한 실무 자료 링크를 한눈에 볼 수 있도록 정리했습니다.
-            </p>
-            <p className="mt-6 max-w-3xl border-l-2 border-[#B9975B] pl-4 text-xs font-medium leading-relaxed text-slate-400">
+            <p className="mt-3 max-w-3xl break-keep text-xs leading-relaxed text-slate-400">
               {t.note}
             </p>
           </div>
@@ -53,8 +50,8 @@ export default function DisclosureLinksPage() {
           
           {/* 실무 약관 및 공시 자료 확인 흐름 */}
           <section className="rounded-xl border border-[#E3DED4] bg-white p-6 shadow-sm">
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
-              Planner workflow
+            <span className="text-[11px] font-bold tracking-[0.18em] text-[#B9975B]">
+              설계사 실무 흐름
             </span>
             <h2 className="mt-2 break-keep text-base font-bold text-[#0F1D2E]">
               {t.workflowTitle}
@@ -63,7 +60,7 @@ export default function DisclosureLinksPage() {
               {workflowSteps.map((step, index) => (
                 <div className="rounded-lg border border-slate-100 bg-[#F8F7F3] p-4 shadow-sm" key={step}>
                   <p className="text-[11px] font-bold tracking-widest text-[#B9975B]">
-                    STEP {index + 1}
+                    {index + 1}단계
                   </p>
                   <p className="mt-2 break-keep text-xs font-semibold leading-relaxed text-slate-600">
                     {step}

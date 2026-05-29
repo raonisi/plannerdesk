@@ -29,7 +29,7 @@ const text = {
   draft: "초안",
   countSuffix: "개 링크",
   resultSuffix:
-    "개 항목이 표시됩니다. 현재 일부 정보는 검수 전 샘플 데이터이며, 상담 전 공식 출처 확인이 필요합니다.",
+    "개 항목이 표시됩니다.",
   lastVerifiedLabel: "최근 검수",
   officialSource: "공식 출처",
   openSource: "공식 출처 열기",
@@ -142,7 +142,7 @@ export function DisclosureLinkCenter({
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div className="max-w-2xl">
                   <p className="text-sm font-semibold text-[#7a612d]">
-                    Reference category
+                    자료 분류
                   </p>
                   <h2 className="mt-1 break-keep text-2xl font-semibold text-[#102235]">
                     {categoryLabels[group.category]}

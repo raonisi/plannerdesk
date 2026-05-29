@@ -30,19 +30,16 @@ export default function MessageTemplatesPage() {
       <div>
         <Header />
         
-        {/* 히어로 영역 - B2B Premium SaaS Style */}
+        {/* 히어로 영역 */}
         <section className="bg-[#0F1D2E] text-white">
-          <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
-              Message Center
+          <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
+            <span className="text-[11px] font-bold tracking-[0.18em] text-[#B9975B]">
+              고객 문구
             </span>
-            <h1 className="mt-4 break-keep text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <h1 className="mt-3 break-keep text-2xl font-extrabold tracking-tight sm:text-3xl">
               {t.title}
             </h1>
-            <p className="mt-4 max-w-3xl break-keep text-sm leading-relaxed text-slate-300">
-              고객용 필요서류 요청 알림톡, 보완 요청 멘트, 지급 완료 알림 등 설계사가 하루에 수십 번 반복 발송하는 문구를 클릭 한 번으로 개인화 복사하세요.
-            </p>
-            <p className="mt-6 max-w-3xl border-l-2 border-[#B9975B] pl-4 text-xs font-medium leading-relaxed text-slate-400">
+            <p className="mt-3 max-w-3xl break-keep text-xs leading-relaxed text-slate-400">
               {t.note}
             </p>
           </div>
@@ -54,8 +51,8 @@ export default function MessageTemplatesPage() {
           
           {/* 고객 발송 프로세스 안내 */}
           <section className="rounded-xl border border-[#E3DED4] bg-white p-6 shadow-sm">
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
-              Planner workflow
+            <span className="text-[11px] font-bold tracking-[0.18em] text-[#B9975B]">
+              설계사 실무 흐름
             </span>
             <h2 className="mt-2 break-keep text-base font-bold text-[#0F1D2E]">
               {t.workflowTitle}
@@ -64,7 +61,7 @@ export default function MessageTemplatesPage() {
               {workflowSteps.map((step, index) => (
                 <div className="rounded-lg border border-slate-100 bg-[#F8F7F3] p-4 shadow-sm" key={step}>
                   <p className="text-[11px] font-bold tracking-widest text-[#B9975B]">
-                    STEP {index + 1}
+                    {index + 1}단계
                   </p>
                   <p className="mt-2 break-keep text-xs font-semibold leading-relaxed text-slate-600">
                     {step}

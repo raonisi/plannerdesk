@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { KnowledgeArchiveList } from "./knowledge-archive-list";
 
 const t = {
-  eyebrow: "Knowledge Archive",
+  eyebrow: "지식 아카이브",
   title: "지식 아카이브",
   description:
     "보험설계사가 반복해서 확인하는 실무 질문을 검수 상태와 함께 정리합니다.",
@@ -12,7 +12,7 @@ const t = {
     "현재 목록은 초기 정적 샘플이며, 공식 출처 확인 전에는 확정 자료로 사용하지 않습니다.",
   safetyTitle: "안전한 실무 참고 기준",
   safetyBody:
-    "PlannerDesk는 보험금 지급 여부를 판단하지 않으며, 보험금 지급 금액을 산정하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하지 마세요.\n지식 문서는 공식 출처와 관리자 검수 후 신뢰 상태가 갱신됩니다.",
+    "플래너데스크는 보험금 지급 여부를 판단하지 않으며, 보험금 지급 금액을 산정하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하지 마세요.\n지식 문서는 공식 출처와 관리자 검수 후 신뢰 상태가 갱신됩니다.",
 };
 
 export default function KnowledgeArchivePage() {

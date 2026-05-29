@@ -107,19 +107,12 @@ export function ClaimDocumentExplorer({
         status={status}
       />
 
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-[#7a612d]">전체 검색</p>
-          <h2 className="mt-1 break-keep text-2xl font-semibold text-[#102235]">
-            보험사별 청구서류
-          </h2>
-          <p className="mt-2 break-keep text-sm leading-6 text-[#5f6670]">
-            보험사 바로가기의 청구 안내와 같은 데이터를 전체 보험사 기준으로
-            검색할 수 있습니다.
-          </p>
-        </div>
-        <p className="whitespace-nowrap text-sm font-semibold text-[#5f6670]">
-          {insurerGroups.length}개 보험사 · {totalItemCount}개 청구서류
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-[#102235]">
+          보험사별 청구서류
+        </h2>
+        <p className="whitespace-nowrap text-xs font-semibold text-[#5f6670]">
+          {insurerGroups.length}개 보험사 · {totalItemCount}개 서류
         </p>
       </div>
 
