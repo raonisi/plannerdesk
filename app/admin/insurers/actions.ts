@@ -11,6 +11,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
+  handleAdminUnauthorized,
+  redirectWithError,
+  revalidatePublicContentPaths,
+} from "@/lib/admin/actions";
+import {
   getSessionUserId,
   requireInsurerContentManager,
   requireInsurerPublisher,
@@ -240,15 +245,8 @@ function parseInsurerForm(formData: FormData): FormResult {
   };
 }
 
-function redirectWithError(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
-}
-
 function handleUnauthorized(path: string, error: unknown): never {
-  if (error instanceof Error && error.message.includes("ACCESS_DENIED")) {
-    redirectWithError(path, "Admin permission is required.");
-  }
-  throw error;
+  handleAdminUnauthorized(path, error);
 }
 
 export async function createInsurer(formData: FormData) {
@@ -280,6 +278,7 @@ export async function createInsurer(formData: FormData) {
   }
 
   revalidatePath("/admin/insurers");
+  revalidatePublicContentPaths();
   redirect("/admin/insurers");
 }
 
@@ -313,6 +312,7 @@ export async function updateInsurer(id: string, formData: FormData) {
   }
 
   revalidatePath("/admin/insurers");
+  revalidatePublicContentPaths();
   redirect("/admin/insurers");
 }
 
@@ -365,4 +365,5 @@ export async function setInsurerPublished(id: string, isPublished: boolean) {
   }
 
   revalidatePath("/admin/insurers");
+  revalidatePublicContentPaths();
 }

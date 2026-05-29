@@ -9,6 +9,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
+  handleAdminUnauthorized,
+  redirectWithError,
+  revalidatePublicContentPaths,
+} from "@/lib/admin/actions";
+import {
   SLUG_MAX_LENGTH,
   isValidSlug,
   scanFieldsForProhibitedPhrases,
@@ -338,15 +343,8 @@ async function parseClaimDocumentForm(
   };
 }
 
-function redirectWithError(path: string, message: string): never {
-  redirect(`${path}?error=${encodeURIComponent(message)}`);
-}
-
 function handleUnauthorized(path: string, error: unknown): never {
-  if (error instanceof Error && error.message.includes("ACCESS_DENIED")) {
-    redirectWithError(path, "Admin permission is required.");
-  }
-  throw error;
+  handleAdminUnauthorized(path, error);
 }
 
 function handleKnownPrismaError(
@@ -396,6 +394,7 @@ export async function createClaimDocument(formData: FormData) {
   }
 
   revalidatePath("/admin/claim-documents");
+  revalidatePublicContentPaths();
   redirect("/admin/claim-documents");
 }
 
@@ -433,6 +432,7 @@ export async function updateClaimDocument(id: string, formData: FormData) {
   }
 
   revalidatePath("/admin/claim-documents");
+  revalidatePublicContentPaths();
   redirect("/admin/claim-documents");
 }
 
@@ -495,4 +495,5 @@ export async function setClaimDocumentPublished(
   }
 
   revalidatePath("/admin/claim-documents");
+  revalidatePublicContentPaths();
 }

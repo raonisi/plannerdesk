@@ -2,6 +2,7 @@ import { signOut } from "@/auth";
 import Link from "next/link";
 import { surfaces, borders, shadows, textStyles } from "@/lib/design-system";
 import { roleDisplayLabel } from "@/lib/auth/rbac";
+import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
 
 interface AdminShellProps {
   session: {
@@ -91,8 +92,17 @@ export default function AdminShell({ session }: AdminShellProps) {
           <div className="absolute right-0 top-0 w-32 h-32 bg-[#aa8137]/5 rounded-bl-full pointer-events-none" />
           <h1 className="text-3xl font-semibold text-[#102235] mb-2">관리자 데스크</h1>
           <p className={`${textStyles.body} max-w-2xl`}>
-            플래너데스크 운영 자료를 관리하기 위한 준비 화면입니다. 추후 데이터베이스(Neon PostgreSQL) 및 CRUD 기능 연동 시 실제 관리 도구로 활성화됩니다.
+            승인된 운영자만 접근할 수 있는 관리자 데스크입니다. 보험사 디렉토리와
+            청구서류 라이브러리를 관리하며, 공개 화면에는 게시·검수 조건을 충족한
+            데이터만 표시됩니다.
           </p>
+        </div>
+
+        <div className="mb-8">
+          <AdminSafetyNotice
+            policySummary="관리자 데스크 공통 정책: 초안·비게시 데이터는 공개 화면에 노출되지 않습니다."
+            showNeedsReview
+          />
         </div>
 
         {/* Dashboard Grid */}

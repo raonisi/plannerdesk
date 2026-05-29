@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
 import { getInsurerAdminAccess } from "./access";
 import { setInsurerPublished } from "./actions";
 import {
@@ -209,17 +210,13 @@ export default async function AdminInsurersPage({
           </div>
         ) : null}
 
-        <div className="mb-5 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm leading-relaxed text-[#4f5661]">
-          {SAFETY_NOTICE}
+        <div className="mb-5">
+          <AdminSafetyNotice policySummary={ADMIN_VISIBILITY_COPY.policySummary} />
         </div>
 
-        <div className="mb-5 rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-sm leading-relaxed text-[#102235]">
-          <p className="font-semibold">{ADMIN_VISIBILITY_COPY.policySummary}</p>
-          <p className="mt-1 text-[#4f5661]">{ADMIN_VISIBILITY_COPY.draftRule}</p>
-          <p className="mt-1 text-[#4f5661]">
-            {ADMIN_VISIBILITY_COPY.governanceRule}
-          </p>
-        </div>
+        <p className="mb-5 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm leading-relaxed text-[#4f5661]">
+          {SAFETY_NOTICE}
+        </p>
 
         <form
           className={`${surfaces.card} ${borders.default} ${shadows.card} mb-5 grid gap-3 rounded-lg p-4 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto]`}

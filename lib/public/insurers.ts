@@ -6,6 +6,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { insurerDirectoryEntries } from "@/lib/content/insurers";
+import { isPublishedContentPubliclyVisible } from "@/lib/public/visibility";
 
 // Public-safe projection of the Insurer model. Internal governance fields like
 // `notes`, `sourceNote`, `createdById`, `updatedById`, and any unpublished
@@ -115,7 +116,7 @@ export interface InsurerVisibilityFlags {
 export function isInsurerPubliclyVisible(
   flags: InsurerVisibilityFlags,
 ): boolean {
-  return flags.isPublished && isPublicVerificationStatus(flags.verificationStatus);
+  return isPublishedContentPubliclyVisible(flags);
 }
 
 const CANONICAL_MAPPING: Record<string, string> = {

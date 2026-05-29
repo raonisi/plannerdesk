@@ -88,3 +88,6 @@ export async function requireSuperAdminAccess(): Promise<AdminSession> {
 export function getSessionUserId(session: AdminSession): string | null {
   return session.user?.id ?? null;
 }
+
+/** Alias for content_admin and super_admin content CRUD guards. */
+export const requireContentAdmin = requireContentManagerAccess;

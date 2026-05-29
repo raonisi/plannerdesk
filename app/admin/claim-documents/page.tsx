@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
 import { getClaimDocumentAdminAccess } from "./access";
 import { setClaimDocumentPublished } from "./actions";
 import {
@@ -163,19 +164,8 @@ export default async function AdminClaimDocumentsPage({
           </div>
         ) : null}
 
-        <div className="mb-5 rounded-md border border-[#d6a36e] bg-[#fff5e1] px-4 py-3 text-sm leading-relaxed text-[#7b4b19]">
-          <p className="font-semibold">{ADMIN_CLAIM_DOC_COPY.guidanceNotice}</p>
-          <p className="mt-2 text-[#4f5661]">
-            {ADMIN_CLAIM_DOC_COPY.sensitiveNotice}
-          </p>
-        </div>
-
-        <div className="mb-5 rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-sm leading-relaxed text-[#102235]">
-          <p className="font-semibold">{ADMIN_CLAIM_DOC_COPY.policySummary}</p>
-          <p className="mt-1 text-[#4f5661]">{ADMIN_CLAIM_DOC_COPY.draftRule}</p>
-          <p className="mt-1 text-[#4f5661]">
-            {ADMIN_CLAIM_DOC_COPY.governanceRule}
-          </p>
+        <div className="mb-5">
+          <AdminSafetyNotice policySummary={ADMIN_CLAIM_DOC_COPY.policySummary} />
         </div>
 
         <form

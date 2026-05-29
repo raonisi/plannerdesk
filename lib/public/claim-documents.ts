@@ -4,6 +4,10 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_VERIFICATION_STATUSES } from "./insurers";
+import {
+  isPublishedContentPubliclyVisible,
+  type PublishedContentFlags,
+} from "./visibility";
 
 // Public-safe projection of the ClaimDocument model. Internal governance fields
 // like `createdById`, `updatedById`, `createdAt`, `updatedAt`, and any
@@ -30,6 +34,12 @@ export interface PublicClaimDocument {
 export type PublicClaimDocumentsResult =
   | { status: "ok"; data: PublicClaimDocument[] }
   | { status: "error" };
+
+export function isClaimDocumentPubliclyVisible(
+  flags: PublishedContentFlags,
+): boolean {
+  return isPublishedContentPubliclyVisible(flags);
+}
 
 function toIsoDate(value: Date | null): string | null {
   if (!value) return null;

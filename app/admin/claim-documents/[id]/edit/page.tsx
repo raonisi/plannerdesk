@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
@@ -69,9 +70,8 @@ export default async function EditClaimDocumentPage({
           </div>
         ) : null}
 
-        <div className="mb-5 rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-sm leading-relaxed text-[#102235]">
-          <p className="font-semibold">{ADMIN_CLAIM_DOC_COPY.policySummary}</p>
-          <p className="mt-1 text-[#4f5661]">{ADMIN_CLAIM_DOC_COPY.draftRule}</p>
+        <div className="mb-5">
+          <AdminSafetyNotice policySummary={ADMIN_CLAIM_DOC_COPY.policySummary} />
         </div>
 
         <section
