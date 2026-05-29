@@ -83,6 +83,9 @@ export function getItemSearchText(item: ClaimLibraryItem): string {
     doc.optionalDocuments,
     doc.insurerName ?? "공통",
     doc.cautionNote,
+    doc.officialSourceUrl,
+    doc.customerMessageTemplate,
+    doc.claimFormUrl,
   ]
     .filter(Boolean)
     .join(" ");

@@ -11,6 +11,7 @@ import {
   insurerGroupKey,
   type ClaimLibraryItem,
 } from "./library-items";
+import { categoryLabels, categoryOrder } from "./category-labels";
 import {
   getClaimSlugsForInsurerId,
   INSURER_ID_TO_CLAIM_SLUGS,
@@ -22,6 +23,7 @@ export type ClaimLibraryFilters = {
   query: string;
   category: string;
   status: string;
+  documentNature: string;
   selectedInsurerKey: string;
 };
 
@@ -56,6 +58,9 @@ export function filterClaimLibraryItems(
     const matchesStatus =
       filters.status === "all" ||
       getItemVerificationStatus(item) === filters.status;
+    const matchesNature =
+      filters.documentNature === "all" ||
+      matchesDocumentNature(item, filters.documentNature);
 
     const itemInsurerKey = insurerGroupKey(getItemInsurerName(item));
     const matchesInsurer =
@@ -64,8 +69,39 @@ export function filterClaimLibraryItems(
         itemInsurerKey === COMMON_INSURER_KEY) ||
       matchesInsurerFilterKey(item, filters.selectedInsurerKey);
 
-    return matchesQuery && matchesCategory && matchesStatus && matchesInsurer;
+    return (
+      matchesQuery &&
+      matchesCategory &&
+      matchesStatus &&
+      matchesNature &&
+      matchesInsurer
+    );
   });
+}
+
+function matchesDocumentNature(
+  item: ClaimLibraryItem,
+  nature: string,
+): boolean {
+  if (nature === "required") {
+    if (item.kind === "pdf") return true;
+    return Boolean(item.document.requiredDocuments?.trim());
+  }
+  if (nature === "optional") {
+    if (item.kind === "pdf") return false;
+    return Boolean(item.document.optionalDocuments?.trim());
+  }
+  return true;
+}
+
+export function buildCategoryFilterOptions(items: ClaimLibraryItem[]) {
+  const present = new Set(items.map((item) => getItemCategory(item)));
+  return [
+    { label: "전체", value: "all" },
+    ...categoryOrder
+      .filter((cat) => present.has(cat))
+      .map((cat) => ({ label: categoryLabels[cat], value: cat })),
+  ];
 }
 
 function matchesInsurerFilterKey(
