@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { surfaces, borders, shadows, textStyles } from "@/lib/design-system";
 import {
+  getAdminSignInHref,
   isAuthProviderConfigured,
   isAuthSecretConfigured,
 } from "@/lib/auth/env";
@@ -73,7 +74,8 @@ export default function AdminLockedState() {
           <div className="space-y-3">
             {providerReady ? (
               <Link
-                href="/api/auth/signin?callbackUrl=/admin"
+                href={getAdminSignInHref("/admin")}
+                prefetch={false}
                 className="block w-full text-center py-2.5 px-4 rounded bg-[#10243e] text-[#f7f3e8] hover:bg-[#17324f] focus-visible:ring-2 focus-visible:ring-[#b8924a] focus-visible:outline-hidden transition-colors text-sm font-semibold shadow-sm"
               >
                 로그인하기

@@ -135,8 +135,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
    * Route handler is at app/api/auth/[...nextauth]/route.ts.
    */
   basePath: "/api/auth",
-
-  pages: {
-    signIn: "/admin",
-  },
 });

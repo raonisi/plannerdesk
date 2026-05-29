@@ -20,6 +20,15 @@ export function isAuthProviderConfigured(): boolean {
   return isGoogleAuthConfigured();
 }
 
+/** Auth.js sign-in URL for admin; avoids redirect loops from custom sign-in pages. */
+export function getAdminSignInHref(callbackUrl = "/admin"): string {
+  const encoded = encodeURIComponent(callbackUrl);
+  if (isGoogleAuthConfigured()) {
+    return `/api/auth/signin/google?callbackUrl=${encoded}`;
+  }
+  return `/api/auth/signin?callbackUrl=${encoded}`;
+}
+
 export function isDatabaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL?.trim());
 }
