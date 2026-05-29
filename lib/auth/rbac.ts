@@ -133,3 +133,36 @@ export function canManageUsers(userOrSession: UserSessionLike | null | undefined
   const role = extractRole(userOrSession);
   return role === ROLE_SUPER_ADMIN;
 }
+
+/** Human-readable Korean label for admin UI and access-denied copy. */
+export function roleDisplayLabel(role: string | null | undefined): string {
+  const normalized = normalizeRole(role);
+
+  if (normalized === ROLE_SUPER_ADMIN) return "슈퍼 관리자";
+  if (normalized === ROLE_CONTENT_ADMIN) return "콘텐츠 관리자";
+  if (normalized === ROLE_MODERATOR) return "모더레이터";
+  if (normalized === ROLE_VERIFIED_PLANNER) return "인증 설계사";
+
+  return "일반 사용자";
+}
+
+/**
+ * Permission matrix (server-side only):
+ * - super_admin: full /admin shell, content CRUD, publish, future user/role management
+ * - content_admin: /admin shell, content CRUD, publish (insurers, claim documents, future KB)
+ * - all other roles: /admin blocked at layout and server actions
+ */
+export const ADMIN_PERMISSION_MATRIX = {
+  super_admin: {
+    accessAdmin: true,
+    manageContent: true,
+    publishContent: true,
+    manageUsers: true,
+  },
+  content_admin: {
+    accessAdmin: true,
+    manageContent: true,
+    publishContent: true,
+    manageUsers: false,
+  },
+} as const;

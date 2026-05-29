@@ -1,17 +1,20 @@
 import { signOut } from "@/auth";
 import Link from "next/link";
 import { surfaces, borders, shadows, textStyles } from "@/lib/design-system";
+import { roleDisplayLabel } from "@/lib/auth/rbac";
 
 interface AdminShellProps {
   session: {
     user?: {
       email?: string | null;
+      role?: string | null;
     } | null;
   } | null;
 }
 
 export default function AdminShell({ session }: AdminShellProps) {
   const userEmail = session?.user?.email || "알 수 없는 운영자";
+  const roleLabel = roleDisplayLabel(session?.user?.role);
 
   // Dashboard placeholder items
   const placeholders = [
@@ -60,6 +63,8 @@ export default function AdminShell({ session }: AdminShellProps) {
           <div className="flex items-center gap-4">
             <span className="text-xs text-[#d8c08f] hidden sm:inline-block">
               접속 계정: <span className="font-semibold text-white">{userEmail}</span>
+              <span className="mx-2 opacity-50">|</span>
+              역할: <span className="font-semibold text-white">{roleLabel}</span>
             </span>
 
             <form

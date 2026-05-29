@@ -1,10 +1,5 @@
-import { auth } from "@/auth";
-import { canAccessAdmin } from "@/lib/auth/rbac";
-import AdminLockedState from "@/components/admin/AdminLockedState";
-import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
+import { getAdminAccess } from "@/lib/auth/access";
 import AdminShell from "@/components/admin/AdminShell";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "관리자 데스크 | 플래너데스크",
@@ -12,15 +7,11 @@ export const metadata = {
 };
 
 export default async function AdminPage() {
-  const session = await auth();
+  const access = await getAdminAccess();
 
-  if (!session) {
-    return <AdminLockedState />;
+  if (access.status !== "authenticated") {
+    return null;
   }
 
-  if (!canAccessAdmin(session)) {
-    return <AdminAccessDeniedState />;
-  }
-
-  return <AdminShell session={session} />;
+  return <AdminShell session={access.session} />;
 }

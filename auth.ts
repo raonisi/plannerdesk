@@ -23,6 +23,10 @@ import NextAuth, { type DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import Google from "next-auth/providers/google";
+import {
+  isAuthProviderConfigured,
+  isAuthSecretConfigured,
+} from "@/lib/auth/env";
 
 declare module "next-auth" {
   interface Session {
@@ -36,11 +40,23 @@ declare module "next-auth" {
   }
 }
 
-const googleProviderEnabled =
-  Boolean(process.env.AUTH_GOOGLE_ID) &&
-  Boolean(process.env.AUTH_GOOGLE_SECRET);
+const googleProviderEnabled = isAuthProviderConfigured();
+
+function resolveAuthSecret(): string | undefined {
+  const secret =
+    process.env.AUTH_SECRET?.trim() || process.env.NEXTAUTH_SECRET?.trim();
+  return secret || undefined;
+}
+
+if (process.env.NODE_ENV === "production" && !isAuthSecretConfigured()) {
+  console.warn(
+    "[plannerdesk] AUTH_SECRET is not configured. Admin sign-in will not work until it is set in Railway Variables.",
+  );
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: resolveAuthSecret(),
+  trustHost: true,
   /**
    * Use the Prisma Adapter to persist user, account, and verification tokens.
    */
@@ -119,4 +135,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
    * Route handler is at app/api/auth/[...nextauth]/route.ts.
    */
   basePath: "/api/auth",
+
+  pages: {
+    signIn: "/admin",
+  },
 });
