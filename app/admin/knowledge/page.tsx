@@ -4,6 +4,7 @@ import {
   KnowledgeArticleStatus,
   KnowledgeArticleType,
   KnowledgeRiskLevel,
+  type KnowledgeArticle,
   type Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -46,9 +47,15 @@ interface SearchParams {
   risk?: string;
 }
 
-function formatDate(value: Date | null) {
+function formatDate(value: unknown) {
   if (!value) return "—";
-  return value.toISOString().slice(0, 10);
+  try {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return "—";
+    return d.toISOString().slice(0, 10);
+  } catch {
+    return "—";
+  }
 }
 
 function badgeClass(tone: "green" | "gold" | "gray" | "navy" | "red") {
@@ -154,10 +161,21 @@ export default async function AdminKnowledgePage({
   }
 
   const resolvedSearchParams = await searchParams;
-  const articles = await prisma.knowledgeArticle.findMany({
-    where: buildWhere(resolvedSearchParams),
-    orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
-  });
+  
+  let articles: KnowledgeArticle[] = [];
+  let dbError = false;
+  let dbErrorMessage = "";
+
+  try {
+    articles = await prisma.knowledgeArticle.findMany({
+      where: buildWhere(resolvedSearchParams),
+      orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
+    });
+  } catch (error: unknown) {
+    console.error("[AdminKnowledgePage] Database query failed:", error);
+    dbError = true;
+    dbErrorMessage = (error as Error)?.message || "Unknown database error";
+  }
 
   return (
     <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
@@ -279,10 +297,22 @@ export default async function AdminKnowledgePage({
         <section
           className={`${surfaces.card} ${borders.default} ${shadows.card} overflow-hidden rounded-lg`}
         >
-          {articles.length === 0 ? (
+          {dbError ? (
+            <div className="p-8 text-center text-[#8b2e2e]">
+              <h2 className="text-lg font-semibold">
+                데이터를 불러오는 중 오류가 발생했습니다.
+              </h2>
+              <p className={`${textStyles.body} mt-2 text-sm`}>
+                데이터베이스 연결 문제일 수 있습니다. 잠시 후 다시 시도해 주세요.
+              </p>
+              <p className="mt-4 text-xs font-mono opacity-70 break-all max-w-2xl mx-auto text-left">
+                {dbErrorMessage}
+              </p>
+            </div>
+          ) : articles.length === 0 ? (
             <div className="p-8 text-center">
               <h2 className="text-lg font-semibold text-[#102235]">
-                조건에 맞는 지식 문서가 없습니다.
+                등록된 지식 문서가 없습니다.
               </h2>
               <p className={`${textStyles.body} mt-2`}>
                 새 문서를 작성하거나 필터를 조정해 주세요.
@@ -329,15 +359,15 @@ export default async function AdminKnowledgePage({
                         <td className="px-4 py-4">
                           <div className="flex flex-wrap gap-2">
                             <span className={badgeClass("navy")}>
-                              {CATEGORY_LABEL[article.category]}
+                              {CATEGORY_LABEL[article.category as KnowledgeArticleCategory] || String(article.category)}
                             </span>
                             <span className={badgeClass("navy")}>
-                              {TYPE_LABEL[article.type]}
+                              {TYPE_LABEL[article.type as KnowledgeArticleType] || String(article.type)}
                             </span>
                             <span
                               className={badgeClass(statusTone(article.status))}
                             >
-                              {STATUS_LABEL[article.status]}
+                              {STATUS_LABEL[article.status as KnowledgeArticleStatus] || String(article.status)}
                             </span>
                             <span
                               className={badgeClass(
@@ -361,10 +391,10 @@ export default async function AdminKnowledgePage({
                               <span className={badgeClass("gold")}>AI 참조</span>
                             ) : null}
                             <span className={badgeClass("gray")}>
-                              {RISK_LABEL[article.riskLevel]}
+                              {RISK_LABEL[article.riskLevel as KnowledgeRiskLevel] || String(article.riskLevel)}
                             </span>
                             <span className={badgeClass("gray")}>
-                              {SOURCE_TYPE_LABEL[article.sourceType]}
+                              {SOURCE_TYPE_LABEL[article.sourceType as keyof typeof SOURCE_TYPE_LABEL] || String(article.sourceType)}
                             </span>
                           </div>
                         </td>
