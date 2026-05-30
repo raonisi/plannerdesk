@@ -5,7 +5,7 @@
   "description": "PlannerDesk is a public B2B SaaS platform for Korean insurance planners.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "node scripts/start.mjs",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
