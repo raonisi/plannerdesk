@@ -12,6 +12,8 @@ import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import { probeKnowledgeArticleTable } from "@/lib/admin/dashboard-status";
+import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
 import { getKnowledgeAdminAccess } from "./access";
 import KnowledgeAdminList, { type KnowledgeListRow } from "./knowledge-admin-list";
 import {
@@ -148,10 +150,46 @@ export default async function AdminKnowledgePage({
   }
 
   const resolvedSearchParams = await searchParams;
-  const articles = await prisma.knowledgeArticle.findMany({
-    where: buildWhere(resolvedSearchParams),
-    orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
-  });
+  const tableProbe = await probeKnowledgeArticleTable();
+
+  if (tableProbe.status === "missing_table") {
+    return (
+      <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+        <div className="mx-auto max-w-3xl">
+          <AdminPageStateNotice
+            kind="setupRequired"
+            detail="KnowledgeArticle migration을 운영 DB에 적용한 뒤 다시 접속해 주세요."
+          />
+        </div>
+      </main>
+    );
+  }
+
+  if (tableProbe.status === "unavailable") {
+    return (
+      <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+        <div className="mx-auto max-w-3xl">
+          <AdminPageStateNotice kind="error" />
+        </div>
+      </main>
+    );
+  }
+
+  let articles: Awaited<ReturnType<typeof prisma.knowledgeArticle.findMany>>;
+  try {
+    articles = await prisma.knowledgeArticle.findMany({
+      where: buildWhere(resolvedSearchParams),
+      orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
+    });
+  } catch {
+    return (
+      <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+        <div className="mx-auto max-w-3xl">
+          <AdminPageStateNotice kind="error" />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
@@ -272,6 +310,10 @@ export default async function AdminKnowledgePage({
             필터
           </button>
         </form>
+
+        {articles.length === 0 ? (
+          <AdminPageStateNotice kind="empty" className="mb-5" />
+        ) : null}
 
         <KnowledgeAdminList
           articles={serializeKnowledgeRows(articles)}

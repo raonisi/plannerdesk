@@ -2,7 +2,10 @@ import { signOut } from "@/auth";
 import Link from "next/link";
 import { surfaces, borders, shadows, textStyles } from "@/lib/design-system";
 import { roleDisplayLabel } from "@/lib/auth/rbac";
+import type { AdminDashboardSnapshot } from "@/lib/admin/dashboard-status";
+import { ADMIN_DASHBOARD_SAFETY_LINES } from "@/lib/admin/dashboard-status";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
 
 interface AdminShellProps {
   session: {
@@ -11,69 +14,60 @@ interface AdminShellProps {
       role?: string | null;
     } | null;
   } | null;
+  dashboard: AdminDashboardSnapshot;
 }
 
-export default function AdminShell({ session }: AdminShellProps) {
+function SummaryTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "green" | "gold" | "navy" | "red" | "gray";
+}) {
+  const toneClass =
+    tone === "green"
+      ? "border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]"
+      : tone === "gold"
+        ? "border-[#d9c9a8] bg-[#f7f1e5] text-[#7b5b19]"
+        : tone === "red"
+          ? "border-[#e8c4c4] bg-[#fdf2f2] text-[#8b2e2e]"
+          : tone === "navy"
+            ? "border-[#c8d2dc] bg-[#eef3f7] text-[#102235]"
+            : "border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]";
+
+  return (
+    <div className={`rounded-lg border px-4 py-3 ${toneClass}`}>
+      <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+export default function AdminShell({ session, dashboard }: AdminShellProps) {
   const userEmail = session?.user?.email || "알 수 없는 운영자";
   const roleLabel = roleDisplayLabel(session?.user?.role);
-
-  // Dashboard placeholder items
-  const placeholders = [
-    {
-      title: "보험사 디렉토리 관리",
-      status: "운영 중",
-      description: "보험사 정보, 고객 센터 연락처, 팩스 번호 및 웹사이트 링크를 관리합니다.",
-      enabled: true,
-      link: "/admin/insurers",
-    },
-    {
-      title: "청구서류 창고 관리",
-      status: "운영 중",
-      description: "보험사별 필요한 청구 서류 서식과 상세 가이드를 관리합니다.",
-      enabled: true,
-      link: "/admin/claim-documents",
-    },
-    {
-      title: "지식 아카이브 관리",
-      status: "운영 중",
-      description:
-        "청구·고지·해지·약관·고객응대 기준 문서를 작성하고 검수·공개 상태를 관리합니다.",
-      enabled: true,
-      link: "/admin/knowledge",
-    },
-    {
-      title: "공시·약관 링크 관리",
-      status: "정적 데이터 · 조회",
-      description:
-        "공시실·약관 링크를 검수·출처 확인일 기준으로 점검합니다. 저장·일괄 변경은 DisclosureLink DB PR 이후 제공됩니다.",
-      enabled: true,
-      link: "/admin/disclosure-links",
-    },
-    {
-      title: "고객 안내 문구 관리",
-      status: "정적 데이터 · 조회",
-      description:
-        "상황별 고객 안내 문구를 검수하고 금지 표현을 확인합니다. 저장·일괄 변경은 MessageTemplate DB PR 이후 제공됩니다.",
-      enabled: true,
-      link: "/admin/message-templates",
-    },
-  ];
+  const { summary } = dashboard;
 
   return (
     <div className={`min-h-screen ${surfaces.page}`}>
-      {/* Top Header */}
       <header className={`${surfaces.hero} border-b ${borders.divider} py-4 px-6 sm:px-8`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xl font-bold tracking-tight">PlannerDesk Admin</span>
-            <span className="text-xs bg-[#aa8137] text-white px-2 py-0.5 rounded-full font-semibold">
+            <span className="text-xl font-bold tracking-tight text-white">
+              PlannerDesk Admin
+            </span>
+            <span className="rounded-full bg-[#aa8137] px-2 py-0.5 text-xs font-semibold text-white">
               MVP
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-xs text-[#d8c08f] hidden sm:inline-block">
-              접속 계정: <span className="font-semibold text-white">{userEmail}</span>
+            <span className="hidden text-xs text-[#d8c08f] sm:inline-block">
+              접속: <span className="font-semibold text-white">{userEmail}</span>
               <span className="mx-2 opacity-50">|</span>
               역할: <span className="font-semibold text-white">{roleLabel}</span>
             </span>
@@ -86,7 +80,7 @@ export default function AdminShell({ session }: AdminShellProps) {
             >
               <button
                 type="submit"
-                className="py-1.5 px-3 rounded bg-red-800 text-white font-medium hover:bg-red-900 transition-colors text-xs cursor-pointer"
+                className="cursor-pointer rounded bg-red-800 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-900"
               >
                 로그아웃
               </button>
@@ -95,18 +89,47 @@ export default function AdminShell({ session }: AdminShellProps) {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto py-10 px-6 sm:px-8">
-        {/* Banner Section */}
-        <div className={`mb-10 ${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-6 sm:p-8 relative overflow-hidden`}>
-          <div className="absolute right-0 top-0 w-32 h-32 bg-[#aa8137]/5 rounded-bl-full pointer-events-none" />
-          <h1 className="text-3xl font-semibold text-[#102235] mb-2">관리자 데스크</h1>
-          <p className={`${textStyles.body} max-w-2xl`}>
-            승인된 운영자만 접근할 수 있는 관리자 데스크입니다. 보험사 디렉토리와
-            청구서류 라이브러리를 관리하며, 공개 화면에는 게시·검수 조건을 충족한
-            데이터만 표시됩니다.
+      <main className="mx-auto max-w-7xl px-6 py-10 sm:px-8">
+        <section
+          className={`relative mb-8 overflow-hidden rounded-lg p-6 sm:p-8 ${surfaces.card} ${borders.default} ${shadows.card}`}
+        >
+          <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-bl-full bg-[#aa8137]/5" />
+          <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">
+            관리자 데스크
+          </h1>
+          <p className={`${textStyles.body} mt-3 max-w-2xl`}>
+            공개 정보, 실무 자료, 지식 문서를 검수 기준에 따라 관리합니다.
           </p>
-        </div>
+          <p className="mt-3 max-w-2xl text-xs leading-relaxed text-[#4f5661]">
+            고객 개인정보와 의료자료는 저장하지 않습니다. 보험금 지급 여부와
+            지급 금액을 판단하지 않습니다.
+          </p>
+        </section>
+
+        <section className="mb-8" aria-labelledby="admin-ops-summary">
+          <h2
+            id="admin-ops-summary"
+            className="mb-3 text-sm font-bold uppercase tracking-wide text-[#aa8137]"
+          >
+            운영 상태 요약
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <SummaryTile label="운영 중" value={summary.active} tone="green" />
+            <SummaryTile
+              label="확인 필요"
+              value={summary.activeWithWarning}
+              tone="gold"
+            />
+            <SummaryTile
+              label="설정 필요"
+              value={summary.setupRequired}
+              tone="navy"
+            />
+            <SummaryTile label="점검 필요" value={summary.blocked} tone="red" />
+            <SummaryTile label="준비 중" value={summary.comingSoon} tone="gray" />
+          </div>
+        </section>
 
         <div className="mb-8">
           <AdminSafetyNotice
@@ -115,66 +138,56 @@ export default function AdminShell({ session }: AdminShellProps) {
           />
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {placeholders.map((item, index) => (
-            <div
-              key={index}
-              className={`relative ${surfaces.card} ${borders.default} rounded-lg p-6 transition-all ${
-                item.enabled ? 'border-solid shadow-sm' : 'opacity-75 grayscale border-dashed'
-              }`}
-            >
-              {/* Badge */}
-              <span className={`absolute top-6 right-6 text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
-                item.enabled 
-                  ? 'border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]' 
-                  : 'bg-[#f7f1e5] border border-[#d9c9a8] text-[#4f5661]'
-              }`}>
-                {item.status}
-              </span>
+        <section className="mb-10" aria-labelledby="admin-feature-areas">
+          <h2
+            id="admin-feature-areas"
+            className="mb-4 text-lg font-semibold text-[#102235]"
+          >
+            주요 관리 영역
+          </h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {dashboard.features.map(({ id, ...feature }) => (
+              <AdminFeatureCard key={id} {...feature} />
+            ))}
+          </div>
+        </section>
 
-              {/* Icon Placeholder */}
-              <div className="w-10 h-10 bg-[#f7f1e5] rounded-lg flex items-center justify-center mb-4 text-[#aa8137]">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                  />
-                </svg>
-              </div>
+        <section className="mb-10" aria-labelledby="admin-bulk-ops">
+          <h2
+            id="admin-bulk-ops"
+            className="mb-2 text-lg font-semibold text-[#102235]"
+          >
+            운영 작업
+          </h2>
+          <p className="mb-4 text-xs leading-relaxed text-[#4f5661]">
+            일괄 등록·검수·상태 변경은 각 목록 화면에서 선택 후 실행합니다.
+            구현되지 않은 영역은 준비 중으로 표시됩니다.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {dashboard.bulkWorkflows.map(({ id, ...workflow }) => (
+              <AdminWorkflowCard key={id} {...workflow} />
+            ))}
+          </div>
+        </section>
 
-              {/* Title */}
-              <h3 className="text-lg font-bold text-[#102235] mb-2">{item.title}</h3>
-              {/* Description */}
-              <p className="text-sm text-[#4f5661] leading-relaxed">{item.description}</p>
-
-              {/* Action Button */}
-              {item.enabled ? (
-                <Link
-                  href={item.link}
-                  className="mt-6 block w-full py-2 px-4 rounded border border-[#10243E] bg-[#10243E] text-xs font-semibold text-[#F7F3E8] hover:bg-[#17324F] transition-colors text-center focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
-                >
-                  관리하기
-                </Link>
-              ) : (
-                <button
-                  disabled
-                  className="mt-6 w-full py-2 px-4 rounded border border-[#d9c9a8] bg-[#f7f1e5] text-xs font-semibold text-[#4f5661] cursor-not-allowed text-center"
-                >
-                  비활성화됨
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
+        <section
+          className={`rounded-lg border border-[#c8d2dc] bg-[#eef3f7] px-5 py-5 ${borders.default}`}
+          aria-labelledby="admin-safety-boundary"
+        >
+          <h2
+            id="admin-safety-boundary"
+            className="text-sm font-bold text-[#102235]"
+          >
+            안전 경계
+          </h2>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-xs leading-relaxed text-[#4f5661]">
+            {ADMIN_DASHBOARD_SAFETY_LINES.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+            <li>파일 업로드 기반 일괄 import는 제공하지 않습니다.</li>
+            <li>AI 참조(aiUsable) 일괄 활성화는 별도 검수 PR 이후 제공합니다.</li>
+          </ul>
+        </section>
       </main>
     </div>
   );
