@@ -139,6 +139,67 @@ enum DisclosureLinkStatus {
   archived
 }
 
+// Customer message templates (PR-73 schema only; admin CRUD and public fetch in PR-74+).
+enum MessageTemplateCategory {
+  greeting
+  follow_up
+  appointment
+  policy_review
+  claim_guide
+  contract_maintenance
+  cancellation_defense
+  rebalancing
+  customer_care
+  notice
+  other
+}
+
+enum MessageTemplateChannel {
+  kakao
+  sms
+  phone_script
+  email
+  blog
+  threads
+  instagram
+  general
+}
+
+enum MessageTemplateAudienceType {
+  new_customer
+  existing_customer
+  dormant_customer
+  claim_customer
+  cancellation_risk
+  referral
+  general
+}
+
+enum MessageTemplateTone {
+  formal
+  warm
+  concise
+  consultative
+  reassuring
+  neutral
+  professional
+  careful
+  calm
+}
+
+enum MessageTemplateRiskLevel {
+  low
+  medium
+  high
+}
+
+enum MessageTemplateStatus {
+  draft
+  needs_review
+  published
+  archived
+}
+
 model User {
   id                 String             @id @default(cuid())
   name               String?
@@ -343,4 +404,45 @@ model DisclosureLink {
   @@index([isPublished])
   @@index([sortOrder])
   @@index([lastVerifiedAt])
+}
+
+// Planner-facing customer message templates for /message-templates (DB-backed in PR-74+).
+// Public visibility (PR-76): isPublished=true AND status=published AND isInternalOnly=false.
+// Template placeholders only — no customer PII, medical, contract, or payout data in rows.
+model MessageTemplate {
+  id               String                      @id @default(cuid())
+  title            String
+  description      String                      @db.Text
+  body             String                      @db.Text
+  category         MessageTemplateCategory
+  channel          MessageTemplateChannel      @default(general)
+  audienceType     MessageTemplateAudienceType @default(general)
+  useCase          String                      @db.Text
+  tone             MessageTemplateTone         @default(neutral)
+  status           MessageTemplateStatus       @default(draft)
+  isPublished      Boolean                     @default(false)
+  isInternalOnly   Boolean                     @default(false)
+  riskLevel        MessageTemplateRiskLevel    @default(medium)
+  safeCopy         String?                     @db.Text
+  forbiddenClaims  String[]                    @default([])
+  complianceNote   String?                     @db.Text
+  allowedVariables String[]                    @default([])
+  sortOrder        Int                         @default(0)
+  reviewedAt       DateTime?
+  reviewedById     String?
+  publishedAt      DateTime?
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+  createdById      String?
+  updatedById      String?
+
+  @@index([category])
+  @@index([channel])
+  @@index([audienceType])
+  @@index([tone])
+  @@index([status])
+  @@index([isPublished])
+  @@index([isInternalOnly])
+  @@index([riskLevel])
+  @@index([sortOrder])
 }
