@@ -47,7 +47,7 @@ interface SearchParams {
   risk?: string;
 }
 
-function formatDate(value: unknown) {
+function formatDate(value: Date | string | number | null | undefined) {
   if (!value) return "—";
   try {
     const d = new Date(value);
