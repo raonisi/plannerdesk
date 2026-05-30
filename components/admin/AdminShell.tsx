@@ -99,11 +99,11 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
             관리자 데스크
           </h1>
           <p className={`${textStyles.body} mt-3 max-w-2xl`}>
-            공개 정보, 실무 자료, 지식 문서를 검수 기준에 따라 관리합니다.
+            보험사 정보, 청구서류, 지식 문서, 공시 링크, 고객 안내 문구를 검수 기준에 따라 관리합니다.
           </p>
           <p className="mt-3 max-w-2xl text-xs leading-relaxed text-[#4f5661]">
-            고객 개인정보와 의료자료는 저장하지 않습니다. 보험금 지급 여부와
-            지급 금액을 판단하지 않습니다.
+            공개 전에는 공식 출처, 검수 상태, 공개 여부를 반드시 확인하세요.<br />
+            PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않으며, 고객 개인정보와 의료자료를 저장하지 않습니다.
           </p>
         </section>
 
