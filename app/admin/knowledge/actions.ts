@@ -15,6 +15,17 @@ import {
   handleAdminUnauthorized,
   redirectWithError,
 } from "@/lib/admin/actions";
+import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
+import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import type { BulkRunResponse } from "@/lib/admin/bulk-run";
+import { bulkRunError } from "@/lib/admin/bulk-run";
+import { runKnowledgeBulkByAction } from "@/lib/admin/knowledge-bulk-actions";
+import {
+  importKnowledgeStarterDrafts,
+  previewKnowledgeStarterDrafts,
+  type StarterImportApplyResult,
+  type StarterImportPreviewResult,
+} from "@/lib/admin/knowledge-starter-import";
 import {
   isValidSlug,
   parseCommaSeparatedList,
@@ -519,4 +530,123 @@ export async function archiveKnowledgeArticle(id: string) {
   }
 
   revalidatePath("/admin/knowledge");
+}
+
+function revalidateKnowledgePaths(): void {
+  revalidatePath("/admin/knowledge");
+  revalidatePath("/knowledge");
+}
+
+export async function previewKnowledgeStarterDraftsAction(): Promise<
+  StarterImportPreviewResult | { ok: false; message: string }
+> {
+  try {
+    await requireKnowledgeContentManager();
+  } catch (error) {
+    handleUnauthorized("/admin/knowledge", error);
+  }
+
+  return previewKnowledgeStarterDrafts();
+}
+
+export async function importKnowledgeStarterDraftsAction(): Promise<
+  StarterImportApplyResult | { ok: false; message: string }
+> {
+  let session: Awaited<ReturnType<typeof requireKnowledgeContentManager>>;
+
+  try {
+    session = await requireKnowledgeContentManager();
+  } catch (error) {
+    handleUnauthorized("/admin/knowledge", error);
+  }
+
+  const result = await importKnowledgeStarterDrafts(getSessionUserId(session));
+
+  if (result.ok && result.created > 0) {
+    revalidateKnowledgePaths();
+  }
+
+  return result;
+}
+
+async function runKnowledgeBulk(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+  requirePublisher: boolean,
+): Promise<BulkRunResponse> {
+  let session: Awaited<ReturnType<typeof requireKnowledgeContentManager>>;
+
+  try {
+    session = requirePublisher
+      ? await requireKnowledgePublisher()
+      : await requireKnowledgeContentManager();
+  } catch (error) {
+    handleUnauthorized("/admin/knowledge", error);
+  }
+
+  const policy = getBulkActionPolicy(actionId);
+  const result = await runKnowledgeBulkByAction(
+    actionId,
+    ids,
+    getSessionUserId(session),
+  );
+
+  if (result.ok && (result.succeeded > 0 || result.skipped > 0)) {
+    revalidateKnowledgePaths();
+  }
+
+  if (!result.ok) return result;
+  return { ...result, actionLabel: policy.resultSummaryLabel };
+}
+
+export async function bulkMarkKnowledgeNeedsReview(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runKnowledgeBulk("markNeedsReview", ids, false);
+}
+
+export async function bulkMarkKnowledgeVerified(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runKnowledgeBulk("markVerified", ids, false);
+}
+
+export async function bulkSetKnowledgePublished(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runKnowledgeBulk("setPublishedTrue", ids, true);
+}
+
+export async function bulkSetKnowledgeUnpublished(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runKnowledgeBulk("setPublishedFalse", ids, false);
+}
+
+export async function bulkArchiveKnowledgeArticles(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runKnowledgeBulk("archive", ids, false);
+}
+
+export async function executeKnowledgeBulkAction(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  if (actionId === "markNeedsReview") {
+    return bulkMarkKnowledgeNeedsReview(ids);
+  }
+  if (actionId === "markVerified") {
+    return bulkMarkKnowledgeVerified(ids);
+  }
+  if (actionId === "setPublishedTrue") {
+    return bulkSetKnowledgePublished(ids);
+  }
+  if (actionId === "setPublishedFalse") {
+    return bulkSetKnowledgeUnpublished(ids);
+  }
+  if (actionId === "archive") {
+    return bulkArchiveKnowledgeArticles(ids);
+  }
+  return bulkRunError("이 지식 아카이브 목록에서 지원하지 않는 일괄 작업입니다.");
 }

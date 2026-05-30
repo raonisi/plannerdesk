@@ -33,6 +33,9 @@ export interface AdminBulkActionPanelProps {
   className?: string;
   extraConfirmNotice?: string;
   claimSafetyNotice?: boolean;
+  confirmMessageOverrides?: Partial<
+    Record<AdminBulkActionId, string>
+  >;
   executeAction: (
     actionId: AdminBulkActionId,
     ids: string[],
@@ -85,6 +88,7 @@ export default function AdminBulkActionPanel({
   className = "",
   extraConfirmNotice,
   claimSafetyNotice = false,
+  confirmMessageOverrides,
   executeAction,
   children,
 }: AdminBulkActionPanelProps) {
@@ -231,6 +235,11 @@ export default function AdminBulkActionPanel({
         }}
         onConfirm={handleConfirm}
         previewMode={false}
+        confirmMessageOverride={
+          pendingAction
+            ? confirmMessageOverrides?.[pendingAction.id]
+            : undefined
+        }
       />
     </div>
   );

@@ -398,6 +398,13 @@ const IMPLEMENTED_BULK_DOMAINS: Partial<
     "setPublishedFalse",
     "setPublishedTrue",
   ],
+  knowledgeArticles: [
+    "markNeedsReview",
+    "markVerified",
+    "setPublishedFalse",
+    "setPublishedTrue",
+    "archive",
+  ],
 };
 
 /** Domains with wired server actions (PR-ADMIN-BULK-01+). */

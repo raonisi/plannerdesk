@@ -11,6 +11,8 @@ export interface AdminBulkConfirmDialogProps {
   onCancel: () => void;
   onConfirm: () => void;
   previewMode?: boolean;
+  /** Replaces default policy confirmMessage when set (domain-specific copy). */
+  confirmMessageOverride?: string;
 }
 
 export default function AdminBulkConfirmDialog({
@@ -20,8 +22,11 @@ export default function AdminBulkConfirmDialog({
   onCancel,
   onConfirm,
   previewMode = true,
+  confirmMessageOverride,
 }: AdminBulkConfirmDialogProps) {
   if (!open || !action) return null;
+
+  const confirmMessage = confirmMessageOverride ?? action.confirmMessage;
 
   return (
     <div
@@ -42,7 +47,7 @@ export default function AdminBulkConfirmDialog({
             {action.label}
           </h2>
           <p className="text-sm text-[#4f5661] mb-4 leading-relaxed">
-            {action.confirmMessage}
+            {confirmMessage}
           </p>
           <p className="text-xs text-[#4f5661] mb-2">
             대상: <strong>{selectedCount}건</strong>
