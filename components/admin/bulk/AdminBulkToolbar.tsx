@@ -10,6 +10,7 @@ import type {
 import {
   evaluateBulkActionEligibility,
   getBulkDomainPolicy,
+  isBulkActionImplemented,
   listBulkActionsForDomain,
 } from "@/lib/admin/bulk-policies";
 import type { PlannerDeskRole } from "@/lib/auth/rbac";
@@ -80,7 +81,9 @@ export default function AdminBulkToolbar({
         const isDisabled =
           disabled ||
           !eligibility.allowed ||
-          policy.implementationStatus === "planned";
+          policy.implementationStatus === "planned" ||
+          (policy.implementationStatus === "foundation" &&
+            !isBulkActionImplemented(domain, policy.id));
 
         return (
           <button

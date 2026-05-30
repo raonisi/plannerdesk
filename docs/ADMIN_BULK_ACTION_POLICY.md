@@ -15,8 +15,8 @@ PR-ADMIN-BULK-00 — shared foundation for PlannerDesk admin bulk operations.
 
 | Domain | Admin route | Bulk UI in BULK-00 |
 |--------|-------------|-------------------|
-| `insurers` | `/admin/insurers` | Policy + components ready |
-| `claimDocuments` | `/admin/claim-documents` | Policy + components ready |
+| `insurers` | `/admin/insurers` | **PR-ADMIN-BULK-01** — server actions + list UI |
+| `claimDocuments` | `/admin/claim-documents` | **PR-ADMIN-BULK-01** — server actions + list UI |
 | `knowledgeArticles` | `/admin/knowledge` | Policy + components ready |
 | `disclosureLinks` | (future) | Policy only — **buttons hidden**, “준비 중” |
 | `messageTemplates` | (future) | Policy only — **buttons hidden**, “준비 중” |

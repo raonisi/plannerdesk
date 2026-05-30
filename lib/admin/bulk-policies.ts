@@ -382,3 +382,29 @@ export function evaluateBulkActionEligibility(
 
 export const ADMIN_BULK_FOUNDATION_NOTICE =
   "PR-ADMIN-BULK-00: UI·정책 기반만 제공합니다. 확인 후에도 DB에 반영되지 않으며, 다음 PR에서 server action이 연결됩니다.";
+
+const IMPLEMENTED_BULK_DOMAINS: Partial<
+  Record<AdminBulkDomain, readonly AdminBulkActionId[]>
+> = {
+  insurers: [
+    "markNeedsReview",
+    "markVerified",
+    "setPublishedFalse",
+    "setPublishedTrue",
+  ],
+  claimDocuments: [
+    "markNeedsReview",
+    "markVerified",
+    "setPublishedFalse",
+    "setPublishedTrue",
+  ],
+};
+
+/** Domains with wired server actions (PR-ADMIN-BULK-01+). */
+export function isBulkActionImplemented(
+  domain: AdminBulkDomain,
+  actionId: AdminBulkActionId,
+): boolean {
+  const live = IMPLEMENTED_BULK_DOMAINS[domain];
+  return live?.includes(actionId) ?? false;
+}

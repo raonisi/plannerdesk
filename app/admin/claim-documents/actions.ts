@@ -24,6 +24,11 @@ import {
   requireClaimDocumentPublisher,
 } from "./access";
 import { ADMIN_CLAIM_DOC_COPY, wouldPublishDraft } from "./visibility";
+import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
+import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import type { BulkRunResponse } from "@/lib/admin/bulk-run";
+import { bulkRunError } from "@/lib/admin/bulk-run";
+import { runClaimDocumentBulkByAction } from "@/lib/admin/bulk-verification-actions";
 
 const CATEGORY_VALUES = new Set<string>(
   Object.values(ClaimDocumentCategory) as string[],
@@ -496,4 +501,85 @@ export async function setClaimDocumentPublished(
 
   revalidatePath("/admin/claim-documents");
   revalidatePublicContentPaths();
+}
+
+async function runClaimDocumentBulk(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+  requirePublisher: boolean,
+): Promise<BulkRunResponse> {
+  let session: Awaited<ReturnType<typeof requireClaimDocumentContentManager>>;
+
+  try {
+    session = requirePublisher
+      ? await requireClaimDocumentPublisher()
+      : await requireClaimDocumentContentManager();
+  } catch (error) {
+    handleUnauthorized("/admin/claim-documents", error);
+  }
+
+  const policy = getBulkActionPolicy(actionId);
+  const result = await runClaimDocumentBulkByAction(
+    actionId,
+    ids,
+    getSessionUserId(session),
+  );
+
+  if (result.ok && (result.succeeded > 0 || result.skipped > 0)) {
+    revalidatePath("/admin/claim-documents");
+    revalidatePublicContentPaths();
+  }
+
+  if (!result.ok) return result;
+  return { ...result, actionLabel: policy.resultSummaryLabel };
+}
+
+export async function bulkMarkClaimDocumentsNeedsReview(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runClaimDocumentBulk("markNeedsReview", ids, false);
+}
+
+export async function bulkMarkClaimDocumentsVerified(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runClaimDocumentBulk("markVerified", ids, false);
+}
+
+export async function bulkSetClaimDocumentsPublished(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runClaimDocumentBulk("setPublishedTrue", ids, true);
+}
+
+export async function bulkSetClaimDocumentsUnpublished(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runClaimDocumentBulk("setPublishedFalse", ids, false);
+}
+
+/** Archive is not on ClaimDocument schema; maps to bulk unpublish (공개 제외). */
+export async function bulkArchiveClaimDocuments(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return bulkSetClaimDocumentsUnpublished(ids);
+}
+
+export async function executeClaimDocumentBulkAction(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  if (actionId === "markNeedsReview") {
+    return bulkMarkClaimDocumentsNeedsReview(ids);
+  }
+  if (actionId === "markVerified") {
+    return bulkMarkClaimDocumentsVerified(ids);
+  }
+  if (actionId === "setPublishedTrue") {
+    return bulkSetClaimDocumentsPublished(ids);
+  }
+  if (actionId === "setPublishedFalse" || actionId === "archive") {
+    return bulkSetClaimDocumentsUnpublished(ids);
+  }
+  return bulkRunError("이 청구서류 목록에서 지원하지 않는 일괄 작업입니다.");
 }

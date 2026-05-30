@@ -21,6 +21,11 @@ import {
   requireInsurerPublisher,
 } from "./access";
 import { ADMIN_VISIBILITY_COPY, wouldPublishDraft } from "./visibility";
+import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
+import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import type { BulkRunResponse } from "@/lib/admin/bulk-run";
+import { bulkRunError } from "@/lib/admin/bulk-run";
+import { runInsurerBulkByAction } from "@/lib/admin/bulk-verification-actions";
 
 const CATEGORY_VALUES = new Set<string>([
   InsurerCategory.life,
@@ -366,4 +371,83 @@ export async function setInsurerPublished(id: string, isPublished: boolean) {
 
   revalidatePath("/admin/insurers");
   revalidatePublicContentPaths();
+}
+
+async function runInsurerBulk(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+  requirePublisher: boolean,
+): Promise<BulkRunResponse> {
+  let session: Awaited<ReturnType<typeof requireInsurerContentManager>>;
+
+  try {
+    session = requirePublisher
+      ? await requireInsurerPublisher()
+      : await requireInsurerContentManager();
+  } catch (error) {
+    handleUnauthorized("/admin/insurers", error);
+  }
+
+  const policy = getBulkActionPolicy(actionId);
+  const result = await runInsurerBulkByAction(
+    actionId,
+    ids,
+    getSessionUserId(session),
+  );
+
+  if (result.ok && (result.succeeded > 0 || result.skipped > 0)) {
+    revalidatePath("/admin/insurers");
+    revalidatePublicContentPaths();
+  }
+
+  if (!result.ok) return result;
+  return { ...result, actionLabel: policy.resultSummaryLabel };
+}
+
+export async function bulkMarkInsurersNeedsReview(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runInsurerBulk("markNeedsReview", ids, false);
+}
+
+export async function bulkMarkInsurersVerified(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runInsurerBulk("markVerified", ids, false);
+}
+
+export async function bulkSetInsurersPublished(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runInsurerBulk("setPublishedTrue", ids, true);
+}
+
+export async function bulkSetInsurersUnpublished(
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  return runInsurerBulk("setPublishedFalse", ids, false);
+}
+
+/** Archive is not on Insurer schema; maps to bulk unpublish (공개 제외). */
+export async function bulkArchiveInsurers(ids: unknown): Promise<BulkRunResponse> {
+  return bulkSetInsurersUnpublished(ids);
+}
+
+export async function executeInsurerBulkAction(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  if (actionId === "markNeedsReview") {
+    return bulkMarkInsurersNeedsReview(ids);
+  }
+  if (actionId === "markVerified") {
+    return bulkMarkInsurersVerified(ids);
+  }
+  if (actionId === "setPublishedTrue") {
+    return bulkSetInsurersPublished(ids);
+  }
+  if (actionId === "setPublishedFalse" || actionId === "archive") {
+    return bulkSetInsurersUnpublished(ids);
+  }
+  return bulkRunError("이 보험사 목록에서 지원하지 않는 일괄 작업입니다.");
 }
