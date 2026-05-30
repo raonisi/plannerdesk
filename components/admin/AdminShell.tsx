@@ -43,17 +43,19 @@ export default function AdminShell({ session }: AdminShellProps) {
     },
     {
       title: "공시·약관 링크 관리",
-      status: "준비 중",
-      description: "공시실 및 필수 약관 링크의 최신화 상태를 모니터링하고 편집합니다.",
-      enabled: false,
-      link: "#",
+      status: "정적 데이터 · 조회",
+      description:
+        "공시실·약관 링크를 검수·출처 확인일 기준으로 점검합니다. 저장·일괄 변경은 DisclosureLink DB PR 이후 제공됩니다.",
+      enabled: true,
+      link: "/admin/disclosure-links",
     },
     {
       title: "고객 안내 문구 관리",
-      status: "준비 중",
-      description: "설계사들이 사용하는 상황별/어조별 안내 메세지 템플릿을 관리합니다.",
-      enabled: false,
-      link: "#",
+      status: "정적 데이터 · 조회",
+      description:
+        "상황별 고객 안내 문구를 검수하고 금지 표현을 확인합니다. 저장·일괄 변경은 MessageTemplate DB PR 이후 제공됩니다.",
+      enabled: true,
+      link: "/admin/message-templates",
     },
   ];
 
