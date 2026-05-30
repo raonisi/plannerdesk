@@ -109,6 +109,36 @@ enum KnowledgeSourceType {
   mixed
 }
 
+// Disclosure / terms link library (PR-71 schema only; admin CRUD and public fetch in later PRs).
+enum DisclosureLinkCategory {
+  product_disclosure
+  policy_terms
+  claim_disclosure
+  insurer_notice
+  insurer_official_materials
+  insurance_association
+  regulator
+  claim_compensation_reference
+  education_practice_reference
+  customer_guide
+  other
+}
+
+enum DisclosureLinkTargetType {
+  insurer
+  regulator
+  association
+  internal
+  other
+}
+
+enum DisclosureLinkStatus {
+  draft
+  needs_review
+  published
+  archived
+}
+
 model User {
   id                 String             @id @default(cuid())
   name               String?
@@ -160,40 +190,41 @@ model VerificationToken {
 }
 
 model Insurer {
-  id                 String             @id @default(cuid())
-  name               String
-  category           InsurerCategory
-  officialWebsiteUrl String?
-  plannerPortalUrl   String?
-  systemUrl          String?
-  claimPageUrl       String?
-  customerCenterPhone String?
-  callMonitoringPhone String?
-  helpdeskPhone      String?
-  faxNumber          String?
-  mailingAddress     String?
-  cardPaymentInitialAvailable Boolean?
+  id                            String               @id @default(cuid())
+  name                          String
+  category                      InsurerCategory
+  officialWebsiteUrl            String?
+  plannerPortalUrl              String?
+  systemUrl                     String?
+  claimPageUrl                  String?
+  customerCenterPhone           String?
+  callMonitoringPhone           String?
+  helpdeskPhone                 String?
+  faxNumber                     String?
+  mailingAddress                String?
+  cardPaymentInitialAvailable   Boolean?
   cardPaymentRecurringAvailable Boolean?
-  cardPaymentStatus  CardPaymentStatus  @default(unknown)
-  cardPaymentNote    String?
-  claimFaxNumber     String?
-  claimFaxHandlingType ClaimFaxHandlingType @default(unknown)
-  registeredMailAddress String?
-  claimFormUrl       String?
-  termsUrl           String?
-  sourceNote         String?
-  notes              String?
-  verificationStatus VerificationStatus @default(draft)
-  lastVerifiedAt     DateTime?
-  isPublished        Boolean            @default(false)
-  sortOrder          Int                @default(0)
-  isFeatured         Boolean            @default(false)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  createdById        String?
-  updatedById        String?
+  cardPaymentStatus             CardPaymentStatus    @default(unknown)
+  cardPaymentNote               String?
+  claimFaxNumber                String?
+  claimFaxHandlingType          ClaimFaxHandlingType @default(unknown)
+  registeredMailAddress         String?
+  claimFormUrl                  String?
+  termsUrl                      String?
+  sourceNote                    String?
+  notes                         String?
+  verificationStatus            VerificationStatus   @default(draft)
+  lastVerifiedAt                DateTime?
+  isPublished                   Boolean              @default(false)
+  sortOrder                     Int                  @default(0)
+  isFeatured                    Boolean              @default(false)
+  createdAt                     DateTime             @default(now())
+  updatedAt                     DateTime             @updatedAt
+  createdById                   String?
+  updatedById                   String?
 
-  claimDocuments     ClaimDocument[]
+  claimDocuments  ClaimDocument[]
+  disclosureLinks DisclosureLink[]
 
   @@index([category])
   @@index([verificationStatus])
@@ -238,37 +269,37 @@ model ClaimDocument {
 // Knowledge archive articles for future admin CRUD and DB-backed /knowledge.
 // Public read and Admin UI are out of scope for PR-KNOW-DB-01.
 model KnowledgeArticle {
-  id              String                   @id @default(cuid())
-  slug            String                   @unique
-  title           String
-  summary         String
-  content         String                   @db.Text
+  id      String @id @default(cuid())
+  slug    String @unique
+  title   String
+  summary String
+  content String @db.Text
 
-  category        KnowledgeArticleCategory
-  type            KnowledgeArticleType
-  riskLevel       KnowledgeRiskLevel       @default(medium)
-  status          KnowledgeArticleStatus   @default(draft)
+  category  KnowledgeArticleCategory
+  type      KnowledgeArticleType
+  riskLevel KnowledgeRiskLevel       @default(medium)
+  status    KnowledgeArticleStatus   @default(draft)
 
-  isPublished     Boolean                  @default(false)
-  aiUsable        Boolean                  @default(false)
+  isPublished Boolean @default(false)
+  aiUsable    Boolean @default(false)
 
-  sourceType      KnowledgeSourceType      @default(internal)
+  sourceType      KnowledgeSourceType @default(internal)
   sourceTitle     String?
   sourceUrl       String?
   sourceCheckedAt DateTime?
 
   workflowLabel   String?
-  tags            String[]                 @default([])
-  safeCopy        String?                  @db.Text
-  forbiddenClaims String[]                 @default([])
+  tags            String[] @default([])
+  safeCopy        String?  @db.Text
+  forbiddenClaims String[] @default([])
 
-  createdAt       DateTime                 @default(now())
-  updatedAt       DateTime                 @updatedAt
-  publishedAt     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
 
-  createdById     String?
-  updatedById     String?
-  reviewedById    String?
+  createdById  String?
+  updatedById  String?
+  reviewedById String?
 
   @@index([status])
   @@index([isPublished])
@@ -277,4 +308,39 @@ model KnowledgeArticle {
   @@index([riskLevel])
   @@index([aiUsable])
   @@index([slug])
+}
+
+// Official disclosure / policy links for /disclosure-links (DB-backed in PR-72+).
+// Public visibility (PR-75): isPublished=true AND status=published only.
+model DisclosureLink {
+  id               String                   @id @default(cuid())
+  title            String
+  description      String                   @db.Text
+  url              String
+  category         DisclosureLinkCategory
+  targetType       DisclosureLinkTargetType @default(other)
+  insurerId        String?
+  insurer          Insurer?                 @relation(fields: [insurerId], references: [id], onDelete: SetNull)
+  status           DisclosureLinkStatus     @default(draft)
+  isPublished      Boolean                  @default(false)
+  sourceName       String?
+  isOfficialSource Boolean                  @default(false)
+  lastVerifiedAt   DateTime?
+  publishedAt      DateTime?
+  reviewedAt       DateTime?
+  reviewedById     String?
+  sortOrder        Int                      @default(0)
+  adminMemo        String?                  @db.Text
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  createdById      String?
+  updatedById      String?
+
+  @@index([category])
+  @@index([targetType])
+  @@index([insurerId])
+  @@index([status])
+  @@index([isPublished])
+  @@index([sortOrder])
+  @@index([lastVerifiedAt])
 }
