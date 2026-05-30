@@ -44,9 +44,15 @@ export type AdminDashboardSnapshot = {
     comingSoon: number;
   };
   knowledgeProbe: KnowledgeTableProbe;
+  messageTemplateProbe: MessageTemplateTableProbe;
 };
 
 export type KnowledgeTableProbe =
+  | { status: "ok"; count: number }
+  | { status: "missing_table" }
+  | { status: "unavailable" };
+
+export type MessageTemplateTableProbe =
   | { status: "ok"; count: number }
   | { status: "missing_table" }
   | { status: "unavailable" };
@@ -71,6 +77,18 @@ function isPrismaMissingTable(error: unknown): boolean {
 export async function probeKnowledgeArticleTable(): Promise<KnowledgeTableProbe> {
   try {
     const count = await prisma.knowledgeArticle.count();
+    return { status: "ok", count };
+  } catch (error) {
+    if (isPrismaMissingTable(error)) {
+      return { status: "missing_table" };
+    }
+    return { status: "unavailable" };
+  }
+}
+
+export async function probeMessageTemplateTable(): Promise<MessageTemplateTableProbe> {
+  try {
+    const count = await prisma.messageTemplate.count();
     return { status: "ok", count };
   } catch (error) {
     if (isPrismaMissingTable(error)) {
@@ -169,8 +187,80 @@ function knowledgeFeature(probe: KnowledgeTableProbe): AdminDashboardFeature {
   };
 }
 
+function messageTemplateFeature(
+  probe: MessageTemplateTableProbe,
+): AdminDashboardFeature {
+  if (probe.status === "missing_table") {
+    return {
+      id: "message-templates",
+      title: "고객 안내 문구 관리",
+      description:
+        "고객에게 보낼 수 있는 중립 안내 문구와 금지 표현을 관리합니다.",
+      href: "/admin/message-templates",
+      availability: "setup_required",
+      statusBadge: "설정 필요",
+      lastCheckLabel: "MessageTemplate 테이블 없음",
+      nextAction:
+        "운영 DB에 MessageTemplate migration을 적용한 뒤 관리 화면을 사용하세요.",
+      buttonLabel: "설정 필요",
+      buttonEnabled: true,
+    };
+  }
+
+  if (probe.status === "unavailable") {
+    return {
+      id: "message-templates",
+      title: "고객 안내 문구 관리",
+      description:
+        "고객에게 보낼 수 있는 중립 안내 문구와 금지 표현을 관리합니다.",
+      href: "/admin/message-templates",
+      availability: "blocked",
+      statusBadge: "점검 필요",
+      lastCheckLabel: "DB 연결 확인 필요",
+      nextAction: "잠시 후 다시 시도하거나 운영 로그를 확인하세요.",
+      buttonLabel: "점검 필요",
+      buttonEnabled: true,
+    };
+  }
+
+  if (probe.count === 0) {
+    return {
+      id: "message-templates",
+      title: "고객 안내 문구 관리",
+      description:
+        "상담, 안내, 후속 연락 문구를 검수 기준에 맞춰 관리합니다.",
+      href: "/admin/message-templates",
+      availability: "active_with_warning",
+      statusBadge: "확인 필요",
+      lastCheckLabel: "등록 문구 0건",
+      nextAction:
+        "초안 등록 후 safeCopy·금지 표현·허용 변수를 검수하고 published 상태에서만 게시하세요.",
+      buttonLabel: "관리하기",
+      buttonEnabled: true,
+    };
+  }
+
+  return {
+    id: "message-templates",
+    title: "고객 안내 문구 관리",
+    description:
+      "상담, 안내, 후속 연락 문구를 검수 기준에 맞춰 관리합니다.",
+    href: "/admin/message-templates",
+    availability: "active",
+    statusBadge: "운영 중",
+    lastCheckLabel: `등록 문구 ${probe.count}건 · DB CRUD`,
+    nextAction:
+      "HIGH 위험도·내부 전용 문구는 public 게시 전 safeCopy와 검수 완료를 확인하세요.",
+    buttonLabel: "관리하기",
+    buttonEnabled: true,
+  };
+}
+
 export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnapshot> {
-  const knowledgeProbe = await probeKnowledgeArticleTable();
+  const [knowledgeProbe, messageTemplateProbe] = await Promise.all([
+    probeKnowledgeArticleTable(),
+    probeMessageTemplateTable(),
+  ]);
 
   const features: AdminDashboardFeature[] = [
     {
@@ -213,20 +303,7 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
       buttonLabel: "관리하기",
       buttonEnabled: true,
     },
-    {
-      id: "message-templates",
-      title: "고객 안내 문구 관리",
-      description:
-        "고객에게 보낼 수 있는 중립 안내 문구와 금지 표현을 관리합니다.",
-      href: "/admin/message-templates",
-      availability: "active_with_warning",
-      statusBadge: "조회 모드",
-      lastCheckLabel: "정적 데이터 · MessageTemplate DB 예정",
-      nextAction:
-        "금지 표현을 확인한 뒤 발송 문구를 검수하세요. 저장은 DB PR 이후 제공됩니다.",
-      buttonLabel: "확인하기",
-      buttonEnabled: true,
-    },
+    messageTemplateFeature(messageTemplateProbe),
   ];
 
   const knowledgeBulkAvailability: AdminFeatureAvailability =
@@ -317,6 +394,7 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
     bulkWorkflows,
     summary: countByAvailability(features),
     knowledgeProbe,
+    messageTemplateProbe,
   };
 }
 

@@ -1,17 +1,20 @@
+import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
-import { getMessageTemplateAdminAccess } from "../access";
-import { createMessageTemplate } from "../actions";
-import MessageTemplateForm from "../form";
-import { ADMIN_MESSAGE_TEMPLATE_COPY } from "../visibility";
+import { getMessageTemplateAdminAccess } from "../../access";
+import { updateMessageTemplate } from "../../actions";
+import MessageTemplateForm from "../../form";
+import { ADMIN_MESSAGE_TEMPLATE_COPY } from "../../visibility";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminMessageTemplateNewPage({
+export default async function AdminMessageTemplateEditPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
   const access = await getMessageTemplateAdminAccess();
@@ -24,7 +27,27 @@ export default async function AdminMessageTemplateNewPage({
     return <AdminAccessDeniedState />;
   }
 
+  const { id } = await params;
   const { error } = await searchParams;
+
+  let template = null;
+  try {
+    template = await prisma.messageTemplate.findUnique({ where: { id } });
+  } catch {
+    template = null;
+  }
+
+  if (!template) {
+    return (
+      <main className={`min-h-screen ${surfaces.page} px-4 py-8`}>
+        <p className="text-sm text-[#4f5661]">
+          {ADMIN_MESSAGE_TEMPLATE_COPY.notFound}
+        </p>
+      </main>
+    );
+  }
+
+  const boundUpdate = updateMessageTemplate.bind(null, id);
 
   return (
     <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
@@ -32,11 +55,9 @@ export default async function AdminMessageTemplateNewPage({
         <div className="mb-6">
           <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">
-            고객 안내 문구 등록
+            고객 안내 문구 수정
           </h1>
-          <p className={`${textStyles.body} mt-3`}>
-            초안 상태로 등록합니다. 검수·안전 문구 확인 전에는 게시하지 마세요.
-          </p>
+          <p className={`${textStyles.body} mt-3`}>{template.title}</p>
         </div>
 
         {error ? (
@@ -55,8 +76,9 @@ export default async function AdminMessageTemplateNewPage({
           className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}
         >
           <MessageTemplateForm
-            action={createMessageTemplate}
-            submitLabel="문구 등록"
+            action={boundUpdate}
+            template={template}
+            submitLabel="변경 저장"
           />
         </section>
       </div>

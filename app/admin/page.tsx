@@ -38,6 +38,7 @@ function fallbackDashboard(): AdminDashboardSnapshot {
       comingSoon: 0,
     },
     knowledgeProbe: { status: "unavailable" },
+    messageTemplateProbe: { status: "unavailable" },
   };
 }
 
