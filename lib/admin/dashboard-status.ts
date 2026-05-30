@@ -108,13 +108,13 @@ function knowledgeFeature(probe: KnowledgeTableProbe): AdminDashboardFeature {
       id: "knowledge",
       title: "지식 아카이브 관리",
       description:
-        "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 작성하고 검수 상태와 공개 여부를 관리합니다.",
+        "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 검수 상태별로 관리합니다.",
       href: "/admin/knowledge",
       availability: "setup_required",
       statusBadge: "설정 필요",
-      lastCheckLabel: "KnowledgeArticle migration 적용 여부와 초기 draft import 상태를 확인하세요.",
+      lastCheckLabel: "KnowledgeArticle 테이블 없음",
       nextAction:
-        "테이블 설정 전에는 일괄 등록이나 공개 전환을 실행하지 마세요.",
+        "운영 DB에 KnowledgeArticle migration을 적용한 뒤 관리 화면을 사용하세요.",
       buttonLabel: "설정 필요",
       buttonEnabled: true,
     };
@@ -125,7 +125,7 @@ function knowledgeFeature(probe: KnowledgeTableProbe): AdminDashboardFeature {
       id: "knowledge",
       title: "지식 아카이브 관리",
       description:
-        "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 작성하고 검수 상태와 공개 여부를 관리합니다.",
+        "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 검수 상태별로 관리합니다.",
       href: "/admin/knowledge",
       availability: "blocked",
       statusBadge: "점검 필요",
@@ -137,16 +137,33 @@ function knowledgeFeature(probe: KnowledgeTableProbe): AdminDashboardFeature {
     };
   }
 
+  if (probe.count === 0) {
+    return {
+      id: "knowledge",
+      title: "지식 아카이브 관리",
+      description:
+        "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 검수 상태별로 관리합니다.",
+      href: "/admin/knowledge",
+      availability: "active_with_warning",
+      statusBadge: "확인 필요",
+      lastCheckLabel: "등록된 문서 0건",
+      nextAction:
+        "초안 등록 또는 starter import 후 검수·게시 상태를 확인하세요. (production import는 승인 후)",
+      buttonLabel: "확인하기",
+      buttonEnabled: true,
+    };
+  }
+
   return {
     id: "knowledge",
     title: "지식 아카이브 관리",
     description:
-      "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 작성하고 검수 상태와 공개 여부를 관리합니다.",
+      "설계사 실무 기준, 고객 안내문, 운영 안전 문서를 검수 상태별로 관리합니다.",
     href: "/admin/knowledge",
     availability: "active",
-    statusBadge: "사용 가능",
-    lastCheckLabel: "초안 문서는 public 화면에 노출되지 않으며, AI 참조 가능 여부는 별도 검수 후 설정해야 합니다.",
-    nextAction: "초안은 draft로 등록하고, 검수 완료 후 필요한 문서만 공개하세요.",
+    statusBadge: "운영 중",
+    lastCheckLabel: `등록 문서 ${probe.count}건`,
+    nextAction: "검수·게시 상태를 확인하고 공개 조건을 점검하세요.",
     buttonLabel: "관리하기",
     buttonEnabled: true,
   };
@@ -160,12 +177,12 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
       id: "insurers",
       title: "보험사 디렉토리 관리",
       description:
-        "보험사 전산 접속, 고객센터, 전산 헬프데스크, 청구 팩스, 약관 링크, 카드납 정보를 관리합니다.",
+        "보험사 전산, 연락처, 청구 팩스, 약관 링크, 카드납 정보를 관리합니다.",
       href: "/admin/insurers",
       availability: "active",
-      statusBadge: "사용 가능",
-      lastCheckLabel: "검수되지 않은 링크와 연락처는 공개 전 반드시 확인이 필요합니다.",
-      nextAction: "공식 출처 확인 후 검수 상태와 공개 여부를 관리하세요.",
+      statusBadge: "운영 중",
+      lastCheckLabel: "DB CRUD · 일괄 검수 연결됨",
+      nextAction: "공식 출처 기준으로 연락처·링크를 검수한 뒤 공개 여부를 결정하세요.",
       buttonLabel: "관리하기",
       buttonEnabled: true,
     },
@@ -175,9 +192,9 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
       description: "보험사별 청구서류와 청구 유형별 안내 기준을 관리합니다.",
       href: "/admin/claim-documents",
       availability: "active",
-      statusBadge: "사용 가능",
-      lastCheckLabel: "PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않습니다.",
-      nextAction: "서류 안내는 청구 준비 참고용으로만 관리하고, 보험금 지급 여부 판단 문구는 포함하지 마세요.",
+      statusBadge: "운영 중",
+      lastCheckLabel: "DB CRUD · 일괄 검수 연결됨",
+      nextAction: "필요 서류 목록과 공식 출처 링크를 최신 상태로 유지하세요.",
       buttonLabel: "관리하기",
       buttonEnabled: true,
     },
@@ -186,44 +203,113 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
       id: "disclosure-links",
       title: "공시·약관 링크 관리",
       description:
-        "보험사 공시실, 상품공시, 약관 링크를 공식 출처 기준으로 관리하는 기능입니다.",
+        "공식 공시, 약관, 협회·감독기관 링크를 검수 후 관리합니다.",
       href: "/admin/disclosure-links",
-      availability: "coming_soon",
-      statusBadge: "준비 중",
-      lastCheckLabel: "공식 출처 확인 전 링크를 공개하지 않습니다.",
+      availability: "active",
+      statusBadge: "운영 중",
+      lastCheckLabel: "DB CRUD · 단건 검수·게시",
       nextAction:
-        "관리자 CRUD와 공개 조건이 확정된 뒤 활성화됩니다.",
-      buttonLabel: "준비 중",
-      buttonEnabled: false,
+        "공식 출처를 확인한 뒤 검수 완료(published) 상태에서만 게시하세요. 일괄 변경은 PR-77 예정.",
+      buttonLabel: "관리하기",
+      buttonEnabled: true,
     },
     {
       id: "message-templates",
       title: "고객 안내 문구 관리",
       description:
-        "청구, 고지, 해지, 약관 안내 등 고객에게 전달할 수 있는 중립 문구를 관리하는 기능입니다.",
+        "고객에게 보낼 수 있는 중립 안내 문구와 금지 표현을 관리합니다.",
       href: "/admin/message-templates",
-      availability: "coming_soon",
-      statusBadge: "준비 중",
-      lastCheckLabel: "보험금 지급 단정, 손해사정 오인, 의료자료 요청 문구는 사용할 수 없습니다.",
+      availability: "active_with_warning",
+      statusBadge: "조회 모드",
+      lastCheckLabel: "정적 데이터 · MessageTemplate DB 예정",
       nextAction:
-        "금지 표현, 개인정보·의료자료 차단 기준, 검수 상태 체계가 적용된 뒤 활성화됩니다.",
-      buttonLabel: "준비 중",
-      buttonEnabled: false,
+        "금지 표현을 확인한 뒤 발송 문구를 검수하세요. 저장은 DB PR 이후 제공됩니다.",
+      buttonLabel: "확인하기",
+      buttonEnabled: true,
     },
   ];
 
+  const knowledgeBulkAvailability: AdminFeatureAvailability =
+    knowledgeProbe.status === "ok"
+      ? knowledgeProbe.count === 0
+        ? "active_with_warning"
+        : "active"
+      : knowledgeProbe.status === "missing_table"
+        ? "setup_required"
+        : "blocked";
+
   const bulkWorkflows: AdminBulkWorkflow[] = [
     {
-      id: "bulk-operations",
-      title: "일괄 작업 관리",
-      description: "여러 데이터를 선택해 검수 상태, 공개 여부, 보관 상태를 일괄 변경하는 운영 기능입니다.",
+      id: "bulk-insurers",
+      title: "보험사 일괄 검수·게시",
+      description: "선택한 보험사의 검수 상태와 공개 여부를 일괄 변경합니다.",
       href: "/admin/insurers",
       availability: "active",
       statusBadge: "사용 가능",
-      nextAction: "공통 Bulk 기반과 도메인별 권한 검수가 완료된 뒤 활성화됩니다.",
-      buttonLabel: "일괄 작업 확인",
+      nextAction: "목록에서 항목을 선택한 뒤 일괄 작업을 실행하세요.",
+      buttonLabel: "보험사 목록",
       buttonEnabled: true,
-    }
+    },
+    {
+      id: "bulk-claim-documents",
+      title: "청구서류 일괄 검수·게시",
+      description: "청구서류 검수·게시 상태를 일괄 변경합니다.",
+      href: "/admin/claim-documents",
+      availability: "active",
+      statusBadge: "사용 가능",
+      nextAction: "공개 전 검수 상태와 draft 공개 차단 규칙을 확인하세요.",
+      buttonLabel: "청구서류 목록",
+      buttonEnabled: true,
+    },
+    {
+      id: "bulk-knowledge",
+      title: "지식 문서 일괄 검수·등록",
+      description:
+        "지식 문서 검수·게시·보관 및 starter 초안 일괄 등록(미리보기)을 수행합니다.",
+      href: "/admin/knowledge",
+      availability: knowledgeBulkAvailability,
+      statusBadge:
+        knowledgeBulkAvailability === "active"
+          ? "사용 가능"
+          : knowledgeBulkAvailability === "active_with_warning"
+            ? "데이터 준비 필요"
+            : knowledgeBulkAvailability === "setup_required"
+              ? "설정 필요"
+              : "점검 필요",
+      nextAction:
+        knowledgeBulkAvailability === "active"
+          ? "일괄 변경 전 공식 출처·금지 표현을 확인하세요."
+          : "KnowledgeArticle migration 또는 초안 등록 후 사용하세요.",
+      buttonLabel:
+        knowledgeBulkAvailability === "setup_required"
+          ? "설정 필요"
+          : knowledgeBulkAvailability === "blocked"
+            ? "점검 필요"
+            : "지식 아카이브",
+      buttonEnabled: knowledgeBulkAvailability !== "blocked",
+    },
+    {
+      id: "bulk-disclosure",
+      title: "공시·약관 일괄 변경",
+      description: "공시·약관 링크 일괄 검수·게시(예정).",
+      href: "/admin/disclosure-links",
+      availability: "coming_soon",
+      statusBadge: "준비 중",
+      nextAction: "PR-77에서 목록 일괄 작업이 연결됩니다. 현재는 단건 변경만 가능합니다.",
+      buttonLabel: "준비 중",
+      buttonEnabled: false,
+    },
+    {
+      id: "bulk-message-templates",
+      title: "고객 문구 일괄 변경",
+      description: "고객 안내 문구 일괄 검수·게시(예정).",
+      href: null,
+      availability: "coming_soon",
+      statusBadge: "준비 중",
+      nextAction: "MessageTemplate DB 모델 도입 후 일괄 저장이 연결됩니다.",
+      buttonLabel: "준비 중",
+      buttonEnabled: false,
+    },
   ];
 
   return {
@@ -250,19 +336,19 @@ export const ADMIN_PAGE_STATE_COPY: Record<
   { title: string; body: string }
 > = {
   empty: {
-    title: "등록된 데이터가 없습니다",
-    body: "아직 등록된 관리 데이터가 없습니다. 초기 데이터를 가져오거나 새 항목을 작성한 뒤 검수 상태를 확인하세요.",
+    title: "등록된 데이터가 없습니다.",
+    body: "새 항목을 등록하거나 초기 데이터를 가져온 뒤 검수 상태를 확인하세요.",
   },
   setupRequired: {
-    title: "설정이 필요합니다",
-    body: "이 기능은 코드가 준비되어 있으나 운영 DB 설정 또는 초기 데이터 확인이 필요합니다. 설정이 완료되기 전에는 일괄 등록, 일괄 공개, 일괄 상태 변경을 실행하지 마세요.",
+    title: "이 기능은 데이터베이스 설정이 필요합니다.",
+    body: "운영 DB migration 또는 초기 데이터 등록이 완료된 뒤 사용할 수 있습니다.",
   },
   comingSoon: {
-    title: "준비 중인 관리자 기능입니다",
+    title: "이 관리자 기능은 준비 중입니다.",
     body: "현재는 공개 화면에서만 이용 가능하며, 관리자 편집 기능은 별도 PR로 제공됩니다.",
   },
   error: {
-    title: "관리자 데이터를 불러오지 못했습니다",
-    body: "일시적인 서버 오류 또는 운영 설정 문제가 발생했습니다. 잠시 후 다시 시도하거나 운영 로그를 확인하세요. 민감한 환경변수, DB 접속 정보, 내부 오류 상세는 화면에 표시하지 않습니다.",
+    title: "관리자 데이터를 불러오지 못했습니다.",
+    body: "잠시 후 다시 시도하거나 운영 로그를 확인하세요. 민감한 환경변수나 내부 오류 정보는 화면에 표시하지 않습니다.",
   },
 } as const;

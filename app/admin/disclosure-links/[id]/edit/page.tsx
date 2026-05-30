@@ -1,18 +1,21 @@
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
-import { getDisclosureLinkAdminAccess } from "../access";
-import { createDisclosureLink } from "../actions";
-import DisclosureLinkForm from "../form";
-import { ADMIN_DISCLOSURE_COPY } from "../visibility";
+import { getDisclosureLinkAdminAccess } from "../../access";
+import { updateDisclosureLink } from "../../actions";
+import DisclosureLinkForm from "../../form";
+import { ADMIN_DISCLOSURE_COPY } from "../../visibility";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewDisclosureLinkPage({
+export default async function EditDisclosureLinkPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 }) {
   const access = await getDisclosureLinkAdminAccess();
@@ -25,12 +28,22 @@ export default async function NewDisclosureLinkPage({
     return <AdminAccessDeniedState />;
   }
 
+  const { id } = await params;
   const { error } = await searchParams;
 
-  const insurers = await prisma.insurer.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const [link, insurers] = await Promise.all([
+    prisma.disclosureLink.findUnique({ where: { id } }),
+    prisma.insurer.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+
+  if (!link) {
+    notFound();
+  }
+
+  const boundUpdate = updateDisclosureLink.bind(null, id);
 
   return (
     <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
@@ -38,11 +51,9 @@ export default async function NewDisclosureLinkPage({
         <div className="mb-6">
           <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">
-            공시·약관 링크 등록
+            공시·약관 링크 수정
           </h1>
-          <p className={`${textStyles.body} mt-3`}>
-            초안 상태로 등록합니다. 공식 출처 확인 전에는 게시하지 마세요.
-          </p>
+          <p className={`${textStyles.body} mt-3`}>{link.title}</p>
         </div>
 
         {error ? (
@@ -59,9 +70,10 @@ export default async function NewDisclosureLinkPage({
           className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}
         >
           <DisclosureLinkForm
-            action={createDisclosureLink}
+            action={boundUpdate}
+            link={link}
             insurers={insurers}
-            submitLabel="링크 등록"
+            submitLabel="변경 저장"
           />
         </section>
       </div>
