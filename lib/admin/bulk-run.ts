@@ -4,7 +4,12 @@ import {
   wouldPublishDraft,
 } from "@/lib/public/visibility";
 
-export const BULK_ACTION_MAX_IDS = 100;
+export const BULK_ACTION_MAX_IDS = 50;
+
+export type BulkFailure = {
+  id: string;
+  reason: string;
+};
 
 export type BulkRunResult = {
   ok: true;
@@ -12,6 +17,7 @@ export type BulkRunResult = {
   succeeded: number;
   skipped: number;
   failed: number;
+  failures: BulkFailure[];
   actionLabel: string;
 };
 
@@ -63,7 +69,70 @@ export function emptyBulkResult(
     succeeded: 0,
     skipped: requested,
     failed: 0,
+    failures: [],
     actionLabel,
+  };
+}
+
+
+
+export async function runBulkPerRow<T extends { id: string }>(options: {
+  ids: unknown;
+  actionLabel: string;
+  loadRows: (ids: string[]) => Promise<Map<string, T>>;
+  resolve: (
+    row: T,
+  ) =>
+    | { outcome: "skipped"; reason?: string }
+    | { outcome: "failed"; reason: string }
+    | { outcome: "succeeded"; data: Record<string, unknown> };
+  applyUpdate: (id: string, data: Record<string, unknown>) => Promise<void>;
+}): Promise<BulkRunResponse> {
+  const parsed = parseBulkIds(options.ids);
+  if (!Array.isArray(parsed)) return parsed;
+
+  const rowById = await options.loadRows(parsed);
+  let succeeded = 0;
+  let skipped = 0;
+  let failed = 0;
+  const failures: BulkFailure[] = [];
+
+  for (const id of parsed) {
+    const row = rowById.get(id);
+    if (!row) {
+      failed += 1;
+      failures.push({ id, reason: "항목을 찾을 수 없습니다." });
+      continue;
+    }
+
+    const resolution = options.resolve(row);
+    if (resolution.outcome === "skipped") {
+      skipped += 1;
+      continue;
+    }
+    if (resolution.outcome === "failed") {
+      failed += 1;
+      failures.push({ id, reason: resolution.reason });
+      continue;
+    }
+
+    try {
+      await options.applyUpdate(id, resolution.data);
+      succeeded += 1;
+    } catch {
+      failed += 1;
+      failures.push({ id, reason: "저장 중 오류가 발생했습니다." });
+    }
+  }
+
+  return {
+    ok: true,
+    requested: parsed.length,
+    succeeded,
+    skipped,
+    failed,
+    failures,
+    actionLabel: options.actionLabel,
   };
 }
 

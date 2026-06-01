@@ -11,7 +11,13 @@ import { prisma } from "@/lib/prisma";
 import {
   handleAdminUnauthorized,
   redirectWithError,
+  revalidatePublicContentPaths,
 } from "@/lib/admin/actions";
+import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
+import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import type { BulkRunResponse } from "@/lib/admin/bulk-run";
+import { bulkRunError } from "@/lib/admin/bulk-run";
+import { runDisclosureLinkBulkByAction } from "@/lib/admin/disclosure-link-bulk-actions";
 import {
   ADMIN_MEMO_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
@@ -485,4 +491,58 @@ export async function archiveDisclosureLink(id: string) {
   }
 
   revalidatePath(ADMIN_PATH);
+}
+
+function revalidateDisclosurePaths(): void {
+  revalidatePath(ADMIN_PATH);
+  revalidatePublicContentPaths();
+}
+
+async function runDisclosureLinkBulk(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+  requirePublisher: boolean,
+): Promise<BulkRunResponse> {
+  let session: Awaited<ReturnType<typeof requireDisclosureLinkContentManager>>;
+
+  try {
+    session = requirePublisher
+      ? await requireDisclosureLinkPublisher()
+      : await requireDisclosureLinkContentManager();
+  } catch (error) {
+    handleAdminUnauthorized(ADMIN_PATH, error);
+  }
+
+  const policy = getBulkActionPolicy(actionId);
+  const result = await runDisclosureLinkBulkByAction(
+    actionId,
+    ids,
+    getSessionUserId(session),
+  );
+
+  if (result.ok && result.succeeded > 0) {
+    revalidateDisclosurePaths();
+  }
+
+  if (!result.ok) return result;
+  return { ...result, actionLabel: policy.resultSummaryLabel };
+}
+
+export async function executeDisclosureLinkBulkAction(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  if (actionId === "setPublishedTrue") {
+    return runDisclosureLinkBulk(actionId, ids, true);
+  }
+  if (
+    actionId === "markNeedsReview" ||
+    actionId === "markVerified" ||
+    actionId === "setStatusDraft" ||
+    actionId === "setPublishedFalse" ||
+    actionId === "archive"
+  ) {
+    return runDisclosureLinkBulk(actionId, ids, false);
+  }
+  return bulkRunError("이 공시·약관 목록에서 지원하지 않는 일괄 작업입니다.");
 }

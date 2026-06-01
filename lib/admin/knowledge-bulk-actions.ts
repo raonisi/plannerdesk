@@ -94,6 +94,7 @@ async function runPerId(
     succeeded,
     skipped,
     failed,
+    failures: [],
     actionLabel,
   };
 }

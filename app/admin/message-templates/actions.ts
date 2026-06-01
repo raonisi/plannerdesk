@@ -14,7 +14,13 @@ import { prisma } from "@/lib/prisma";
 import {
   handleAdminUnauthorized,
   redirectWithError,
+  revalidatePublicContentPaths,
 } from "@/lib/admin/actions";
+import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
+import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import type { BulkRunResponse } from "@/lib/admin/bulk-run";
+import { bulkRunError } from "@/lib/admin/bulk-run";
+import { runMessageTemplateBulkByAction } from "@/lib/admin/message-template-bulk-actions";
 import {
   BODY_MAX_LENGTH,
   clampSortOrder,
@@ -652,4 +658,60 @@ export async function archiveMessageTemplate(id: string) {
   }
 
   revalidatePath(ADMIN_PATH);
+}
+
+function revalidateMessageTemplatePaths(): void {
+  revalidatePath(ADMIN_PATH);
+  revalidatePublicContentPaths();
+}
+
+async function runMessageTemplateBulk(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+  requirePublisher: boolean,
+): Promise<BulkRunResponse> {
+  let session: Awaited<ReturnType<typeof requireMessageTemplateContentManager>>;
+
+  try {
+    session = requirePublisher
+      ? await requireMessageTemplatePublisher()
+      : await requireMessageTemplateContentManager();
+  } catch (error) {
+    handleAdminUnauthorized(ADMIN_PATH, error);
+  }
+
+  const policy = getBulkActionPolicy(actionId);
+  const result = await runMessageTemplateBulkByAction(
+    actionId,
+    ids,
+    getSessionUserId(session),
+  );
+
+  if (result.ok && result.succeeded > 0) {
+    revalidateMessageTemplatePaths();
+  }
+
+  if (!result.ok) return result;
+  return { ...result, actionLabel: policy.resultSummaryLabel };
+}
+
+export async function executeMessageTemplateBulkAction(
+  actionId: AdminBulkActionId,
+  ids: unknown,
+): Promise<BulkRunResponse> {
+  if (actionId === "setPublishedTrue") {
+    return runMessageTemplateBulk(actionId, ids, true);
+  }
+  if (
+    actionId === "markNeedsReview" ||
+    actionId === "markVerified" ||
+    actionId === "setStatusDraft" ||
+    actionId === "setPublishedFalse" ||
+    actionId === "setInternalOnlyTrue" ||
+    actionId === "setInternalOnlyFalse" ||
+    actionId === "archive"
+  ) {
+    return runMessageTemplateBulk(actionId, ids, false);
+  }
+  return bulkRunError("이 고객문구 목록에서 지원하지 않는 일괄 작업입니다.");
 }

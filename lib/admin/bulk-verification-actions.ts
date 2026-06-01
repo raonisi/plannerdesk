@@ -97,6 +97,7 @@ async function runPerIdUpdates(
     succeeded,
     skipped,
     failed,
+    failures: [],
     actionLabel,
   };
 }

@@ -22,6 +22,9 @@ export type AdminBulkDomain = (typeof ADMIN_BULK_DOMAINS)[number];
 export const ADMIN_BULK_ACTION_IDS = [
   "markNeedsReview",
   "markVerified",
+  "setStatusDraft",
+  "setInternalOnlyTrue",
+  "setInternalOnlyFalse",
   "setPublishedFalse",
   "setPublishedTrue",
   "archive",
@@ -141,13 +144,49 @@ const ACTION_POLICIES: Record<AdminBulkActionId, AdminBulkActionPolicy> = {
     forbiddenConditions: [],
     implementationStatus: "foundation",
   },
+  setStatusDraft: {
+    id: "setStatusDraft",
+    label: "선택 항목 초안으로 변경",
+    riskLevel: "low",
+    requiredPermission: "manageContent",
+    confirmMessage:
+      "선택한 항목을 초안 상태로 변경합니다. 공개 중인 항목은 비공개로 자동 전환됩니다. 계속할까요?",
+    resultSummaryLabel: "초안 처리",
+    publishRules: "상태 변경 후에는 공개할 수 없습니다.",
+    forbiddenConditions: [],
+    implementationStatus: "foundation",
+  },
+  setInternalOnlyTrue: {
+    id: "setInternalOnlyTrue",
+    label: "선택 항목 내부 전용",
+    riskLevel: "medium",
+    requiredPermission: "manageContent",
+    confirmMessage:
+      "선택한 항목을 내부 전용으로 전환하고 비공개 처리합니다. public 화면에 노출되지 않습니다. 계속할까요?",
+    resultSummaryLabel: "내부 전용 처리",
+    publishRules: "isInternalOnly=true, isPublished=false",
+    forbiddenConditions: [],
+    implementationStatus: "foundation",
+  },
+  setInternalOnlyFalse: {
+    id: "setInternalOnlyFalse",
+    label: "선택 항목 내부 전용 해제",
+    riskLevel: "low",
+    requiredPermission: "manageContent",
+    confirmMessage:
+      "선택한 항목의 내부 전용 표시를 해제합니다. 공개 전 검수·안전 문구 조건을 다시 확인하세요. 계속할까요?",
+    resultSummaryLabel: "내부 전용 해제",
+    publishRules: "공개는 별도 ‘선택 항목 공개’ 작업으로 진행합니다.",
+    forbiddenConditions: [],
+    implementationStatus: "foundation",
+  },
   setPublishedTrue: {
     id: "setPublishedTrue",
-    label: "일괄 공개",
+    label: "선택 항목 공개",
     riskLevel: "high",
     requiredPermission: "publishContent",
     confirmMessage:
-      "선택한 항목을 공개합니다. 초안·보관·반려 상태는 공개할 수 없습니다. 공식 출처 검수를 완료했는지 확인해 주세요. 계속할까요?",
+      "선택한 항목을 공개합니다. 공개 조건을 충족하지 않는 항목은 처리되지 않습니다. 계속할까요?",
     resultSummaryLabel: "공개 처리",
     publishRules: [
       SHARED_PUBLISH_RULES.draftBlocked,
@@ -164,7 +203,7 @@ const ACTION_POLICIES: Record<AdminBulkActionId, AdminBulkActionPolicy> = {
   },
   archive: {
     id: "archive",
-    label: "일괄 보관",
+    label: "선택 항목 보관",
     riskLevel: "medium",
     requiredPermission: "manageContent",
     confirmMessage:
@@ -197,6 +236,13 @@ const VERIFICATION_FORBIDDEN_VERIFY = ["draft", "unverified"] as const;
 
 const KNOWLEDGE_FORBIDDEN_PUBLISH = ["draft", "archived", "rejected"] as const;
 const KNOWLEDGE_FORBIDDEN_VERIFY = ["draft", "archived", "rejected"] as const;
+
+const CONTENT_STATUS_FORBIDDEN_PUBLISH = [
+  "draft",
+  "needs_review",
+  "archived",
+] as const;
+const CONTENT_STATUS_FORBIDDEN_VERIFY = ["draft", "archived"] as const;
 
 export const ADMIN_BULK_DOMAIN_POLICIES: Record<
   AdminBulkDomain,
@@ -247,37 +293,37 @@ export const ADMIN_BULK_DOMAIN_POLICIES: Record<
   },
   disclosureLinks: {
     domain: "disclosureLinks",
-    label: "공시·약관 링크",
+    label: "공시·약관",
     enabled: true,
-    futureNotice:
-      "일괄 저장은 DisclosureLink DB PR 이후 활성화됩니다. 현재는 정적 데이터 조회·UI만 제공합니다.",
-    statusFieldLabel: "검수 상태(verificationStatus)",
+    statusFieldLabel: "상태(status)",
     supportedActionIds: [
       "markNeedsReview",
       "markVerified",
+      "setStatusDraft",
       "setPublishedFalse",
       "setPublishedTrue",
       "archive",
     ],
-    forbiddenStatusesForPublish: [...VERIFICATION_FORBIDDEN_PUBLISH],
-    forbiddenStatusesForVerify: [...VERIFICATION_FORBIDDEN_VERIFY],
+    forbiddenStatusesForPublish: [...CONTENT_STATUS_FORBIDDEN_PUBLISH],
+    forbiddenStatusesForVerify: [...CONTENT_STATUS_FORBIDDEN_VERIFY],
   },
   messageTemplates: {
     domain: "messageTemplates",
-    label: "고객 안내 문구",
+    label: "고객문구",
     enabled: true,
-    futureNotice:
-      "일괄 저장은 MessageTemplate DB PR 이후 활성화됩니다. 현재는 정적 데이터 조회·UI만 제공합니다.",
-    statusFieldLabel: "검수 상태(verificationStatus)",
+    statusFieldLabel: "상태(status)",
     supportedActionIds: [
       "markNeedsReview",
       "markVerified",
+      "setStatusDraft",
       "setPublishedFalse",
       "setPublishedTrue",
+      "setInternalOnlyTrue",
+      "setInternalOnlyFalse",
       "archive",
     ],
-    forbiddenStatusesForPublish: [...VERIFICATION_FORBIDDEN_PUBLISH],
-    forbiddenStatusesForVerify: [...VERIFICATION_FORBIDDEN_VERIFY],
+    forbiddenStatusesForPublish: [...CONTENT_STATUS_FORBIDDEN_PUBLISH],
+    forbiddenStatusesForVerify: [...CONTENT_STATUS_FORBIDDEN_VERIFY],
   },
 };
 
@@ -417,6 +463,24 @@ const IMPLEMENTED_BULK_DOMAINS: Partial<
     "markVerified",
     "setPublishedFalse",
     "setPublishedTrue",
+    "archive",
+  ],
+  disclosureLinks: [
+    "markNeedsReview",
+    "markVerified",
+    "setStatusDraft",
+    "setPublishedFalse",
+    "setPublishedTrue",
+    "archive",
+  ],
+  messageTemplates: [
+    "markNeedsReview",
+    "markVerified",
+    "setStatusDraft",
+    "setPublishedFalse",
+    "setPublishedTrue",
+    "setInternalOnlyTrue",
+    "setInternalOnlyFalse",
     "archive",
   ],
 };
