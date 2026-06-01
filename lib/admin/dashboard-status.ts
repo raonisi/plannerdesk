@@ -357,6 +357,20 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
 
   const features: AdminDashboardFeature[] = [
     {
+      id: "admin-search",
+      title: "관리자 통합 검색",
+      description:
+        "보험사·청구서류·지식·공시·고객문구·제보 큐를 도메인·상태별로 빠르게 찾습니다.",
+      href: "/admin/search",
+      availability: "active",
+      statusBadge: "운영 중",
+      lastCheckLabel: "PR-85 · public 검색과 분리",
+      nextAction:
+        "운영 데이터명·문서 제목으로 검색하세요. 민감정보·제보 원문은 결과에 노출하지 않습니다.",
+      buttonLabel: "검색하기",
+      buttonEnabled: true,
+    },
+    {
       id: "insurers",
       title: "보험사 디렉토리 관리",
       description:

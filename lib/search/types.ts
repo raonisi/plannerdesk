@@ -39,13 +39,15 @@ export type AdminSearchDomain =
   | "all";
 
 export interface AdminSearchResult
-  extends Omit<GlobalSearchResult, "type"> {
+  extends Omit<GlobalSearchResult, "type" | "url"> {
   type: AdminSearchResultType;
   status?: string;
   isPublished?: boolean;
   isInternalOnly?: boolean;
   riskBadge?: string;
+  sensitiveBadge?: string;
   adminUrl: string;
+  createdAt?: string;
   /** Admin-only; never returned on public search. */
   containsSensitiveData?: boolean;
   redactionRequired?: boolean;
@@ -68,6 +70,42 @@ export type GlobalSearchQueryResult =
   | {
       ok: false;
       blockedReason: "sensitive_query" | "validation";
+      message: string;
+    };
+
+export type AdminSearchStatusFilter =
+  | "all"
+  | "draft"
+  | "review"
+  | "published"
+  | "archived"
+  | "new"
+  | "needsRedaction";
+
+export type AdminSearchPublishedFilter = "all" | "published" | "unpublished";
+
+export type AdminSearchInternalFilter = "all" | "internal" | "external";
+
+export type AdminSearchSensitiveFilter = "all" | "flagged";
+
+export interface AdminSearchQueryInput {
+  q: string;
+  domain?: AdminSearchDomain;
+  status?: AdminSearchStatusFilter;
+  published?: AdminSearchPublishedFilter;
+  internal?: AdminSearchInternalFilter;
+  sensitive?: AdminSearchSensitiveFilter;
+}
+
+export type AdminSearchQueryResult =
+  | {
+      ok: true;
+      results: AdminSearchResult[];
+      total: number;
+    }
+  | {
+      ok: false;
+      blockedReason: "sensitive_query" | "validation" | "unauthorized";
       message: string;
     };
 
