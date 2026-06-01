@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Star, Copy } from "lucide-react";
+import { Star, Copy, ChevronDown } from "lucide-react";
 import {
   EmptyState,
   SearchBar,
@@ -9,148 +9,83 @@ import {
 } from "@/components/content-page";
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { CopyToast } from "@/components/ui/copy-toast";
-import type {
-  CustomerMessageTemplate,
-  MessageSituation,
-  MessageTone,
-} from "@/lib/content";
+import type { PublicMessageTemplate } from "@/lib/public/message-templates";
+import {
+  applySafeCopyPlaceholders,
+  matchesEnumFilter,
+  matchesPublicMessageCategory,
+  publicMessageAudienceLabels,
+  publicMessageCategoryFilterTabs,
+  publicMessageCategoryLabels,
+  publicMessageCategoryOrder,
+  publicMessageChannelLabels,
+  publicMessageRiskLabels,
+  publicMessageToneLabels,
+  type PublicMessageAudienceFilter,
+  type PublicMessageCategoryFilterId,
+  type PublicMessageChannelFilter,
+  type PublicMessageRiskFilter,
+  type PublicMessageToneFilter,
+} from "@/lib/public/message-template-display";
+import {
+  MessageTemplateAudienceType,
+  MessageTemplateChannel,
+  MessageTemplateRiskLevel,
+  MessageTemplateTone,
+} from "@prisma/client";
 import { buttons, sectionEyebrow, shadows } from "@/lib/design-system";
 
-type SituationFilter = "all" | MessageSituation;
-type ToneFilter = "all" | MessageTone;
-type CopyStyle = "original" | "kakao" | "careful" | "professional";
+const channelFilterOptions: Array<{ id: PublicMessageChannelFilter; label: string }> =
+  [
+    { id: "all", label: "전체" },
+    ...Object.values(MessageTemplateChannel).map((value) => ({
+      id: value as PublicMessageChannelFilter,
+      label: publicMessageChannelLabels[value],
+    })),
+  ];
 
-const situationLabels: Record<MessageSituation, string> = {
-  claim_documents_request: "청구서류 요청",
-  claim_received_notice: "접수 완료 안내",
-  supplement_request: "보완 요청",
-  claim_completed_notice: "지급 완료 안내",
-  consultation_schedule: "상담 일정 조율",
-  coverage_review: "보장점검 안내",
-  cancellation_concern: "해지 고민 고객",
-  referral_response: "소개 고객 응대",
-  long_time_no_contact: "장기 미연락 고객",
-};
+const audienceFilterOptions: Array<{ id: PublicMessageAudienceFilter; label: string }> =
+  [
+    { id: "all", label: "전체" },
+    ...Object.values(MessageTemplateAudienceType).map((value) => ({
+      id: value as PublicMessageAudienceFilter,
+      label: publicMessageAudienceLabels[value],
+    })),
+  ];
 
-const toneLabels: Record<MessageTone, string> = {
-  professional: "전문적인",
-  warm: "친근한",
-  concise: "짧은 안내형",
-  careful: "정중한",
-  formal: "신뢰형",
-  calm: "차분한",
-  trustworthy: "신뢰형",
-};
-
-const situationOrder: MessageSituation[] = [
-  "claim_documents_request",
-  "claim_received_notice",
-  "supplement_request",
-  "claim_completed_notice",
-  "consultation_schedule",
-  "coverage_review",
-  "cancellation_concern",
-  "referral_response",
-  "long_time_no_contact",
-];
-
-const situationOptions = [
+const toneFilterOptions: Array<{ id: PublicMessageToneFilter; label: string }> = [
   { id: "all", label: "전체" },
-  ...situationOrder.map((value) => ({
-    id: value,
-    label: situationLabels[value],
+  ...Object.values(MessageTemplateTone).map((value) => ({
+    id: value as PublicMessageToneFilter,
+    label: publicMessageToneLabels[value],
   })),
 ];
 
-const toneOptions: Array<{ id: ToneFilter; label: string }> = [
+const riskFilterOptions: Array<{ id: PublicMessageRiskFilter; label: string }> = [
   { id: "all", label: "전체" },
-  { id: "careful", label: "정중한" },
-  { id: "calm", label: "차분한" },
-  { id: "warm", label: "친근한" },
-  { id: "professional", label: "전문적인" },
-  { id: "concise", label: "짧은 안내형" },
-  { id: "trustworthy", label: "신뢰형" },
+  ...Object.values(MessageTemplateRiskLevel).map((value) => ({
+    id: value as PublicMessageRiskFilter,
+    label: publicMessageRiskLabels[value],
+  })),
 ];
-
-const copyToastMessages: Record<CopyStyle, string> = {
-  original: "문구가 복사되었습니다.",
-  kakao: "짧은 카톡 문구가 복사되었습니다.",
-  careful: "정중한 버전이 복사되었습니다.",
-  professional: "전문가용 문구가 복사되었습니다.",
-};
-
-function convertMessageStyle(
-  text: string,
-  style: CopyStyle
-): string {
-  let processed = text;
-
-  if (style === "kakao") {
-    processed =
-      "⚡ " +
-      processed
-        .replace(/하겠습니다\./g, "할게요 🙂")
-        .replace(/드립니다\./g, "드려요 😊")
-        .replace(/바랍니다\./g, "부탁드립니다 🙏")
-        .replace(/\n\n/g, "\n");
-    processed +=
-      "\n\n💬 혹시 궁금하신 점이 있으시면 언제든지 편하게 말씀해 주세요! 🍀";
-  } else if (style === "careful") {
-    processed = processed
-      .replace(
-        /안녕하세요/g,
-        "안녕하십니까 고객님, 항상 믿고 맡겨주셔서 대단히 감사드립니다."
-      )
-      .replace(
-        /부탁드립니다\./g,
-        "바쁘시겠지만 번거로우시더라도 확인 후 정중한 협조를 간곡히 부탁드리는 바입니다."
-      )
-      .replace(
-        /안내해 드립니다\./g,
-        "안내해 드리오니 너른 이해와 검토를 희망합니다."
-      );
-  } else if (style === "professional") {
-    processed = `[알림: 담당 금융설계사 안내]\n\n귀하의 보장 계약 관리 및 공식 청구 프로세스를 위해 전해드리는 핵심 안내문입니다.\n\n${processed}`;
-    processed +=
-      "\n\n※ 본 안내는 실무 참고용이며, 최종 기준은 보험사 공식 안내와 상품 약관을 확인해 주세요.";
-  }
-
-  return processed;
-}
-
-function applyNameReplacement(
-  text: string,
-  customerName: string,
-  plannerName: string
-): string {
-  let result = text;
-  if (customerName) {
-    result = result.replace(
-      /O+고객|O+님|\[고객명\]|\{고객명\}|OOO/g,
-      customerName
-    );
-  }
-  if (plannerName) {
-    result = result.replace(
-      /\[설계사명\]|\{설계사명\}|담당자 OOO/g,
-      plannerName
-    );
-  }
-  return result;
-}
 
 export function MessageTemplateLibrary({
   templates,
 }: {
-  templates: CustomerMessageTemplate[];
+  templates: PublicMessageTemplate[];
 }) {
   const [query, setQuery] = useState("");
-  const [situation, setSituation] = useState<SituationFilter>("all");
-  const [tone, setTone] = useState<ToneFilter>("all");
+  const [category, setCategory] = useState<PublicMessageCategoryFilterId>("all");
+  const [channel, setChannel] = useState<PublicMessageChannelFilter>("all");
+  const [audience, setAudience] = useState<PublicMessageAudienceFilter>("all");
+  const [tone, setTone] = useState<PublicMessageToneFilter>("all");
+  const [risk, setRisk] = useState<PublicMessageRiskFilter>("all");
+  const [useCaseQuery, setUseCaseQuery] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [plannerName, setPlannerName] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -159,8 +94,8 @@ export function MessageTemplateLibrary({
     try {
       const parsed = JSON.parse(saved) as string[];
       setTimeout(() => setFavorites(parsed), 0);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // ignore invalid storage
     }
   }, []);
 
@@ -176,49 +111,64 @@ export function MessageTemplateLibrary({
     setFavorites(next);
     window.localStorage.setItem(
       "plannerdesk.messages.favorites",
-      JSON.stringify(next)
+      JSON.stringify(next),
     );
     showToast(
       favorites.includes(id)
         ? "즐겨찾기에서 제거되었습니다."
-        : "자주 쓰는 문구로 등록되었습니다."
+        : "자주 쓰는 문구로 등록되었습니다.",
     );
   };
 
   const filteredTemplates = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
+    const normalizedUseCase = useCaseQuery.trim().toLocaleLowerCase("ko-KR");
 
     return templates.filter((template) => {
       const searchTarget = [
         template.title,
-        template.situation,
-        situationLabels[template.situationCategory],
-        toneLabels[template.tone],
-        template.body,
+        template.description,
+        template.safeCopy,
       ]
         .join(" ")
         .toLocaleLowerCase("ko-KR");
 
       const matchesQuery =
         normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
-      const matchesSituation =
-        situation === "all" || template.situationCategory === situation;
-      const matchesTone = tone === "all" || template.tone === tone;
+      const matchesCategoryFilter = matchesPublicMessageCategory(
+        template.category,
+        category,
+      );
+      const matchesChannel = matchesEnumFilter(template.channel, channel);
+      const matchesAudience = matchesEnumFilter(template.audienceType, audience);
+      const matchesTone = matchesEnumFilter(template.tone, tone);
+      const matchesRisk = matchesEnumFilter(template.riskLevel, risk);
+      const matchesUseCase =
+        normalizedUseCase.length === 0 ||
+        template.useCase.toLocaleLowerCase("ko-KR").includes(normalizedUseCase);
 
-      return matchesQuery && matchesSituation && matchesTone;
+      return (
+        matchesQuery &&
+        matchesCategoryFilter &&
+        matchesChannel &&
+        matchesAudience &&
+        matchesTone &&
+        matchesRisk &&
+        matchesUseCase
+      );
     });
-  }, [query, situation, templates, tone]);
+  }, [audience, category, channel, query, risk, templates, tone, useCaseQuery]);
 
   const favoriteItems = useMemo(
     () => filteredTemplates.filter((t) => favorites.includes(t.id)),
-    [filteredTemplates, favorites]
+    [filteredTemplates, favorites],
   );
 
-  const groups = situationOrder
-    .map((situationKey) => ({
-      situation: situationKey,
+  const groups = publicMessageCategoryOrder
+    .map((categoryKey) => ({
+      category: categoryKey,
       templates: filteredTemplates.filter(
-        (template) => template.situationCategory === situationKey
+        (template) => template.category === categoryKey,
       ),
     }))
     .filter((group) => group.templates.length > 0);
@@ -231,27 +181,28 @@ export function MessageTemplateLibrary({
         className={`rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 ${shadows.card}`}
       >
         <h2 className="text-base font-bold text-[#0F1D2E]">
-          고객명·설계사명 입력
+          선택적 이름 치환 (저장되지 않음)
         </h2>
-        <p className="mt-1 text-sm text-[#5B6470] break-keep">
-          입력한 이름은 문구 치환에만 사용됩니다. 저장되지 않습니다.
+        <p className="mt-1 break-keep text-sm text-[#5B6470]">
+          문구에 {"{고객명}"}, {"{담당자명}"} placeholder가 있을 때만 치환됩니다.
+          복사·표시되는 본문은 검수된 안전 문구(safeCopy)입니다.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="text-xs font-bold text-[#17202A]">고객명</span>
+            <span className="text-xs font-bold text-[#17202A]">고객명 (선택)</span>
             <input
               aria-label="고객명"
-              className="mt-1.5 w-full min-h-11 rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15 placeholder:text-[#5B6470]/60"
+              className="mt-1.5 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none placeholder:text-[#5B6470]/60 focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
               placeholder="예: 홍길동"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
             />
           </label>
           <label className="block">
-            <span className="text-xs font-bold text-[#17202A]">설계사명</span>
+            <span className="text-xs font-bold text-[#17202A]">설계사명 (선택)</span>
             <input
               aria-label="설계사명"
-              className="mt-1.5 w-full min-h-11 rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15 placeholder:text-[#5B6470]/60"
+              className="mt-1.5 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none placeholder:text-[#5B6470]/60 focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
               placeholder="예: 김설계"
               value={plannerName}
               onChange={(e) => setPlannerName(e.target.value)}
@@ -262,10 +213,10 @@ export function MessageTemplateLibrary({
           <p className="text-xs font-bold text-[#17202A]">문구 검색</p>
           <div className="mt-1.5">
             <SearchBar
-              ariaLabel="문구 검색"
+              ariaLabel="제목, 설명, 안전 문구 검색"
               onChange={setQuery}
               onClear={() => setQuery("")}
-              placeholder="청구, 보완 요청, 해지 고민, 상담 일정 검색"
+              placeholder="제목, 설명, 안전 문구 검색"
               value={query}
             />
           </div>
@@ -274,36 +225,94 @@ export function MessageTemplateLibrary({
 
       <section className="space-y-4">
         <div>
-          <p className={sectionEyebrow}>상황</p>
+          <p className={sectionEyebrow}>카테고리</p>
           <div className="mt-2">
             <CategoryPillBar
-              ariaLabel="상황 필터"
-              categories={situationOptions}
-              onSelect={(id) => setSituation(id as SituationFilter)}
-              selectedId={situation}
+              ariaLabel="카테고리 필터"
+              categories={publicMessageCategoryFilterTabs}
+              onSelect={(id) => setCategory(id as PublicMessageCategoryFilterId)}
+              selectedId={category}
             />
           </div>
         </div>
-        <div>
-          <p className={sectionEyebrow}>톤</p>
-          <div className="mt-2">
-            <CategoryPillBar
-              ariaLabel="톤 필터"
-              categories={toneOptions}
-              onSelect={(id) => setTone(id as ToneFilter)}
-              selectedId={tone}
+
+        <div className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE]">
+          <button
+            type="button"
+            aria-controls="message-advanced-filter"
+            aria-expanded={advancedOpen}
+            className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+            onClick={() => setAdvancedOpen(!advancedOpen)}
+          >
+            <span className="text-sm font-bold text-[#0F1D2E]">고급 필터</span>
+            <ChevronDown
+              aria-hidden
+              className={`h-4 w-4 text-[#B9975B] transition ${advancedOpen ? "rotate-180" : ""}`}
             />
-          </div>
+          </button>
+          {advancedOpen ? (
+            <div
+              className="space-y-4 border-t border-[#E3DED4] px-4 pb-4 pt-3"
+              id="message-advanced-filter"
+            >
+              <div>
+                <p className="mb-2 text-xs text-[#5B6470]">채널</p>
+                <CategoryPillBar
+                  ariaLabel="채널"
+                  categories={channelFilterOptions}
+                  onSelect={(id) => setChannel(id as PublicMessageChannelFilter)}
+                  selectedId={channel}
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-xs text-[#5B6470]">대상 고객</p>
+                <CategoryPillBar
+                  ariaLabel="대상 고객"
+                  categories={audienceFilterOptions}
+                  onSelect={(id) => setAudience(id as PublicMessageAudienceFilter)}
+                  selectedId={audience}
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-xs text-[#5B6470]">톤</p>
+                <CategoryPillBar
+                  ariaLabel="톤"
+                  categories={toneFilterOptions}
+                  onSelect={(id) => setTone(id as PublicMessageToneFilter)}
+                  selectedId={tone}
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-xs text-[#5B6470]">위험도</p>
+                <CategoryPillBar
+                  ariaLabel="위험도"
+                  categories={riskFilterOptions}
+                  onSelect={(id) => setRisk(id as PublicMessageRiskFilter)}
+                  selectedId={risk}
+                />
+              </div>
+              <label className="block text-xs text-[#5B6470]">
+                사용 상황
+                <input
+                  className="mt-1 min-h-10 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A]"
+                  value={useCaseQuery}
+                  onChange={(e) => setUseCaseQuery(e.target.value)}
+                  placeholder="사용 상황 키워드"
+                />
+              </label>
+            </div>
+          ) : null}
         </div>
+
         <p className="text-sm text-[#5B6470]">
           <span className="font-bold text-[#0F1D2E]">
             {filteredTemplates.length}
           </span>
-          개 문구
+          개 검수된 안내 문구
         </p>
       </section>
 
-      {favoriteItems.length > 0 && !query && situation === "all" && (
+      {favoriteItems.length > 0 && !query && category === "all" ? (
         <section className="space-y-4">
           <div className="flex items-center gap-1.5">
             <Star
@@ -328,14 +337,14 @@ export function MessageTemplateLibrary({
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
       {groups.length > 0 ? (
         <div className="space-y-10">
           {groups.map((group) => (
-            <section key={group.situation}>
+            <section key={group.category}>
               <h3 className="text-base font-bold text-[#0F1D2E]">
-                {situationLabels[group.situation]}
+                {publicMessageCategoryLabels[group.category]}
               </h3>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 {group.templates.map((template) => (
@@ -355,7 +364,7 @@ export function MessageTemplateLibrary({
         </div>
       ) : (
         <EmptyState
-          description="검색어를 줄이거나 상황·톤 필터를 변경해 주세요."
+          description="검색어를 줄이거나 필터를 변경해 주세요."
           title="조건에 맞는 안내 문구가 없습니다."
         />
       )}
@@ -371,31 +380,23 @@ function TemplateCard({
   onToggleFav,
   onToast,
 }: {
-  template: CustomerMessageTemplate;
+  template: PublicMessageTemplate;
   customerName: string;
   plannerName: string;
   isFav: boolean;
   onToggleFav: (id: string) => void;
   onToast: (msg: string) => void;
 }) {
-  const replacedOriginal = useMemo(
-    () => applyNameReplacement(template.body, customerName, plannerName),
-    [template.body, customerName, plannerName]
+  const previewText = useMemo(
+    () =>
+      applySafeCopyPlaceholders(template.safeCopy, customerName, plannerName),
+    [template.safeCopy, customerName, plannerName],
   );
 
-  async function handleCopy(style: CopyStyle) {
-    const finalVal = convertMessageStyle(replacedOriginal, style);
-    await copyTextToClipboard(finalVal);
-    onToast(copyToastMessages[style]);
+  async function handleCopySafeCopy() {
+    await copyTextToClipboard(previewText);
+    onToast("검수된 안전 문구가 복사되었습니다.");
   }
-
-  const copyActions: Array<{ style: CopyStyle; label: string; primary?: boolean }> =
-    [
-      { style: "original", label: "기본 복사", primary: true },
-      { style: "kakao", label: "카카오톡 복사" },
-      { style: "careful", label: "정중한 버전 복사" },
-      { style: "professional", label: "전문가용 복사" },
-    ];
 
   return (
     <article
@@ -405,11 +406,19 @@ function TemplateCard({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-2 py-0.5 text-[10px] font-bold text-[#16382C]">
-              {situationLabels[template.situationCategory]}
+              {publicMessageCategoryLabels[template.category]}
             </span>
             <span className="rounded-md border border-[#E3DED4] bg-[#F8F7F3] px-2 py-0.5 text-[10px] font-bold text-[#5B6470]">
-              {toneLabels[template.tone]}
+              {publicMessageChannelLabels[template.channel]}
             </span>
+            <span className="rounded-md border border-[#E3DED4] bg-[#F8F7F3] px-2 py-0.5 text-[10px] font-bold text-[#5B6470]">
+              {publicMessageToneLabels[template.tone]}
+            </span>
+            {template.riskLevel === MessageTemplateRiskLevel.high ? (
+              <span className="rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-2 py-0.5 text-[10px] font-bold text-[#8b2e2e]">
+                위험도 높음
+              </span>
+            ) : null}
           </div>
           <h4 className="mt-2 break-keep text-lg font-bold leading-snug text-[#0F1D2E]">
             {template.title}
@@ -432,48 +441,53 @@ function TemplateCard({
         </button>
       </div>
 
-      <p className="mt-2 text-xs leading-relaxed text-[#5B6470] break-keep">
-        {template.situation}
+      <p className="mt-2 break-keep text-xs leading-relaxed text-[#5B6470]">
+        {template.useCase}
+      </p>
+      <p className="mt-1 text-xs text-[#5B6470]/90">
+        대상: {publicMessageAudienceLabels[template.audienceType]}
       </p>
 
       <div className="mt-4 rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] p-4">
-        <p className="text-[10px] font-bold text-[#B9975B]">문구 미리보기</p>
+        <p className="text-[10px] font-bold text-[#B9975B]">
+          검수된 안전 문구 (safeCopy)
+        </p>
         <p className="mt-2 line-clamp-6 whitespace-pre-wrap break-keep text-sm leading-relaxed text-[#17202A]">
-          {replacedOriginal}
+          {previewText}
         </p>
       </div>
 
-      {template.safetyNote ? (
-        <p className="mt-3 text-[11px] leading-relaxed text-[#5B6470]/90 break-keep border-l-2 border-[#E3DED4] pl-3">
-          {template.safetyNote}
-        </p>
-      ) : null}
-
-      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {copyActions.map((action) => (
-          <button
-            key={action.style}
-            type="button"
-            onClick={() => handleCopy(action.style)}
-            className={`${buttons.base} gap-2 px-3 text-xs sm:text-sm ${
-              action.primary ? buttons.primary : buttons.outline
-            }`}
-            aria-label={`${template.title} ${action.label}`}
-          >
-            <Copy aria-hidden className="h-4 w-4 shrink-0" />
-            {action.label}
-          </button>
-        ))}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={handleCopySafeCopy}
+          className={`${buttons.base} ${buttons.primary} w-full gap-2`}
+          aria-label={`${template.title} 안전 문구 복사`}
+        >
+          <Copy aria-hidden className="h-4 w-4 shrink-0" />
+          안전 문구 복사
+        </button>
       </div>
 
       <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] text-[#5B6470]">
-        최근 확인일 {formatVerifiedDate(template.lastUpdatedAt)}
+        게시일 {formatVerifiedDate(template.publishedAt ?? template.updatedAt)}
+        <span className="mx-1.5 text-[#E3DED4]">·</span>
+        검수 완료
       </p>
     </article>
   );
 }
 
 async function copyTextToClipboard(text: string): Promise<void> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+  } catch {
+    // fall through
+  }
+
   const textarea = document.createElement("textarea");
   textarea.value = text;
   textarea.setAttribute("readonly", "");
@@ -485,18 +499,9 @@ async function copyTextToClipboard(text: string): Promise<void> {
 
   try {
     document.execCommand("copy");
-    return;
   } catch {
-    // Fall through to Clipboard API for browsers where execCommand is blocked.
+    // ignore
   } finally {
     document.body.removeChild(textarea);
-  }
-
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-    }
-  } catch {
-    return;
   }
 }
