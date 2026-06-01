@@ -2,39 +2,62 @@
 
 import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { DisclosureLinkTargetType } from "@prisma/client";
 import { EmptyState, SearchBar } from "@/components/content-page";
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { DisclosureCard } from "@/components/disclosure/disclosure-card";
-import type { DisclosureLinkEntry, VerificationStatus } from "@/lib/content";
 import {
-  disclosureCategoryLabels,
-  disclosureCategoryOrder,
-  disclosureFilterTabs,
-  matchesDisclosureCategory,
-  type DisclosureFilterTabId,
-} from "@/lib/disclosure-display";
+  matchesPublicDisclosureCategory,
+  matchesPublicOfficialFilter,
+  matchesPublicTargetType,
+  publicDisclosureCategoryLabels,
+  publicDisclosureCategoryOrder,
+  publicDisclosureFilterTabs,
+  publicTargetTypeLabels,
+  type PublicDisclosureFilterTabId,
+  type PublicOfficialFilter,
+  type PublicTargetTypeFilter,
+} from "@/lib/public/disclosure-display";
+import type { PublicDisclosureLink } from "@/lib/public/disclosure-links";
 import { sectionEyebrow } from "@/lib/design-system";
 
-type StatusFilter = "all" | VerificationStatus;
+const targetTypeFilterOptions: Array<{ id: PublicTargetTypeFilter; label: string }> =
+  [
+    { id: "all", label: "전체" },
+    ...Object.values(DisclosureLinkTargetType).map((value) => ({
+      id: value as PublicTargetTypeFilter,
+      label: publicTargetTypeLabels[value],
+    })),
+  ];
 
-const statusFilterOptions: Array<{ id: StatusFilter; label: string }> = [
-  { id: "all", label: "전체" },
-  { id: "verified", label: "확인됨" },
-  { id: "needs_review", label: "재확인 권장" },
-  { id: "draft", label: "준비 중" },
-];
+const officialFilterOptions: Array<{ id: PublicOfficialFilter; label: string }> =
+  [
+    { id: "all", label: "전체" },
+    { id: "official", label: "공식 출처" },
+    { id: "general", label: "일반" },
+  ];
 
 export function DisclosureLinkCenter({
   entries,
   onRequestCorrection,
 }: {
-  entries: DisclosureLinkEntry[];
+  entries: PublicDisclosureLink[];
   onRequestCorrection?: (insurerSearch: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<DisclosureFilterTabId>("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
+  const [category, setCategory] = useState<PublicDisclosureFilterTabId>("all");
+  const [targetType, setTargetType] = useState<PublicTargetTypeFilter>("all");
+  const [official, setOfficial] = useState<PublicOfficialFilter>("all");
+  const [insurerFilter, setInsurerFilter] = useState<string>("all");
   const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  const insurerOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const entry of entries) {
+      if (entry.insurerName) names.add(entry.insurerName);
+    }
+    return Array.from(names).sort((a, b) => a.localeCompare(b, "ko-KR"));
+  }, [entries]);
 
   const filteredEntries = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
@@ -42,27 +65,38 @@ export function DisclosureLinkCenter({
     return entries.filter((entry) => {
       const searchTarget = [
         entry.title,
-        disclosureCategoryLabels[entry.category],
         entry.description,
-        entry.notes ?? "",
+        entry.sourceName ?? "",
+        entry.insurerName ?? "",
       ]
         .join(" ")
         .toLocaleLowerCase("ko-KR");
 
       const matchesQuery =
         normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
-      const matchesCategoryFilter = matchesDisclosureCategory(
+      const matchesCategoryFilter = matchesPublicDisclosureCategory(
         entry.category,
-        category
+        category,
       );
-      const matchesStatus =
-        status === "all" || entry.verificationStatus === status;
+      const matchesTarget = matchesPublicTargetType(entry.targetType, targetType);
+      const matchesOfficial = matchesPublicOfficialFilter(
+        entry.isOfficialSource,
+        official,
+      );
+      const matchesInsurer =
+        insurerFilter === "all" || entry.insurerName === insurerFilter;
 
-      return matchesQuery && matchesCategoryFilter && matchesStatus;
+      return (
+        matchesQuery &&
+        matchesCategoryFilter &&
+        matchesTarget &&
+        matchesOfficial &&
+        matchesInsurer
+      );
     });
-  }, [category, entries, query, status]);
+  }, [category, entries, insurerFilter, official, query, targetType]);
 
-  const groups = disclosureCategoryOrder
+  const groups = publicDisclosureCategoryOrder
     .map((categoryKey) => ({
       category: categoryKey,
       entries: filteredEntries.filter((entry) => entry.category === categoryKey),
@@ -75,11 +109,11 @@ export function DisclosureLinkCenter({
         <label className="block" htmlFor="disclosure-search">
           <span className="sr-only">공시·약관 검색</span>
           <SearchBar
-            ariaLabel="보험사명, 자료명, 약관, 상품공시 검색"
+            ariaLabel="제목, 설명, 출처명, 보험사명 검색"
             id="disclosure-search"
             onChange={setQuery}
             onClear={() => setQuery("")}
-            placeholder="보험사명, 자료명, 약관, 상품공시 검색"
+            placeholder="제목, 설명, 출처명, 보험사명 검색"
             value={query}
           />
         </label>
@@ -89,8 +123,8 @@ export function DisclosureLinkCenter({
           <div className="mt-2">
             <CategoryPillBar
               ariaLabel="자료 분류"
-              categories={disclosureFilterTabs}
-              onSelect={(id) => setCategory(id as DisclosureFilterTabId)}
+              categories={publicDisclosureFilterTabs}
+              onSelect={(id) => setCategory(id as PublicDisclosureFilterTabId)}
               selectedId={category}
             />
           </div>
@@ -112,16 +146,44 @@ export function DisclosureLinkCenter({
           </button>
           {advancedOpen ? (
             <div
-              className="border-t border-[#E3DED4] px-4 pb-4 pt-3"
+              className="space-y-4 border-t border-[#E3DED4] px-4 pb-4 pt-3"
               id="disclosure-advanced-filter"
             >
-              <p className="text-xs text-[#5B6470] mb-2">확인 상태 (운영 참고)</p>
-              <CategoryPillBar
-                ariaLabel="확인 상태"
-                categories={statusFilterOptions}
-                onSelect={(id) => setStatus(id as StatusFilter)}
-                selectedId={status}
-              />
+              <div>
+                <p className="mb-2 text-xs text-[#5B6470]">대상 유형</p>
+                <CategoryPillBar
+                  ariaLabel="대상 유형"
+                  categories={targetTypeFilterOptions}
+                  onSelect={(id) => setTargetType(id as PublicTargetTypeFilter)}
+                  selectedId={targetType}
+                />
+              </div>
+              <div>
+                <p className="mb-2 text-xs text-[#5B6470]">공식 출처</p>
+                <CategoryPillBar
+                  ariaLabel="공식 출처"
+                  categories={officialFilterOptions}
+                  onSelect={(id) => setOfficial(id as PublicOfficialFilter)}
+                  selectedId={official}
+                />
+              </div>
+              {insurerOptions.length > 0 ? (
+                <label className="block text-xs text-[#5B6470]">
+                  보험사
+                  <select
+                    className="mt-1 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#0F1D2E]"
+                    value={insurerFilter}
+                    onChange={(event) => setInsurerFilter(event.target.value)}
+                  >
+                    <option value="all">전체</option>
+                    {insurerOptions.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -137,7 +199,7 @@ export function DisclosureLinkCenter({
           {groups.map((group) => (
             <section key={group.category}>
               <h2 className="text-base font-bold text-[#0F1D2E]">
-                {disclosureCategoryLabels[group.category]}
+                {publicDisclosureCategoryLabels[group.category]}
               </h2>
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 {group.entries.map((entry) => (

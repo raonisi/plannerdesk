@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { CollapsibleNotice } from "@/components/content-page";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
-import type { DisclosureLinkEntry } from "@/lib/content";
+import type { PublicDisclosureLink } from "@/lib/public/disclosure-links";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import { uiLabels } from "@/lib/ui-labels";
 import { DisclosureLinkCenter } from "./disclosure-link-center";
@@ -12,24 +12,25 @@ export function DisclosureLinksClient({
   entries,
   insurers,
 }: {
-  entries: DisclosureLinkEntry[];
+  entries: PublicDisclosureLink[];
   insurers: PublicInsurer[];
 }) {
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [correctionInsurerId, setCorrectionInsurerId] = useState<string | null>(
-    null
+    null,
   );
 
   const openCorrection = useCallback(
     (insurerSearch: string) => {
-      const match = insurers.find((ins) =>
-        ins.name.includes(insurerSearch.replace(/보험|생명|손해/g, "").trim()) ||
-        insurerSearch.includes(ins.name.slice(0, 2))
+      const match = insurers.find(
+        (ins) =>
+          ins.name.includes(insurerSearch.replace(/보험|생명|손해/g, "").trim()) ||
+          insurerSearch.includes(ins.name.slice(0, 2)),
       );
       setCorrectionInsurerId(match?.id ?? null);
       setCorrectionOpen(true);
     },
-    [insurers]
+    [insurers],
   );
 
   return (
