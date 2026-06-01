@@ -2,6 +2,10 @@ import Link from "next/link";
 import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import {
+  filterAndSortKnowledgeArchive,
+  parseKnowledgeArchiveParams,
+} from "@/lib/knowledge/archive-filter";
 import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
 import { KnowledgeArchiveList } from "./knowledge-archive-list";
 
@@ -19,10 +23,33 @@ const t = {
     "PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.\nPlannerDesk는 보험금 지급 금액을 산정하지 않습니다.\nPlannerDesk는 손해사정 업무를 수행하지 않습니다.\nPlannerDesk는 의료 진단을 해석하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하거나 업로드하지 마세요.",
 };
 
-export default async function KnowledgeArchivePage() {
+interface KnowledgePageSearchParams {
+  q?: string;
+  category?: string;
+  type?: string;
+  risk?: string;
+  review?: string;
+  sort?: string;
+}
+
+export default async function KnowledgeArchivePage({
+  searchParams,
+}: {
+  searchParams: Promise<KnowledgePageSearchParams>;
+}) {
+  const resolved = await searchParams;
+  const filterState = parseKnowledgeArchiveParams(
+    resolved as Record<string, string | string[] | undefined>,
+  );
+
   const result = await getPublicKnowledgeArticles();
   const articles = result.status === "ok" ? result.articles : [];
   const isCatalogEmpty = articles.length === 0;
+
+  const { items: filteredItems, blockedMessage } = filterAndSortKnowledgeArchive(
+    articles,
+    filterState,
+  );
 
   return (
     <PageFrame>
@@ -50,8 +77,11 @@ export default async function KnowledgeArchivePage() {
           <KnowledgeWorkflows />
 
           <KnowledgeArchiveList
-            items={articles}
+            blockedMessage={blockedMessage}
+            filterState={filterState}
+            filteredItems={filteredItems}
             isCatalogEmpty={isCatalogEmpty}
+            items={articles}
           />
         </div>
       </ContentSection>

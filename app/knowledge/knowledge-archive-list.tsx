@@ -1,26 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   KnowledgeArticleCategory,
   KnowledgeArticleType,
   KnowledgeRiskLevel,
 } from "@prisma/client";
-import { EmptyState, SearchBar } from "@/components/content-page";
+import { EmptyState } from "@/components/content-page";
+import {
+  buildKnowledgeArchiveHref,
+  defaultKnowledgeArchiveFilterState,
+  hasActiveKnowledgeFilters,
+  KNOWLEDGE_ARCHIVE_EMPTY_MESSAGE,
+  PUBLIC_RISK_GUIDANCE_LABEL,
+  type KnowledgeArchiveFilterState,
+  type KnowledgeArchiveSort,
+} from "@/lib/knowledge/archive-filter";
 import {
   PUBLIC_CATEGORY_LABEL,
+  PUBLIC_STATUS_LABEL,
   PUBLIC_TYPE_LABEL,
   type PublicKnowledgeStatus,
 } from "@/lib/public/knowledge-display";
 import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 
-type CategoryFilter = "all" | KnowledgeArticleCategory;
-type StatusFilter = "all" | PublicKnowledgeStatus;
-type RiskFilter = "all" | KnowledgeRiskLevel | "blocked";
-type TypeFilter = "all" | KnowledgeArticleType;
-
-const categoryOptions: Array<{ label: string; value: CategoryFilter }> = [
+const categoryOptions: Array<{
+  label: string;
+  value: KnowledgeArchiveFilterState["category"];
+}> = [
   { label: "전체", value: "all" },
   ...Object.values(KnowledgeArticleCategory).map((value) => ({
     label: PUBLIC_CATEGORY_LABEL[value],
@@ -28,7 +37,10 @@ const categoryOptions: Array<{ label: string; value: CategoryFilter }> = [
   })),
 ];
 
-const typeOptions: Array<{ label: string; value: TypeFilter }> = [
+const typeOptions: Array<{
+  label: string;
+  value: KnowledgeArchiveFilterState["type"];
+}> = [
   { label: "전체", value: "all" },
   ...Object.values(KnowledgeArticleType).map((value) => ({
     label: PUBLIC_TYPE_LABEL[value],
@@ -36,26 +48,43 @@ const typeOptions: Array<{ label: string; value: TypeFilter }> = [
   })),
 ];
 
-const statusOptions: Array<{ label: string; value: StatusFilter }> = [
+const reviewOptions: Array<{
+  label: string;
+  value: KnowledgeArchiveFilterState["review"];
+}> = [
   { label: "전체", value: "all" },
-  { label: "검수 필요", value: "needs_review" },
-  { label: "검수 완료", value: "verified" },
+  { label: PUBLIC_STATUS_LABEL.needs_review, value: "needs_review" },
+  { label: PUBLIC_STATUS_LABEL.verified, value: "verified" },
 ];
 
-const riskOptions: Array<{ label: string; value: RiskFilter }> = [
+const riskOptions: Array<{
+  label: string;
+  value: KnowledgeArchiveFilterState["risk"];
+}> = [
   { label: "전체", value: "all" },
-  { label: "낮음", value: KnowledgeRiskLevel.low },
-  { label: "주의", value: KnowledgeRiskLevel.medium },
-  { label: "높음", value: KnowledgeRiskLevel.high },
-  { label: "차단", value: KnowledgeRiskLevel.blocked },
+  { label: PUBLIC_RISK_GUIDANCE_LABEL.low, value: KnowledgeRiskLevel.low },
+  {
+    label: PUBLIC_RISK_GUIDANCE_LABEL.medium,
+    value: KnowledgeRiskLevel.medium,
+  },
+  {
+    label: PUBLIC_RISK_GUIDANCE_LABEL.high,
+    value: KnowledgeRiskLevel.high,
+  },
 ];
 
-const statusClasses: Record<PublicKnowledgeStatus, string> = {
+const sortOptions: { label: string; value: KnowledgeArchiveSort }[] = [
+  { label: "최신 공개순", value: "latest" },
+  { label: "업데이트순", value: "updated" },
+  { label: "활용 주의도순", value: "risk" },
+];
+
+const reviewClasses: Record<PublicKnowledgeStatus, string> = {
   needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
   verified: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
 };
 
-const riskClasses: Record<KnowledgeRiskLevel, string> = {
+const riskToneClasses: Record<KnowledgeRiskLevel, string> = {
   [KnowledgeRiskLevel.low]: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
   [KnowledgeRiskLevel.medium]: "border-[#d9c9a8] bg-[#fff7e6] text-[#7a612d]",
   [KnowledgeRiskLevel.high]: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
@@ -64,80 +93,88 @@ const riskClasses: Record<KnowledgeRiskLevel, string> = {
 
 interface KnowledgeArchiveListProps {
   items: PublicKnowledgeArticleListItem[];
+  filteredItems: PublicKnowledgeArticleListItem[];
+  filterState: KnowledgeArchiveFilterState;
+  blockedMessage: string | null;
   isCatalogEmpty: boolean;
 }
 
-function resetFilters(
-  setQuery: (v: string) => void,
-  setCategory: (v: CategoryFilter) => void,
-  setTypeFilter: (v: TypeFilter) => void,
-  setStatus: (v: StatusFilter) => void,
-  setRisk: (v: RiskFilter) => void,
-) {
-  setQuery("");
-  setCategory("all");
-  setTypeFilter("all");
-  setStatus("all");
-  setRisk("all");
+function mergeState(
+  base: KnowledgeArchiveFilterState,
+  patch: Partial<KnowledgeArchiveFilterState>,
+): KnowledgeArchiveFilterState {
+  return { ...base, ...patch };
 }
 
 export function KnowledgeArchiveList({
   items,
+  filteredItems,
+  filterState,
+  blockedMessage,
   isCatalogEmpty,
 }: KnowledgeArchiveListProps) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<CategoryFilter>("all");
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
-  const [risk, setRisk] = useState<RiskFilter>("all");
+  const router = useRouter();
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const filteredItems = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
+  const activeChips = useMemo(() => {
+    const chips: { label: string; href: string }[] = [];
+    if (filterState.q) {
+      chips.push({
+        label: `검색: ${filterState.q}`,
+        href: buildKnowledgeArchiveHref(mergeState(filterState, { q: "" })),
+      });
+    }
+    if (filterState.category !== "all") {
+      chips.push({
+        label: PUBLIC_CATEGORY_LABEL[filterState.category],
+        href: buildKnowledgeArchiveHref(
+          mergeState(filterState, { category: "all" }),
+        ),
+      });
+    }
+    if (filterState.type !== "all") {
+      chips.push({
+        label: PUBLIC_TYPE_LABEL[filterState.type],
+        href: buildKnowledgeArchiveHref(mergeState(filterState, { type: "all" })),
+      });
+    }
+    if (filterState.risk !== "all") {
+      chips.push({
+        label: PUBLIC_RISK_GUIDANCE_LABEL[filterState.risk],
+        href: buildKnowledgeArchiveHref(mergeState(filterState, { risk: "all" })),
+      });
+    }
+    if (filterState.review !== "all") {
+      chips.push({
+        label: PUBLIC_STATUS_LABEL[filterState.review],
+        href: buildKnowledgeArchiveHref(
+          mergeState(filterState, { review: "all" }),
+        ),
+      });
+    }
+    if (filterState.sort !== "latest") {
+      const sortLabel =
+        sortOptions.find((o) => o.value === filterState.sort)?.label ??
+        filterState.sort;
+      chips.push({
+        label: sortLabel,
+        href: buildKnowledgeArchiveHref(
+          mergeState(filterState, { sort: "latest" }),
+        ),
+      });
+    }
+    return chips;
+  }, [filterState]);
 
-    return items.filter((item) => {
-      const searchTarget = [
-        item.title,
-        item.summary,
-        item.categoryLabel,
-        item.typeLabel,
-        ...(item.tags || []),
-        item.workflowLabel || "",
-        item.sourceTitle || "",
-      ]
-        .join(" ")
-        .toLocaleLowerCase("ko-KR");
-
-      const matchesQuery =
-        normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
-      const matchesCategory =
-        category === "all" || item.category === category;
-      const matchesType = typeFilter === "all" || item.type === typeFilter;
-      const matchesStatus = status === "all" || item.status === status;
-      const matchesRisk =
-        risk === "all" ||
-        (risk === "blocked"
-          ? item.type === KnowledgeArticleType.safety_boundary ||
-            item.riskLevel === KnowledgeRiskLevel.blocked
-          : item.riskLevel === risk);
-
-      return (
-        matchesQuery &&
-        matchesCategory &&
-        matchesType &&
-        matchesStatus &&
-        matchesRisk
-      );
-    });
-  }, [category, items, query, risk, status, typeFilter]);
-
-  const handleReset = () =>
-    resetFilters(setQuery, setCategory, setTypeFilter, setStatus, setRisk);
+  const navigate = (patch: Partial<KnowledgeArchiveFilterState>) => {
+    router.push(buildKnowledgeArchiveHref(mergeState(filterState, patch)));
+  };
 
   if (isCatalogEmpty) {
     return (
       <EmptyState
-        title="현재 공개된 지식 문서가 없습니다."
         description="관리자 검수와 공개 설정이 완료된 문서만 표시됩니다."
+        title="현재 공개된 지식 문서가 없습니다."
       />
     );
   }
@@ -148,71 +185,153 @@ export function KnowledgeArchiveList({
         aria-label="지식 아카이브 검색 및 필터"
         className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6"
       >
-        <label className="block" htmlFor="knowledge-archive-search">
-          <span className="text-sm font-semibold text-[#303845]">검색</span>
-          <div className="mt-2">
-            <SearchBar
-              ariaLabel="지식 문서, 태그, 업무 기준 검색"
-              id="knowledge-archive-search"
-              onChange={setQuery}
-              onClear={() => setQuery("")}
-              placeholder="지식 문서, 태그, 업무 기준을 검색하세요"
-              value={query}
-            />
-          </div>
-        </label>
+        <form action="/knowledge" className="space-y-4" method="get" role="search">
+          <label className="block" htmlFor="knowledge-archive-search">
+            <span className="text-sm font-semibold text-[#303845]">검색</span>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <input
+                className="min-h-12 min-w-0 flex-1 rounded-xl border border-[#E3DED4] bg-white px-4 text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470] focus:ring-2 focus:ring-[#B9975B]/40"
+                defaultValue={filterState.q}
+                id="knowledge-archive-search"
+                maxLength={50}
+                name="q"
+                placeholder="지식 문서, 태그, 업무 기준을 검색하세요"
+                type="search"
+              />
+              <button
+                className="min-h-12 rounded-xl bg-[#102235] px-5 text-sm font-semibold text-white hover:bg-[#1b344e]"
+                type="submit"
+              >
+                검색
+              </button>
+            </div>
+          </label>
+          <PreserveFiltersExceptQ filterState={filterState} />
+          <p className="text-xs leading-5 text-[#5f6670]">
+            개인정보·의료정보·계약정보·보험금 지급 판단 관련 검색은 제공하지
+            않습니다.
+          </p>
+        </form>
 
-        <div className="mt-4 grid gap-5 sm:gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 flex flex-wrap items-center gap-2 lg:hidden">
+          <button
+            aria-expanded={mobileFiltersOpen}
+            className="min-h-11 rounded-full border border-[#d9c9a8] bg-white px-4 text-sm font-semibold text-[#303845]"
+            onClick={() => setMobileFiltersOpen((open) => !open)}
+            type="button"
+          >
+            {mobileFiltersOpen ? "필터 닫기" : "필터 열기"}
+          </button>
+          <Link
+            className="min-h-11 rounded-full border border-[#d9c9a8] bg-white px-4 text-sm font-semibold text-[#7a612d]"
+            href={buildKnowledgeArchiveHref(defaultKnowledgeArchiveFilterState())}
+          >
+            초기화
+          </Link>
+        </div>
+
+        <div
+          className={`mt-4 grid gap-5 lg:grid-cols-2 xl:grid-cols-4 ${mobileFiltersOpen ? "grid" : "hidden lg:grid"}`}
+        >
           <FilterGroup
             label="카테고리"
-            onChange={(value) => setCategory(value as CategoryFilter)}
+            onSelect={(value) =>
+              navigate({ category: value as KnowledgeArchiveFilterState["category"] })
+            }
             options={categoryOptions}
-            value={category}
+            value={filterState.category}
           />
           <FilterGroup
             label="문서 유형"
-            onChange={(value) => setTypeFilter(value as TypeFilter)}
+            onSelect={(value) =>
+              navigate({ type: value as KnowledgeArchiveFilterState["type"] })
+            }
             options={typeOptions}
-            value={typeFilter}
+            value={filterState.type}
           />
           <FilterGroup
-            label="검수상태"
-            onChange={(value) => setStatus(value as StatusFilter)}
-            options={statusOptions}
-            value={status}
-          />
-          <FilterGroup
-            label="위험도"
-            onChange={(value) => setRisk(value as RiskFilter)}
+            label="활용 주의도"
+            onSelect={(value) =>
+              navigate({ risk: value as KnowledgeArchiveFilterState["risk"] })
+            }
             options={riskOptions}
-            value={risk}
+            value={filterState.risk}
+          />
+          <FilterGroup
+            label="검수 단계"
+            onSelect={(value) =>
+              navigate({ review: value as KnowledgeArchiveFilterState["review"] })
+            }
+            options={reviewOptions}
+            value={filterState.review}
           />
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-[#e3d5b8] pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <label className="block text-sm font-semibold text-[#303845]">
+            정렬
+            <select
+              className="mt-1 min-h-11 w-full min-w-[12rem] rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] sm:w-auto"
+              onChange={(event) =>
+                navigate({ sort: event.target.value as KnowledgeArchiveSort })
+              }
+              value={filterState.sort}
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Link
+            className="hidden min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-4 text-sm font-semibold text-[#7a612d] hover:border-[#aa8137] lg:inline-flex"
+            href={buildKnowledgeArchiveHref(defaultKnowledgeArchiveFilterState())}
+          >
+            필터 초기화
+          </Link>
+        </div>
+
+        {activeChips.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-[#e3d5b8] pt-4">
+            {activeChips.map((chip) => (
+              <Link
+                className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[#d9c9a8] bg-white px-3 text-xs font-semibold text-[#4f5661] hover:border-[#aa8137]"
+                href={chip.href}
+                key={chip.label}
+              >
+                {chip.label}
+                <span aria-hidden="true">×</span>
+              </Link>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-col gap-3 border-t border-[#e3d5b8] pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p
             aria-live="polite"
             className="text-sm font-medium text-[#4f5661]"
             role="status"
           >
-            총{" "}
-            <strong className="text-[#102235]">{items.length}</strong>
-            개 중{" "}
+            공개 문서{" "}
+            <strong className="text-[#102235]">{items.length}</strong>개 중{" "}
             <strong className="text-[#102235]">{filteredItems.length}</strong>
-            개 문서를 표시 중입니다.
+            개 표시
+            {hasActiveKnowledgeFilters(filterState) ? " (필터 적용)" : ""}
           </p>
-          <button
-            type="button"
-            aria-label="검색어 및 필터 초기화"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-4 text-sm font-semibold text-[#7a612d] transition hover:border-[#aa8137] hover:text-[#aa8137] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2"
-            onClick={handleReset}
-          >
-            필터 초기화
-          </button>
         </div>
       </section>
 
-      {filteredItems.length > 0 ? (
+      {blockedMessage ? (
+        <div
+          className="rounded-md border border-[#d6a36e] bg-[#fff5e1] px-4 py-3 text-sm leading-relaxed text-[#7b4b19]"
+          role="alert"
+        >
+          {blockedMessage}
+        </div>
+      ) : null}
+
+      {!blockedMessage && filteredItems.length > 0 ? (
         <ul className="grid list-none gap-5 p-0 lg:grid-cols-2">
           {filteredItems.map((item) => (
             <li key={item.id}>
@@ -220,24 +339,52 @@ export function KnowledgeArchiveList({
             </li>
           ))}
         </ul>
-      ) : (
+      ) : null}
+
+      {!blockedMessage && filteredItems.length === 0 ? (
         <EmptyState
+          description={KNOWLEDGE_ARCHIVE_EMPTY_MESSAGE}
           title="조건에 맞는 지식 문서가 없습니다."
-          description="검색어를 줄이거나 필터를 초기화해보세요."
         />
-      )}
+      ) : null}
     </div>
+  );
+}
+
+function PreserveFiltersExceptQ({
+  filterState,
+}: {
+  filterState: KnowledgeArchiveFilterState;
+}) {
+  return (
+    <>
+      {filterState.category !== "all" ? (
+        <input name="category" type="hidden" value={filterState.category} />
+      ) : null}
+      {filterState.type !== "all" ? (
+        <input name="type" type="hidden" value={filterState.type} />
+      ) : null}
+      {filterState.risk !== "all" ? (
+        <input name="risk" type="hidden" value={filterState.risk} />
+      ) : null}
+      {filterState.review !== "all" ? (
+        <input name="review" type="hidden" value={filterState.review} />
+      ) : null}
+      {filterState.sort !== "latest" ? (
+        <input name="sort" type="hidden" value={filterState.sort} />
+      ) : null}
+    </>
   );
 }
 
 function FilterGroup({
   label,
-  onChange,
+  onSelect,
   options,
   value,
 }: {
   label: string;
-  onChange: (value: string) => void;
+  onSelect: (value: string) => void;
   options: Array<{ label: string; value: string }>;
   value: string;
 }) {
@@ -250,14 +397,13 @@ function FilterGroup({
           return (
             <button
               aria-pressed={isSelected}
-              aria-label={`${label} ${option.label}`}
               className={`min-h-11 rounded-full border px-3.5 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2 ${
                 isSelected
                   ? "border-[#173f36] bg-[#173f36] text-[#fbf7ee]"
                   : "border-[#d9c9a8] bg-white text-[#303845] hover:border-[#aa8137]"
               }`}
               key={option.value}
-              onClick={() => onChange(option.value)}
+              onClick={() => onSelect(option.value)}
               type="button"
             >
               {option.label}
@@ -270,6 +416,10 @@ function FilterGroup({
 }
 
 function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
+  const dateParts: string[] = [];
+  if (item.publishedAt) dateParts.push(`공개 ${item.publishedAt}`);
+  if (item.updatedAt) dateParts.push(`업데이트 ${item.updatedAt}`);
+
   return (
     <article className="flex h-full flex-col rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
@@ -281,39 +431,45 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
         </span>
       </div>
 
-      <h3 className="mt-3 break-keep text-lg font-semibold leading-snug text-[#102235] sm:text-xl">
-        {item.title}
+      <h3 className="mt-3 break-words text-lg font-semibold leading-snug text-[#102235] sm:text-xl">
+        <Link
+          className="hover:text-[#7a612d] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+          href={`/knowledge/${item.slug}`}
+        >
+          {item.title}
+        </Link>
       </h3>
-      <p className="mt-2 line-clamp-3 break-keep text-sm leading-6 text-[#4f5661]">
+      <p className="mt-2 line-clamp-3 break-words text-sm leading-6 text-[#4f5661]">
         {item.summary}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses[item.status]}`}
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${reviewClasses[item.status]}`}
         >
-          상태: {item.statusLabel}
+          검수: {item.statusLabel}
         </span>
         <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${riskClasses[item.riskLevel]}`}
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${riskToneClasses[item.riskLevel]}`}
         >
-          위험도: {item.riskLabel}
+          {PUBLIC_RISK_GUIDANCE_LABEL[item.riskLevel]}
         </span>
       </div>
 
-      <p className="mt-3 text-xs leading-5 text-[#5f6670]">
-        {item.aiUsable ? "AI 참조 가능" : "AI 참조 전 검수 필요"}
-      </p>
+      {dateParts.length > 0 ? (
+        <p className="mt-3 text-xs text-[#5f6670]">{dateParts.join(" · ")}</p>
+      ) : null}
+
       <Link
-        className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-[#173f36] underline decoration-[#aa8137] underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#aa8137]/40 focus-visible:ring-offset-2"
+        className="mt-4 inline-flex min-h-11 w-fit items-center justify-center rounded-lg bg-[#102235] px-4 text-sm font-semibold text-white hover:bg-[#1b344e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
         href={`/knowledge/${item.slug}`}
       >
-        상세 보기
+        자세히 보기
       </Link>
 
       {item.tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
-          {item.tags.map((tag) => (
+          {item.tags.slice(0, 6).map((tag) => (
             <span
               className="rounded-full border border-[#e3d5b8] bg-white px-2.5 py-1 text-xs text-[#4f5661]"
               key={`${item.id}-${tag}`}
