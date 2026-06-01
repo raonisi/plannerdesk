@@ -57,6 +57,11 @@ export type MessageTemplateTableProbe =
   | { status: "missing_table" }
   | { status: "unavailable" };
 
+export type CorrectionRequestTableProbe =
+  | { status: "ok"; count: number; newCount: number }
+  | { status: "missing_table" }
+  | { status: "unavailable" };
+
 function isPrismaMissingTable(error: unknown): boolean {
   if (
     error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -90,6 +95,23 @@ export async function probeMessageTemplateTable(): Promise<MessageTemplateTableP
   try {
     const count = await prisma.messageTemplate.count();
     return { status: "ok", count };
+  } catch (error) {
+    if (isPrismaMissingTable(error)) {
+      return { status: "missing_table" };
+    }
+    return { status: "unavailable" };
+  }
+}
+
+export async function probeCorrectionRequestTable(): Promise<CorrectionRequestTableProbe> {
+  try {
+    const [count, newCount] = await Promise.all([
+      prisma.correctionRequest.count({ where: { deletedAt: null } }),
+      prisma.correctionRequest.count({
+        where: { deletedAt: null, status: "new" },
+      }),
+    ]);
+    return { status: "ok", count, newCount };
   } catch (error) {
     if (isPrismaMissingTable(error)) {
       return { status: "missing_table" };
@@ -187,6 +209,75 @@ function knowledgeFeature(probe: KnowledgeTableProbe): AdminDashboardFeature {
   };
 }
 
+function correctionInboxFeature(
+  probe: CorrectionRequestTableProbe,
+): AdminDashboardFeature {
+  if (probe.status === "missing_table") {
+    return {
+      id: "corrections",
+      title: "정보 수정 제보 인박스",
+      description:
+        "public에서 접수된 정보 오류·개선 제보를 검수하고 상태를 관리합니다.",
+      href: "/admin/corrections",
+      availability: "setup_required",
+      statusBadge: "설정 필요",
+      lastCheckLabel: "CorrectionRequest 테이블 없음",
+      nextAction:
+        "운영 DB에 CorrectionRequest migration을 적용한 뒤 인박스를 사용하세요.",
+      buttonLabel: "설정 필요",
+      buttonEnabled: true,
+    };
+  }
+
+  if (probe.status === "unavailable") {
+    return {
+      id: "corrections",
+      title: "정보 수정 제보 인박스",
+      description:
+        "public에서 접수된 정보 오류·개선 제보를 검수하고 상태를 관리합니다.",
+      href: "/admin/corrections",
+      availability: "blocked",
+      statusBadge: "점검 필요",
+      lastCheckLabel: "DB 연결 확인 필요",
+      nextAction: "잠시 후 다시 시도하거나 운영 로그를 확인하세요.",
+      buttonLabel: "점검 필요",
+      buttonEnabled: true,
+    };
+  }
+
+  if (probe.newCount > 0) {
+    return {
+      id: "corrections",
+      title: "정보 수정 제보 인박스",
+      description:
+        "public에서 접수된 정보 오류·개선 제보를 검수하고 상태를 관리합니다.",
+      href: "/admin/corrections",
+      availability: "active_with_warning",
+      statusBadge: "신규 제보",
+      lastCheckLabel: `미처리 신규 ${probe.newCount}건 · 전체 ${probe.count}건`,
+      nextAction:
+        "민감정보 의심 제보는 마스킹·삭제를 우선 검토하세요. public 자동 반영은 없습니다.",
+      buttonLabel: "인박스 열기",
+      buttonEnabled: true,
+    };
+  }
+
+  return {
+    id: "corrections",
+    title: "정보 수정 제보 인박스",
+    description:
+      "public에서 접수된 정보 오류·개선 제보를 검수하고 상태를 관리합니다.",
+    href: "/admin/corrections",
+    availability: "active",
+    statusBadge: "운영 중",
+    lastCheckLabel: `접수 ${probe.count}건`,
+    nextAction:
+      "반영은 각 도메인 관리 화면에서 수동으로 진행한 뒤 APPLIED로 표시하세요.",
+    buttonLabel: "인박스 열기",
+    buttonEnabled: true,
+  };
+}
+
 function messageTemplateFeature(
   probe: MessageTemplateTableProbe,
 ): AdminDashboardFeature {
@@ -257,10 +348,12 @@ function messageTemplateFeature(
 }
 
 export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnapshot> {
-  const [knowledgeProbe, messageTemplateProbe] = await Promise.all([
-    probeKnowledgeArticleTable(),
-    probeMessageTemplateTable(),
-  ]);
+  const [knowledgeProbe, messageTemplateProbe, correctionProbe] =
+    await Promise.all([
+      probeKnowledgeArticleTable(),
+      probeMessageTemplateTable(),
+      probeCorrectionRequestTable(),
+    ]);
 
   const features: AdminDashboardFeature[] = [
     {
@@ -304,6 +397,7 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
       buttonEnabled: true,
     },
     messageTemplateFeature(messageTemplateProbe),
+    correctionInboxFeature(correctionProbe),
   ];
 
   const knowledgeBulkAvailability: AdminFeatureAvailability =
