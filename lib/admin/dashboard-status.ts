@@ -62,6 +62,11 @@ export type CorrectionRequestTableProbe =
   | { status: "missing_table" }
   | { status: "unavailable" };
 
+export type PlannerVerificationTableProbe =
+  | { status: "ok"; count: number; pendingCount: number }
+  | { status: "missing_table" }
+  | { status: "unavailable" };
+
 function isPrismaMissingTable(error: unknown): boolean {
   if (
     error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -112,6 +117,26 @@ export async function probeCorrectionRequestTable(): Promise<CorrectionRequestTa
       }),
     ]);
     return { status: "ok", count, newCount };
+  } catch (error) {
+    if (isPrismaMissingTable(error)) {
+      return { status: "missing_table" };
+    }
+    return { status: "unavailable" };
+  }
+}
+
+export async function probePlannerVerificationTable(): Promise<PlannerVerificationTableProbe> {
+  try {
+    const [count, pendingCount] = await Promise.all([
+      prisma.plannerVerification.count({ where: { deletedAt: null } }),
+      prisma.plannerVerification.count({
+        where: {
+          deletedAt: null,
+          status: { in: ["pending", "under_review"] },
+        },
+      }),
+    ]);
+    return { status: "ok", count, pendingCount };
   } catch (error) {
     if (isPrismaMissingTable(error)) {
       return { status: "missing_table" };
@@ -278,6 +303,75 @@ function correctionInboxFeature(
   };
 }
 
+function plannerVerificationFeature(
+  probe: PlannerVerificationTableProbe,
+): AdminDashboardFeature {
+  if (probe.status === "missing_table") {
+    return {
+      id: "planner-verifications",
+      title: "설계사 검증 관리",
+      description:
+        "설계사 검증 신청을 수동으로 검토하고 내부 권한 상태를 관리합니다.",
+      href: "/admin/planner-verifications",
+      availability: "setup_required",
+      statusBadge: "설정 필요",
+      lastCheckLabel: "PlannerVerification 테이블 없음",
+      nextAction:
+        "운영 DB에 PlannerVerification migration을 적용한 뒤 관리 화면을 사용하세요.",
+      buttonLabel: "설정 필요",
+      buttonEnabled: true,
+    };
+  }
+
+  if (probe.status === "unavailable") {
+    return {
+      id: "planner-verifications",
+      title: "설계사 검증 관리",
+      description:
+        "설계사 검증 신청을 수동으로 검토하고 내부 권한 상태를 관리합니다.",
+      href: "/admin/planner-verifications",
+      availability: "blocked",
+      statusBadge: "점검 필요",
+      lastCheckLabel: "DB 연결 확인 필요",
+      nextAction: "잠시 후 다시 시도하거나 운영 로그를 확인하세요.",
+      buttonLabel: "점검 필요",
+      buttonEnabled: true,
+    };
+  }
+
+  if (probe.pendingCount > 0) {
+    return {
+      id: "planner-verifications",
+      title: "설계사 검증 관리",
+      description:
+        "설계사 검증 신청을 수동으로 검토합니다. 승인은 PlannerDesk 내부 권한 기준입니다.",
+      href: "/admin/planner-verifications",
+      availability: "active_with_warning",
+      statusBadge: "검토 대기",
+      lastCheckLabel: `대기 ${probe.pendingCount}건 · 전체 ${probe.count}건`,
+      nextAction:
+        "민감정보 의심 신청은 삭제·플래그 처리를 우선 검토하세요. 자동 승인·외부 조회는 없습니다.",
+      buttonLabel: "검증 큐 열기",
+      buttonEnabled: true,
+    };
+  }
+
+  return {
+    id: "planner-verifications",
+    title: "설계사 검증 관리",
+    description:
+      "설계사 검증 신청을 수동으로 검토합니다. 승인은 PlannerDesk 내부 권한 기준입니다.",
+    href: "/admin/planner-verifications",
+    availability: "active",
+    statusBadge: "운영 중",
+    lastCheckLabel: `신청 ${probe.count}건`,
+    nextAction:
+      "승인은 내부 커뮤니티 권한 기준이며, User.role은 이 화면에서 자동 변경되지 않습니다.",
+    buttonLabel: "검증 큐 열기",
+    buttonEnabled: true,
+  };
+}
+
 function messageTemplateFeature(
   probe: MessageTemplateTableProbe,
 ): AdminDashboardFeature {
@@ -348,11 +442,12 @@ function messageTemplateFeature(
 }
 
 export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnapshot> {
-  const [knowledgeProbe, messageTemplateProbe, correctionProbe] =
+  const [knowledgeProbe, messageTemplateProbe, correctionProbe, plannerVerificationProbe] =
     await Promise.all([
       probeKnowledgeArticleTable(),
       probeMessageTemplateTable(),
       probeCorrectionRequestTable(),
+      probePlannerVerificationTable(),
     ]);
 
   const features: AdminDashboardFeature[] = [
@@ -412,6 +507,7 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
     },
     messageTemplateFeature(messageTemplateProbe),
     correctionInboxFeature(correctionProbe),
+    plannerVerificationFeature(plannerVerificationProbe),
   ];
 
   const knowledgeBulkAvailability: AdminFeatureAvailability =
