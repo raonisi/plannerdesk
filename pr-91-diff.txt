@@ -1,0 +1,1817 @@
+﻿diff --git a/app/admin/community-posts/[id]/page.tsx b/app/admin/community-posts/[id]/page.tsx
+new file mode 100644
+index 0000000..2f69aba
+--- /dev/null
++++ b/app/admin/community-posts/[id]/page.tsx
+@@ -0,0 +1,91 @@
++癤퓁mport Link from "next/link";
++import { notFound } from "next/navigation";
++import type { Prisma } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import { surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import { getCommunityAdminAccess } from "../access";
++import { ADMIN_COMMUNITY_COPY } from "../visibility";
++import CommunityPostDetailPanel, { type CommunityAdminDetail } from "../community-post-detail-panel";
++
++export const dynamic = "force-dynamic";
++
++type CommunityDetailRecord = Prisma.CommunityPostGetPayload<{
++  include: {
++    author: { select: { id: true; name: true } };
++    reports: {
++      include: { reporter: { select: { id: true; name: true } } };
++    };
++  };
++}>;
++
++function serialize(row: CommunityDetailRecord): CommunityAdminDetail {
++  return {
++    id: row.id,
++    title: row.title,
++    content: row.content,
++    category: row.category,
++    status: row.status,
++    visibility: row.visibility,
++    isBlind: row.isBlind,
++    blindReason: row.blindReason,
++    blindReasonText: row.blindReasonText,
++    reportCount: row.reportCount,
++    adminMemo: row.adminMemo,
++    authorLabel: row.author.name?.trim() || `?ъ슜??${row.author.id.slice(0, 8)}??,
++    createdAt: row.createdAt.toISOString(),
++    updatedAt: row.updatedAt.toISOString(),
++    deletedAt: row.deletedAt?.toISOString() ?? null,
++    reports: row.reports.map((report) => ({
++      id: report.id,
++      reason: report.reason,
++      status: report.status,
++      message: report.message,
++      createdAt: report.createdAt.toISOString(),
++      reporterLabel: report.reporter.name?.trim() || `?ъ슜??${report.reporter.id.slice(0, 8)}??,
++    })),
++  };
++}
++
++export default async function AdminCommunityPostDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
++  const access = await getCommunityAdminAccess();
++  if (access.status === "locked") return <AdminLockedState />;
++  if (access.status === "denied") return <AdminAccessDeniedState />;
++
++  const { id } = await params;
++  const q = await searchParams;
++
++  const record = await prisma.communityPost.findUnique({
++    where: { id },
++    include: {
++      author: { select: { id: true, name: true } },
++      reports: {
++        orderBy: { createdAt: "desc" },
++        take: 20,
++        include: { reporter: { select: { id: true, name: true } } },
++      },
++    },
++  });
++
++  if (!record) notFound();
++
++  const row = serialize(record);
++
++  return (
++    <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
++      <div className="mx-auto max-w-5xl">
++        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
++          <div>
++            <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
++            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">{ADMIN_COMMUNITY_COPY.detailTitle}</h1>
++          </div>
++          <Link href="/admin/community-posts" className="inline-flex items-center justify-center rounded-md border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#102235] hover:bg-[#f7f1e5]">紐⑸줉?쇰줈</Link>
++        </div>
++        {q.error ? <p className="mb-4 rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-3 py-2 text-sm text-[#8b2e2e]">{q.error}</p> : null}
++        <CommunityPostDetailPanel row={row} />
++      </div>
++    </main>
++  );
++}
++
+diff --git a/app/admin/community-posts/access.ts b/app/admin/community-posts/access.ts
+new file mode 100644
+index 0000000..e433ed0
+--- /dev/null
++++ b/app/admin/community-posts/access.ts
+@@ -0,0 +1,8 @@
++癤풽xport {
++  getAdminAccess as getCommunityAdminAccess,
++  requireContentManagerAccess as requireCommunityContentManager,
++  getSessionUserId,
++  type AdminAccessState,
++  type AdminSession,
++} from "@/lib/auth/access";
++
+diff --git a/app/admin/community-posts/actions.ts b/app/admin/community-posts/actions.ts
+new file mode 100644
+index 0000000..ca46e68
+--- /dev/null
++++ b/app/admin/community-posts/actions.ts
+@@ -0,0 +1,100 @@
++癤?use server";
++
++import {
++  CommunityPostStatus,
++  CommunityReportReason,
++  type Prisma,
++} from "@prisma/client";
++import { revalidatePath } from "next/cache";
++import { prisma } from "@/lib/prisma";
++import { handleAdminUnauthorized, redirectWithError } from "@/lib/admin/actions";
++import {
++  getSessionUserId,
++  requireCommunityContentManager,
++} from "./access";
++import { parseReason, parseStatus } from "./visibility";
++
++const ADMIN_LIST_PATH = "/admin/community-posts";
++
++function revalidateCommunityAdminPaths(id: string) {
++  revalidatePath(ADMIN_LIST_PATH);
++  revalidatePath(`${ADMIN_LIST_PATH}/${id}`);
++  revalidatePath("/community");
++  revalidatePath(`/community/${id}`);
++}
++
++function optionalText(value: FormDataEntryValue | null): string | null {
++  if (typeof value !== "string") return null;
++  const trimmed = value.trim();
++  return trimmed ? trimmed.slice(0, 2000) : null;
++}
++
++async function loadPostOrRedirect(id: string) {
++  const row = await prisma.communityPost.findUnique({ where: { id } });
++  if (!row) {
++    redirectWithError(ADMIN_LIST_PATH, "寃뚯떆湲??李얠쓣 ???놁뒿?덈떎.");
++  }
++  return row;
++}
++
++export async function updateCommunityPostModeration(
++  id: string,
++  formData: FormData,
++): Promise<{ ok: true } | { ok: false; message: string }> {
++  try {
++    const session = await requireCommunityContentManager();
++    const actorId = getSessionUserId(session);
++    if (!actorId) {
++      return { ok: false, message: "愿由ъ옄 ?몄뀡???뺤씤?????놁뒿?덈떎." };
++    }
++
++    const status = parseStatus(String(formData.get("status") ?? ""));
++    if (!status) {
++      return { ok: false, message: "?좏슚?섏? ?딆? ?곹깭?낅땲??" };
++    }
++
++    const reason = parseReason(String(formData.get("blindReason") ?? ""));
++    const blindReasonText = optionalText(formData.get("blindReasonText"));
++    const adminMemo = optionalText(formData.get("adminMemo"));
++
++    const existing = await loadPostOrRedirect(id);
++    const now = new Date();
++    const data: Prisma.CommunityPostUpdateInput = {
++      status,
++      reviewedAt: now,
++      reviewedBy: { connect: { id: actorId } },
++      adminMemo,
++    };
++
++    if (status === CommunityPostStatus.blinded) {
++      data.isBlind = true;
++      data.blindReason = reason ?? CommunityReportReason.other;
++      data.blindReasonText = blindReasonText;
++      data.blindedAt = now;
++      data.blindedBy = { connect: { id: actorId } };
++    }
++
++    if (status === CommunityPostStatus.published) {
++      data.isBlind = false;
++      data.blindReason = null;
++      data.blindReasonText = null;
++      data.blindedAt = null;
++      data.blindedBy = { disconnect: true };
++    }
++
++    if (status === CommunityPostStatus.deleted) {
++      data.deletedAt = now;
++      data.deletedBy = { connect: { id: actorId } };
++    } else if (existing.deletedAt) {
++      data.deletedAt = existing.deletedAt;
++    }
++
++    await prisma.communityPost.update({ where: { id }, data });
++    revalidateCommunityAdminPaths(id);
++    return { ok: true };
++  } catch (error) {
++    handleAdminUnauthorized(ADMIN_LIST_PATH, error);
++    return { ok: false, message: "?곹깭 ??μ뿉 ?ㅽ뙣?덉뒿?덈떎." };
++  }
++}
++
+diff --git a/app/admin/community-posts/community-post-detail-panel.tsx b/app/admin/community-posts/community-post-detail-panel.tsx
+new file mode 100644
+index 0000000..d4a1cb7
+--- /dev/null
++++ b/app/admin/community-posts/community-post-detail-panel.tsx
+@@ -0,0 +1,146 @@
++癤?use client";
++
++import { useRouter } from "next/navigation";
++import { useState, useTransition } from "react";
++import type {
++  CommunityPostCategory,
++  CommunityPostStatus,
++  CommunityPostVisibility,
++  CommunityReportReason,
++  CommunityReportStatus,
++} from "@prisma/client";
++import { updateCommunityPostModeration } from "./actions";
++import {
++  ADMIN_COMMUNITY_COPY,
++  CATEGORY_LABEL,
++  REPORT_REASON_LABEL,
++  STATUS_LABEL,
++  WRITABLE_POST_STATUSES,
++  statusTone,
++} from "./visibility";
++
++function badgeClass(tone: "green" | "gold" | "gray" | "navy" | "red") {
++  const base = "inline-flex min-h-7 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold";
++  if (tone === "green") return `${base} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]`;
++  if (tone === "gold") return `${base} border-[#d9c9a8] bg-[#f7f1e5] text-[#7b5b19]`;
++  if (tone === "navy") return `${base} border-[#c8d2dc] bg-[#eef3f7] text-[#102235]`;
++  if (tone === "red") return `${base} border-[#e8c4c4] bg-[#fdf2f2] text-[#8b2e2e]`;
++  return `${base} border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]`;
++}
++
++export type CommunityAdminDetail = {
++  id: string;
++  title: string;
++  content: string;
++  category: CommunityPostCategory;
++  status: CommunityPostStatus;
++  visibility: CommunityPostVisibility;
++  isBlind: boolean;
++  blindReason: CommunityReportReason | null;
++  blindReasonText: string | null;
++  reportCount: number;
++  adminMemo: string | null;
++  authorLabel: string;
++  createdAt: string;
++  updatedAt: string;
++  deletedAt: string | null;
++  reports: {
++    id: string;
++    reason: CommunityReportReason;
++    status: CommunityReportStatus;
++    message: string | null;
++    createdAt: string;
++    reporterLabel: string;
++  }[];
++};
++
++function date(iso: string | null): string {
++  if (!iso) return "?";
++  return iso.replace("T", " ").slice(0, 16);
++}
++
++export default function CommunityPostDetailPanel({ row }: { row: CommunityAdminDetail }) {
++  const [feedback, setFeedback] = useState<string | null>(null);
++  const [isPending, startTransition] = useTransition();
++  const router = useRouter();
++
++  const run = (formData: FormData) => {
++    startTransition(async () => {
++      const result = await updateCommunityPostModeration(row.id, formData);
++      if (result.ok) {
++        setFeedback("?댁쁺 ?곹깭媛 ??λ릺?덉뒿?덈떎.");
++        router.refresh();
++      } else {
++        setFeedback(result.message);
++      }
++    });
++  };
++
++  return (
++    <div className="space-y-6">
++      <div className="rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-sm text-[#102235]">{ADMIN_COMMUNITY_COPY.policySummary}</div>
++      {feedback ? <p className="rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-2 text-sm text-[#4f5661]">{feedback}</p> : null}
++
++      <section className="rounded-lg border border-[#d9c9a8] bg-white p-5">
++        <div className="mb-2 flex flex-wrap gap-2">
++          <span className={badgeClass("gray")}>{CATEGORY_LABEL[row.category]}</span>
++          <span className={badgeClass(statusTone(row.status))}>{STATUS_LABEL[row.status]}</span>
++          {row.isBlind ? <span className={badgeClass("red")}>釉붾씪?몃뱶</span> : null}
++        </div>
++        <h2 className="text-xl font-semibold text-[#102235]">{row.title}</h2>
++        <p className="mt-2 text-xs text-[#5f6670]">?묒꽦??{row.authorLabel} 쨌 ?묒꽦 {date(row.createdAt)} 쨌 ?섏젙 {date(row.updatedAt)} 쨌 ??젣 {date(row.deletedAt)}</p>
++        <div className="mt-5 whitespace-pre-wrap break-words text-sm leading-7 text-[#303845]">{row.content}</div>
++      </section>
++
++      <section className="rounded-lg border border-[#d9c9a8] bg-white p-5">
++        <h3 className="text-sm font-semibold text-[#102235]">Moderation</h3>
++        <form
++          className="mt-3 space-y-3"
++          onSubmit={(event) => {
++            event.preventDefault();
++            const formData = new FormData(event.currentTarget);
++            const status = String(formData.get("status") ?? "");
++            if (status === "deleted" && !window.confirm("寃뚯떆湲????젣 泥섎━?좉퉴??")) return;
++            run(formData);
++          }}
++        >
++          <label className="block text-sm">
++            ?곹깭
++            <select name="status" defaultValue={row.status} className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] px-3 text-sm" disabled={isPending}>
++              {WRITABLE_POST_STATUSES.map((value) => <option key={value} value={value}>{STATUS_LABEL[value]}</option>)}
++            </select>
++          </label>
++          <label className="block text-sm">
++            釉붾씪?몃뱶 ?ъ쑀
++            <select name="blindReason" defaultValue={row.blindReason ?? "other"} className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] px-3 text-sm" disabled={isPending}>
++              {Object.entries(REPORT_REASON_LABEL).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
++            </select>
++          </label>
++          <label className="block text-sm">
++            釉붾씪?몃뱶 蹂댁땐 ?ъ쑀
++            <textarea name="blindReasonText" defaultValue={row.blindReasonText ?? ""} className="mt-1 min-h-20 w-full rounded-md border border-[#d9c9a8] px-3 py-2 text-sm" disabled={isPending} />
++          </label>
++          <label className="block text-sm">
++            愿由ъ옄 硫붾え
++            <textarea name="adminMemo" defaultValue={row.adminMemo ?? ""} className="mt-1 min-h-24 w-full rounded-md border border-[#d9c9a8] px-3 py-2 text-sm" disabled={isPending} />
++          </label>
++          <button type="submit" className="rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8]" disabled={isPending}>???/button>
++        </form>
++      </section>
++
++      <section className="rounded-lg border border-[#d9c9a8] bg-white p-5">
++        <h3 className="text-sm font-semibold text-[#102235]">?좉퀬 ?댁뿭 ({row.reportCount})</h3>
++        <div className="mt-3 space-y-2 text-sm">
++          {row.reports.length === 0 ? <p className="text-[#5f6670]">?좉퀬 ?댁뿭???놁뒿?덈떎.</p> : row.reports.map((report) => (
++            <article key={report.id} className="rounded-md border border-[#e7ddc9] bg-[#fbf7ee] p-3">
++              <p className="text-xs text-[#5f6670]">{date(report.createdAt)} 쨌 {report.reporterLabel}</p>
++              <p className="mt-1 font-semibold text-[#102235]">{REPORT_REASON_LABEL[report.reason]} / {report.status}</p>
++              <p className="mt-1 whitespace-pre-wrap break-words text-[#4f5661]">{report.message ?? "(?ㅻ챸 ?놁쓬)"}</p>
++            </article>
++          ))}
++        </div>
++      </section>
++    </div>
++  );
++}
++
+diff --git a/app/admin/community-posts/community-posts-admin-list.tsx b/app/admin/community-posts/community-posts-admin-list.tsx
+new file mode 100644
+index 0000000..f9dc131
+--- /dev/null
++++ b/app/admin/community-posts/community-posts-admin-list.tsx
+@@ -0,0 +1,72 @@
++癤?use client";
++
++import Link from "next/link";
++import type { CommunityPostCategory, CommunityPostStatus } from "@prisma/client";
++import { CATEGORY_LABEL, STATUS_LABEL, statusTone } from "./visibility";
++
++function badgeClass(tone: "green" | "gold" | "gray" | "navy" | "red") {
++  const base = "inline-flex min-h-7 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold";
++  if (tone === "green") return `${base} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]`;
++  if (tone === "gold") return `${base} border-[#d9c9a8] bg-[#f7f1e5] text-[#7b5b19]`;
++  if (tone === "navy") return `${base} border-[#c8d2dc] bg-[#eef3f7] text-[#102235]`;
++  if (tone === "red") return `${base} border-[#e8c4c4] bg-[#fdf2f2] text-[#8b2e2e]`;
++  return `${base} border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]`;
++}
++
++export type CommunityAdminListRow = {
++  id: string;
++  category: CommunityPostCategory;
++  title: string;
++  status: CommunityPostStatus;
++  isBlind: boolean;
++  reportCount: number;
++  authorLabel: string;
++  createdAt: string;
++  deletedAt: string | null;
++};
++
++export default function CommunityPostsAdminList({ rows }: { rows: CommunityAdminListRow[] }) {
++  return (
++    <section className="overflow-hidden rounded-lg border border-[#d9c9a8] bg-white">
++      <div className="overflow-x-auto">
++        <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
++          <thead className="bg-[#f7f1e5] text-left text-xs font-semibold uppercase tracking-wide text-[#4f5661]">
++            <tr>
++              <th className="px-4 py-3">移댄뀒怨좊━</th>
++              <th className="px-4 py-3">?쒕ぉ</th>
++              <th className="px-4 py-3">?곹깭</th>
++              <th className="px-4 py-3">?묒꽦??/th>
++              <th className="px-4 py-3">?좉퀬 ??/th>
++              <th className="px-4 py-3">?묒꽦??/th>
++              <th className="px-4 py-3 text-right">愿由?/th>
++            </tr>
++          </thead>
++          <tbody className="divide-y divide-[#e7ddc9]">
++            {rows.map((row) => (
++              <tr key={row.id} className="align-top">
++                <td className="px-4 py-4 text-[#4f5661]">{CATEGORY_LABEL[row.category]}</td>
++                <td className="px-4 py-4">
++                  <p className="font-semibold text-[#102235]">{row.title}</p>
++                  {row.deletedAt ? <p className="mt-1 text-xs text-[#8b2e2e]">??젣??/p> : null}
++                </td>
++                <td className="px-4 py-4">
++                  <span className={badgeClass(statusTone(row.status))}>{STATUS_LABEL[row.status]}</span>
++                  {row.isBlind ? <span className={`${badgeClass("red")} ml-1`}>釉붾씪?몃뱶</span> : null}
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">{row.authorLabel}</td>
++                <td className="px-4 py-4 text-[#4f5661]">{row.reportCount}</td>
++                <td className="px-4 py-4 text-[#4f5661]">{row.createdAt.slice(0, 10)}</td>
++                <td className="px-4 py-4 text-right">
++                  <Link href={`/admin/community-posts/${row.id}`} className="inline-flex min-h-9 items-center rounded-md border border-[#d9c9a8] bg-white px-3 text-xs font-semibold text-[#102235] hover:bg-[#f7f1e5]">
++                    ?곸꽭
++                  </Link>
++                </td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      </div>
++    </section>
++  );
++}
++
+diff --git a/app/admin/community-posts/page.tsx b/app/admin/community-posts/page.tsx
+new file mode 100644
+index 0000000..a20cc44
+--- /dev/null
++++ b/app/admin/community-posts/page.tsx
+@@ -0,0 +1,171 @@
++癤퓁mport Link from "next/link";
++import { CommunityPostCategory, CommunityPostStatus, type Prisma } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import { adminListPageCount, ADMIN_LIST_PAGE_SIZE, parseAdminListPage } from "@/lib/admin/list-pagination";
++import { surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
++import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
++import { getCommunityAdminAccess } from "./access";
++import CommunityPostsAdminList, { type CommunityAdminListRow } from "./community-posts-admin-list";
++import { ADMIN_COMMUNITY_COPY, CATEGORY_LABEL, STATUS_LABEL } from "./visibility";
++
++export const dynamic = "force-dynamic";
++
++interface SearchParams {
++  q?: string;
++  status?: string;
++  category?: string;
++  isBlind?: string;
++  showDeleted?: string;
++  page?: string;
++  error?: string;
++}
++
++function where(params: SearchParams): Prisma.CommunityPostWhereInput {
++  const and: Prisma.CommunityPostWhereInput[] = [];
++  if (params.showDeleted !== "true") and.push({ deletedAt: null });
++
++  const q = params.q?.trim();
++  if (q) {
++    and.push({
++      OR: [
++        { title: { contains: q, mode: "insensitive" } },
++        { content: { contains: q, mode: "insensitive" } },
++        { adminMemo: { contains: q, mode: "insensitive" } },
++      ],
++    });
++  }
++
++  if (params.status && params.status !== "all" && (Object.values(CommunityPostStatus) as string[]).includes(params.status)) {
++    and.push({ status: params.status as CommunityPostStatus });
++  }
++  if (params.category && params.category !== "all" && (Object.values(CommunityPostCategory) as string[]).includes(params.category)) {
++    and.push({ category: params.category as CommunityPostCategory });
++  }
++  if (params.isBlind === "true") and.push({ isBlind: true });
++  if (params.isBlind === "false") and.push({ isBlind: false });
++
++  if (and.length === 0) return {};
++  if (and.length === 1) return and[0]!;
++  return { AND: and };
++}
++
++function qs(params: SearchParams, overrides: Partial<SearchParams>) {
++  const merged = { ...params, ...overrides };
++  const sp = new URLSearchParams();
++  if (merged.q) sp.set("q", merged.q);
++  if (merged.status && merged.status !== "all") sp.set("status", merged.status);
++  if (merged.category && merged.category !== "all") sp.set("category", merged.category);
++  if (merged.isBlind && merged.isBlind !== "all") sp.set("isBlind", merged.isBlind);
++  if (merged.showDeleted === "true") sp.set("showDeleted", "true");
++  if (merged.page && merged.page !== "1") sp.set("page", merged.page);
++  return sp.toString() ? `?${sp.toString()}` : "";
++}
++
++function rows(data: Prisma.CommunityPostGetPayload<{ include: { author: { select: { id: true; name: true } } } }>[]): CommunityAdminListRow[] {
++  return data.map((row) => ({
++    id: row.id,
++    category: row.category,
++    title: row.title,
++    status: row.status,
++    isBlind: row.isBlind,
++    reportCount: row.reportCount,
++    authorLabel: row.author.name?.trim() || `?ъ슜??${row.author.id.slice(0, 8)}??,
++    createdAt: row.createdAt.toISOString(),
++    deletedAt: row.deletedAt?.toISOString() ?? null,
++  }));
++}
++
++export default async function AdminCommunityPostsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
++  const access = await getCommunityAdminAccess();
++  if (access.status === "locked") return <AdminLockedState />;
++  if (access.status === "denied") return <AdminAccessDeniedState />;
++
++  const params = await searchParams;
++  const page = parseAdminListPage(params.page);
++  const filters = where(params);
++
++  let total = 0;
++  let list: CommunityAdminListRow[] = [];
++  let loadFailed = false;
++
++  try {
++    const [count, data] = await Promise.all([
++      prisma.communityPost.count({ where: filters }),
++      prisma.communityPost.findMany({
++        where: filters,
++        orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
++        skip: (page - 1) * ADMIN_LIST_PAGE_SIZE,
++        take: ADMIN_LIST_PAGE_SIZE,
++        include: { author: { select: { id: true, name: true } } },
++      }),
++    ]);
++    total = count;
++    list = rows(data);
++  } catch {
++    loadFailed = true;
++  }
++
++  const pageCount = adminListPageCount(total);
++
++  return (
++    <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
++      <div className="mx-auto max-w-7xl">
++        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
++          <div>
++            <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
++            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">{ADMIN_COMMUNITY_COPY.pageTitle}</h1>
++            <p className="mt-3 max-w-2xl text-sm text-[#4f5661]">{ADMIN_COMMUNITY_COPY.pageDescription}</p>
++          </div>
++          <Link href="/admin" className="inline-flex items-center justify-center rounded-md border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#102235]">愿由ъ옄 ??/Link>
++        </div>
++
++        {params.error ? <p className="mb-4 rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-3 py-2 text-sm text-[#8b2e2e]">{params.error}</p> : null}
++
++        {loadFailed ? (
++          <AdminPageStateNotice kind="error" className="mb-5" />
++        ) : (
++          <>
++            <div className="mb-5">
++              <AdminSafetyNotice policySummary={ADMIN_COMMUNITY_COPY.policySummary} />
++            </div>
++            <form method="get" className="mb-5 grid gap-3 rounded-lg border border-[#d9c9a8] bg-white p-4 md:grid-cols-2 lg:grid-cols-5">
++              <input name="q" defaultValue={params.q ?? ""} placeholder="?쒕ぉ쨌蹂몃Ц쨌愿由ъ옄 硫붾え 寃?? className="min-h-11 rounded-md border border-[#d9c9a8] px-3 text-sm lg:col-span-2" />
++              <select name="status" defaultValue={params.status ?? "all"} className="min-h-11 rounded-md border border-[#d9c9a8] px-3 text-sm">
++                <option value="all">?곹깭 ?꾩껜</option>
++                {Object.values(CommunityPostStatus).map((value) => <option key={value} value={value}>{STATUS_LABEL[value]}</option>)}
++              </select>
++              <select name="category" defaultValue={params.category ?? "all"} className="min-h-11 rounded-md border border-[#d9c9a8] px-3 text-sm">
++                <option value="all">移댄뀒怨좊━ ?꾩껜</option>
++                {Object.values(CommunityPostCategory).map((value) => <option key={value} value={value}>{CATEGORY_LABEL[value]}</option>)}
++              </select>
++              <select name="isBlind" defaultValue={params.isBlind ?? "all"} className="min-h-11 rounded-md border border-[#d9c9a8] px-3 text-sm">
++                <option value="all">釉붾씪?몃뱶 ?꾩껜</option>
++                <option value="true">釉붾씪?몃뱶</option>
++                <option value="false">?뺤긽</option>
++              </select>
++              <label className="flex min-h-11 items-center gap-2 rounded-md border border-[#d9c9a8] px-3 text-xs text-[#4f5661]">
++                <input type="checkbox" name="showDeleted" value="true" defaultChecked={params.showDeleted === "true"} /> ??젣 ?ы븿
++              </label>
++              <button type="submit" className="min-h-11 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8]">?꾪꽣</button>
++              <Link href="/admin/community-posts" className="min-h-11 rounded-md border border-[#d9c9a8] px-4 py-2 text-sm font-semibold text-[#102235]">珥덇린??/Link>
++            </form>
++
++            <CommunityPostsAdminList rows={list} />
++
++            <div className="mt-4 flex items-center justify-between text-sm text-[#4f5661]">
++              <p>珥?{total}嫄?쨌 {page}/{pageCount} ?섏씠吏</p>
++              <div className="flex gap-2">
++                {page > 1 ? <Link href={`/admin/community-posts${qs(params, { page: String(page - 1) })}`} className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold">?댁쟾</Link> : null}
++                {page < pageCount ? <Link href={`/admin/community-posts${qs(params, { page: String(page + 1) })}`} className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold">?ㅼ쓬</Link> : null}
++              </div>
++            </div>
++          </>
++        )}
++      </div>
++    </main>
++  );
++}
++
+diff --git a/app/admin/community-posts/visibility.ts b/app/admin/community-posts/visibility.ts
+new file mode 100644
+index 0000000..279b31d
+--- /dev/null
++++ b/app/admin/community-posts/visibility.ts
+@@ -0,0 +1,54 @@
++癤퓁mport {
++  CommunityPostCategory,
++  CommunityPostStatus,
++  CommunityReportReason,
++} from "@prisma/client";
++import { CATEGORY_LABEL, REPORT_REASON_LABEL, STATUS_LABEL } from "@/app/community/visibility";
++
++export const ADMIN_COMMUNITY_COPY = {
++  pageTitle: "而ㅻ??덊떚 寃뚯떆湲 愿由?,
++  pageDescription:
++    "而ㅻ??덊떚 寃뚯떆湲??寃?좏븯怨?釉붾씪?몃뱶쨌??젣쨌?곹깭 蹂寃쎌쓣 ?섎룞 泥섎━?⑸땲??",
++  detailTitle: "而ㅻ??덊떚 寃뚯떆湲 ?곸꽭",
++  policySummary:
++    "媛쒖씤?뺣낫쨌?섎즺?뺣낫쨌怨꾩빟?뺣낫쨌泥?뎄?먮즺쨌蹂댄뿕湲??먮떒??寃뚯떆湲? ?섎룞 釉붾씪?몃뱶 ?먮뒗 ??젣 ??곸엯?덈떎. ?먮룞 釉붾씪?몃뱶???곸슜?섏? ?딆뒿?덈떎.",
++  memoHint:
++    "愿由ъ옄 硫붾え???대? 湲곕줉?⑹엯?덈떎. 誘쇨컧?뺣낫 ?먮Ц??蹂듭궗?섏? 留덉꽭??",
++} as const;
++
++export { CATEGORY_LABEL, STATUS_LABEL, REPORT_REASON_LABEL };
++
++export const WRITABLE_POST_STATUSES = Object.values(
++  CommunityPostStatus,
++) as CommunityPostStatus[];
++
++export function statusTone(
++  status: CommunityPostStatus,
++): "green" | "gold" | "gray" | "navy" | "red" {
++  if (status === CommunityPostStatus.published) return "green";
++  if (status === CommunityPostStatus.under_review) return "gold";
++  if (status === CommunityPostStatus.blinded || status === CommunityPostStatus.deleted) {
++    return "red";
++  }
++  if (status === CommunityPostStatus.archived) return "navy";
++  return "gray";
++}
++
++export function parseCategory(value: string): CommunityPostCategory | null {
++  return (Object.values(CommunityPostCategory) as string[]).includes(value)
++    ? (value as CommunityPostCategory)
++    : null;
++}
++
++export function parseStatus(value: string): CommunityPostStatus | null {
++  return (Object.values(CommunityPostStatus) as string[]).includes(value)
++    ? (value as CommunityPostStatus)
++    : null;
++}
++
++export function parseReason(value: string): CommunityReportReason | null {
++  return (Object.values(CommunityReportReason) as string[]).includes(value)
++    ? (value as CommunityReportReason)
++    : null;
++}
++
+diff --git a/app/community/[id]/edit/page.tsx b/app/community/[id]/edit/page.tsx
+new file mode 100644
+index 0000000..bffd089
+--- /dev/null
++++ b/app/community/[id]/edit/page.tsx
+@@ -0,0 +1,59 @@
++癤퓁mport Link from "next/link";
++import { notFound } from "next/navigation";
++import CommunityPostEditor from "../../post-editor";
++import { getCommunityViewer } from "../../access";
++import { updateCommunityPost } from "../../actions";
++import { prisma } from "@/lib/prisma";
++
++export const dynamic = "force-dynamic";
++
++export default async function CommunityEditPage({
++  params,
++  searchParams,
++}: {
++  params: Promise<{ id: string }>;
++  searchParams: Promise<{ error?: string }>;
++}) {
++  const { id } = await params;
++  const q = await searchParams;
++  const viewer = await getCommunityViewer();
++
++  if (!viewer) {
++    return <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-[#4f5661]">濡쒓렇?????댁슜?????덉뒿?덈떎.</main>;
++  }
++
++  const post = await prisma.communityPost.findUnique({ where: { id } });
++  if (!post || post.deletedAt) notFound();
++
++  const ownPost = post.authorId === viewer.userId;
++  if (!viewer.isAdmin && (!viewer.canWrite || !ownPost)) {
++    return <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-[#4f5661]">蹂몄씤 湲留??섏젙?????덉뒿?덈떎.</main>;
++  }
++
++  if (!viewer.isAdmin && post.isBlind) {
++    return <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-[#4f5661]">釉붾씪?몃뱶 泥섎━??湲? 愿由ъ옄 ?뺤씤 ???섏젙?????덉뒿?덈떎.</main>;
++  }
++
++  return (
++    <main className="mx-auto max-w-3xl px-4 py-10">
++      <div className="mb-5 flex items-end justify-between gap-2">
++        <h1 className="text-2xl font-semibold text-[#102235]">寃뚯떆湲 ?섏젙</h1>
++        <Link href={`/community/${id}`} className="text-sm font-semibold text-[#102235] underline">?곸꽭濡?/Link>
++      </div>
++      {q.error ? <p className="mb-4 rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-3 py-2 text-sm text-[#8b2e2e]">{q.error}</p> : null}
++      <CommunityPostEditor
++        initial={{
++          category: post.category,
++          title: post.title,
++          content: post.content,
++          visibility: post.visibility,
++          isPinned: post.isPinned,
++        }}
++        isAdmin={viewer.isAdmin}
++        submitLabel="?섏젙 ???
++        action={updateCommunityPost.bind(null, id)}
++      />
++    </main>
++  );
++}
++
+diff --git a/app/community/[id]/page.tsx b/app/community/[id]/page.tsx
+new file mode 100644
+index 0000000..9aed86b
+--- /dev/null
++++ b/app/community/[id]/page.tsx
+@@ -0,0 +1,116 @@
++癤퓁mport Link from "next/link";
++import { notFound } from "next/navigation";
++import { CommunityReportReason, CommunityPostVisibility } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import { reportCommunityPost, softDeleteCommunityPost } from "../actions";
++import { getCommunityViewer } from "../access";
++import { CATEGORY_LABEL, COMMUNITY_COPY, REPORT_REASON_LABEL, formatDate } from "../visibility";
++
++export const dynamic = "force-dynamic";
++
++function canViewPost(isAdmin: boolean, post: { status: string; deletedAt: Date | null; isBlind: boolean; visibility: CommunityPostVisibility }) {
++  if (isAdmin) return true;
++  if (post.deletedAt) return false;
++  if (post.isBlind) return false;
++  if (post.status !== "published") return false;
++  return post.visibility === CommunityPostVisibility.public || post.visibility === CommunityPostVisibility.verified_only;
++}
++
++export default async function CommunityDetailPage({
++  params,
++  searchParams,
++}: {
++  params: Promise<{ id: string }>;
++  searchParams: Promise<{ success?: string; error?: string }>;
++}) {
++  const { id } = await params;
++  const q = await searchParams;
++  const viewer = await getCommunityViewer();
++
++  if (!viewer) {
++    return (
++      <main className="mx-auto max-w-3xl px-4 py-10">
++        <p className="text-sm text-[#4f5661]">濡쒓렇????而ㅻ??덊떚瑜??댁슜?????덉뒿?덈떎.</p>
++      </main>
++    );
++  }
++
++  if (!viewer.canWrite && !viewer.isAdmin) {
++    return (
++      <main className="mx-auto max-w-3xl px-4 py-10">
++        <p className="rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm text-[#4f5661]">{viewer.denyReason ?? COMMUNITY_COPY.blockedNotice}</p>
++      </main>
++    );
++  }
++
++  const post = await prisma.communityPost.findUnique({
++    where: { id },
++    include: {
++      author: { select: { id: true, name: true } },
++    },
++  });
++
++  if (!post) notFound();
++
++  if (!canViewPost(viewer.isAdmin, post)) {
++    if (post.isBlind && !viewer.isAdmin) {
++      return (
++        <main className="mx-auto max-w-3xl px-4 py-10">
++          <p className="rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm text-[#4f5661]">{COMMUNITY_COPY.blindNotice}</p>
++        </main>
++      );
++    }
++    return (
++      <main className="mx-auto max-w-3xl px-4 py-10">
++        <p className="rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm text-[#4f5661]">{COMMUNITY_COPY.missingNotice}</p>
++      </main>
++    );
++  }
++
++  const ownPost = post.authorId === viewer.userId;
++
++  return (
++    <main className="mx-auto max-w-3xl px-4 py-10">
++      <Link href="/community" className="text-sm font-semibold text-[#102235] underline">紐⑸줉?쇰줈</Link>
++
++      {q.success ? <p className="mt-4 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-2 text-sm text-[#4f5661]">{q.success}</p> : null}
++      {q.error ? <p className="mt-4 rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-3 py-2 text-sm text-[#8b2e2e]">{q.error}</p> : null}
++
++      <article className="mt-4 rounded-lg border border-[#d9c9a8] bg-white p-5">
++        <p className="text-xs font-semibold uppercase tracking-wide text-[#7a612d]">{CATEGORY_LABEL[post.category]}</p>
++        <h1 className="mt-2 text-2xl font-semibold text-[#102235]">{post.title}</h1>
++        <p className="mt-2 text-xs text-[#5f6670]">
++          ?묒꽦??{post.author.name?.trim() || `?ъ슜??${post.author.id.slice(0, 8)}??} 쨌 ?묒꽦 {formatDate(post.createdAt.toISOString())} 쨌 ?섏젙 {formatDate(post.updatedAt.toISOString())}
++        </p>
++        <div className="mt-6 whitespace-pre-wrap break-words text-sm leading-7 text-[#303845]">{post.content}</div>
++      </article>
++
++      <div className="mt-5 flex flex-wrap gap-2">
++        {ownPost || viewer.isAdmin ? (
++          <Link href={`/community/${post.id}/edit`} className="rounded-md border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#102235]">?섏젙</Link>
++        ) : null}
++
++        {ownPost || viewer.isAdmin ? (
++          <form action={softDeleteCommunityPost.bind(null, post.id)}>
++            <button type="submit" className="rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-4 py-2 text-sm font-semibold text-[#8b2e2e]">??젣</button>
++          </form>
++        ) : null}
++      </div>
++
++      <section className="mt-8 rounded-lg border border-[#d9c9a8] bg-white p-5">
++        <h2 className="text-sm font-semibold text-[#102235]">?좉퀬</h2>
++        <p className="mt-1 text-xs text-[#5f6670]">?먮룞 釉붾씪?몃뱶???곸슜?섏? ?딆쑝硫?愿由ъ옄 寃????泥섎━?⑸땲??</p>
++        <form action={reportCommunityPost.bind(null, post.id)} className="mt-3 space-y-3">
++          <select name="reason" defaultValue={CommunityReportReason.other} className="min-h-11 w-full rounded-md border border-[#d9c9a8] px-3 text-sm">
++            {Object.entries(REPORT_REASON_LABEL).map(([value, label]) => (
++              <option key={value} value={value}>{label}</option>
++            ))}
++          </select>
++          <textarea name="message" maxLength={500} className="min-h-20 w-full rounded-md border border-[#d9c9a8] px-3 py-2 text-sm" placeholder="蹂댁땐 ?ㅻ챸 (?좏깮, 500???댄븯)" />
++          <button type="submit" className="rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8]">?좉퀬 ?묒닔</button>
++        </form>
++      </section>
++    </main>
++  );
++}
++
+diff --git a/app/community/access.ts b/app/community/access.ts
+new file mode 100644
+index 0000000..cc1b60b
+--- /dev/null
++++ b/app/community/access.ts
+@@ -0,0 +1,116 @@
++癤퓁mport { auth } from "@/auth";
++import { prisma } from "@/lib/prisma";
++import { requireAdminAccess, type AdminSession } from "@/lib/auth/access";
++import type { UserStatus } from "@prisma/client";
++
++export type CommunityViewer = {
++  userId: string;
++  isAdmin: boolean;
++  canWrite: boolean;
++  denyReason?: string;
++};
++
++export async function getCommunityViewer(): Promise<CommunityViewer | null> {
++  const session = await auth();
++  const userId = session?.user?.id ?? null;
++  if (!userId) return null;
++
++  const role = (session?.user?.role ?? "").toLowerCase();
++  const isAdmin = role === "super_admin" || role === "content_admin";
++
++  if (isAdmin) {
++    return { userId, isAdmin: true, canWrite: true };
++  }
++
++  const user = await prisma.user.findUnique({
++    where: { id: userId },
++    select: { role: true, status: true },
++  });
++
++  if (!user) return null;
++
++  if (user.status !== ("active" as UserStatus)) {
++    return {
++      userId,
++      isAdmin: false,
++      canWrite: false,
++      denyReason: "?꾩옱 怨꾩젙 ?곹깭濡쒕뒗 而ㅻ??덊떚瑜??댁슜?????놁뒿?덈떎.",
++    };
++  }
++
++  if (user.role !== "verified_planner") {
++    return {
++      userId,
++      isAdmin: false,
++      canWrite: false,
++      denyReason: "而ㅻ??덊떚 湲?곌린??寃利??꾨즺???ㅺ퀎?щ쭔 ?댁슜?????덉뒿?덈떎.",
++    };
++  }
++
++  const [approved, suspended] = await Promise.all([
++    prisma.plannerVerification.findFirst({
++      where: {
++        userId,
++        status: "approved",
++        deletedAt: null,
++        suspendedAt: null,
++      },
++      orderBy: { reviewedAt: "desc" },
++      select: { id: true },
++    }),
++    prisma.plannerVerification.findFirst({
++      where: {
++        userId,
++        status: "suspended",
++        deletedAt: null,
++      },
++      orderBy: { reviewedAt: "desc" },
++      select: { id: true },
++    }),
++  ]);
++
++  if (suspended) {
++    return {
++      userId,
++      isAdmin: false,
++      canWrite: false,
++      denyReason: "?꾩옱 寃利??곹깭媛 ?뺤??섏뼱 而ㅻ??덊떚 ?묒꽦 沅뚰븳???쒗븳?⑸땲??",
++    };
++  }
++
++  if (!approved) {
++    return {
++      userId,
++      isAdmin: false,
++      canWrite: false,
++      denyReason: "而ㅻ??덊떚 湲?곌린??寃利??꾨즺???ㅺ퀎?щ쭔 ?댁슜?????덉뒿?덈떎.",
++    };
++  }
++
++  return { userId, isAdmin: false, canWrite: true };
++}
++
++export async function requireCommunityWriter(): Promise<CommunityViewer> {
++  const viewer = await getCommunityViewer();
++  if (!viewer) {
++    throw new Error("COMMUNITY_AUTH_REQUIRED");
++  }
++  if (!viewer.canWrite) {
++    throw new Error(viewer.denyReason ?? "COMMUNITY_WRITE_DENIED");
++  }
++  return viewer;
++}
++
++export async function requireCommunityViewer(): Promise<CommunityViewer> {
++  const viewer = await getCommunityViewer();
++  if (!viewer) throw new Error("COMMUNITY_AUTH_REQUIRED");
++  if (!viewer.canWrite && !viewer.isAdmin) {
++    throw new Error(viewer.denyReason ?? "COMMUNITY_READ_DENIED");
++  }
++  return viewer;
++}
++
++export async function requireCommunityAdmin(): Promise<AdminSession> {
++  return requireAdminAccess();
++}
++
+diff --git a/app/community/actions.ts b/app/community/actions.ts
+new file mode 100644
+index 0000000..dc87605
+--- /dev/null
++++ b/app/community/actions.ts
+@@ -0,0 +1,343 @@
++癤?use server";
++
++import {
++  CommunityPostCategory,
++  CommunityPostStatus,
++  CommunityPostVisibility,
++  CommunityReportReason,
++  CommunityReportStatus,
++} from "@prisma/client";
++import { revalidatePath } from "next/cache";
++import { redirect } from "next/navigation";
++import { prisma } from "@/lib/prisma";
++import { requireCommunityAdmin, requireCommunityWriter } from "./access";
++import {
++  COMMUNITY_VALIDATION,
++  communityBlockedMessage,
++  hasBlockedContent,
++  hasTooManyUrls,
++  hasUnsafeHtml,
++  sanitizeText,
++} from "./validation";
++
++const COMMUNITY_PATH = "/community";
++const COMMUNITY_ADMIN_PATH = "/admin/community-posts";
++
++function qs(path: string, message: string): never {
++  redirect(`${path}?error=${encodeURIComponent(message)}`);
++}
++
++function success(path: string, message: string): never {
++  redirect(`${path}?success=${encodeURIComponent(message)}`);
++}
++
++function parseCategory(value: string): CommunityPostCategory | null {
++  return (Object.values(CommunityPostCategory) as string[]).includes(value)
++    ? (value as CommunityPostCategory)
++    : null;
++}
++
++function parseVisibility(value: string): CommunityPostVisibility | null {
++  return (Object.values(CommunityPostVisibility) as string[]).includes(value)
++    ? (value as CommunityPostVisibility)
++    : null;
++}
++
++function parseReason(value: string): CommunityReportReason | null {
++  return (Object.values(CommunityReportReason) as string[]).includes(value)
++    ? (value as CommunityReportReason)
++    : null;
++}
++
++function parseStatus(value: string): CommunityPostStatus | null {
++  return (Object.values(CommunityPostStatus) as string[]).includes(value)
++    ? (value as CommunityPostStatus)
++    : null;
++}
++
++function validatePostPayload(title: string, content: string): string | null {
++  if (title.length < COMMUNITY_VALIDATION.titleMin || title.length > COMMUNITY_VALIDATION.titleMax) {
++    return `?쒕ぉ? ${COMMUNITY_VALIDATION.titleMin}???댁긽 ${COMMUNITY_VALIDATION.titleMax}???댄븯濡??묒꽦??二쇱꽭??`;
++  }
++  if (content.length < COMMUNITY_VALIDATION.contentMin || content.length > COMMUNITY_VALIDATION.contentMax) {
++    return `蹂몃Ц? ${COMMUNITY_VALIDATION.contentMin}???댁긽 ${COMMUNITY_VALIDATION.contentMax}???댄븯濡??묒꽦??二쇱꽭??`;
++  }
++  if (hasUnsafeHtml(title) || hasUnsafeHtml(content)) {
++    return "HTML ?먮뒗 ?ㅽ겕由쏀듃 ?뺤떇? ?낅젰?????놁뒿?덈떎.";
++  }
++  if (hasTooManyUrls(content)) {
++    return "?몃? 留곹겕媛 ?덈Т 留롮뒿?덈떎. ?듭떖 留곹겕留??④꺼 二쇱꽭??";
++  }
++  const merged = `${title}\n${content}`;
++  if (hasBlockedContent(merged)) {
++    return communityBlockedMessage();
++  }
++  return null;
++}
++
++function revalidateCommunity(id?: string) {
++  revalidatePath(COMMUNITY_PATH);
++  if (id) revalidatePath(`${COMMUNITY_PATH}/${id}`);
++  revalidatePath(COMMUNITY_ADMIN_PATH);
++  if (id) revalidatePath(`${COMMUNITY_ADMIN_PATH}/${id}`);
++}
++
++export async function createCommunityPost(formData: FormData): Promise<void> {
++  const viewer = await requireCommunityWriter();
++
++  const category = parseCategory(String(formData.get("category") ?? ""));
++  if (!category) {
++    qs("/community/new", "移댄뀒怨좊━瑜??좏깮??二쇱꽭??");
++  }
++
++  const title = sanitizeText(formData.get("title"));
++  const content = sanitizeText(formData.get("content"));
++  const payloadError = validatePostPayload(title, content);
++  if (payloadError) {
++    qs("/community/new", payloadError);
++  }
++
++  let visibility: CommunityPostVisibility = CommunityPostVisibility.verified_only;
++  let isPinned = false;
++  if (viewer.isAdmin) {
++    visibility =
++      parseVisibility(String(formData.get("visibility") ?? "")) ??
++      CommunityPostVisibility.verified_only;
++    isPinned = String(formData.get("isPinned") ?? "") === "true";
++  }
++
++  const row = await prisma.communityPost.create({
++    data: {
++      authorId: viewer.userId,
++      category,
++      title,
++      content,
++      status: CommunityPostStatus.published,
++      visibility,
++      isPinned,
++      isBlind: false,
++    },
++    select: { id: true },
++  });
++
++  revalidateCommunity(row.id);
++  success(`/community/${row.id}`, "寃뚯떆湲???깅줉?섏뿀?듬땲??");
++}
++
++export async function updateCommunityPost(id: string, formData: FormData): Promise<void> {
++  const viewer = await requireCommunityWriter();
++
++  const existing = await prisma.communityPost.findUnique({
++    where: { id },
++    select: {
++      id: true,
++      authorId: true,
++      isBlind: true,
++      deletedAt: true,
++    },
++  });
++
++  if (!existing || existing.deletedAt) {
++    qs(COMMUNITY_PATH, "寃뚯떆湲??李얠쓣 ???놁뒿?덈떎.");
++  }
++
++  if (!viewer.isAdmin && existing.authorId !== viewer.userId) {
++    qs(`/community/${id}`, "蹂몄씤 湲留??섏젙?????덉뒿?덈떎.");
++  }
++
++  if (!viewer.isAdmin && existing.isBlind) {
++    qs(`/community/${id}`, "釉붾씪?몃뱶 泥섎━??湲? 愿由ъ옄 ?뺤씤 ???섏젙?????덉뒿?덈떎.");
++  }
++
++  const category = parseCategory(String(formData.get("category") ?? ""));
++  if (!category) {
++    qs(`/community/${id}/edit`, "移댄뀒怨좊━瑜??좏깮??二쇱꽭??");
++  }
++
++  const title = sanitizeText(formData.get("title"));
++  const content = sanitizeText(formData.get("content"));
++  const payloadError = validatePostPayload(title, content);
++  if (payloadError) {
++    qs(`/community/${id}/edit`, payloadError);
++  }
++
++  const data: {
++    category: CommunityPostCategory;
++    title: string;
++    content: string;
++    visibility?: CommunityPostVisibility;
++    isPinned?: boolean;
++    status?: CommunityPostStatus;
++    reviewedAt?: Date;
++  } = {
++    category,
++    title,
++    content,
++  };
++
++  if (viewer.isAdmin) {
++    data.visibility =
++      parseVisibility(String(formData.get("visibility") ?? "")) ??
++      CommunityPostVisibility.verified_only;
++    data.isPinned = String(formData.get("isPinned") ?? "") === "true";
++  }
++
++  await prisma.communityPost.update({ where: { id }, data });
++
++  revalidateCommunity(id);
++  success(`/community/${id}`, "寃뚯떆湲???섏젙?섏뿀?듬땲??");
++}
++
++export async function softDeleteCommunityPost(id: string): Promise<void> {
++  const viewer = await requireCommunityWriter();
++
++  const existing = await prisma.communityPost.findUnique({
++    where: { id },
++    select: {
++      id: true,
++      authorId: true,
++      isBlind: true,
++      deletedAt: true,
++      status: true,
++    },
++  });
++
++  if (!existing || existing.deletedAt) {
++    qs(COMMUNITY_PATH, "寃뚯떆湲??李얠쓣 ???놁뒿?덈떎.");
++  }
++
++  if (!viewer.isAdmin && existing.authorId !== viewer.userId) {
++    qs(`/community/${id}`, "蹂몄씤 湲留???젣?????덉뒿?덈떎.");
++  }
++
++  if (!viewer.isAdmin && (existing.isBlind || existing.status === CommunityPostStatus.blinded)) {
++    qs(`/community/${id}`, "?좉퀬 ?먮뒗 釉붾씪?몃뱶 泥섎━??湲? 愿由ъ옄?먭쾶 臾몄쓽??二쇱꽭??");
++  }
++
++  await prisma.communityPost.update({
++    where: { id },
++    data: {
++      status: CommunityPostStatus.deleted,
++      deletedAt: new Date(),
++      deletedById: viewer.userId,
++    },
++  });
++
++  revalidateCommunity(id);
++  success(COMMUNITY_PATH, "寃뚯떆湲????젣?섏뿀?듬땲??");
++}
++
++export async function reportCommunityPost(id: string, formData: FormData): Promise<void> {
++  const viewer = await requireCommunityWriter();
++
++  const post = await prisma.communityPost.findUnique({
++    where: { id },
++    select: { id: true, deletedAt: true },
++  });
++
++  if (!post || post.deletedAt) {
++    qs(COMMUNITY_PATH, "?좉퀬??寃뚯떆湲??李얠쓣 ???놁뒿?덈떎.");
++  }
++
++  const reason = parseReason(String(formData.get("reason") ?? ""));
++  if (!reason) {
++    qs(`/community/${id}`, "?좉퀬 ?ъ쑀瑜??좏깮??二쇱꽭??");
++  }
++
++  const message = sanitizeText(formData.get("message"));
++  if (message.length > COMMUNITY_VALIDATION.reportMessageMax) {
++    qs(`/community/${id}`, `?좉퀬 ?ㅻ챸? ${COMMUNITY_VALIDATION.reportMessageMax}???댄븯濡??낅젰??二쇱꽭??`);
++  }
++  if (message && hasBlockedContent(message)) {
++    qs(`/community/${id}`, "?좉퀬 ?ㅻ챸?먮뒗 媛쒖씤?뺣낫??誘쇨컧?뺣낫瑜??낅젰?섏? 留덉꽭??");
++  }
++
++  try {
++    await prisma.$transaction([
++      prisma.communityReport.create({
++        data: {
++          postId: id,
++          reporterId: viewer.userId,
++          reason,
++          status: CommunityReportStatus.new,
++          message: message || null,
++        },
++      }),
++      prisma.communityPost.update({
++        where: { id },
++        data: { reportCount: { increment: 1 } },
++      }),
++    ]);
++  } catch (error) {
++    if (error && typeof error === "object" && "code" in error && (error as { code?: string }).code === "P2002") {
++      qs(`/community/${id}`, "?숈씪 ?ъ쑀濡??대? ?좉퀬??寃뚯떆湲?낅땲??");
++    }
++    throw error;
++  }
++
++  revalidateCommunity(id);
++  success(`/community/${id}`, "?좉퀬媛 ?묒닔?섏뿀?듬땲?? 愿由ъ옄媛 ?뺤씤 ??泥섎━?⑸땲??");
++}
++
++export async function adminUpdateCommunityModeration(id: string, formData: FormData): Promise<void> {
++  const session = await requireCommunityAdmin();
++  const actorId = session.user?.id ?? null;
++  if (!actorId) {
++    qs(COMMUNITY_ADMIN_PATH, "愿由ъ옄 ?몄뀡???뺤씤?????놁뒿?덈떎.");
++  }
++
++  const status = parseStatus(String(formData.get("status") ?? ""));
++  if (!status) {
++    qs(`${COMMUNITY_ADMIN_PATH}/${id}`, "?좏슚?섏? ?딆? ?곹깭?낅땲??");
++  }
++
++  const blindReason = parseReason(String(formData.get("blindReason") ?? ""));
++  const blindReasonText = sanitizeText(formData.get("blindReasonText"));
++  const adminMemo = sanitizeText(formData.get("adminMemo"));
++
++  const data: {
++    status: CommunityPostStatus;
++    reviewedAt: Date;
++    reviewedById: string;
++    isBlind?: boolean;
++    blindReason?: CommunityReportReason | null;
++    blindReasonText?: string | null;
++    blindedAt?: Date | null;
++    blindedById?: string | null;
++    deletedAt?: Date | null;
++    deletedById?: string | null;
++    adminMemo?: string | null;
++  } = {
++    status,
++    reviewedAt: new Date(),
++    reviewedById: actorId,
++    adminMemo: adminMemo || null,
++  };
++
++  if (status === CommunityPostStatus.blinded) {
++    data.isBlind = true;
++    data.blindReason = blindReason ?? CommunityReportReason.other;
++    data.blindReasonText = blindReasonText || null;
++    data.blindedAt = new Date();
++    data.blindedById = actorId;
++  }
++
++  if (status === CommunityPostStatus.published) {
++    data.isBlind = false;
++    data.blindReason = null;
++    data.blindReasonText = null;
++    data.blindedAt = null;
++    data.blindedById = null;
++  }
++
++  if (status === CommunityPostStatus.deleted) {
++    data.deletedAt = new Date();
++    data.deletedById = actorId;
++  }
++
++  await prisma.communityPost.update({ where: { id }, data });
++
++  revalidateCommunity(id);
++  success(`${COMMUNITY_ADMIN_PATH}/${id}`, "?댁쁺 ?곹깭媛 ??λ릺?덉뒿?덈떎.");
++}
++
+diff --git a/app/community/layout.tsx b/app/community/layout.tsx
+new file mode 100644
+index 0000000..066c46e
+--- /dev/null
++++ b/app/community/layout.tsx
+@@ -0,0 +1,16 @@
++癤퓁mport type { Metadata } from "next";
++import type { ReactNode } from "react";
++
++export const metadata: Metadata = {
++  title: "PlannerDesk 而ㅻ??덊떚",
++  description: "寃利??ㅺ퀎?щ? ?꾪븳 ?ㅻТ ?뺣낫 怨듭쑀 怨듦컙?낅땲??",
++  robots: {
++    index: false,
++    follow: false,
++  },
++};
++
++export default function CommunityLayout({ children }: { children: ReactNode }) {
++  return children;
++}
++
+diff --git a/app/community/new/page.tsx b/app/community/new/page.tsx
+new file mode 100644
+index 0000000..a685299
+--- /dev/null
++++ b/app/community/new/page.tsx
+@@ -0,0 +1,42 @@
++癤퓁mport Link from "next/link";
++import { CommunityPostCategory, CommunityPostVisibility } from "@prisma/client";
++import CommunityPostEditor from "../post-editor";
++import { createCommunityPost } from "../actions";
++import { getCommunityViewer } from "../access";
++
++export const dynamic = "force-dynamic";
++
++export default async function CommunityNewPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
++  const q = await searchParams;
++  const viewer = await getCommunityViewer();
++
++  if (!viewer) {
++    return <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-[#4f5661]">濡쒓렇?????댁슜?????덉뒿?덈떎.</main>;
++  }
++  if (!viewer.canWrite) {
++    return <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-[#4f5661]">{viewer.denyReason ?? "?묒꽦 沅뚰븳???놁뒿?덈떎."}</main>;
++  }
++
++  return (
++    <main className="mx-auto max-w-3xl px-4 py-10">
++      <div className="mb-5 flex items-end justify-between gap-2">
++        <h1 className="text-2xl font-semibold text-[#102235]">而ㅻ??덊떚 湲?곌린</h1>
++        <Link href="/community" className="text-sm font-semibold text-[#102235] underline">紐⑸줉?쇰줈</Link>
++      </div>
++      {q.error ? <p className="mb-4 rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-3 py-2 text-sm text-[#8b2e2e]">{q.error}</p> : null}
++      <CommunityPostEditor
++        initial={{
++          category: CommunityPostCategory.field_tips,
++          title: "",
++          content: "",
++          visibility: CommunityPostVisibility.verified_only,
++          isPinned: false,
++        }}
++        isAdmin={viewer.isAdmin}
++        submitLabel="寃뚯떆湲 ?깅줉"
++        action={createCommunityPost}
++      />
++    </main>
++  );
++}
++
+diff --git a/app/community/page.tsx b/app/community/page.tsx
+new file mode 100644
+index 0000000..d8c46bf
+--- /dev/null
++++ b/app/community/page.tsx
+@@ -0,0 +1,155 @@
++癤퓁mport Link from "next/link";
++import { CommunityPostCategory, CommunityPostVisibility, type Prisma } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import { adminListPageCount, ADMIN_LIST_PAGE_SIZE, parseAdminListPage } from "@/lib/admin/list-pagination";
++import { getCommunityViewer } from "./access";
++import { CATEGORY_LABEL, COMMUNITY_COPY, STATUS_LABEL, formatDate, postStatusTone } from "./visibility";
++
++export const dynamic = "force-dynamic";
++
++interface SearchParams {
++  category?: string;
++  page?: string;
++  success?: string;
++  error?: string;
++}
++
++function badgeClass(tone: "green" | "gold" | "gray" | "navy" | "red") {
++  const base = "inline-flex min-h-7 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold";
++  if (tone === "green") return `${base} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]`;
++  if (tone === "gold") return `${base} border-[#d9c9a8] bg-[#f7f1e5] text-[#7b5b19]`;
++  if (tone === "navy") return `${base} border-[#c8d2dc] bg-[#eef3f7] text-[#102235]`;
++  if (tone === "red") return `${base} border-[#e8c4c4] bg-[#fdf2f2] text-[#8b2e2e]`;
++  return `${base} border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]`;
++}
++
++function buildWhere(category: string | undefined): Prisma.CommunityPostWhereInput {
++  const where: Prisma.CommunityPostWhereInput = {
++    status: "published",
++    deletedAt: null,
++    isBlind: false,
++    visibility: { in: [CommunityPostVisibility.verified_only, CommunityPostVisibility.public] },
++  };
++
++  if (category && (Object.values(CommunityPostCategory) as string[]).includes(category)) {
++    where.category = category as CommunityPostCategory;
++  }
++
++  return where;
++}
++
++function queryString(params: SearchParams, overrides: Partial<SearchParams>) {
++  const merged = { ...params, ...overrides };
++  const qs = new URLSearchParams();
++  if (merged.category && merged.category !== "all") qs.set("category", merged.category);
++  if (merged.page && merged.page !== "1") qs.set("page", merged.page);
++  return qs.toString() ? `?${qs.toString()}` : "";
++}
++
++export default async function CommunityPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
++  const params = await searchParams;
++  const viewer = await getCommunityViewer();
++
++  if (!viewer) {
++    return (
++      <main className="mx-auto max-w-4xl px-4 py-10">
++        <h1 className="text-2xl font-semibold text-[#102235]">{COMMUNITY_COPY.pageTitle}</h1>
++        <p className="mt-3 text-sm text-[#4f5661]">濡쒓렇????而ㅻ??덊떚瑜??댁슜?????덉뒿?덈떎.</p>
++      </main>
++    );
++  }
++
++  if (!viewer.canWrite && !viewer.isAdmin) {
++    return (
++      <main className="mx-auto max-w-4xl px-4 py-10">
++        <h1 className="text-2xl font-semibold text-[#102235]">{COMMUNITY_COPY.pageTitle}</h1>
++        <p className="mt-3 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm text-[#4f5661]">
++          {viewer.denyReason ?? COMMUNITY_COPY.blockedNotice}
++        </p>
++      </main>
++    );
++  }
++
++  const page = parseAdminListPage(params.page);
++  const where = buildWhere(params.category);
++  const [total, posts] = await Promise.all([
++    prisma.communityPost.count({ where }),
++    prisma.communityPost.findMany({
++      where,
++      orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
++      skip: (page - 1) * ADMIN_LIST_PAGE_SIZE,
++      take: ADMIN_LIST_PAGE_SIZE,
++      select: {
++        id: true,
++        category: true,
++        title: true,
++        status: true,
++        isPinned: true,
++        updatedAt: true,
++        createdAt: true,
++        author: { select: { id: true, name: true } },
++      },
++    }),
++  ]);
++
++  const pageCount = adminListPageCount(total);
++
++  return (
++    <main className="mx-auto max-w-5xl px-4 py-10">
++      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
++        <div>
++          <h1 className="text-3xl font-semibold tracking-tight text-[#102235]">{COMMUNITY_COPY.pageTitle}</h1>
++          <p className="mt-2 text-sm text-[#4f5661]">{COMMUNITY_COPY.pageDescription}</p>
++        </div>
++        <Link href="/community/new" className="rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8]">
++          ??湲 ?묒꽦
++        </Link>
++      </div>
++
++      {params.success ? <p className="mb-4 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-2 text-sm text-[#4f5661]">{params.success}</p> : null}
++      {params.error ? <p className="mb-4 rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-3 py-2 text-sm text-[#8b2e2e]">{params.error}</p> : null}
++
++      <form className="mb-5 grid gap-3 rounded-lg border border-[#d9c9a8] bg-white p-4 md:grid-cols-[1fr_auto_auto]" method="get">
++        <select name="category" defaultValue={params.category ?? "all"} className="min-h-11 rounded-md border border-[#d9c9a8] px-3 text-sm">
++          <option value="all">移댄뀒怨좊━ ?꾩껜</option>
++          {Object.entries(CATEGORY_LABEL).map(([value, label]) => (
++            <option key={value} value={value}>{label}</option>
++          ))}
++        </select>
++        <button type="submit" className="min-h-11 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8]">?꾪꽣</button>
++        <Link href="/community" className="min-h-11 rounded-md border border-[#d9c9a8] px-4 py-2 text-sm font-semibold text-[#102235]">珥덇린??/Link>
++      </form>
++
++      <section className="space-y-3">
++        {posts.length === 0 ? (
++          <p className="rounded-md border border-[#d9c9a8] bg-white px-4 py-5 text-sm text-[#4f5661]">?쒖떆??寃뚯떆湲???놁뒿?덈떎.</p>
++        ) : (
++          posts.map((post) => (
++            <article key={post.id} className="rounded-lg border border-[#d9c9a8] bg-white p-4">
++              <div className="mb-2 flex flex-wrap gap-2">
++                <span className={badgeClass("gray")}>{CATEGORY_LABEL[post.category]}</span>
++                <span className={badgeClass(postStatusTone(post.status))}>{STATUS_LABEL[post.status]}</span>
++                {post.isPinned ? <span className={badgeClass("navy")}>怨좎젙</span> : null}
++              </div>
++              <h2 className="text-lg font-semibold text-[#102235]">
++                <Link href={`/community/${post.id}`} className="hover:underline">{post.title}</Link>
++              </h2>
++              <p className="mt-2 text-xs text-[#5f6670]">
++                ?묒꽦??{post.author.name?.trim() || `?ъ슜??${post.author.id.slice(0, 8)}??} 쨌 ?묒꽦 {formatDate(post.createdAt.toISOString())} 쨌 ?섏젙 {formatDate(post.updatedAt.toISOString())}
++              </p>
++            </article>
++          ))
++        )}
++      </section>
++
++      <div className="mt-4 flex items-center justify-between text-sm text-[#4f5661]">
++        <p>珥?{total}嫄?쨌 {page}/{pageCount} ?섏씠吏</p>
++        <div className="flex gap-2">
++          {page > 1 ? <Link href={`/community${queryString(params, { page: String(page - 1) })}`} className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold">?댁쟾</Link> : null}
++          {page < pageCount ? <Link href={`/community${queryString(params, { page: String(page + 1) })}`} className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold">?ㅼ쓬</Link> : null}
++        </div>
++      </div>
++    </main>
++  );
++}
++
+diff --git a/app/community/post-editor.tsx b/app/community/post-editor.tsx
+new file mode 100644
+index 0000000..61b9006
+--- /dev/null
++++ b/app/community/post-editor.tsx
+@@ -0,0 +1,107 @@
++癤퓁mport type { CommunityPostCategory, CommunityPostVisibility } from "@prisma/client";
++import { CommunityPostVisibility as CommunityPostVisibilityEnum } from "@prisma/client";
++import { CATEGORY_LABEL, COMMUNITY_COPY, VISIBILITY_LABEL } from "./visibility";
++
++export type CommunityEditorInitial = {
++  category: CommunityPostCategory;
++  title: string;
++  content: string;
++  visibility: CommunityPostVisibility;
++  isPinned: boolean;
++};
++
++export default function CommunityPostEditor({
++  initial,
++  isAdmin,
++  submitLabel,
++  action,
++}: {
++  initial: CommunityEditorInitial;
++  isAdmin: boolean;
++  submitLabel: string;
++  action: (formData: FormData) => void | Promise<void>;
++}) {
++  return (
++    <form action={action} className="space-y-4 rounded-lg border border-[#d9c9a8] bg-white p-5">
++      <p className="rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-3 py-2 text-sm text-[#102235]">
++        {COMMUNITY_COPY.writeNotice}
++      </p>
++      <div className="grid gap-4 md:grid-cols-2">
++        <label className="text-sm text-[#303845]">
++          移댄뀒怨좊━
++          <select
++            name="category"
++            defaultValue={initial.category}
++            className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          >
++            {Object.entries(CATEGORY_LABEL).map(([value, label]) => (
++              <option key={value} value={value}>
++                {label}
++              </option>
++            ))}
++          </select>
++        </label>
++
++        {isAdmin ? (
++          <label className="text-sm text-[#303845]">
++            怨듦컻 踰붿쐞
++            <select
++              name="visibility"
++              defaultValue={initial.visibility}
++              className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++            >
++              {Object.entries(VISIBILITY_LABEL).map(([value, label]) => (
++                <option key={value} value={value}>
++                  {label}
++                </option>
++              ))}
++            </select>
++          </label>
++        ) : (
++          <input type="hidden" name="visibility" value={CommunityPostVisibilityEnum.verified_only} />
++        )}
++      </div>
++
++      {isAdmin ? (
++        <label className="inline-flex items-center gap-2 text-sm text-[#303845]">
++          <input type="checkbox" name="isPinned" value="true" defaultChecked={initial.isPinned} />
++          怨좎젙湲濡??쒖떆
++        </label>
++      ) : null}
++
++      <label className="block text-sm text-[#303845]">
++        ?쒕ぉ
++        <input
++          name="title"
++          defaultValue={initial.title}
++          minLength={5}
++          maxLength={100}
++          required
++          className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          placeholder="?쒕ぉ???낅젰?섏꽭??(5~100??"
++        />
++      </label>
++
++      <label className="block text-sm text-[#303845]">
++        蹂몃Ц
++        <textarea
++          name="content"
++          defaultValue={initial.content}
++          minLength={20}
++          maxLength={5000}
++          required
++          className="mt-1 min-h-64 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm leading-6"
++          placeholder="?ㅻТ 湲곗? 以묒떖?쇰줈 ?묒꽦??二쇱꽭??(20~5000??"
++        />
++      </label>
++
++      <button
++        type="submit"
++        className="min-h-11 rounded-md bg-[#10243E] px-5 text-sm font-semibold text-[#F7F3E8]"
++      >
++        {submitLabel}
++      </button>
++    </form>
++  );
++}
++
+diff --git a/app/community/validation.ts b/app/community/validation.ts
+new file mode 100644
+index 0000000..b580060
+--- /dev/null
++++ b/app/community/validation.ts
+@@ -0,0 +1,41 @@
++癤풻onst BLOCKED_PATTERNS: RegExp[] = [
++  /\b\d{2,3}-\d{3,4}-\d{4}\b/u,
++  /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/u,
++  /\b\d{6}-\d{7}\b/u,
++  /二쇰??깅줉踰덊샇|?좊텇利??댁쟾硫댄뿀|?ш텒踰덊샇|怨꾩빟踰덊샇|利앷텒踰덊샇|怨꾩쥖踰덊샇|怨좉컼紐?怨좉컼踰덊샇/u,
++  /蹂묐챸|吏꾨떒紐?吏꾨떒???뚭껄??蹂묒썝紐??섏닠紐??낆썝???댁썝??吏꾨즺湲곕줉|泥섎갑??寃?ш껐怨??쎌젣鍮?吏꾨즺鍮?u,
++  /蹂댄뿕湲?s*諛?吏湲?s*媛??蹂댁긽\s*媛??泥?뎄\s*媛??硫댁콉|遺吏湲??먰빐?ъ젙|吏湲?s*?먮떒|?쇰쭏\s*諛?u,
++  /臾댁“嫄?s*媛??諛섎뱶??s*媛??吏湲?s*??s*?섎㈃\s*?먰빐|?댁??섎㈃\s*?곗씪|100%\s*蹂댁옣|臾댁“嫄?s*吏湲?u,
++];
++
++export const COMMUNITY_VALIDATION = {
++  titleMin: 5,
++  titleMax: 100,
++  contentMin: 20,
++  contentMax: 5000,
++  reportMessageMax: 500,
++};
++
++export function sanitizeText(value: FormDataEntryValue | null): string {
++  return typeof value === "string" ? value.trim() : "";
++}
++
++export function hasBlockedContent(value: string): boolean {
++  return BLOCKED_PATTERNS.some((pattern) => pattern.test(value));
++}
++
++export function hasUnsafeHtml(value: string): boolean {
++  if (/<[^>]+>/u.test(value)) return true;
++  if (/javascript:/iu.test(value)) return true;
++  return false;
++}
++
++export function hasTooManyUrls(value: string): boolean {
++  const matches = value.match(/https?:\/\//giu);
++  return (matches?.length ?? 0) > 3;
++}
++
++export function communityBlockedMessage(): string {
++  return "蹂댄뿕湲?吏湲?媛???щ?, ?먰빐?ъ젙???먮떒, ?섎즺?뺣낫 ?댁꽍???대떦?????덈뒗 ?댁슜? 而ㅻ??덊떚??寃뚯떆?????놁뒿?덈떎. 媛쒖씤?뺣낫? 誘쇨컧?뺣낫瑜??쒖쇅?섍퀬 ?쇰컲 湲곗? 以묒떖?쇰줈 ?ㅼ떆 ?묒꽦??二쇱꽭??";
++}
++
+diff --git a/app/community/visibility.ts b/app/community/visibility.ts
+new file mode 100644
+index 0000000..e103bb7
+--- /dev/null
++++ b/app/community/visibility.ts
+@@ -0,0 +1,78 @@
++癤퓁mport {
++  CommunityPostCategory,
++  CommunityPostStatus,
++  CommunityPostVisibility,
++  CommunityReportReason,
++} from "@prisma/client";
++
++export const COMMUNITY_COPY = {
++  pageTitle: "PlannerDesk 而ㅻ??덊떚",
++  pageDescription:
++    "寃利??ㅺ퀎?щ? ?꾪븳 ?ㅻТ ?뺣낫 怨듭쑀 怨듦컙?낅땲?? 蹂댄뿕湲??먮떒, ?먰빐?ъ젙???먮떒, ?섎즺?뺣낫 ?댁꽍? ?쒓났?섏? ?딆뒿?덈떎.",
++  writeNotice:
++    "怨좉컼紐? ?곕씫泥? 怨꾩빟踰덊샇, 蹂묐챸, 吏꾨떒紐? 泥?뎄?쒕쪟 ?대?吏???낅젰?섏? 留덉꽭??",
++  blockedNotice:
++    "?꾩옱 沅뚰븳?쇰줈??而ㅻ??덊떚瑜??댁슜?????놁뒿?덈떎.",
++  blindNotice: "?댁쁺 湲곗????곕씪 釉붾씪?몃뱶 泥섎━??寃뚯떆湲?낅땲??",
++  missingNotice: "??젣?섏뿀嫄곕굹 ?묎렐?????녿뒗 寃뚯떆湲?낅땲??",
++} as const;
++
++export const CATEGORY_LABEL: Record<CommunityPostCategory, string> = {
++  notice: "怨듭?",
++  field_tips: "?ㅻТ ?명븯??,
++  claim_guide: "泥?뎄 ?덈궡",
++  system_links: "?꾩궛쨌留곹겕",
++  knowledge_qa: "吏??Q&A",
++  script_review: "臾멸뎄 寃??,
++  community_qa: "?쇰컲 Q&A",
++  other: "湲고?",
++};
++
++export const STATUS_LABEL: Record<CommunityPostStatus, string> = {
++  draft: "?꾩떆",
++  published: "寃뚯떆",
++  under_review: "寃??,
++  blinded: "釉붾씪?몃뱶",
++  archived: "蹂닿?",
++  deleted: "??젣",
++};
++
++export const VISIBILITY_LABEL: Record<CommunityPostVisibility, string> = {
++  public: "怨듦컻",
++  verified_only: "寃利??ㅺ퀎??,
++  admin_only: "愿由ъ옄",
++};
++
++export const REPORT_REASON_LABEL: Record<CommunityReportReason, string> = {
++  personal_info: "媛쒖씤?뺣낫",
++  medical_info: "?섎즺?뺣낫",
++  contract_info: "怨꾩빟?뺣낫",
++  claim_document: "泥?뎄?먮즺",
++  claim_judgment: "蹂댄뿕湲??먮떒 ?붿껌",
++  loss_adjustment: "?먰빐?ъ젙???먮떒",
++  product_solicitation: "?곹뭹 媛뺢텒",
++  fear_marketing: "怨듯룷 議곗옣",
++  spam: "愿묎퀬쨌?ㅽ뙵",
++  external_contact: "?몃? ?곕씫 ?좊룄",
++  abuse: "鍮꾨갑쨌?뺤꽕",
++  misinformation: "?덉쐞?뺣낫 ?섏떖",
++  duplicate: "以묐났 寃뚯떆",
++  other: "湲고?",
++};
++
++export function postStatusTone(
++  status: CommunityPostStatus,
++): "green" | "gold" | "gray" | "red" | "navy" {
++  if (status === CommunityPostStatus.published) return "green";
++  if (status === CommunityPostStatus.under_review) return "gold";
++  if (status === CommunityPostStatus.blinded || status === CommunityPostStatus.deleted) {
++    return "red";
++  }
++  if (status === CommunityPostStatus.archived) return "navy";
++  return "gray";
++}
++
++export function formatDate(iso: string): string {
++  return iso.slice(0, 10);
++}
++
