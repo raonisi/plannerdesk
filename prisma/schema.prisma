@@ -241,20 +241,71 @@ enum CorrectionRequestPriority {
   urgent
 }
 
+// Planner verification queue (PR-87 schema only; admin UI PR-88, public form later).
+// No PII, license images, OCR, auto-approve, or external lookup — see docs/PR-86-PLANNER-VERIFICATION-POLICY.md.
+enum PlannerVerificationStatus {
+  pending
+  under_review
+  approved
+  rejected
+  suspended
+  expired
+  deleted
+}
+
+enum PlannerType {
+  life
+  non_life
+  both
+  ga
+  agency
+  other
+}
+
+enum PlannerCareerRange {
+  under_1_year
+  one_to_three_years
+  three_to_five_years
+  five_to_ten_years
+  over_ten_years
+  not_disclosed
+}
+
+enum PlannerLicenseScope {
+  life_only
+  non_life_only
+  life_and_non_life
+  third_insurance
+  unknown
+  not_disclosed
+}
+
+enum PlannerBusinessChannel {
+  face_to_face
+  online
+  telemarketing
+  corporate
+  mixed
+  other
+  not_disclosed
+}
+
 model User {
-  id                         String              @id @default(cuid())
-  name                       String?
-  email                      String?             @unique
-  emailVerified              DateTime?
-  image                      String?
-  role                       Role                @default(anonymous_public)
-  status                     UserStatus          @default(active)
-  verificationStatus         VerificationStatus  @default(unverified)
-  accounts                   Account[]
-  sessions                   Session[]
-  resolvedCorrectionRequests CorrectionRequest[] @relation("CorrectionRequestResolvedBy")
-  createdAt                  DateTime            @default(now())
-  updatedAt                  DateTime            @updatedAt
+  id                           String                @id @default(cuid())
+  name                         String?
+  email                        String?               @unique
+  emailVerified                DateTime?
+  image                        String?
+  role                         Role                  @default(anonymous_public)
+  status                       UserStatus            @default(active)
+  verificationStatus           VerificationStatus    @default(unverified)
+  accounts                     Account[]
+  sessions                     Session[]
+  resolvedCorrectionRequests   CorrectionRequest[]   @relation("CorrectionRequestResolvedBy")
+  plannerVerifications         PlannerVerification[] @relation("PlannerVerificationUser")
+  reviewedPlannerVerifications PlannerVerification[] @relation("PlannerVerificationReviewer")
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
 }
 
 model Account {
@@ -523,4 +574,45 @@ model CorrectionRequest {
   @@index([status, createdAt])
   @@index([targetType, createdAt])
   @@index([redactionRequired, createdAt])
+}
+
+// Admin-reviewed planner verification. Grants internal RBAC only — not legal credential proof.
+// approved status does not auto-update User.role; PR-88 super_admin action required.
+model PlannerVerification {
+  id                         String                    @id @default(cuid())
+  userId                     String
+  user                       User                      @relation("PlannerVerificationUser", fields: [userId], references: [id], onDelete: Cascade)
+  status                     PlannerVerificationStatus @default(pending)
+  displayName                String
+  plannerType                PlannerType
+  affiliationName            String?
+  activityRegion             String
+  careerRange                PlannerCareerRange
+  licenseScope               PlannerLicenseScope       @default(not_disclosed)
+  businessChannel            PlannerBusinessChannel    @default(not_disclosed)
+  verificationNote           String?                   @db.Text
+  containsSensitiveData      Boolean                   @default(false)
+  requestedAt                DateTime                  @default(now())
+  reviewedAt                 DateTime?
+  reviewedById               String?
+  reviewedBy                 User?                     @relation("PlannerVerificationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  adminMemo                  String?                   @db.Text
+  rejectionReason            String?                   @db.Text
+  userFacingRejectionSummary String?
+  suspendedAt                DateTime?
+  deletedAt                  DateTime?
+  retentionUntil             DateTime?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([plannerType])
+  @@index([careerRange])
+  @@index([requestedAt])
+  @@index([reviewedAt])
+  @@index([deletedAt])
+  @@index([containsSensitiveData])
+  @@index([status, requestedAt])
+  @@index([userId, status])
 }
