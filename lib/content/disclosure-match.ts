@@ -15,13 +15,17 @@ import { disclosureLinkEntries } from "./disclosure-links";
  * excluded from per-insurer matching.
  */
 
-/** Alias slugs that map to the canonical insurer ID. */
-const SLUG_ALIASES: Record<string, string> = {
+/** 
+ * Maps the canonical insurer ID (from database/insurers.ts) to the 
+ * slug used in disclosure-links.ts entry IDs. 
+ */
+const ID_TO_SLUG: Record<string, string> = {
   "db-insurance": "db-general",
   "kb-insurance": "kb-general",
   "lotte-fire": "lotte-general",
   "lina-general": "chubb-general",
-  "yebyeol-insurance": "yebyeol-general",
+  "yebyeol-insurance": "aig-general",
+  "samsung-digital": "samsung-fire",
 };
 
 function extractInsurerSlug(entryId: string): string | null {
@@ -54,12 +58,13 @@ export function getDisclosureLinksForInsurer(
   let productDisclosure: DisclosureLinkEntry | null = null;
   let policyTerms: DisclosureLinkEntry | null = null;
 
+  const targetSlug = ID_TO_SLUG[insurerId] ?? insurerId;
+
   for (const entry of disclosureLinkEntries) {
     const slug = extractInsurerSlug(entry.id);
     if (!slug) continue;
 
-    const canonicalSlug = SLUG_ALIASES[slug] ?? slug;
-    if (canonicalSlug !== insurerId) continue;
+    if (slug !== targetSlug) continue;
 
     if (entry.category === "product_disclosure" && !productDisclosure) {
       productDisclosure = entry;
@@ -80,16 +85,22 @@ export function getDisclosureLinksForInsurer(
 export function buildDisclosureLinkIndex(): Map<string, InsurerDisclosureLinks> {
   const index = new Map<string, InsurerDisclosureLinks>();
 
+  // Invert ID_TO_SLUG to map slug back to insurerId
+  const SLUG_TO_ID: Record<string, string> = {};
+  for (const [id, slug] of Object.entries(ID_TO_SLUG)) {
+    SLUG_TO_ID[slug] = id;
+  }
+
   for (const entry of disclosureLinkEntries) {
     const slug = extractInsurerSlug(entry.id);
     if (!slug) continue;
 
-    const canonicalId = SLUG_ALIASES[slug] ?? slug;
+    const insurerId = SLUG_TO_ID[slug] ?? slug;
 
-    if (!index.has(canonicalId)) {
-      index.set(canonicalId, { productDisclosure: null, policyTerms: null });
+    if (!index.has(insurerId)) {
+      index.set(insurerId, { productDisclosure: null, policyTerms: null });
     }
-    const links = index.get(canonicalId)!;
+    const links = index.get(insurerId)!;
 
     if (entry.category === "product_disclosure" && !links.productDisclosure) {
       links.productDisclosure = entry;
