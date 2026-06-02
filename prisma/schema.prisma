@@ -290,6 +290,60 @@ enum PlannerBusinessChannel {
   not_disclosed
 }
 
+// Community post schema (PR-90 schema only; public/admin UI in PR-91+).
+// Never store customer PII, medical data, claim docs, files, OCR, or payout judgments.
+enum CommunityPostCategory {
+  notice
+  field_tips
+  claim_guide
+  system_links
+  knowledge_qa
+  script_review
+  community_qa
+  other
+}
+
+enum CommunityPostStatus {
+  draft
+  published
+  under_review
+  blinded
+  archived
+  deleted
+}
+
+enum CommunityPostVisibility {
+  public
+  verified_only
+  admin_only
+}
+
+enum CommunityReportReason {
+  personal_info
+  medical_info
+  contract_info
+  claim_document
+  claim_judgment
+  loss_adjustment
+  product_solicitation
+  fear_marketing
+  spam
+  external_contact
+  abuse
+  misinformation
+  duplicate
+  other
+}
+
+enum CommunityReportStatus {
+  new
+  reviewing
+  accepted
+  rejected
+  closed
+  deleted
+}
+
 model User {
   id                           String                @id @default(cuid())
   name                         String?
@@ -304,6 +358,12 @@ model User {
   resolvedCorrectionRequests   CorrectionRequest[]   @relation("CorrectionRequestResolvedBy")
   plannerVerifications         PlannerVerification[] @relation("PlannerVerificationUser")
   reviewedPlannerVerifications PlannerVerification[] @relation("PlannerVerificationReviewer")
+  authoredCommunityPosts       CommunityPost[]       @relation("CommunityPostAuthor")
+  reviewedCommunityPosts       CommunityPost[]       @relation("CommunityPostReviewer")
+  blindedCommunityPosts        CommunityPost[]       @relation("CommunityPostBlindedBy")
+  deletedCommunityPosts        CommunityPost[]       @relation("CommunityPostDeletedBy")
+  submittedCommunityReports    CommunityReport[]     @relation("CommunityReportReporter")
+  reviewedCommunityReports     CommunityReport[]     @relation("CommunityReportReviewer")
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
 }
@@ -615,4 +675,83 @@ model PlannerVerification {
   @@index([containsSensitiveData])
   @@index([status, requestedAt])
   @@index([userId, status])
+}
+
+// Community posts authored by verified planners/admins (RBAC checks in PR-91 server layer).
+// Visibility and status guard public exposure; no file attachment fields by design.
+model CommunityPost {
+  id          String                  @id @default(cuid())
+  authorId    String
+  author      User                    @relation("CommunityPostAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  category    CommunityPostCategory
+  title       String
+  content     String                  @db.Text
+  status      CommunityPostStatus     @default(draft)
+  visibility  CommunityPostVisibility @default(verified_only)
+  isPinned    Boolean                 @default(false)
+  isBlind     Boolean                 @default(false)
+  blindReason CommunityReportReason?
+
+  blindReasonText String?   @db.Text
+  blindedAt       DateTime?
+  blindedById     String?
+  blindedBy       User?     @relation("CommunityPostBlindedBy", fields: [blindedById], references: [id], onDelete: SetNull)
+  reviewedAt      DateTime?
+  reviewedById    String?
+  reviewedBy      User?     @relation("CommunityPostReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  deletedAt       DateTime?
+  deletedById     String?
+  deletedBy       User?     @relation("CommunityPostDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+  adminMemo       String?   @db.Text
+  reportCount     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  reports CommunityReport[]
+
+  @@index([authorId])
+  @@index([category])
+  @@index([status])
+  @@index([visibility])
+  @@index([isPinned])
+  @@index([isBlind])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([deletedAt])
+  @@index([status, createdAt])
+  @@index([category, status, createdAt])
+  @@index([visibility, status, createdAt])
+  @@index([authorId, createdAt])
+  @@index([isBlind, status, createdAt])
+}
+
+// Minimal manual moderation report queue for community posts.
+// No screenshots/files/OCR or auto-moderation result fields.
+model CommunityReport {
+  id           String                @id @default(cuid())
+  postId       String
+  post         CommunityPost         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId   String
+  reporter     User                  @relation("CommunityReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reason       CommunityReportReason
+  status       CommunityReportStatus @default(new)
+  message      String?               @db.Text
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?                 @relation("CommunityReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  adminMemo    String?               @db.Text
+  deletedAt    DateTime?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@unique([postId, reporterId, reason])
+  @@index([postId])
+  @@index([reporterId])
+  @@index([reason])
+  @@index([status])
+  @@index([createdAt])
+  @@index([reviewedAt])
+  @@index([postId, status])
+  @@index([status, createdAt])
+  @@index([reporterId, postId])
 }
