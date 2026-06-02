@@ -1,0 +1,1760 @@
+diff --git a/app/admin/planner-verifications/[id]/page.tsx b/app/admin/planner-verifications/[id]/page.tsx
+new file mode 100644
+index 0000000..909748c
+--- /dev/null
++++ b/app/admin/planner-verifications/[id]/page.tsx
+@@ -0,0 +1,120 @@
++import Link from "next/link";
++import { notFound } from "next/navigation";
++import type { Prisma } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import { surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import { getPlannerVerificationAdminAccess } from "../access";
++import PlannerVerificationDetailPanel, {
++  type PlannerVerificationDetailData,
++} from "../planner-verification-detail-panel";
++import {
++  ADMIN_PLANNER_VERIFICATION_COPY,
++  formatApplicantLabel,
++} from "../visibility";
++
++export const dynamic = "force-dynamic";
++
++interface PageProps {
++  params: Promise<{ id: string }>;
++  searchParams: Promise<{ error?: string }>;
++}
++
++type DetailRecord = Prisma.PlannerVerificationGetPayload<{
++  include: {
++    user: { select: { id: true; name: true } };
++    reviewedBy: { select: { id: true; name: true } };
++  };
++}>;
++
++function serializeDetail(row: DetailRecord): PlannerVerificationDetailData {
++  return {
++    id: row.id,
++    displayName: row.displayName,
++    applicant: row.user,
++    status: row.status,
++    plannerType: row.plannerType,
++    affiliationName: row.affiliationName,
++    activityRegion: row.activityRegion,
++    careerRange: row.careerRange,
++    licenseScope: row.licenseScope,
++    businessChannel: row.businessChannel,
++    verificationNote: row.verificationNote,
++    containsSensitiveData: row.containsSensitiveData,
++    requestedAt: row.requestedAt.toISOString(),
++    reviewedAt: row.reviewedAt?.toISOString() ?? null,
++    reviewedByLabel: row.reviewedBy
++      ? formatApplicantLabel(row.reviewedBy)
++      : null,
++    adminMemo: row.adminMemo,
++    rejectionReason: row.rejectionReason,
++    userFacingRejectionSummary: row.userFacingRejectionSummary,
++    suspendedAt: row.suspendedAt?.toISOString() ?? null,
++    deletedAt: row.deletedAt?.toISOString() ?? null,
++    retentionUntil: row.retentionUntil?.toISOString() ?? null,
++    createdAt: row.createdAt.toISOString(),
++    updatedAt: row.updatedAt.toISOString(),
++  };
++}
++
++export default async function AdminPlannerVerificationDetailPage({
++  params,
++  searchParams,
++}: PageProps) {
++  const access = await getPlannerVerificationAdminAccess();
++
++  if (access.status === "locked") {
++    return <AdminLockedState />;
++  }
++
++  if (access.status === "denied") {
++    return <AdminAccessDeniedState />;
++  }
++
++  const { id } = await params;
++  const resolvedSearch = await searchParams;
++
++  const record = await prisma.plannerVerification.findUnique({
++    where: { id },
++    include: {
++      user: { select: { id: true, name: true } },
++      reviewedBy: { select: { id: true, name: true } },
++    },
++  });
++
++  if (!record) {
++    notFound();
++  }
++
++  const row = serializeDetail(record);
++
++  return (
++    <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
++      <div className="mx-auto max-w-5xl">
++        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
++          <div>
++            <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
++            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">
++              {ADMIN_PLANNER_VERIFICATION_COPY.detailTitle}
++            </h1>
++          </div>
++          <Link
++            href="/admin/planner-verifications"
++            className="inline-flex items-center justify-center rounded-md border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#102235] hover:bg-[#f7f1e5]"
++          >
++            목록으로
++          </Link>
++        </div>
++
++        {resolvedSearch.error ? (
++          <div className="mb-5 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm text-[#4f5661]">
++            {resolvedSearch.error}
++          </div>
++        ) : null}
++
++        <PlannerVerificationDetailPanel row={row} />
++      </div>
++    </main>
++  );
++}
+diff --git a/app/admin/planner-verifications/access.ts b/app/admin/planner-verifications/access.ts
+new file mode 100644
+index 0000000..a836922
+--- /dev/null
++++ b/app/admin/planner-verifications/access.ts
+@@ -0,0 +1,7 @@
++export {
++  getAdminAccess as getPlannerVerificationAdminAccess,
++  requireContentManagerAccess as requirePlannerVerificationContentManager,
++  getSessionUserId,
++  type AdminAccessState,
++  type AdminSession,
++} from "@/lib/auth/access";
+diff --git a/app/admin/planner-verifications/actions.ts b/app/admin/planner-verifications/actions.ts
+new file mode 100644
+index 0000000..3a241bc
+--- /dev/null
++++ b/app/admin/planner-verifications/actions.ts
+@@ -0,0 +1,212 @@
++"use server";
++
++import {
++  PlannerVerificationStatus,
++  type PlannerVerification,
++  type Prisma,
++} from "@prisma/client";
++import { revalidatePath } from "next/cache";
++import { prisma } from "@/lib/prisma";
++import { handleAdminUnauthorized, redirectWithError } from "@/lib/admin/actions";
++import {
++  getSessionUserId,
++  requirePlannerVerificationContentManager,
++} from "./access";
++import { isReviewedStatus } from "./visibility";
++
++const ADMIN_LIST_PATH = "/admin/planner-verifications";
++const TEXT_MAX_LENGTH = 2_000;
++
++const STATUS_VALUES = new Set<string>(
++  Object.values(PlannerVerificationStatus) as string[],
++);
++
++export type PlannerVerificationAdminActionResult =
++  | { ok: true }
++  | { ok: false; message: string };
++
++function revalidatePlannerVerificationPaths(id: string) {
++  revalidatePath(ADMIN_LIST_PATH);
++  revalidatePath(`${ADMIN_LIST_PATH}/${id}`);
++}
++
++function parseStatus(value: string): PlannerVerificationStatus | null {
++  return STATUS_VALUES.has(value) ? (value as PlannerVerificationStatus) : null;
++}
++
++function optionalText(value: FormDataEntryValue | null): string | null {
++  if (typeof value !== "string") return null;
++  const trimmed = value.trim();
++  if (!trimmed) return null;
++  if (trimmed.length > TEXT_MAX_LENGTH) {
++    return trimmed.slice(0, TEXT_MAX_LENGTH);
++  }
++  return trimmed;
++}
++
++function parseBooleanField(value: FormDataEntryValue | null): boolean | null {
++  if (value === "true") return true;
++  if (value === "false") return false;
++  return null;
++}
++
++async function loadVerificationOrRedirect(id: string) {
++  const row = await prisma.plannerVerification.findUnique({ where: { id } });
++  if (!row) {
++    redirectWithError(ADMIN_LIST_PATH, "검증 신청을 찾을 수 없습니다.");
++  }
++  return row;
++}
++
++function buildStatusUpdateData(
++  status: PlannerVerificationStatus,
++  userId: string | null,
++  existing: PlannerVerification,
++): Prisma.PlannerVerificationUpdateInput {
++  const now = new Date();
++  const data: Prisma.PlannerVerificationUpdateInput = { status };
++
++  if (
++    status === PlannerVerificationStatus.under_review &&
++    userId
++  ) {
++    data.reviewedBy = { connect: { id: userId } };
++  }
++
++  if (isReviewedStatus(status)) {
++    data.reviewedAt = now;
++    if (userId) {
++      data.reviewedBy = { connect: { id: userId } };
++    }
++  }
++
++  if (status === PlannerVerificationStatus.approved) {
++    data.suspendedAt = null;
++    data.rejectionReason = null;
++    data.userFacingRejectionSummary = null;
++  }
++
++  if (status === PlannerVerificationStatus.suspended) {
++    data.suspendedAt = now;
++  }
++
++  if (
++    status !== PlannerVerificationStatus.suspended &&
++    status !== PlannerVerificationStatus.deleted &&
++    existing.status === PlannerVerificationStatus.suspended &&
++    status === PlannerVerificationStatus.approved
++  ) {
++    data.suspendedAt = null;
++  }
++
++  if (status === PlannerVerificationStatus.deleted) {
++    data.deletedAt = now;
++  } else if (existing.deletedAt) {
++    data.deletedAt = existing.deletedAt;
++  }
++
++  return data;
++}
++
++export async function updatePlannerVerificationStatus(
++  id: string,
++  formData: FormData,
++): Promise<PlannerVerificationAdminActionResult> {
++  try {
++    const session = await requirePlannerVerificationContentManager();
++    const status = parseStatus(String(formData.get("status") ?? ""));
++    if (!status) {
++      return { ok: false, message: "유효하지 않은 상태입니다." };
++    }
++
++    const userId = getSessionUserId(session);
++    const existing = await loadVerificationOrRedirect(id);
++    const data = buildStatusUpdateData(status, userId, existing);
++
++    await prisma.plannerVerification.update({
++      where: { id },
++      data,
++    });
++
++    revalidatePlannerVerificationPaths(id);
++    return { ok: true };
++  } catch (error) {
++    handleAdminUnauthorized(ADMIN_LIST_PATH, error);
++    return { ok: false, message: "상태 변경에 실패했습니다." };
++  }
++}
++
++export async function updatePlannerVerificationAdminMemo(
++  id: string,
++  formData: FormData,
++): Promise<PlannerVerificationAdminActionResult> {
++  try {
++    await requirePlannerVerificationContentManager();
++    const adminMemo = optionalText(formData.get("adminMemo"));
++
++    await prisma.plannerVerification.update({
++      where: { id },
++      data: { adminMemo },
++    });
++
++    revalidatePlannerVerificationPaths(id);
++    return { ok: true };
++  } catch (error) {
++    handleAdminUnauthorized(ADMIN_LIST_PATH, error);
++    return { ok: false, message: "관리자 메모 저장에 실패했습니다." };
++  }
++}
++
++export async function updatePlannerVerificationRejectionFields(
++  id: string,
++  formData: FormData,
++): Promise<PlannerVerificationAdminActionResult> {
++  try {
++    await requirePlannerVerificationContentManager();
++    const rejectionReason = optionalText(formData.get("rejectionReason"));
++    const userFacingRejectionSummary = optionalText(
++      formData.get("userFacingRejectionSummary"),
++    );
++
++    await prisma.plannerVerification.update({
++      where: { id },
++      data: {
++        rejectionReason,
++        userFacingRejectionSummary,
++      },
++    });
++
++    revalidatePlannerVerificationPaths(id);
++    return { ok: true };
++  } catch (error) {
++    handleAdminUnauthorized(ADMIN_LIST_PATH, error);
++    return { ok: false, message: "거절 사유 저장에 실패했습니다." };
++  }
++}
++
++export async function updatePlannerVerificationSensitiveFlag(
++  id: string,
++  formData: FormData,
++): Promise<PlannerVerificationAdminActionResult> {
++  try {
++    await requirePlannerVerificationContentManager();
++    const containsSensitiveData = parseBooleanField(
++      formData.get("containsSensitiveData"),
++    );
++
++    if (containsSensitiveData === null) {
++      return { ok: false, message: "민감정보 플래그 값이 올바르지 않습니다." };
++    }
++
++    await prisma.plannerVerification.update({
++      where: { id },
++      data: { containsSensitiveData },
++    });
++
++    revalidatePlannerVerificationPaths(id);
++    return { ok: true };
++  } catch (error) {
++    handleAdminUnauthorized(ADMIN_LIST_PATH, error);
++    return { ok: false, message: "민감정보 플래그 저장에 실패했습니다." };
++  }
++}
+diff --git a/app/admin/planner-verifications/page.tsx b/app/admin/planner-verifications/page.tsx
+new file mode 100644
+index 0000000..224d45b
+--- /dev/null
++++ b/app/admin/planner-verifications/page.tsx
+@@ -0,0 +1,502 @@
++import Link from "next/link";
++import {
++  PlannerBusinessChannel,
++  PlannerCareerRange,
++  PlannerLicenseScope,
++  PlannerType,
++  PlannerVerificationStatus,
++  type Prisma,
++} from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import {
++  adminListPageCount,
++  ADMIN_LIST_PAGE_SIZE,
++  parseAdminListPage,
++} from "@/lib/admin/list-pagination";
++import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
++import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
++import { getPlannerVerificationAdminAccess } from "./access";
++import PlannerVerificationsAdminList, {
++  type PlannerVerificationListRow,
++} from "./planner-verifications-admin-list";
++import {
++  ADMIN_PLANNER_VERIFICATION_COPY,
++  BUSINESS_CHANNEL_LABEL,
++  CAREER_RANGE_LABEL,
++  LICENSE_SCOPE_LABEL,
++  PLANNER_TYPE_LABEL,
++  STATUS_LABEL,
++  formatApplicantLabel,
++} from "./visibility";
++
++export const dynamic = "force-dynamic";
++
++interface SearchParams {
++  error?: string;
++  q?: string;
++  status?: string;
++  plannerType?: string;
++  activityRegion?: string;
++  careerRange?: string;
++  licenseScope?: string;
++  businessChannel?: string;
++  reviewed?: string;
++  suspended?: string;
++  showDeleted?: string;
++  requestedFrom?: string;
++  requestedTo?: string;
++  page?: string;
++}
++
++function parseDateStart(value: string | undefined): Date | undefined {
++  if (!value?.trim()) return undefined;
++  const d = new Date(`${value.trim()}T00:00:00.000Z`);
++  return Number.isNaN(d.getTime()) ? undefined : d;
++}
++
++function parseDateEnd(value: string | undefined): Date | undefined {
++  if (!value?.trim()) return undefined;
++  const d = new Date(`${value.trim()}T23:59:59.999Z`);
++  return Number.isNaN(d.getTime()) ? undefined : d;
++}
++
++function buildWhere(params: SearchParams): Prisma.PlannerVerificationWhereInput {
++  const and: Prisma.PlannerVerificationWhereInput[] = [];
++
++  if (params.showDeleted !== "true") {
++    and.push({ deletedAt: null });
++  }
++
++  const query = params.q?.trim();
++  if (query) {
++    and.push({
++      OR: [
++        { displayName: { contains: query, mode: "insensitive" } },
++        { affiliationName: { contains: query, mode: "insensitive" } },
++        { adminMemo: { contains: query, mode: "insensitive" } },
++        { rejectionReason: { contains: query, mode: "insensitive" } },
++      ],
++    });
++  }
++
++  if (
++    params.status &&
++    params.status !== "all" &&
++    (Object.values(PlannerVerificationStatus) as string[]).includes(
++      params.status,
++    )
++  ) {
++    and.push({ status: params.status as PlannerVerificationStatus });
++  }
++
++  if (
++    params.plannerType &&
++    params.plannerType !== "all" &&
++    (Object.values(PlannerType) as string[]).includes(params.plannerType)
++  ) {
++    and.push({ plannerType: params.plannerType as PlannerType });
++  }
++
++  const region = params.activityRegion?.trim();
++  if (region) {
++    and.push({
++      activityRegion: { contains: region, mode: "insensitive" },
++    });
++  }
++
++  if (
++    params.careerRange &&
++    params.careerRange !== "all" &&
++    (Object.values(PlannerCareerRange) as string[]).includes(params.careerRange)
++  ) {
++    and.push({ careerRange: params.careerRange as PlannerCareerRange });
++  }
++
++  if (
++    params.licenseScope &&
++    params.licenseScope !== "all" &&
++    (Object.values(PlannerLicenseScope) as string[]).includes(
++      params.licenseScope,
++    )
++  ) {
++    and.push({ licenseScope: params.licenseScope as PlannerLicenseScope });
++  }
++
++  if (
++    params.businessChannel &&
++    params.businessChannel !== "all" &&
++    (Object.values(PlannerBusinessChannel) as string[]).includes(
++      params.businessChannel,
++    )
++  ) {
++    and.push({
++      businessChannel: params.businessChannel as PlannerBusinessChannel,
++    });
++  }
++
++  if (params.reviewed === "true") {
++    and.push({ reviewedAt: { not: null } });
++  }
++  if (params.reviewed === "false") {
++    and.push({ reviewedAt: null });
++  }
++
++  if (params.suspended === "true") {
++    and.push({
++      OR: [
++        { status: PlannerVerificationStatus.suspended },
++        { suspendedAt: { not: null } },
++      ],
++    });
++  }
++  if (params.suspended === "false") {
++    and.push({
++      status: { not: PlannerVerificationStatus.suspended },
++      suspendedAt: null,
++    });
++  }
++
++  const requestedFrom = parseDateStart(params.requestedFrom);
++  const requestedTo = parseDateEnd(params.requestedTo);
++  if (requestedFrom || requestedTo) {
++    const requestedAt: Prisma.DateTimeFilter = {};
++    if (requestedFrom) requestedAt.gte = requestedFrom;
++    if (requestedTo) requestedAt.lte = requestedTo;
++    and.push({ requestedAt });
++  }
++
++  if (and.length === 0) return {};
++  if (and.length === 1) return and[0]!;
++  return { AND: and };
++}
++
++function buildOrderBy(): Prisma.PlannerVerificationOrderByWithRelationInput[] {
++  return [{ status: "asc" }, { requestedAt: "desc" }];
++}
++
++function filterQueryString(
++  params: SearchParams,
++  overrides: Partial<SearchParams>,
++): string {
++  const merged = { ...params, ...overrides };
++  const parts = new URLSearchParams();
++  if (merged.q) parts.set("q", merged.q);
++  if (merged.status && merged.status !== "all") parts.set("status", merged.status);
++  if (merged.plannerType && merged.plannerType !== "all") {
++    parts.set("plannerType", merged.plannerType);
++  }
++  if (merged.activityRegion) parts.set("activityRegion", merged.activityRegion);
++  if (merged.careerRange && merged.careerRange !== "all") {
++    parts.set("careerRange", merged.careerRange);
++  }
++  if (merged.licenseScope && merged.licenseScope !== "all") {
++    parts.set("licenseScope", merged.licenseScope);
++  }
++  if (merged.businessChannel && merged.businessChannel !== "all") {
++    parts.set("businessChannel", merged.businessChannel);
++  }
++  if (merged.reviewed && merged.reviewed !== "all") {
++    parts.set("reviewed", merged.reviewed);
++  }
++  if (merged.suspended && merged.suspended !== "all") {
++    parts.set("suspended", merged.suspended);
++  }
++  if (merged.showDeleted === "true") parts.set("showDeleted", "true");
++  if (merged.requestedFrom) parts.set("requestedFrom", merged.requestedFrom);
++  if (merged.requestedTo) parts.set("requestedTo", merged.requestedTo);
++  if (merged.page && merged.page !== "1") parts.set("page", merged.page);
++  const qs = parts.toString();
++  return qs ? `?${qs}` : "";
++}
++
++function formatReviewerLabel(user: {
++  id: string;
++  name: string | null;
++} | null): string | null {
++  if (!user) return null;
++  return formatApplicantLabel(user);
++}
++
++function serializeRows(
++  rows: Prisma.PlannerVerificationGetPayload<{
++    include: {
++      user: { select: { id: true; name: true } };
++      reviewedBy: { select: { id: true; name: true } };
++    };
++  }>[],
++): PlannerVerificationListRow[] {
++  return rows.map((row) => ({
++    id: row.id,
++    displayName: row.displayName,
++    applicantLabel: formatApplicantLabel(row.user),
++    status: row.status,
++    plannerType: row.plannerType,
++    affiliationName: row.affiliationName,
++    activityRegion: row.activityRegion,
++    careerRange: row.careerRange,
++    licenseScope: row.licenseScope,
++    businessChannel: row.businessChannel,
++    containsSensitiveData: row.containsSensitiveData,
++    requestedAt: row.requestedAt.toISOString(),
++    reviewedAt: row.reviewedAt?.toISOString() ?? null,
++    reviewedByLabel: formatReviewerLabel(row.reviewedBy),
++    suspendedAt: row.suspendedAt?.toISOString() ?? null,
++    deletedAt: row.deletedAt?.toISOString() ?? null,
++  }));
++}
++
++export default async function AdminPlannerVerificationsPage({
++  searchParams,
++}: {
++  searchParams: Promise<SearchParams>;
++}) {
++  const access = await getPlannerVerificationAdminAccess();
++
++  if (access.status === "locked") {
++    return <AdminLockedState />;
++  }
++
++  if (access.status === "denied") {
++    return <AdminAccessDeniedState />;
++  }
++
++  const resolved = await searchParams;
++  const page = parseAdminListPage(resolved.page);
++  const where = buildWhere(resolved);
++
++  let total = 0;
++  let rows: PlannerVerificationListRow[] = [];
++  let loadFailed = false;
++
++  try {
++    const [count, data] = await Promise.all([
++      prisma.plannerVerification.count({ where }),
++      prisma.plannerVerification.findMany({
++        where,
++        orderBy: buildOrderBy(),
++        skip: (page - 1) * ADMIN_LIST_PAGE_SIZE,
++        take: ADMIN_LIST_PAGE_SIZE,
++        include: {
++          user: { select: { id: true, name: true } },
++          reviewedBy: { select: { id: true, name: true } },
++        },
++      }),
++    ]);
++    total = count;
++    rows = serializeRows(data);
++  } catch {
++    loadFailed = true;
++  }
++
++  const pageCount = adminListPageCount(total);
++
++  return (
++    <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
++      <div className="mx-auto max-w-7xl">
++        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
++          <div>
++            <p className={textStyles.eyebrow}>PlannerDesk Admin</p>
++            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#102235]">
++              {ADMIN_PLANNER_VERIFICATION_COPY.pageTitle}
++            </h1>
++            <p className={`${textStyles.body} mt-3 max-w-2xl`}>
++              {ADMIN_PLANNER_VERIFICATION_COPY.pageDescription}
++            </p>
++          </div>
++          <Link
++            href="/admin"
++            className="inline-flex items-center justify-center rounded-md border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#102235] shadow-sm transition hover:bg-[#f7f1e5]"
++          >
++            관리자 홈
++          </Link>
++        </div>
++
++        {resolved.error ? (
++          <div className="mb-5 rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-4 py-3 text-sm text-[#4f5661]">
++            {resolved.error}
++          </div>
++        ) : null}
++
++        {loadFailed ? (
++          <AdminPageStateNotice kind="error" className="mb-5" />
++        ) : (
++          <>
++            <div className="mb-5">
++              <AdminSafetyNotice
++                policySummary={ADMIN_PLANNER_VERIFICATION_COPY.policySummary}
++              />
++            </div>
++
++            <form
++              className={`${surfaces.card} ${borders.default} ${shadows.card} mb-5 grid gap-3 rounded-lg p-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6`}
++              method="get"
++            >
++              <input
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm lg:col-span-2"
++                name="q"
++                placeholder="표시 이름·소속·관리자 메모·거절 사유 검색"
++                defaultValue={resolved.q ?? ""}
++              />
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="status"
++                defaultValue={resolved.status ?? "all"}
++              >
++                <option value="all">상태 전체</option>
++                {Object.values(PlannerVerificationStatus).map((value) => (
++                  <option key={value} value={value}>
++                    {STATUS_LABEL[value]}
++                  </option>
++                ))}
++              </select>
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="plannerType"
++                defaultValue={resolved.plannerType ?? "all"}
++              >
++                <option value="all">유형 전체</option>
++                {Object.values(PlannerType).map((value) => (
++                  <option key={value} value={value}>
++                    {PLANNER_TYPE_LABEL[value]}
++                  </option>
++                ))}
++              </select>
++              <input
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="activityRegion"
++                placeholder="활동 지역"
++                defaultValue={resolved.activityRegion ?? ""}
++              />
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="careerRange"
++                defaultValue={resolved.careerRange ?? "all"}
++              >
++                <option value="all">경력 전체</option>
++                {Object.values(PlannerCareerRange).map((value) => (
++                  <option key={value} value={value}>
++                    {CAREER_RANGE_LABEL[value]}
++                  </option>
++                ))}
++              </select>
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="licenseScope"
++                defaultValue={resolved.licenseScope ?? "all"}
++              >
++                <option value="all">자격 범위 전체</option>
++                {Object.values(PlannerLicenseScope).map((value) => (
++                  <option key={value} value={value}>
++                    {LICENSE_SCOPE_LABEL[value]}
++                  </option>
++                ))}
++              </select>
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="businessChannel"
++                defaultValue={resolved.businessChannel ?? "all"}
++              >
++                <option value="all">업무 채널 전체</option>
++                {Object.values(PlannerBusinessChannel).map((value) => (
++                  <option key={value} value={value}>
++                    {BUSINESS_CHANNEL_LABEL[value]}
++                  </option>
++                ))}
++              </select>
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="reviewed"
++                defaultValue={resolved.reviewed ?? "all"}
++              >
++                <option value="all">검토 완료 전체</option>
++                <option value="true">검토 완료</option>
++                <option value="false">미검토</option>
++              </select>
++              <select
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="suspended"
++                defaultValue={resolved.suspended ?? "all"}
++              >
++                <option value="all">정지 여부 전체</option>
++                <option value="true">정지</option>
++                <option value="false">정지 아님</option>
++              </select>
++              <input
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="requestedFrom"
++                type="date"
++                defaultValue={resolved.requestedFrom ?? ""}
++                aria-label="신청일 시작"
++              />
++              <input
++                className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                name="requestedTo"
++                type="date"
++                defaultValue={resolved.requestedTo ?? ""}
++                aria-label="신청일 종료"
++              />
++              <label className="flex min-h-11 items-center gap-2 rounded-md border border-[#d9c9a8] bg-white px-3 text-xs text-[#4f5661]">
++                <input
++                  defaultChecked={resolved.showDeleted === "true"}
++                  name="showDeleted"
++                  type="checkbox"
++                  value="true"
++                />
++                삭제 포함
++              </label>
++              <button
++                type="submit"
++                className="min-h-11 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] lg:col-span-2"
++              >
++                필터
++              </button>
++            </form>
++
++            {rows.length === 0 ? (
++              <AdminPageStateNotice kind="empty" className="mb-5" />
++            ) : null}
++
++            <PlannerVerificationsAdminList rows={rows} />
++
++            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-[#4f5661]">
++              <p>
++                총 {total}건 · {page}/{pageCount} 페이지
++              </p>
++              <div className="flex gap-2">
++                {page > 1 ? (
++                  <Link
++                    href={`/admin/planner-verifications${filterQueryString(resolved, {
++                      page: String(page - 1),
++                    })}`}
++                    className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold hover:bg-[#f7f1e5]"
++                  >
++                    이전
++                  </Link>
++                ) : null}
++                {page < pageCount ? (
++                  <Link
++                    href={`/admin/planner-verifications${filterQueryString(resolved, {
++                      page: String(page + 1),
++                    })}`}
++                    className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold hover:bg-[#f7f1e5]"
++                  >
++                    다음
++                  </Link>
++                ) : null}
++                <Link
++                  href="/admin/planner-verifications"
++                  className="rounded border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold hover:bg-[#f7f1e5]"
++                >
++                  필터 초기화
++                </Link>
++              </div>
++            </div>
++          </>
++        )}
++      </div>
++    </main>
++  );
++}
+diff --git a/app/admin/planner-verifications/planner-verification-detail-panel.tsx b/app/admin/planner-verifications/planner-verification-detail-panel.tsx
+new file mode 100644
+index 0000000..4e2d7c3
+--- /dev/null
++++ b/app/admin/planner-verifications/planner-verification-detail-panel.tsx
+@@ -0,0 +1,451 @@
++"use client";
++
++import { useRouter } from "next/navigation";
++import { useState, useTransition } from "react";
++import type {
++  PlannerBusinessChannel,
++  PlannerCareerRange,
++  PlannerLicenseScope,
++  PlannerType,
++  PlannerVerificationStatus,
++} from "@prisma/client";
++import { borders, shadows, surfaces } from "@/lib/design-system";
++import {
++  updatePlannerVerificationAdminMemo,
++  updatePlannerVerificationRejectionFields,
++  updatePlannerVerificationSensitiveFlag,
++  updatePlannerVerificationStatus,
++} from "./actions";
++import {
++  ADMIN_PLANNER_VERIFICATION_COPY,
++  STATUS_LABEL,
++  WRITABLE_STATUSES,
++  businessChannelLabel,
++  careerRangeLabel,
++  formatApplicantLabel,
++  licenseScopeLabel,
++  plannerTypeLabel,
++  statusTone,
++} from "./visibility";
++
++const badgeBase =
++  "inline-flex min-h-7 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold";
++
++function badgeClass(tone: "green" | "gold" | "gray" | "navy" | "red") {
++  if (tone === "green") return `${badgeBase} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]`;
++  if (tone === "gold") return `${badgeBase} border-[#d9c9a8] bg-[#f7f1e5] text-[#7b5b19]`;
++  if (tone === "navy") return `${badgeBase} border-[#c8d2dc] bg-[#eef3f7] text-[#102235]`;
++  if (tone === "red") return `${badgeBase} border-[#e8c4c4] bg-[#fdf2f2] text-[#8b2e2e]`;
++  return `${badgeBase} border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]`;
++}
++
++export type PlannerVerificationDetailData = {
++  id: string;
++  displayName: string;
++  applicant: { id: string; name: string | null };
++  status: PlannerVerificationStatus;
++  plannerType: PlannerType;
++  affiliationName: string | null;
++  activityRegion: string;
++  careerRange: PlannerCareerRange;
++  licenseScope: PlannerLicenseScope;
++  businessChannel: PlannerBusinessChannel;
++  verificationNote: string | null;
++  containsSensitiveData: boolean;
++  requestedAt: string;
++  reviewedAt: string | null;
++  reviewedByLabel: string | null;
++  adminMemo: string | null;
++  rejectionReason: string | null;
++  userFacingRejectionSummary: string | null;
++  suspendedAt: string | null;
++  deletedAt: string | null;
++  retentionUntil: string | null;
++  createdAt: string;
++  updatedAt: string;
++};
++
++function formatDateTime(iso: string | null): string {
++  if (!iso) return "—";
++  return iso.replace("T", " ").slice(0, 16);
++}
++
++export default function PlannerVerificationDetailPanel({
++  row,
++}: {
++  row: PlannerVerificationDetailData;
++}) {
++  const router = useRouter();
++  const [isPending, startTransition] = useTransition();
++  const [feedback, setFeedback] = useState<string | null>(null);
++  const [noteExpanded, setNoteExpanded] = useState(!row.containsSensitiveData);
++
++  const runAction = (
++    action: () => Promise<{ ok: boolean; message?: string }>,
++    successMessage: string,
++  ) => {
++    setFeedback(null);
++    startTransition(async () => {
++      const result = await action();
++      if (result.ok) {
++        setFeedback(successMessage);
++        router.refresh();
++        return;
++      }
++      setFeedback(result.message ?? "처리에 실패했습니다.");
++    });
++  };
++
++  const handleStatusSubmit = (formData: FormData) => {
++    const status = String(formData.get("status") ?? "");
++    if (
++      status === "deleted" &&
++      !window.confirm(
++        "이 검증 신청을 삭제 처리합니다. 목록 기본 조회에서 제외되며 public 데이터는 변경되지 않습니다. 계속할까요?",
++      )
++    ) {
++      return;
++    }
++    if (
++      status === "suspended" &&
++      !window.confirm(
++        "검증을 정지 처리합니다. 향후 커뮤니티 글쓰기 제한 기준으로 사용됩니다. 계속할까요?",
++      )
++    ) {
++      return;
++    }
++    runAction(
++      () => updatePlannerVerificationStatus(row.id, formData),
++      "상태가 저장되었습니다.",
++    );
++  };
++
++  return (
++    <div className="space-y-6">
++      <div
++        className="rounded-md border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-sm leading-relaxed text-[#102235]"
++        role="note"
++      >
++        <p>{ADMIN_PLANNER_VERIFICATION_COPY.policySummary}</p>
++        <p className="mt-2">{ADMIN_PLANNER_VERIFICATION_COPY.collectionNotice}</p>
++        <p className="mt-2 text-xs text-[#4f5661]">
++          {ADMIN_PLANNER_VERIFICATION_COPY.statusChangeNote}
++        </p>
++      </div>
++
++      {row.deletedAt ? (
++        <div
++          className="rounded-md border border-[#e8c4c4] bg-[#fdf2f2] px-4 py-3 text-sm text-[#8b2e2e]"
++          role="alert"
++        >
++          삭제 처리됨 ({formatDateTime(row.deletedAt)}).
++        </div>
++      ) : null}
++
++      {row.containsSensitiveData ? (
++        <div
++          className="rounded-md border border-[#d6a36e] bg-[#fff5e1] px-4 py-3 text-sm leading-relaxed text-[#7b4b19]"
++          role="alert"
++        >
++          {ADMIN_PLANNER_VERIFICATION_COPY.sensitiveBanner}
++        </div>
++      ) : null}
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5`}
++      >
++        <div className="flex flex-wrap items-start justify-between gap-3">
++          <div>
++            <h2 className="text-lg font-semibold text-[#102235]">{row.displayName}</h2>
++            <p className="mt-2 text-sm text-[#4f5661]">
++              신청자: {formatApplicantLabel(row.applicant)}
++            </p>
++          </div>
++          <div className="flex flex-wrap gap-2">
++            <span className={badgeClass(statusTone(row.status))}>
++              {STATUS_LABEL[row.status]}
++            </span>
++            <span className={badgeClass("gray")}>
++              {plannerTypeLabel(row.plannerType)}
++            </span>
++            {row.containsSensitiveData ? (
++              <span className={badgeClass("red")}>민감정보 의심</span>
++            ) : null}
++          </div>
++        </div>
++
++        <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">소속</dt>
++            <dd className="mt-1 text-[#102235]">{row.affiliationName ?? "—"}</dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              활동 지역
++            </dt>
++            <dd className="mt-1 text-[#102235]">{row.activityRegion}</dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              경력 구간
++            </dt>
++            <dd className="mt-1 text-[#102235]">
++              {careerRangeLabel(row.careerRange)}
++            </dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              자격 범위
++            </dt>
++            <dd className="mt-1 text-[#102235]">
++              {licenseScopeLabel(row.licenseScope)}
++            </dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              업무 채널
++            </dt>
++            <dd className="mt-1 text-[#102235]">
++              {businessChannelLabel(row.businessChannel)}
++            </dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              신청자 ID
++            </dt>
++            <dd className="mt-1 font-mono text-xs text-[#4f5661]">
++              {row.applicant.id}
++            </dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              신청일
++            </dt>
++            <dd className="mt-1 text-[#102235]">{formatDateTime(row.requestedAt)}</dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              검토일 / 처리자
++            </dt>
++            <dd className="mt-1 text-[#102235]">
++              {formatDateTime(row.reviewedAt)}
++              {row.reviewedByLabel ? ` · ${row.reviewedByLabel}` : ""}
++            </dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              정지일 / 보관 만료
++            </dt>
++            <dd className="mt-1 text-[#102235]">
++              {formatDateTime(row.suspendedAt)} /{" "}
++              {formatDateTime(row.retentionUntil)}
++            </dd>
++          </div>
++          <div>
++            <dt className="text-xs font-semibold uppercase text-[#7a612d]">
++              생성 / 수정
++            </dt>
++            <dd className="mt-1 text-[#102235]">
++              {formatDateTime(row.createdAt)} / {formatDateTime(row.updatedAt)}
++            </dd>
++          </div>
++        </dl>
++
++        {row.verificationNote ? (
++          <div className="mt-5 rounded-md border border-[#d9c9a8] bg-[#fbf7ee] p-4">
++            <div className="flex items-center justify-between gap-2">
++              <h3 className="text-sm font-semibold text-[#102235]">신청 메모</h3>
++              {row.containsSensitiveData ? (
++                <button
++                  className="text-xs font-semibold text-[#7a612d] underline"
++                  onClick={() => setNoteExpanded((v) => !v)}
++                  type="button"
++                >
++                  {noteExpanded ? "접기" : "내용 보기"}
++                </button>
++              ) : null}
++            </div>
++            {noteExpanded ? (
++              <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-[#303845]">
++                {row.verificationNote}
++              </p>
++            ) : (
++              <p className="mt-3 text-sm text-[#5f6670]">
++                민감정보 의심 신청입니다. 필요할 때만 내용을 펼쳐 확인하세요.
++              </p>
++            )}
++          </div>
++        ) : null}
++      </section>
++
++      {feedback ? (
++        <p
++          aria-live="polite"
++          className="rounded-md border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-2 text-sm text-[#4f5661]"
++          role="status"
++        >
++          {feedback}
++        </p>
++      ) : null}
++
++      <div className="grid gap-5 lg:grid-cols-2">
++        <section
++          className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++        >
++          <h3 className="text-sm font-semibold text-[#102235]">상태 변경</h3>
++          <p className="mt-1 text-xs text-[#5f6670]">
++            자동 승인·외부 조회 없이 수동으로만 변경합니다.
++          </p>
++          <form
++            className="mt-3 space-y-3"
++            onSubmit={(event) => {
++              event.preventDefault();
++              handleStatusSubmit(new FormData(event.currentTarget));
++            }}
++          >
++            <select
++              className="min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++              defaultValue={row.status}
++              disabled={isPending}
++              name="status"
++            >
++              {WRITABLE_STATUSES.map((value) => (
++                <option key={value} value={value}>
++                  {STATUS_LABEL[value]}
++                </option>
++              ))}
++            </select>
++            <button
++              className="min-h-10 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] disabled:opacity-60"
++              disabled={isPending}
++              type="submit"
++            >
++              상태 저장
++            </button>
++          </form>
++        </section>
++
++        <section
++          className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++        >
++          <h3 className="text-sm font-semibold text-[#102235]">민감정보 플래그</h3>
++          <form
++            className="mt-3 space-y-3"
++            onSubmit={(event) => {
++              event.preventDefault();
++              runAction(
++                () =>
++                  updatePlannerVerificationSensitiveFlag(
++                    row.id,
++                    new FormData(event.currentTarget),
++                  ),
++                "민감정보 플래그가 저장되었습니다.",
++              );
++            }}
++          >
++            <select
++              className="min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++              defaultValue={row.containsSensitiveData ? "true" : "false"}
++              disabled={isPending}
++              name="containsSensitiveData"
++            >
++              <option value="true">민감정보 의심</option>
++              <option value="false">민감정보 없음</option>
++            </select>
++            <button
++              className="min-h-10 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] disabled:opacity-60"
++              disabled={isPending}
++              type="submit"
++            >
++              플래그 저장
++            </button>
++          </form>
++        </section>
++
++        <section
++          className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4 lg:col-span-2`}
++        >
++          <h3 className="text-sm font-semibold text-[#102235]">관리자 메모</h3>
++          <p className="mt-1 text-xs text-[#5f6670]">
++            {ADMIN_PLANNER_VERIFICATION_COPY.memoHint}
++          </p>
++          <form
++            action={(formData) =>
++              runAction(
++                () => updatePlannerVerificationAdminMemo(row.id, formData),
++                "관리자 메모가 저장되었습니다.",
++              )
++            }
++            className="mt-3 space-y-3"
++          >
++            <textarea
++              className="min-h-28 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm"
++              defaultValue={row.adminMemo ?? ""}
++              disabled={isPending}
++              maxLength={2000}
++              name="adminMemo"
++            />
++            <button
++              className="min-h-10 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] disabled:opacity-60"
++              disabled={isPending}
++              type="submit"
++            >
++              메모 저장
++            </button>
++          </form>
++        </section>
++
++        <section
++          className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4 lg:col-span-2`}
++        >
++          <h3 className="text-sm font-semibold text-[#102235]">거절 사유</h3>
++          <p className="mt-1 text-xs text-[#5f6670]">
++            {ADMIN_PLANNER_VERIFICATION_COPY.rejectionHint}
++          </p>
++          <form
++            action={(formData) =>
++              runAction(
++                () => updatePlannerVerificationRejectionFields(row.id, formData),
++                "거절 사유가 저장되었습니다.",
++              )
++            }
++            className="mt-3 space-y-3"
++          >
++            <label className="block text-sm">
++              <span className="font-medium text-[#303845]">
++                사용자 노출 가능 요약 (중립 문구)
++              </span>
++              <input
++                className="mt-1 min-h-11 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                defaultValue={row.userFacingRejectionSummary ?? ""}
++                disabled={isPending}
++                maxLength={500}
++                name="userFacingRejectionSummary"
++                placeholder="예: 제출된 정보만으로는 검증 기준을 충족하기 어렵습니다."
++              />
++            </label>
++            <label className="block text-sm">
++              <span className="font-medium text-[#303845]">
++                내부 거절 사유 (관리자 전용)
++              </span>
++              <textarea
++                className="mt-1 min-h-24 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm"
++                defaultValue={row.rejectionReason ?? ""}
++                disabled={isPending}
++                maxLength={2000}
++                name="rejectionReason"
++              />
++            </label>
++            <button
++              className="min-h-10 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8] disabled:opacity-60"
++              disabled={isPending}
++              type="submit"
++            >
++              거절 사유 저장
++            </button>
++          </form>
++        </section>
++      </div>
++    </div>
++  );
++}
+diff --git a/app/admin/planner-verifications/planner-verifications-admin-list.tsx b/app/admin/planner-verifications/planner-verifications-admin-list.tsx
+new file mode 100644
+index 0000000..05dcaae
+--- /dev/null
++++ b/app/admin/planner-verifications/planner-verifications-admin-list.tsx
+@@ -0,0 +1,152 @@
++"use client";
++
++import Link from "next/link";
++import type {
++  PlannerBusinessChannel,
++  PlannerCareerRange,
++  PlannerLicenseScope,
++  PlannerType,
++  PlannerVerificationStatus,
++} from "@prisma/client";
++import { borders, shadows, surfaces } from "@/lib/design-system";
++import {
++  STATUS_LABEL,
++  businessChannelLabel,
++  careerRangeLabel,
++  licenseScopeLabel,
++  plannerTypeLabel,
++  statusTone,
++} from "./visibility";
++
++const badgeBase =
++  "inline-flex min-h-7 items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold";
++
++function badgeClass(tone: "green" | "gold" | "gray" | "navy" | "red") {
++  if (tone === "green") return `${badgeBase} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55]`;
++  if (tone === "gold") return `${badgeBase} border-[#d9c9a8] bg-[#f7f1e5] text-[#7b5b19]`;
++  if (tone === "navy") return `${badgeBase} border-[#c8d2dc] bg-[#eef3f7] text-[#102235]`;
++  if (tone === "red") return `${badgeBase} border-[#e8c4c4] bg-[#fdf2f2] text-[#8b2e2e]`;
++  return `${badgeBase} border-[#d6d8dc] bg-[#f4f5f6] text-[#4f5661]`;
++}
++
++export type PlannerVerificationListRow = {
++  id: string;
++  displayName: string;
++  applicantLabel: string;
++  status: PlannerVerificationStatus;
++  plannerType: PlannerType;
++  affiliationName: string | null;
++  activityRegion: string;
++  careerRange: PlannerCareerRange;
++  licenseScope: PlannerLicenseScope;
++  businessChannel: PlannerBusinessChannel;
++  containsSensitiveData: boolean;
++  requestedAt: string;
++  reviewedAt: string | null;
++  reviewedByLabel: string | null;
++  suspendedAt: string | null;
++  deletedAt: string | null;
++};
++
++function formatDate(iso: string | null): string {
++  if (!iso) return "—";
++  return iso.slice(0, 10);
++}
++
++export default function PlannerVerificationsAdminList({
++  rows,
++}: {
++  rows: PlannerVerificationListRow[];
++}) {
++  if (rows.length === 0) {
++    return null;
++  }
++
++  return (
++    <section
++      className={`${surfaces.card} ${borders.default} ${shadows.card} overflow-hidden rounded-lg`}
++    >
++      <div className="overflow-x-auto">
++        <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
++          <thead className="bg-[#f7f1e5] text-left text-xs font-semibold uppercase tracking-wide text-[#4f5661]">
++            <tr>
++              <th className="px-4 py-3">표시 이름</th>
++              <th className="px-4 py-3">신청자</th>
++              <th className="px-4 py-3">상태</th>
++              <th className="px-4 py-3">유형</th>
++              <th className="px-4 py-3">소속</th>
++              <th className="px-4 py-3">지역</th>
++              <th className="px-4 py-3">경력</th>
++              <th className="px-4 py-3">자격 범위</th>
++              <th className="px-4 py-3">업무 채널</th>
++              <th className="px-4 py-3">신청일</th>
++              <th className="px-4 py-3">처리</th>
++              <th className="px-4 py-3 text-right">관리</th>
++            </tr>
++          </thead>
++          <tbody className="divide-y divide-[#e7ddc9]">
++            {rows.map((row) => (
++              <tr key={row.id} className="align-top">
++                <td className="px-4 py-4">
++                  <p className="font-semibold text-[#102235]">{row.displayName}</p>
++                  {row.containsSensitiveData ? (
++                    <span className={`${badgeClass("red")} mt-1`}>민감정보</span>
++                  ) : null}
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">{row.applicantLabel}</td>
++                <td className="px-4 py-4">
++                  <span className={badgeClass(statusTone(row.status))}>
++                    {STATUS_LABEL[row.status]}
++                  </span>
++                  {row.deletedAt ? (
++                    <span className={`${badgeClass("red")} ml-1`}>삭제됨</span>
++                  ) : null}
++                </td>
++                <td className="px-4 py-4">
++                  <span className={badgeClass("gray")}>
++                    {plannerTypeLabel(row.plannerType)}
++                  </span>
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">
++                  {row.affiliationName ?? "—"}
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">{row.activityRegion}</td>
++                <td className="px-4 py-4 text-[#4f5661]">
++                  {careerRangeLabel(row.careerRange)}
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">
++                  {licenseScopeLabel(row.licenseScope)}
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">
++                  {businessChannelLabel(row.businessChannel)}
++                </td>
++                <td className="px-4 py-4 text-[#4f5661]">
++                  {formatDate(row.requestedAt)}
++                </td>
++                <td className="px-4 py-4 text-xs text-[#4f5661]">
++                  <p>{formatDate(row.reviewedAt)}</p>
++                  {row.reviewedByLabel ? (
++                    <p className="mt-0.5">{row.reviewedByLabel}</p>
++                  ) : null}
++                  {row.suspendedAt ? (
++                    <p className="mt-0.5 text-[#8b2e2e]">
++                      정지 {formatDate(row.suspendedAt)}
++                    </p>
++                  ) : null}
++                </td>
++                <td className="px-4 py-4 text-right">
++                  <Link
++                    href={`/admin/planner-verifications/${row.id}`}
++                    className="inline-flex min-h-9 items-center rounded-md border border-[#d9c9a8] bg-white px-3 text-xs font-semibold text-[#102235] hover:bg-[#f7f1e5]"
++                  >
++                    상세
++                  </Link>
++                </td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      </div>
++    </section>
++  );
++}
+diff --git a/app/admin/planner-verifications/visibility.ts b/app/admin/planner-verifications/visibility.ts
+new file mode 100644
+index 0000000..f7655c4
+--- /dev/null
++++ b/app/admin/planner-verifications/visibility.ts
+@@ -0,0 +1,133 @@
++import {
++  PlannerBusinessChannel,
++  PlannerCareerRange,
++  PlannerLicenseScope,
++  PlannerType,
++  PlannerVerificationStatus,
++} from "@prisma/client";
++
++export const ADMIN_PLANNER_VERIFICATION_COPY = {
++  pageTitle: "설계사 검증 관리",
++  pageDescription:
++    "설계사 검증 신청을 수동으로 검토합니다. 승인은 PlannerDesk 내부 커뮤니티 권한 기준이며, 외부 기관의 공식 자격 보증·보험상품 판매·보험금 판단 권한을 의미하지 않습니다.",
++  detailTitle: "설계사 검증 상세",
++  policySummary:
++    "설계사 검증은 PlannerDesk 내부 권한 관리 기준입니다. 외부 기관의 공식 자격 보증, 보험상품 판매 권한 보증, 보험금 지급 판단 권한을 의미하지 않습니다.",
++  collectionNotice:
++    "신분증, 자격증 이미지, 고객정보, 계약정보, 의료정보는 이 화면에서 수집하거나 보관하지 않습니다.",
++  sensitiveBanner:
++    "이 신청에는 개인정보·고객정보·의료정보가 포함되었을 가능성이 있습니다. 원문을 외부로 복사하지 말고, 필요 시 삭제 처리하세요.",
++  memoHint:
++    "내부 검토 메모만 기록하세요. 고객 개인정보·의료정보·계약정보·민감정보 원문은 입력하지 마세요.",
++  rejectionHint:
++    "사용자에게 노출될 수 있는 중립 문구만 입력하세요. 주민등록번호·연락처·자격번호·고객정보를 재기재하지 마세요. 상세 내부 사유는 관리자 메모에 기록하세요.",
++  statusChangeNote:
++    "상태 변경만으로 User.role은 자동 변경되지 않습니다. 커뮤니티 권한 연결은 PR-89 이후 별도 구현됩니다.",
++} as const;
++
++export const STATUS_LABEL: Record<PlannerVerificationStatus, string> = {
++  pending: "신청 접수",
++  under_review: "검토 중",
++  approved: "승인",
++  rejected: "거절",
++  suspended: "정지",
++  expired: "만료",
++  deleted: "삭제",
++};
++
++export const PLANNER_TYPE_LABEL: Record<PlannerType, string> = {
++  life: "생명보험",
++  non_life: "손해보험",
++  both: "생명·손해",
++  ga: "GA",
++  agency: "대리점",
++  other: "기타",
++};
++
++export const CAREER_RANGE_LABEL: Record<PlannerCareerRange, string> = {
++  under_1_year: "1년 미만",
++  one_to_three_years: "1~3년",
++  three_to_five_years: "3~5년",
++  five_to_ten_years: "5~10년",
++  over_ten_years: "10년 이상",
++  not_disclosed: "미공개",
++};
++
++export const LICENSE_SCOPE_LABEL: Record<PlannerLicenseScope, string> = {
++  life_only: "생명",
++  non_life_only: "손해",
++  life_and_non_life: "생명·손해",
++  third_insurance: "제3보험",
++  unknown: "미확인",
++  not_disclosed: "미공개",
++};
++
++export const BUSINESS_CHANNEL_LABEL: Record<PlannerBusinessChannel, string> = {
++  face_to_face: "대면",
++  online: "온라인",
++  telemarketing: "TM",
++  corporate: "법인",
++  mixed: "복합",
++  other: "기타",
++  not_disclosed: "미공개",
++};
++
++export const WRITABLE_STATUSES = Object.values(
++  PlannerVerificationStatus,
++) as PlannerVerificationStatus[];
++
++export function statusTone(
++  status: PlannerVerificationStatus,
++): "green" | "gold" | "gray" | "navy" | "red" {
++  if (status === PlannerVerificationStatus.approved) return "green";
++  if (
++    status === PlannerVerificationStatus.pending ||
++    status === PlannerVerificationStatus.under_review
++  ) {
++    return "gold";
++  }
++  if (
++    status === PlannerVerificationStatus.rejected ||
++    status === PlannerVerificationStatus.deleted
++  ) {
++    return "red";
++  }
++  if (status === PlannerVerificationStatus.suspended) return "red";
++  if (status === PlannerVerificationStatus.expired) return "navy";
++  return "gray";
++}
++
++export function plannerTypeLabel(value: PlannerType): string {
++  return PLANNER_TYPE_LABEL[value];
++}
++
++export function careerRangeLabel(value: PlannerCareerRange): string {
++  return CAREER_RANGE_LABEL[value];
++}
++
++export function licenseScopeLabel(value: PlannerLicenseScope): string {
++  return LICENSE_SCOPE_LABEL[value];
++}
++
++export function businessChannelLabel(value: PlannerBusinessChannel): string {
++  return BUSINESS_CHANNEL_LABEL[value];
++}
++
++export function formatApplicantLabel(user: {
++  id: string;
++  name: string | null;
++}): string {
++  const trimmed = user.name?.trim();
++  if (trimmed) return trimmed;
++  return `사용자 ${user.id.slice(0, 8)}…`;
++}
++
++export function isReviewedStatus(status: PlannerVerificationStatus): boolean {
++  return (
++    status === PlannerVerificationStatus.approved ||
++    status === PlannerVerificationStatus.rejected ||
++    status === PlannerVerificationStatus.suspended ||
++    status === PlannerVerificationStatus.expired ||
++    status === PlannerVerificationStatus.deleted
++  );
++}
+diff --git a/lib/admin/dashboard-status.ts b/lib/admin/dashboard-status.ts
+index df234e7..141799e 100644
+--- a/lib/admin/dashboard-status.ts
++++ b/lib/admin/dashboard-status.ts
+@@ -62,6 +62,11 @@ export type CorrectionRequestTableProbe =
+   | { status: "missing_table" }
+   | { status: "unavailable" };
+ 
++export type PlannerVerificationTableProbe =
++  | { status: "ok"; count: number; pendingCount: number }
++  | { status: "missing_table" }
++  | { status: "unavailable" };
++
+ function isPrismaMissingTable(error: unknown): boolean {
+   if (
+     error instanceof Prisma.PrismaClientKnownRequestError &&
+@@ -120,6 +125,26 @@ export async function probeCorrectionRequestTable(): Promise<CorrectionRequestTa
+   }
+ }
+ 
++export async function probePlannerVerificationTable(): Promise<PlannerVerificationTableProbe> {
++  try {
++    const [count, pendingCount] = await Promise.all([
++      prisma.plannerVerification.count({ where: { deletedAt: null } }),
++      prisma.plannerVerification.count({
++        where: {
++          deletedAt: null,
++          status: { in: ["pending", "under_review"] },
++        },
++      }),
++    ]);
++    return { status: "ok", count, pendingCount };
++  } catch (error) {
++    if (isPrismaMissingTable(error)) {
++      return { status: "missing_table" };
++    }
++    return { status: "unavailable" };
++  }
++}
++
+ function countByAvailability(features: AdminDashboardFeature[]) {
+   const summary = {
+     active: 0,
+@@ -278,6 +303,75 @@ function correctionInboxFeature(
+   };
+ }
+ 
++function plannerVerificationFeature(
++  probe: PlannerVerificationTableProbe,
++): AdminDashboardFeature {
++  if (probe.status === "missing_table") {
++    return {
++      id: "planner-verifications",
++      title: "설계사 검증 관리",
++      description:
++        "설계사 검증 신청을 수동으로 검토하고 내부 권한 상태를 관리합니다.",
++      href: "/admin/planner-verifications",
++      availability: "setup_required",
++      statusBadge: "설정 필요",
++      lastCheckLabel: "PlannerVerification 테이블 없음",
++      nextAction:
++        "운영 DB에 PlannerVerification migration을 적용한 뒤 관리 화면을 사용하세요.",
++      buttonLabel: "설정 필요",
++      buttonEnabled: true,
++    };
++  }
++
++  if (probe.status === "unavailable") {
++    return {
++      id: "planner-verifications",
++      title: "설계사 검증 관리",
++      description:
++        "설계사 검증 신청을 수동으로 검토하고 내부 권한 상태를 관리합니다.",
++      href: "/admin/planner-verifications",
++      availability: "blocked",
++      statusBadge: "점검 필요",
++      lastCheckLabel: "DB 연결 확인 필요",
++      nextAction: "잠시 후 다시 시도하거나 운영 로그를 확인하세요.",
++      buttonLabel: "점검 필요",
++      buttonEnabled: true,
++    };
++  }
++
++  if (probe.pendingCount > 0) {
++    return {
++      id: "planner-verifications",
++      title: "설계사 검증 관리",
++      description:
++        "설계사 검증 신청을 수동으로 검토합니다. 승인은 PlannerDesk 내부 권한 기준입니다.",
++      href: "/admin/planner-verifications",
++      availability: "active_with_warning",
++      statusBadge: "검토 대기",
++      lastCheckLabel: `대기 ${probe.pendingCount}건 · 전체 ${probe.count}건`,
++      nextAction:
++        "민감정보 의심 신청은 삭제·플래그 처리를 우선 검토하세요. 자동 승인·외부 조회는 없습니다.",
++      buttonLabel: "검증 큐 열기",
++      buttonEnabled: true,
++    };
++  }
++
++  return {
++    id: "planner-verifications",
++    title: "설계사 검증 관리",
++    description:
++      "설계사 검증 신청을 수동으로 검토합니다. 승인은 PlannerDesk 내부 권한 기준입니다.",
++    href: "/admin/planner-verifications",
++    availability: "active",
++    statusBadge: "운영 중",
++    lastCheckLabel: `신청 ${probe.count}건`,
++    nextAction:
++      "승인은 내부 커뮤니티 권한 기준이며, User.role은 이 화면에서 자동 변경되지 않습니다.",
++    buttonLabel: "검증 큐 열기",
++    buttonEnabled: true,
++  };
++}
++
+ function messageTemplateFeature(
+   probe: MessageTemplateTableProbe,
+ ): AdminDashboardFeature {
+@@ -348,11 +442,12 @@ function messageTemplateFeature(
+ }
+ 
+ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnapshot> {
+-  const [knowledgeProbe, messageTemplateProbe, correctionProbe] =
++  const [knowledgeProbe, messageTemplateProbe, correctionProbe, plannerVerificationProbe] =
+     await Promise.all([
+       probeKnowledgeArticleTable(),
+       probeMessageTemplateTable(),
+       probeCorrectionRequestTable(),
++      probePlannerVerificationTable(),
+     ]);
+ 
+   const features: AdminDashboardFeature[] = [
+@@ -412,6 +507,7 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
+     },
+     messageTemplateFeature(messageTemplateProbe),
+     correctionInboxFeature(correctionProbe),
++    plannerVerificationFeature(plannerVerificationProbe),
+   ];
+ 
+   const knowledgeBulkAvailability: AdminFeatureAvailability =
