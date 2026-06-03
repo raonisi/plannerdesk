@@ -25,6 +25,7 @@ import {
   type RetrievalSourceType,
 } from "./retrieval-types";
 import type { AnswerAssistantPurpose } from "./types";
+import type { AnswerAssistantEvidenceItem } from "./types";
 
 function toIsoDate(value: Date | null | undefined): string | undefined {
   if (!value) return undefined;
@@ -479,24 +480,24 @@ export async function retrieveAnswerCandidates(
 
 export function toEvidenceItems(
   candidates: RetrievalCandidate[],
-): {
-  id: string;
-  type: RetrievalSourceType;
-  title: string;
-  summary?: string;
-  sourceName?: string;
-  sourceUrl?: string;
-  categoryLabel?: string;
-  isOfficialSource?: boolean;
-}[] {
+): AnswerAssistantEvidenceItem[] {
   return candidates.map((candidate) => ({
     id: candidate.id,
     type: candidate.type,
     title: candidate.title,
     summary: candidate.summary,
+    safeTextSummary: candidate.safeText ?? candidate.summary,
     sourceName: candidate.sourceName,
     sourceUrl: candidate.sourceUrl,
     categoryLabel: candidate.categoryLabel,
     isOfficialSource: candidate.isOfficialSource,
+    reviewedAt: candidate.reviewedAt,
+    lastVerifiedAt: candidate.lastVerifiedAt,
+    updatedAt: candidate.updatedAt,
+    needsOfficialConfirmation:
+      !candidate.isOfficialSource &&
+      (candidate.type === "knowledge_article" ||
+        candidate.type === "claim_document" ||
+        Boolean(candidate.sourceUrl)),
   }));
 }

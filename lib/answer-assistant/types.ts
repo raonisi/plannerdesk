@@ -49,10 +49,15 @@ export interface AnswerAssistantEvidenceItem {
   type: RetrievalSourceType;
   title: string;
   summary?: string;
+  safeTextSummary?: string;
   sourceName?: string;
   sourceUrl?: string;
   categoryLabel?: string;
   isOfficialSource?: boolean;
+  reviewedAt?: string;
+  lastVerifiedAt?: string;
+  updatedAt?: string;
+  needsOfficialConfirmation?: boolean;
 }
 
 export interface AnswerAssistantSuccessResult {
@@ -69,6 +74,7 @@ export interface AnswerAssistantSuccessResult {
   candidateCount: number;
   draftLabel: string;
   footerDisclaimer: string;
+  adminReviewChecklist: readonly string[];
 }
 
 export interface AnswerAssistantBlockedResult {
@@ -79,7 +85,10 @@ export interface AnswerAssistantBlockedResult {
   warnings: string[];
   needsOfficialCheck?: boolean;
   insufficientEvidence?: boolean;
+  insufficientEvidenceReasons?: string[];
   candidateCount: number;
+  safetyGatePassed?: boolean;
+  retrievalCompleted?: boolean;
 }
 
 export type AnswerAssistantDraftResult =

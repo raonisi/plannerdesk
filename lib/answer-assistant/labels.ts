@@ -75,6 +75,26 @@ export const RETRIEVAL_SOURCE_TYPE_LABEL: Record<RetrievalSourceType, string> =
     claim_document: "청구서류",
   };
 
+export const BLOCKED_REASON_LABEL: Record<
+  import("./types").AnswerAssistantBlockedReason,
+  string
+> = {
+  PERSONAL_INFO: "개인정보·계약정보 차단",
+  CONTRACT_INFO: "계약정보 차단",
+  MEDICAL_INFO: "의료정보 차단",
+  CLAIM_DOCUMENT: "청구자료·파일 요청 차단",
+  CLAIM_JUDGMENT: "보험금 판단 요청 차단",
+  LOSS_ADJUSTMENT: "손해사정 판단 요청 차단",
+  PRODUCT_SOLICITATION: "상품 추천·가입 유도 차단",
+  FEAR_MARKETING: "공포 조장 문구 차단",
+  PROMPT_INJECTION: "Prompt Injection 차단",
+  VALIDATION: "입력 형식 오류",
+  INSUFFICIENT_EVIDENCE: "근거 부족",
+  PROVIDER_NOT_CONFIGURED: "Provider 미구성",
+  PROVIDER_ERROR: "Provider 오류",
+  OUTPUT_SAFETY_BLOCKED: "출력 안전성 차단",
+};
+
 export function purposeRequiresOfficialCheck(
   purpose: AnswerAssistantPurpose,
 ): boolean {

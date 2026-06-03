@@ -20,6 +20,8 @@ export async function generateAnswerAssistantDraftAction(
       evidence: [],
       warnings: [],
       candidateCount: 0,
+      safetyGatePassed: false,
+      retrievalCompleted: false,
     };
   }
 

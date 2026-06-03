@@ -11,6 +11,7 @@ import {
   ANSWER_ASSIST_DOMAIN_OPTIONS,
   ANSWER_ASSIST_PURPOSE_OPTIONS,
   ANSWER_ASSIST_TONE_OPTIONS,
+  BLOCKED_REASON_LABEL,
   RETRIEVAL_SOURCE_TYPE_LABEL,
 } from "@/lib/answer-assistant/labels";
 import type {
@@ -186,20 +187,58 @@ function AnswerAssistantResultPanel({
   result: AnswerAssistantDraftResult;
 }) {
   if (!result.ok) {
+    const reasonLabel = result.blockedReason
+      ? BLOCKED_REASON_LABEL[result.blockedReason]
+      : "처리되지 않음";
+    const showPartialSuccess =
+      result.safetyGatePassed &&
+      (result.retrievalCompleted ||
+        result.blockedReason === "PROVIDER_NOT_CONFIGURED");
+
     return (
       <section
-        className="rounded-lg border border-[#d6a36e] bg-[#fff5e1] px-4 py-4"
+        className="space-y-4 rounded-lg border border-[#d6a36e] bg-[#fff5e1] px-4 py-4"
         role="alert"
       >
-        <h2 className="text-sm font-semibold text-[#7b4b19]">처리되지 않음</h2>
-        <p className="mt-2 text-sm leading-relaxed text-[#7b4b19]">
-          {result.message}
-        </p>
-        {result.blockedReason ? (
-          <p className="mt-2 text-xs text-[#9a6a3a]">
-            사유 코드: {result.blockedReason}
+        <div>
+          <h2 className="text-sm font-semibold text-[#7b4b19]">{reasonLabel}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[#7b4b19]">
+            {result.message}
+          </p>
+          {result.blockedReason ? (
+            <p className="mt-2 text-xs text-[#9a6a3a]">
+              사유 코드: {result.blockedReason}
+            </p>
+          ) : null}
+        </div>
+
+        {showPartialSuccess ? (
+          <p className="rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-xs text-[#4f5661]">
+            입력 안전성 검사는 통과했습니다.
+            {result.retrievalCompleted
+              ? " 근거 후보 조회까지 완료되었습니다."
+              : null}
+            {result.blockedReason === "PROVIDER_NOT_CONFIGURED"
+              ? " 초안 생성 provider가 구성되지 않아 본문 초안은 생성하지 않았습니다."
+              : null}
           </p>
         ) : null}
+
+        {result.insufficientEvidenceReasons &&
+        result.insufficientEvidenceReasons.length > 0 ? (
+          <InsufficientEvidenceDetails
+            reasons={result.insufficientEvidenceReasons}
+          />
+        ) : null}
+
+        {result.warnings.length > 0 ? (
+          <ul className="list-disc space-y-1 pl-5 text-sm text-[#7b4b19]">
+            {result.warnings.map((warning) => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
+        ) : null}
+
         {result.evidence.length > 0 ? (
           <EvidenceList count={result.candidateCount} items={result.evidence} />
         ) : null}
@@ -250,11 +289,55 @@ function AnswerAssistantResultPanel({
         </div>
       ) : null}
 
+      <AdminReviewChecklist items={result.adminReviewChecklist} />
+
       <p className="rounded-md border border-[#d9c9a8] bg-white px-3 py-3 text-xs leading-relaxed text-[#5f6670]">
         {result.footerDisclaimer}
       </p>
     </section>
   );
+}
+
+function InsufficientEvidenceDetails({ reasons }: { reasons: string[] }) {
+  return (
+    <div className="rounded-md border border-[#d9c9a8] bg-white px-3 py-3">
+      <h3 className="text-sm font-semibold text-[#102235]">근거 부족 상세</h3>
+      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#4f5661]">
+        {reasons.map((reason) => (
+          <li key={reason}>{reason}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function AdminReviewChecklist({ items }: { items: readonly string[] }) {
+  return (
+    <div className="rounded-md border border-[#d9c9a8] bg-white px-3 py-3">
+      <h3 className="text-sm font-semibold text-[#102235]">
+        관리자 검수 체크리스트
+      </h3>
+      <p className="mt-1 text-xs text-[#5f6670]">
+        고객 발송·커뮤니티 게시 전 아래 항목을 직접 확인하세요. (화면 표시용,
+        저장되지 않습니다.)
+      </p>
+      <ul className="mt-3 space-y-2 text-sm text-[#303845]">
+        {items.map((item) => (
+          <li className="flex gap-2" key={item}>
+            <span aria-hidden className="text-[#7a612d]">
+              ☐
+            </span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function formatEvidenceDate(value?: string): string | null {
+  if (!value) return null;
+  return value;
 }
 
 function EvidenceList({
@@ -271,28 +354,68 @@ function EvidenceList({
       <h3 className="text-sm font-semibold text-[#102235]">
         참고 근거 ({count}건)
       </h3>
-      <ul className="mt-2 space-y-2">
+      <ul className="mt-3 space-y-3">
         {items.map((item) => (
           <li
-            className="rounded-md border border-[#e8dcc4] bg-white px-3 py-2 text-sm"
+            className="rounded-md border border-[#e8dcc4] bg-white px-3 py-3 text-sm"
             key={`${item.type}-${item.id}`}
           >
-            <p className="font-semibold text-[#102235]">
-              [{RETRIEVAL_SOURCE_TYPE_LABEL[item.type]}] {item.title}
-            </p>
-            {item.summary ? (
-              <p className="mt-1 text-[#4f5661]">{item.summary}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded bg-[#f3ead8] px-2 py-0.5 text-xs font-semibold text-[#7a612d]">
+                {RETRIEVAL_SOURCE_TYPE_LABEL[item.type]}
+              </span>
+              {item.isOfficialSource ? (
+                <span className="rounded bg-[#e8f5ea] px-2 py-0.5 text-xs font-semibold text-[#2f6b3a]">
+                  공식 출처
+                </span>
+              ) : null}
+              {item.needsOfficialConfirmation ? (
+                <span className="rounded bg-[#fff5e1] px-2 py-0.5 text-xs font-semibold text-[#7b4b19]">
+                  공식 확인 필요
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-2 font-semibold text-[#102235]">{item.title}</p>
+            {item.sourceName ? (
+              <p className="mt-1 text-xs text-[#5f6670]">
+                출처: {item.sourceName}
+              </p>
+            ) : null}
+            {item.categoryLabel ? (
+              <p className="mt-1 text-xs text-[#5f6670]">
+                분류: {item.categoryLabel}
+              </p>
+            ) : null}
+            {item.safeTextSummary ? (
+              <p className="mt-2 text-[#4f5661]">{item.safeTextSummary}</p>
+            ) : item.summary ? (
+              <p className="mt-2 text-[#4f5661]">{item.summary}</p>
             ) : null}
             {item.sourceUrl ? (
-              <p className="mt-1 break-all text-xs text-[#7a612d]">
+              <p className="mt-2 break-all text-xs text-[#7a612d]">
                 {item.sourceUrl}
               </p>
             ) : null}
-            {item.isOfficialSource ? (
-              <p className="mt-1 text-xs font-semibold text-[#2f6b3a]">
-                공식 출처
-              </p>
-            ) : null}
+            <dl className="mt-2 grid gap-1 text-xs text-[#5f6670] sm:grid-cols-3">
+              {formatEvidenceDate(item.reviewedAt) ? (
+                <div>
+                  <dt className="inline font-semibold">검수일 </dt>
+                  <dd className="inline">{item.reviewedAt}</dd>
+                </div>
+              ) : null}
+              {formatEvidenceDate(item.lastVerifiedAt) ? (
+                <div>
+                  <dt className="inline font-semibold">확인일 </dt>
+                  <dd className="inline">{item.lastVerifiedAt}</dd>
+                </div>
+              ) : null}
+              {formatEvidenceDate(item.updatedAt) ? (
+                <div>
+                  <dt className="inline font-semibold">수정일 </dt>
+                  <dd className="inline">{item.updatedAt}</dd>
+                </div>
+              ) : null}
+            </dl>
           </li>
         ))}
       </ul>
