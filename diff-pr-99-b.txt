@@ -1,0 +1,490 @@
+diff --git a/.env.example b/.env.example
+index 74ca951..c9905e0 100644
+--- a/.env.example
++++ b/.env.example
+@@ -21,8 +21,10 @@ AUTH_URL=http://localhost:3000
+ # NEXTAUTH_SECRET=
+ # NEXTAUTH_URL=http://localhost:3000
+ 
+-# Verified answer assistant limited release (PR-98).
++# Verified answer assistant allowlist beta (PR-98 / PR-99-B).
+ # Default OFF when unset. Never set true without operator sign-off + allowlist.
++# ANSWER_ASSISTANT_VERIFIED_BETA_ENABLED=false
++# Legacy alias (also requires allowlist when true):
+ # ANSWER_ASSISTANT_VERIFIED_PREVIEW=false
+ # Comma-separated User.id values only — no email or PII.
+ # ANSWER_ASSISTANT_VERIFIED_ALLOWLIST=
+diff --git a/app/planner/answer-assistant/actions.ts b/app/planner/answer-assistant/actions.ts
+index 278b28d..14f4d68 100644
+--- a/app/planner/answer-assistant/actions.ts
++++ b/app/planner/answer-assistant/actions.ts
+@@ -6,6 +6,7 @@ import {
+   VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES,
+   VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
+ } from "@/lib/answer-assistant/constants";
++import { isVerifiedAnswerAssistantAllowlistBetaOperational } from "@/lib/answer-assistant/allowlist-beta";
+ import { isAnswerAssistantVerifiedPreviewEnabled } from "@/lib/answer-assistant/feature-gate";
+ import {
+   checkVerifiedAnswerAssistantRateLimit,
+@@ -88,8 +89,23 @@ export async function generateVerifiedAnswerAssistantDraftAction(
+     return blockedResult("UNAUTHORIZED", access.denyReason);
+   }
+ 
+-  // 2. Feature gate
++  if (access.status === "beta_not_configured") {
++    const result = blockedResult(
++      "FEATURE_DISABLED",
++      VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.BETA_NOT_CONFIGURED,
++    );
++    await logVerifiedUsage(
++      access.userId,
++      parseAnswerAssistantFormData(formData),
++      "blocked",
++      result,
++    );
++    return result;
++  }
++
++  // 2. Feature gate (beta ON + allowlist required)
+   if (
++    !isVerifiedAnswerAssistantAllowlistBetaOperational() ||
+     !isAnswerAssistantVerifiedPreviewEnabled() ||
+     access.status === "feature_disabled"
+   ) {
+diff --git a/app/planner/answer-assistant/page.tsx b/app/planner/answer-assistant/page.tsx
+index 92434ba..086d16f 100644
+--- a/app/planner/answer-assistant/page.tsx
++++ b/app/planner/answer-assistant/page.tsx
+@@ -1,7 +1,13 @@
+ import Link from "next/link";
+ import { AnswerAssistantPanelShell } from "@/components/answer-assistant/answer-assistant-panel";
+-import { VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES } from "@/lib/answer-assistant/constants";
+-import { VERIFIED_PREVIEW_DISABLED_MESSAGE } from "@/lib/answer-assistant/feature-gate";
++import {
++  VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES,
++  VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
++} from "@/lib/answer-assistant/constants";
++import {
++  VERIFIED_BETA_NOT_CONFIGURED_MESSAGE,
++  VERIFIED_PREVIEW_DISABLED_MESSAGE,
++} from "@/lib/answer-assistant/feature-gate";
+ import { getVerifiedAnswerAssistantAccess } from "@/lib/answer-assistant/verified-access";
+ import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+ import { generateVerifiedAnswerAssistantDraftAction } from "./actions";
+@@ -42,12 +48,18 @@ export default async function PlannerAnswerAssistantPage() {
+   const generationDisabledMessage =
+     access.status === "feature_disabled"
+       ? VERIFIED_PREVIEW_DISABLED_MESSAGE
+-      : access.status === "not_allowlisted"
+-        ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED
+-        : undefined;
++      : access.status === "beta_not_configured"
++        ? VERIFIED_BETA_NOT_CONFIGURED_MESSAGE
++        : access.status === "not_allowlisted"
++          ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED
++          : undefined;
++  const betaActiveNotice =
++    access.status === "authenticated" && access.canGenerate
++      ? `${VERIFIED_ANSWER_ASSIST_PAGE_NOTICES.allowlistBetaActive} ${VERIFIED_ANSWER_ASSIST_PAGE_NOTICES.allowlistBetaPilot}`
++      : undefined;
+   const adminTesterNotice =
+     access.status === "authenticated" && access.isAdminTester
+-      ? "관리자 테스트 모드입니다. 검증 설계사 제한 공개 UI를 확인 중이며, Safety Gate·Retrieval·Output Safety 정책은 동일하게 적용됩니다."
++      ? "관리자 테스트 모드입니다. allowlist beta UI를 확인 중이며, Safety Gate·Retrieval·Output Safety·rate limit·usage audit 정책은 동일하게 적용됩니다."
+       : undefined;
+ 
+   return (
+@@ -83,6 +95,7 @@ export default async function PlannerAnswerAssistantPage() {
+         >
+           <AnswerAssistantPanelShell
+             adminTesterNotice={adminTesterNotice}
++            betaActiveNotice={betaActiveNotice}
+             generationDisabledMessage={generationDisabledMessage}
+             generationEnabled={generationEnabled}
+             submitAction={generateVerifiedAnswerAssistantDraftAction}
+diff --git a/components/answer-assistant/answer-assistant-panel.tsx b/components/answer-assistant/answer-assistant-panel.tsx
+index a3879f0..85686d3 100644
+--- a/components/answer-assistant/answer-assistant-panel.tsx
++++ b/components/answer-assistant/answer-assistant-panel.tsx
+@@ -26,6 +26,7 @@ export interface AnswerAssistantPanelShellProps {
+   variant: AnswerAssistantPanelVariant;
+   generationEnabled: boolean;
+   generationDisabledMessage?: string;
++  betaActiveNotice?: string;
+   adminTesterNotice?: string;
+   submitAction: (formData: FormData) => Promise<AnswerAssistantDraftResult>;
+ }
+@@ -34,6 +35,7 @@ export function AnswerAssistantPanelShell({
+   variant,
+   generationEnabled,
+   generationDisabledMessage,
++  betaActiveNotice,
+   adminTesterNotice,
+   submitAction,
+ }: AnswerAssistantPanelShellProps) {
+@@ -110,11 +112,23 @@ export function AnswerAssistantPanelShell({
+           className="rounded-lg border border-[#d9c9a8] bg-[#f4f6f8] px-4 py-4 text-sm text-[#4f5661]"
+           role="status"
+         >
+-          <p className="font-semibold text-[#102235]">제한 공개 준비 중</p>
++          <p className="font-semibold text-[#102235]">
++            {variant === "verified" ? "제한 beta" : "제한 공개 준비 중"}
++          </p>
+           <p className="mt-2">{generationDisabledMessage}</p>
+         </section>
+       ) : null}
+ 
++      {generationEnabled && betaActiveNotice ? (
++        <section
++          className="rounded-lg border border-[#d6a36e] bg-[#fff3e0] px-4 py-4 text-sm leading-relaxed text-[#5c4520]"
++          role="status"
++        >
++          <p className="font-semibold text-[#102235]">제한 beta 운영 중</p>
++          <p className="mt-2">{betaActiveNotice}</p>
++        </section>
++      ) : null}
++
+       {adminTesterNotice ? (
+         <section className="rounded-lg border border-[#c9d8ea] bg-[#eef4fb] px-4 py-3 text-sm text-[#2f4a66]">
+           {adminTesterNotice}
+diff --git a/lib/answer-assistant/constants.ts b/lib/answer-assistant/constants.ts
+index c76ac0e..ca8cffd 100644
+--- a/lib/answer-assistant/constants.ts
++++ b/lib/answer-assistant/constants.ts
+@@ -61,6 +61,10 @@ export const VERIFIED_ANSWER_ASSIST_PAGE_NOTICES = {
+   draftLabel: "검증 설계사 검수 전 초안",
+   previewDisabled:
+     "현재 검증 설계사 제한 공개는 비활성화되어 있습니다. 입력·초안 생성은 실행되지 않습니다.",
++  allowlistBetaActive:
++    "제한 beta 운영 중입니다. allowlist에 포함된 검증 설계사만 초안 생성이 가능하며, 전체 검증 설계사·일반 회원·비로그인 공개가 아닙니다. 운영 중단 시 별도 공지 없이 접근이 차단될 수 있습니다.",
++  allowlistBetaPilot:
++    "파일럿 allowlist에 등록된 계정만 사용할 수 있습니다. 고객·카카오·이메일 자동 발송, 커뮤니티 자동 댓글, 답변 자동 게시는 제공하지 않습니다.",
+ } as const;
+ 
+ export const VERIFIED_REVIEW_CHECKLIST = [
+@@ -84,5 +88,7 @@ export const VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES = {
+   RATE_LIMIT_ABUSE: (seconds: number) =>
+     `반복 차단 요청으로 일시 제한되었습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요.`,
+   UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
+-  NOT_ALLOWLISTED: "현재 제한 공개 대상이 아닙니다.",
++  NOT_ALLOWLISTED: "현재 제한 beta 대상이 아닙니다.",
++  BETA_NOT_CONFIGURED:
++    "beta gate가 켜져 있으나 allowlist가 비어 있어 초안 생성을 실행하지 않습니다.",
+ } as const;
+diff --git a/lib/answer-assistant/feature-gate.ts b/lib/answer-assistant/feature-gate.ts
+index 260c48a..9474084 100644
+--- a/lib/answer-assistant/feature-gate.ts
++++ b/lib/answer-assistant/feature-gate.ts
+@@ -1,34 +1,79 @@
+-// VERIFIED_PLANNER answer assistant preview feature gate (PR-97-B / PR-98).
+-// Default OFF — never enable in code. Explicit env only after operational sign-off.
++// VERIFIED_PLANNER answer assistant feature gates (PR-97-B / PR-98 / PR-99-B).
++// Default OFF — never enable in code. Explicit env + allowlist for beta only.
+ 
+-/** Code default when ANSWER_ASSISTANT_VERIFIED_PREVIEW env is unset. Must stay false. */
+-export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT = false;
++import { isVerifiedAnswerAssistantAllowlistConfigured } from "./allowlist";
+ 
+-/** @deprecated Use ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT — kept for tests. */
++/** Code default when beta env is unset. Must stay false. */
++export const ANSWER_ASSISTANT_VERIFIED_BETA_CODE_DEFAULT = false;
++
++/** @deprecated Use ANSWER_ASSISTANT_VERIFIED_BETA_CODE_DEFAULT */
++export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT =
++  ANSWER_ASSISTANT_VERIFIED_BETA_CODE_DEFAULT;
++
++/** @deprecated Use ANSWER_ASSISTANT_VERIFIED_BETA_CODE_DEFAULT */
+ export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED =
+-  ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
++  ANSWER_ASSISTANT_VERIFIED_BETA_CODE_DEFAULT;
+ 
+-/**
+- * Public boolean config (not a secret).
+- * Set ANSWER_ASSISTANT_VERIFIED_PREVIEW=true only after PR-98 Go + allowlist configured.
+- */
+-export function isAnswerAssistantVerifiedPreviewEnabled(): boolean {
+-  const raw = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW?.trim().toLowerCase();
++function parseBooleanEnv(
++  raw: string | undefined,
++  defaultValue: boolean,
++): boolean {
+   if (!raw) {
+-    return ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
++    return defaultValue;
+   }
+-  if (raw === "true" || raw === "1") {
++  const normalized = raw.trim().toLowerCase();
++  if (normalized === "true" || normalized === "1") {
+     return true;
+   }
+-  if (raw === "false" || raw === "0") {
++  if (normalized === "false" || normalized === "0") {
+     return false;
+   }
+-  return ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
++  return defaultValue;
++}
++
++/**
++ * Primary allowlist beta flag (PR-99-B).
++ * ANSWER_ASSISTANT_VERIFIED_BETA_ENABLED=true only after operator sign-off.
++ */
++export function isAnswerAssistantVerifiedBetaEnabled(): boolean {
++  return parseBooleanEnv(
++    process.env.ANSWER_ASSISTANT_VERIFIED_BETA_ENABLED,
++    ANSWER_ASSISTANT_VERIFIED_BETA_CODE_DEFAULT,
++  );
+ }
+ 
+ /**
+- * When preview is enabled, admins may use the verified route for UX testing.
+- * Does not bypass allowlist for verified planners, Safety Gate, or Output Safety.
++ * Legacy preview flag — still honored but allowlist is required (PR-99-B).
++ * Prefer ANSWER_ASSISTANT_VERIFIED_BETA_ENABLED for new deployments.
++ */
++function isLegacyVerifiedPreviewFlagEnabled(): boolean {
++  return parseBooleanEnv(
++    process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW,
++    false,
++  );
++}
++
++/** Raw gate ON (beta or legacy). Does not imply users can generate. */
++export function isAnswerAssistantVerifiedGateEnvEnabled(): boolean {
++  return (
++    isAnswerAssistantVerifiedBetaEnabled() || isLegacyVerifiedPreviewFlagEnabled()
++  );
++}
++
++/**
++ * Effective gate for verified route/actions.
++ * Gate ON without allowlist returns false — prevents allowlist-less activation.
++ */
++export function isAnswerAssistantVerifiedPreviewEnabled(): boolean {
++  if (!isAnswerAssistantVerifiedGateEnvEnabled()) {
++    return false;
++  }
++  return isVerifiedAnswerAssistantAllowlistConfigured();
++}
++
++/**
++ * When preview/beta gate is enabled, admins may test UX on allowlisted beta only.
++ * Does not bypass Safety Gate, Retrieval whitelist, or Output Safety.
+  */
+ export const ALLOW_ADMIN_VERIFIED_ANSWER_ASSISTANT_TEST = true;
+ 
+@@ -41,3 +86,6 @@ export function canAdminTestVerifiedAnswerAssistant(): boolean {
+ 
+ export const VERIFIED_PREVIEW_DISABLED_MESSAGE =
+   "현재 검증 설계사 제한 공개는 비활성화되어 있습니다. 기능 준비가 완료되면 별도 공지 후 단계적으로 제공됩니다.";
++
++export const VERIFIED_BETA_NOT_CONFIGURED_MESSAGE =
++  "제한 beta가 활성화되었으나 allowlist가 비어 있어 초안 생성을 실행하지 않습니다. 운영자가 파일럿 userId allowlist를 설정한 뒤 다시 시도해 주세요.";
+diff --git a/lib/answer-assistant/release-readiness.ts b/lib/answer-assistant/release-readiness.ts
+index b4ba09e..c6d5a39 100644
+--- a/lib/answer-assistant/release-readiness.ts
++++ b/lib/answer-assistant/release-readiness.ts
+@@ -1,7 +1,14 @@
+-// Verified answer assistant release readiness checks (PR-98 / PR-99-A).
++// Verified answer assistant release readiness checks (PR-98 / PR-99-A / PR-99-B).
+ 
++import {
++  evaluateAllowlistBetaLaunchReadiness,
++  isVerifiedAnswerAssistantAllowlistBetaOperational,
++} from "./allowlist-beta";
+ import { isVerifiedAnswerAssistantAllowlistConfigured } from "./allowlist";
+-import { isAnswerAssistantVerifiedPreviewEnabled } from "./feature-gate";
++import {
++  isAnswerAssistantVerifiedBetaEnabled,
++  isAnswerAssistantVerifiedGateEnvEnabled,
++} from "./feature-gate";
+ import {
+   getAnswerAssistantRateLimitBackend,
+   getAnswerAssistantUsageAuditBackend,
+@@ -46,9 +53,31 @@ export function evaluateVerifiedAnswerAssistantReleaseReadiness(): {
+     );
+   }
+ 
+-  if (isAnswerAssistantVerifiedPreviewEnabled()) {
++  if (isAnswerAssistantVerifiedGateEnvEnabled()) {
++    warnings.push(
++      "Verified answer assistant gate env is ON — confirm allowlist beta operator checklist",
++    );
++  }
++
++  if (
++    isAnswerAssistantVerifiedBetaEnabled() &&
++    !isVerifiedAnswerAssistantAllowlistConfigured()
++  ) {
++    blockers.push(
++      "ANSWER_ASSISTANT_VERIFIED_BETA_ENABLED=true without allowlist — beta must not run",
++    );
++  }
++
++  const betaLaunch = evaluateAllowlistBetaLaunchReadiness();
++  for (const blocker of betaLaunch.blockers) {
++    if (!blockers.includes(blocker)) {
++      blockers.push(blocker);
++    }
++  }
++
++  if (isVerifiedAnswerAssistantAllowlistBetaOperational()) {
+     warnings.push(
+-      "ANSWER_ASSISTANT_VERIFIED_PREVIEW is true — verify allowlist and operator sign-off",
++      "Allowlist beta is operational — monitor rate limits, usage audit, and rollback path",
+     );
+   }
+ 
+diff --git a/lib/answer-assistant/verified-access.ts b/lib/answer-assistant/verified-access.ts
+index 2f3b0c4..aa680c6 100644
+--- a/lib/answer-assistant/verified-access.ts
++++ b/lib/answer-assistant/verified-access.ts
+@@ -1,9 +1,10 @@
+-// Verified planner access for answer assistant preview route (PR-97-B / PR-98).
++// Verified planner access for answer assistant allowlist beta (PR-97-B / PR-98 / PR-99-B).
+ 
+ import { auth } from "@/auth";
+ import { canAccessAdmin } from "@/lib/auth/rbac";
+ import { prisma } from "@/lib/prisma";
+ import type { PlannerVerificationStatus, UserStatus } from "@prisma/client";
++import { getAllowlistBetaOperationalStatus } from "./allowlist-beta";
+ import { isUserOnVerifiedAnswerAssistantAllowlist } from "./allowlist";
+ import {
+   canAdminTestVerifiedAnswerAssistant,
+@@ -27,6 +28,12 @@ export type VerifiedAnswerAssistantAccessState =
+       email: string | null;
+       canViewShell: boolean;
+     }
++  | {
++      status: "beta_not_configured";
++      userId: string;
++      email: string | null;
++      canViewShell: boolean;
++    }
+   | {
+       status: "not_allowlisted";
+       userId: string;
+@@ -57,7 +64,27 @@ export async function getVerifiedAnswerAssistantAccess(): Promise<VerifiedAnswer
+   const role = (session?.user?.role ?? "").toLowerCase();
+   const isAdmin = canAccessAdmin(session);
+ 
+-  if (!isAnswerAssistantVerifiedPreviewEnabled()) {
++  const betaStatus = getAllowlistBetaOperationalStatus();
++
++  if (betaStatus === "disabled") {
++    const canViewShell = isAdmin || role === "verified_planner";
++    if (!canViewShell) {
++      return {
++        status: "denied",
++        email,
++        denyReason:
++          "답변 보조 초안 기능은 검증 완료된 설계사만 이용할 수 있습니다.",
++      };
++    }
++    return {
++      status: "feature_disabled",
++      userId,
++      email,
++      canViewShell: true,
++    };
++  }
++
++  if (betaStatus === "not_configured") {
+     const canViewShell = isAdmin || role === "verified_planner";
+     if (!canViewShell) {
+       return {
+@@ -67,6 +94,15 @@ export async function getVerifiedAnswerAssistantAccess(): Promise<VerifiedAnswer
+           "답변 보조 초안 기능은 검증 완료된 설계사만 이용할 수 있습니다.",
+       };
+     }
++    return {
++      status: "beta_not_configured",
++      userId,
++      email,
++      canViewShell: true,
++    };
++  }
++
++  if (!isAnswerAssistantVerifiedPreviewEnabled()) {
+     return {
+       status: "feature_disabled",
+       userId,
+@@ -212,6 +248,10 @@ export async function requireVerifiedAnswerAssistantAccess(): Promise<{
+     throw new Error("VERIFIED_ANSWER_ASSIST_FEATURE_DISABLED");
+   }
+ 
++  if (access.status === "beta_not_configured") {
++    throw new Error("VERIFIED_ANSWER_ASSIST_BETA_NOT_CONFIGURED");
++  }
++
+   if (access.status === "not_allowlisted") {
+     throw new Error("VERIFIED_ANSWER_ASSIST_NOT_ALLOWLISTED");
+   }
+diff --git a/tests/answer-assistant/release-decision.test.ts b/tests/answer-assistant/release-decision.test.ts
+index 63aa167..04fa8e4 100644
+--- a/tests/answer-assistant/release-decision.test.ts
++++ b/tests/answer-assistant/release-decision.test.ts
+@@ -34,8 +34,13 @@ describe("Answer Assistant release decision (PR-98)", () => {
+     const previous = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
+     delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
+     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
++    const previousAllowlist = process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
+     process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "true";
++    process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST = "user-preview-test";
+     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), true);
++    delete process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
++    process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "true";
++    assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
+     process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "false";
+     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
+     if (previous === undefined) {
+@@ -43,6 +48,11 @@ describe("Answer Assistant release decision (PR-98)", () => {
+     } else {
+       process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = previous;
+     }
++    if (previousAllowlist === undefined) {
++      delete process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
++    } else {
++      process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST = previousAllowlist;
++    }
+   });
+ 
+   it("treats empty allowlist as not configured", () => {
+@@ -76,7 +86,9 @@ describe("Answer Assistant release decision (PR-98)", () => {
+ 
+   it("server action enforces gate order: access, feature gate, allowlist, rate limit", () => {
+     assert.match(PLANNER_ACTIONS, /getVerifiedAnswerAssistantAccess/);
++    assert.match(PLANNER_ACTIONS, /isVerifiedAnswerAssistantAllowlistBetaOperational/);
+     assert.match(PLANNER_ACTIONS, /isAnswerAssistantVerifiedPreviewEnabled/);
++    assert.match(PLANNER_ACTIONS, /beta_not_configured/);
+     assert.match(PLANNER_ACTIONS, /NOT_ALLOWLISTED/);
+     assert.match(PLANNER_ACTIONS, /checkVerifiedAnswerAssistantRateLimit/);
+     assert.match(PLANNER_ACTIONS, /recordVerifiedAnswerAssistantBlockedAttempt/);
+@@ -87,11 +99,13 @@ describe("Answer Assistant release decision (PR-98)", () => {
+     );
+     const body = PLANNER_ACTIONS.slice(fnStart);
+     const accessIndex = body.indexOf("getVerifiedAnswerAssistantAccess");
+-    const gateIndex = body.indexOf("isAnswerAssistantVerifiedPreviewEnabled");
++    const betaNotConfiguredIndex = body.indexOf("beta_not_configured");
++    const gateIndex = body.indexOf("isVerifiedAnswerAssistantAllowlistBetaOperational");
+     const allowlistIndex = body.indexOf("NOT_ALLOWLISTED");
+     const rateIndex = body.indexOf("checkVerifiedAnswerAssistantRateLimit");
+     const generateIndex = body.indexOf("generateInternalAnswerDraft");
+-    assert.ok(accessIndex < gateIndex);
++    assert.ok(accessIndex < betaNotConfiguredIndex);
++    assert.ok(betaNotConfiguredIndex < gateIndex);
+     assert.ok(gateIndex < allowlistIndex);
+     assert.ok(allowlistIndex < rateIndex);
+     assert.ok(rateIndex < generateIndex);
+diff --git a/tests/answer-assistant/verified-prep.test.ts b/tests/answer-assistant/verified-prep.test.ts
+index e6d103c..641ec4d 100644
+--- a/tests/answer-assistant/verified-prep.test.ts
++++ b/tests/answer-assistant/verified-prep.test.ts
+@@ -46,6 +46,7 @@ describe("Answer Assistant verified preview prep (PR-97-B)", () => {
+   });
+ 
+   it("verified server action checks feature gate before generation", () => {
++    assert.match(ACTIONS_SOURCE, /isVerifiedAnswerAssistantAllowlistBetaOperational/);
+     assert.match(ACTIONS_SOURCE, /isAnswerAssistantVerifiedPreviewEnabled/);
+     assert.match(ACTIONS_SOURCE, /FEATURE_DISABLED/);
+     assert.match(ACTIONS_SOURCE, /NOT_ALLOWLISTED/);

@@ -61,6 +61,10 @@ export const VERIFIED_ANSWER_ASSIST_PAGE_NOTICES = {
   draftLabel: "검증 설계사 검수 전 초안",
   previewDisabled:
     "현재 검증 설계사 제한 공개는 비활성화되어 있습니다. 입력·초안 생성은 실행되지 않습니다.",
+  allowlistBetaActive:
+    "제한 beta 운영 중입니다. allowlist에 포함된 검증 설계사만 초안 생성이 가능하며, 전체 검증 설계사·일반 회원·비로그인 공개가 아닙니다. 운영 중단 시 별도 공지 없이 접근이 차단될 수 있습니다.",
+  allowlistBetaPilot:
+    "파일럿 allowlist에 등록된 계정만 사용할 수 있습니다. 고객·카카오·이메일 자동 발송, 커뮤니티 자동 댓글, 답변 자동 게시는 제공하지 않습니다.",
 } as const;
 
 export const VERIFIED_REVIEW_CHECKLIST = [
@@ -84,5 +88,7 @@ export const VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES = {
   RATE_LIMIT_ABUSE: (seconds: number) =>
     `반복 차단 요청으로 일시 제한되었습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요.`,
   UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
-  NOT_ALLOWLISTED: "현재 제한 공개 대상이 아닙니다.",
+  NOT_ALLOWLISTED: "현재 제한 beta 대상이 아닙니다.",
+  BETA_NOT_CONFIGURED:
+    "beta gate가 켜져 있으나 allowlist가 비어 있어 초안 생성을 실행하지 않습니다.",
 } as const;

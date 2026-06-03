@@ -1,7 +1,14 @@
-// Verified answer assistant release readiness checks (PR-98 / PR-99-A).
+// Verified answer assistant release readiness checks (PR-98 / PR-99-A / PR-99-B).
 
+import {
+  evaluateAllowlistBetaLaunchReadiness,
+  isVerifiedAnswerAssistantAllowlistBetaOperational,
+} from "./allowlist-beta";
 import { isVerifiedAnswerAssistantAllowlistConfigured } from "./allowlist";
-import { isAnswerAssistantVerifiedPreviewEnabled } from "./feature-gate";
+import {
+  isAnswerAssistantVerifiedBetaEnabled,
+  isAnswerAssistantVerifiedGateEnvEnabled,
+} from "./feature-gate";
 import {
   getAnswerAssistantRateLimitBackend,
   getAnswerAssistantUsageAuditBackend,
@@ -46,9 +53,31 @@ export function evaluateVerifiedAnswerAssistantReleaseReadiness(): {
     );
   }
 
-  if (isAnswerAssistantVerifiedPreviewEnabled()) {
+  if (isAnswerAssistantVerifiedGateEnvEnabled()) {
     warnings.push(
-      "ANSWER_ASSISTANT_VERIFIED_PREVIEW is true — verify allowlist and operator sign-off",
+      "Verified answer assistant gate env is ON — confirm allowlist beta operator checklist",
+    );
+  }
+
+  if (
+    isAnswerAssistantVerifiedBetaEnabled() &&
+    !isVerifiedAnswerAssistantAllowlistConfigured()
+  ) {
+    blockers.push(
+      "ANSWER_ASSISTANT_VERIFIED_BETA_ENABLED=true without allowlist — beta must not run",
+    );
+  }
+
+  const betaLaunch = evaluateAllowlistBetaLaunchReadiness();
+  for (const blocker of betaLaunch.blockers) {
+    if (!blockers.includes(blocker)) {
+      blockers.push(blocker);
+    }
+  }
+
+  if (isVerifiedAnswerAssistantAllowlistBetaOperational()) {
+    warnings.push(
+      "Allowlist beta is operational — monitor rate limits, usage audit, and rollback path",
     );
   }
 

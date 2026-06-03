@@ -1,9 +1,10 @@
-// Verified planner access for answer assistant preview route (PR-97-B / PR-98).
+// Verified planner access for answer assistant allowlist beta (PR-97-B / PR-98 / PR-99-B).
 
 import { auth } from "@/auth";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/prisma";
 import type { PlannerVerificationStatus, UserStatus } from "@prisma/client";
+import { getAllowlistBetaOperationalStatus } from "./allowlist-beta";
 import { isUserOnVerifiedAnswerAssistantAllowlist } from "./allowlist";
 import {
   canAdminTestVerifiedAnswerAssistant,
@@ -23,6 +24,12 @@ export type VerifiedAnswerAssistantAccessState =
   | { status: "locked" }
   | {
       status: "feature_disabled";
+      userId: string;
+      email: string | null;
+      canViewShell: boolean;
+    }
+  | {
+      status: "beta_not_configured";
       userId: string;
       email: string | null;
       canViewShell: boolean;
@@ -57,7 +64,9 @@ export async function getVerifiedAnswerAssistantAccess(): Promise<VerifiedAnswer
   const role = (session?.user?.role ?? "").toLowerCase();
   const isAdmin = canAccessAdmin(session);
 
-  if (!isAnswerAssistantVerifiedPreviewEnabled()) {
+  const betaStatus = getAllowlistBetaOperationalStatus();
+
+  if (betaStatus === "disabled") {
     const canViewShell = isAdmin || role === "verified_planner";
     if (!canViewShell) {
       return {
@@ -67,6 +76,33 @@ export async function getVerifiedAnswerAssistantAccess(): Promise<VerifiedAnswer
           "답변 보조 초안 기능은 검증 완료된 설계사만 이용할 수 있습니다.",
       };
     }
+    return {
+      status: "feature_disabled",
+      userId,
+      email,
+      canViewShell: true,
+    };
+  }
+
+  if (betaStatus === "not_configured") {
+    const canViewShell = isAdmin || role === "verified_planner";
+    if (!canViewShell) {
+      return {
+        status: "denied",
+        email,
+        denyReason:
+          "답변 보조 초안 기능은 검증 완료된 설계사만 이용할 수 있습니다.",
+      };
+    }
+    return {
+      status: "beta_not_configured",
+      userId,
+      email,
+      canViewShell: true,
+    };
+  }
+
+  if (!isAnswerAssistantVerifiedPreviewEnabled()) {
     return {
       status: "feature_disabled",
       userId,
@@ -210,6 +246,10 @@ export async function requireVerifiedAnswerAssistantAccess(): Promise<{
 
   if (access.status === "feature_disabled") {
     throw new Error("VERIFIED_ANSWER_ASSIST_FEATURE_DISABLED");
+  }
+
+  if (access.status === "beta_not_configured") {
+    throw new Error("VERIFIED_ANSWER_ASSIST_BETA_NOT_CONFIGURED");
   }
 
   if (access.status === "not_allowlisted") {

@@ -34,14 +34,24 @@ describe("Answer Assistant release decision (PR-98)", () => {
     const previous = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
     delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
+    const previousAllowlist = process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
     process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "true";
+    process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST = "user-preview-test";
     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), true);
+    delete process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
+    process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "true";
+    assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
     process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "false";
     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
     if (previous === undefined) {
       delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
     } else {
       process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = previous;
+    }
+    if (previousAllowlist === undefined) {
+      delete process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
+    } else {
+      process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST = previousAllowlist;
     }
   });
 
@@ -76,7 +86,9 @@ describe("Answer Assistant release decision (PR-98)", () => {
 
   it("server action enforces gate order: access, feature gate, allowlist, rate limit", () => {
     assert.match(PLANNER_ACTIONS, /getVerifiedAnswerAssistantAccess/);
+    assert.match(PLANNER_ACTIONS, /isVerifiedAnswerAssistantAllowlistBetaOperational/);
     assert.match(PLANNER_ACTIONS, /isAnswerAssistantVerifiedPreviewEnabled/);
+    assert.match(PLANNER_ACTIONS, /beta_not_configured/);
     assert.match(PLANNER_ACTIONS, /NOT_ALLOWLISTED/);
     assert.match(PLANNER_ACTIONS, /checkVerifiedAnswerAssistantRateLimit/);
     assert.match(PLANNER_ACTIONS, /recordVerifiedAnswerAssistantBlockedAttempt/);
@@ -87,11 +99,13 @@ describe("Answer Assistant release decision (PR-98)", () => {
     );
     const body = PLANNER_ACTIONS.slice(fnStart);
     const accessIndex = body.indexOf("getVerifiedAnswerAssistantAccess");
-    const gateIndex = body.indexOf("isAnswerAssistantVerifiedPreviewEnabled");
+    const betaNotConfiguredIndex = body.indexOf("beta_not_configured");
+    const gateIndex = body.indexOf("isVerifiedAnswerAssistantAllowlistBetaOperational");
     const allowlistIndex = body.indexOf("NOT_ALLOWLISTED");
     const rateIndex = body.indexOf("checkVerifiedAnswerAssistantRateLimit");
     const generateIndex = body.indexOf("generateInternalAnswerDraft");
-    assert.ok(accessIndex < gateIndex);
+    assert.ok(accessIndex < betaNotConfiguredIndex);
+    assert.ok(betaNotConfiguredIndex < gateIndex);
     assert.ok(gateIndex < allowlistIndex);
     assert.ok(allowlistIndex < rateIndex);
     assert.ok(rateIndex < generateIndex);

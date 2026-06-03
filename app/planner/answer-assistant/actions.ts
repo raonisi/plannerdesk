@@ -6,6 +6,7 @@ import {
   VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES,
   VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
 } from "@/lib/answer-assistant/constants";
+import { isVerifiedAnswerAssistantAllowlistBetaOperational } from "@/lib/answer-assistant/allowlist-beta";
 import { isAnswerAssistantVerifiedPreviewEnabled } from "@/lib/answer-assistant/feature-gate";
 import {
   checkVerifiedAnswerAssistantRateLimit,
@@ -88,8 +89,23 @@ export async function generateVerifiedAnswerAssistantDraftAction(
     return blockedResult("UNAUTHORIZED", access.denyReason);
   }
 
-  // 2. Feature gate
+  if (access.status === "beta_not_configured") {
+    const result = blockedResult(
+      "FEATURE_DISABLED",
+      VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.BETA_NOT_CONFIGURED,
+    );
+    await logVerifiedUsage(
+      access.userId,
+      parseAnswerAssistantFormData(formData),
+      "blocked",
+      result,
+    );
+    return result;
+  }
+
+  // 2. Feature gate (beta ON + allowlist required)
   if (
+    !isVerifiedAnswerAssistantAllowlistBetaOperational() ||
     !isAnswerAssistantVerifiedPreviewEnabled() ||
     access.status === "feature_disabled"
   ) {

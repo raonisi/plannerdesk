@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { AnswerAssistantPanelShell } from "@/components/answer-assistant/answer-assistant-panel";
-import { VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES } from "@/lib/answer-assistant/constants";
-import { VERIFIED_PREVIEW_DISABLED_MESSAGE } from "@/lib/answer-assistant/feature-gate";
+import {
+  VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES,
+  VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
+} from "@/lib/answer-assistant/constants";
+import {
+  VERIFIED_BETA_NOT_CONFIGURED_MESSAGE,
+  VERIFIED_PREVIEW_DISABLED_MESSAGE,
+} from "@/lib/answer-assistant/feature-gate";
 import { getVerifiedAnswerAssistantAccess } from "@/lib/answer-assistant/verified-access";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import { generateVerifiedAnswerAssistantDraftAction } from "./actions";
@@ -42,12 +48,18 @@ export default async function PlannerAnswerAssistantPage() {
   const generationDisabledMessage =
     access.status === "feature_disabled"
       ? VERIFIED_PREVIEW_DISABLED_MESSAGE
-      : access.status === "not_allowlisted"
-        ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED
-        : undefined;
+      : access.status === "beta_not_configured"
+        ? VERIFIED_BETA_NOT_CONFIGURED_MESSAGE
+        : access.status === "not_allowlisted"
+          ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED
+          : undefined;
+  const betaActiveNotice =
+    access.status === "authenticated" && access.canGenerate
+      ? `${VERIFIED_ANSWER_ASSIST_PAGE_NOTICES.allowlistBetaActive} ${VERIFIED_ANSWER_ASSIST_PAGE_NOTICES.allowlistBetaPilot}`
+      : undefined;
   const adminTesterNotice =
     access.status === "authenticated" && access.isAdminTester
-      ? "관리자 테스트 모드입니다. 검증 설계사 제한 공개 UI를 확인 중이며, Safety Gate·Retrieval·Output Safety 정책은 동일하게 적용됩니다."
+      ? "관리자 테스트 모드입니다. allowlist beta UI를 확인 중이며, Safety Gate·Retrieval·Output Safety·rate limit·usage audit 정책은 동일하게 적용됩니다."
       : undefined;
 
   return (
@@ -83,6 +95,7 @@ export default async function PlannerAnswerAssistantPage() {
         >
           <AnswerAssistantPanelShell
             adminTesterNotice={adminTesterNotice}
+            betaActiveNotice={betaActiveNotice}
             generationDisabledMessage={generationDisabledMessage}
             generationEnabled={generationEnabled}
             submitAction={generateVerifiedAnswerAssistantDraftAction}

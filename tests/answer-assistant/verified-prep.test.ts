@@ -46,6 +46,7 @@ describe("Answer Assistant verified preview prep (PR-97-B)", () => {
   });
 
   it("verified server action checks feature gate before generation", () => {
+    assert.match(ACTIONS_SOURCE, /isVerifiedAnswerAssistantAllowlistBetaOperational/);
     assert.match(ACTIONS_SOURCE, /isAnswerAssistantVerifiedPreviewEnabled/);
     assert.match(ACTIONS_SOURCE, /FEATURE_DISABLED/);
     assert.match(ACTIONS_SOURCE, /NOT_ALLOWLISTED/);

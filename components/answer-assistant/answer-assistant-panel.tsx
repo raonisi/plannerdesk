@@ -26,6 +26,7 @@ export interface AnswerAssistantPanelShellProps {
   variant: AnswerAssistantPanelVariant;
   generationEnabled: boolean;
   generationDisabledMessage?: string;
+  betaActiveNotice?: string;
   adminTesterNotice?: string;
   submitAction: (formData: FormData) => Promise<AnswerAssistantDraftResult>;
 }
@@ -34,6 +35,7 @@ export function AnswerAssistantPanelShell({
   variant,
   generationEnabled,
   generationDisabledMessage,
+  betaActiveNotice,
   adminTesterNotice,
   submitAction,
 }: AnswerAssistantPanelShellProps) {
@@ -110,8 +112,20 @@ export function AnswerAssistantPanelShell({
           className="rounded-lg border border-[#d9c9a8] bg-[#f4f6f8] px-4 py-4 text-sm text-[#4f5661]"
           role="status"
         >
-          <p className="font-semibold text-[#102235]">제한 공개 준비 중</p>
+          <p className="font-semibold text-[#102235]">
+            {variant === "verified" ? "제한 beta" : "제한 공개 준비 중"}
+          </p>
           <p className="mt-2">{generationDisabledMessage}</p>
+        </section>
+      ) : null}
+
+      {generationEnabled && betaActiveNotice ? (
+        <section
+          className="rounded-lg border border-[#d6a36e] bg-[#fff3e0] px-4 py-4 text-sm leading-relaxed text-[#5c4520]"
+          role="status"
+        >
+          <p className="font-semibold text-[#102235]">제한 beta 운영 중</p>
+          <p className="mt-2">{betaActiveNotice}</p>
         </section>
       ) : null}
 
