@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import {
-  ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED,
+  ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT,
   isAnswerAssistantVerifiedPreviewEnabled,
 } from "@/lib/answer-assistant/feature-gate";
 import {
@@ -28,8 +28,15 @@ const PAGE_SOURCE = readFileSync(join(PLANNER_ROOT, "page.tsx"), "utf8");
 
 describe("Answer Assistant verified preview prep (PR-97-B)", () => {
   it("keeps feature gate default OFF", () => {
-    assert.equal(ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED, false);
+    assert.equal(ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT, false);
+    const previous = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
+    delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
+    if (previous === undefined) {
+      delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
+    } else {
+      process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = previous;
+    }
   });
 
   it("planner page uses verified access guard and noindex metadata", () => {
@@ -41,6 +48,7 @@ describe("Answer Assistant verified preview prep (PR-97-B)", () => {
   it("verified server action checks feature gate before generation", () => {
     assert.match(ACTIONS_SOURCE, /isAnswerAssistantVerifiedPreviewEnabled/);
     assert.match(ACTIONS_SOURCE, /FEATURE_DISABLED/);
+    assert.match(ACTIONS_SOURCE, /NOT_ALLOWLISTED/);
     assert.match(ACTIONS_SOURCE, /checkVerifiedAnswerAssistantRateLimit/);
     assert.match(ACTIONS_SOURCE, /logAnswerAssistantUsage/);
     assert.match(ACTIONS_SOURCE, /audience:\s*"verified_planner"/);

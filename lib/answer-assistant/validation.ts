@@ -206,6 +206,8 @@ export const ANSWER_ASSIST_BLOCKED_MESSAGES: Record<
   RATE_LIMIT_EXCEEDED:
     "요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.",
   UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
+  NOT_ALLOWLISTED:
+    "현재 제한 공개 대상이 아닙니다. 단계적 공개 대상에 포함되면 별도 안내됩니다.",
 };
 
 const VALID_PURPOSES = new Set<string>([

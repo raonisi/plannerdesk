@@ -96,6 +96,7 @@ export const BLOCKED_REASON_LABEL: Record<
   FEATURE_DISABLED: "제한 공개 비활성화",
   RATE_LIMIT_EXCEEDED: "사용량 제한",
   UNAUTHORIZED: "권한 없음",
+  NOT_ALLOWLISTED: "제한 공개 대상 아님",
 };
 
 export function purposeRequiresOfficialCheck(

@@ -1,7 +1,7 @@
-// Minimal answer assistant usage metadata (PR-97-B).
+// Minimal answer assistant usage metadata (PR-97-B / PR-98).
 // Does NOT store request text, draft text, or raw provider output.
 
-import type { AnswerAssistantBlockedReason } from "./types";
+import type { AnswerAssistantBlockedReason, AnswerAssistantPurpose } from "./types";
 import type { RetrievalSourceType } from "./retrieval-types";
 
 export type AnswerAssistantUsageAudience = "admin" | "verified_planner";
@@ -13,11 +13,14 @@ export interface AnswerAssistantUsageLogEntry {
   userId: string;
   audience: AnswerAssistantUsageAudience;
   outcome: AnswerAssistantUsageOutcome;
-  blockedReason?: AnswerAssistantBlockedReason | "FEATURE_DISABLED" | "RATE_LIMIT_EXCEEDED" | "UNAUTHORIZED";
+  requestPurpose?: AnswerAssistantPurpose;
+  blockedReason?: AnswerAssistantBlockedReason;
   candidateCount?: number;
   evidenceSourceIds?: Array<{ id: string; type: RetrievalSourceType | string }>;
+  outputSafetyBlocked?: boolean;
+  providerConfigured?: boolean;
   providerErrorCode?: "PROVIDER_NOT_CONFIGURED" | "PROVIDER_ERROR";
-  rateLimitHit?: boolean;
+  rateLimitBlocked?: boolean;
   isAdminTester?: boolean;
 }
 

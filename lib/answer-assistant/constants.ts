@@ -81,5 +81,8 @@ export const VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES = {
     `요청이 너무 많습니다. ${seconds}초 후 다시 시도해 주세요. (분당 ${VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perMinute}회 제한)`,
   RATE_LIMIT_DAY: (seconds: number) =>
     `일일 사용 한도에 도달했습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요. (일 ${VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perDay}회 제한)`,
+  RATE_LIMIT_ABUSE: (seconds: number) =>
+    `반복 차단 요청으로 일시 제한되었습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요.`,
   UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
+  NOT_ALLOWLISTED: "현재 제한 공개 대상이 아닙니다.",
 } as const;

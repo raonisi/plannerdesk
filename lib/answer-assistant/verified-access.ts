@@ -1,9 +1,10 @@
-// Verified planner access for answer assistant preview route (PR-97-B).
+// Verified planner access for answer assistant preview route (PR-97-B / PR-98).
 
 import { auth } from "@/auth";
 import { canAccessAdmin } from "@/lib/auth/rbac";
 import { prisma } from "@/lib/prisma";
 import type { PlannerVerificationStatus, UserStatus } from "@prisma/client";
+import { isUserOnVerifiedAnswerAssistantAllowlist } from "./allowlist";
 import {
   canAdminTestVerifiedAnswerAssistant,
   isAnswerAssistantVerifiedPreviewEnabled,
@@ -25,6 +26,11 @@ export type VerifiedAnswerAssistantAccessState =
       userId: string;
       email: string | null;
       canViewShell: boolean;
+    }
+  | {
+      status: "not_allowlisted";
+      userId: string;
+      email: string | null;
     }
   | {
       status: "denied";
@@ -171,6 +177,14 @@ export async function getVerifiedAnswerAssistantAccess(): Promise<VerifiedAnswer
     };
   }
 
+  if (!isUserOnVerifiedAnswerAssistantAllowlist(userId)) {
+    return {
+      status: "not_allowlisted",
+      userId,
+      email,
+    };
+  }
+
   return {
     status: "authenticated",
     userId,
@@ -196,6 +210,10 @@ export async function requireVerifiedAnswerAssistantAccess(): Promise<{
 
   if (access.status === "feature_disabled") {
     throw new Error("VERIFIED_ANSWER_ASSIST_FEATURE_DISABLED");
+  }
+
+  if (access.status === "not_allowlisted") {
+    throw new Error("VERIFIED_ANSWER_ASSIST_NOT_ALLOWLISTED");
   }
 
   if (!access.canGenerate) {

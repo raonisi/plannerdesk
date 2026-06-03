@@ -1,18 +1,36 @@
-// VERIFIED_PLANNER answer assistant preview feature gate (PR-97-B).
-// Default OFF — traffic must not open until a follow-up QA + Go sign-off PR.
+// VERIFIED_PLANNER answer assistant preview feature gate (PR-97-B / PR-98).
+// Default OFF — never enable in code. Explicit env only after operational sign-off.
 
-/** Code constant default. Do not enable without operational sign-off. */
-export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED = false;
+/** Code default when ANSWER_ASSISTANT_VERIFIED_PREVIEW env is unset. Must stay false. */
+export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT = false;
+
+/** @deprecated Use ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT — kept for tests. */
+export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED =
+  ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
+
+/**
+ * Public boolean config (not a secret).
+ * Set ANSWER_ASSISTANT_VERIFIED_PREVIEW=true only after PR-98 Go + allowlist configured.
+ */
+export function isAnswerAssistantVerifiedPreviewEnabled(): boolean {
+  const raw = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW?.trim().toLowerCase();
+  if (!raw) {
+    return ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
+  }
+  if (raw === "true" || raw === "1") {
+    return true;
+  }
+  if (raw === "false" || raw === "0") {
+    return false;
+  }
+  return ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
+}
 
 /**
  * When preview is enabled, admins may use the verified route for UX testing.
- * Does not bypass Safety Gate, Retrieval whitelist, or Output Safety Scan.
+ * Does not bypass allowlist for verified planners, Safety Gate, or Output Safety.
  */
 export const ALLOW_ADMIN_VERIFIED_ANSWER_ASSISTANT_TEST = true;
-
-export function isAnswerAssistantVerifiedPreviewEnabled(): boolean {
-  return ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED;
-}
 
 export function canAdminTestVerifiedAnswerAssistant(): boolean {
   return (

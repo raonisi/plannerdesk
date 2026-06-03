@@ -35,7 +35,8 @@ export type AnswerAssistantBlockedReason =
   | "OUTPUT_SAFETY_BLOCKED"
   | "FEATURE_DISABLED"
   | "RATE_LIMIT_EXCEEDED"
-  | "UNAUTHORIZED";
+  | "UNAUTHORIZED"
+  | "NOT_ALLOWLISTED";
 
 export type AnswerAssistantDraftMode = "rules_based" | "llm";
 
