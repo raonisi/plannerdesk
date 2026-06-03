@@ -93,6 +93,9 @@ export const BLOCKED_REASON_LABEL: Record<
   PROVIDER_NOT_CONFIGURED: "Provider 미구성",
   PROVIDER_ERROR: "Provider 오류",
   OUTPUT_SAFETY_BLOCKED: "출력 안전성 차단",
+  FEATURE_DISABLED: "제한 공개 비활성화",
+  RATE_LIMIT_EXCEEDED: "사용량 제한",
+  UNAUTHORIZED: "권한 없음",
 };
 
 export function purposeRequiresOfficialCheck(

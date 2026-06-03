@@ -426,12 +426,12 @@ function assessEvidencePolicy(
 export async function retrieveAnswerCandidates(
   input: RetrievalQueryInput,
 ): Promise<RetrievalQueryResult> {
-  if (input.audience !== "admin") {
+  if (input.audience !== "admin" && input.audience !== "verified_planner") {
     return {
       ok: false,
       allowed: false,
       blockedReason: "unauthorized",
-      blockedMessage: "관리자 권한이 필요합니다.",
+      blockedMessage: "답변 보조 기능을 사용할 권한이 없습니다.",
       candidates: [],
     };
   }

@@ -32,7 +32,10 @@ export type AnswerAssistantBlockedReason =
   | "INSUFFICIENT_EVIDENCE"
   | "PROVIDER_NOT_CONFIGURED"
   | "PROVIDER_ERROR"
-  | "OUTPUT_SAFETY_BLOCKED";
+  | "OUTPUT_SAFETY_BLOCKED"
+  | "FEATURE_DISABLED"
+  | "RATE_LIMIT_EXCEEDED"
+  | "UNAUTHORIZED";
 
 export type AnswerAssistantDraftMode = "rules_based" | "llm";
 
@@ -100,6 +103,12 @@ export interface AnswerAssistantValidationResult {
   blockedReason?: AnswerAssistantBlockedReason;
   message: string;
   normalizedQuery?: string;
+}
+
+export type AnswerAssistantAudience = "admin" | "verified_planner";
+
+export interface GenerateAnswerDraftOptions {
+  audience?: AnswerAssistantAudience;
 }
 
 export interface AnswerAssistantRetrievalContext {

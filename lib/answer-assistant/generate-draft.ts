@@ -20,12 +20,15 @@ import {
   ANSWER_ASSIST_PAGE_NOTICES,
   INSUFFICIENT_EVIDENCE_MESSAGE,
   OUTPUT_SAFETY_BLOCKED_MESSAGE,
+  VERIFIED_REVIEW_CHECKLIST,
+  VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
 } from "./constants";
 import { purposeRequiresOfficialCheck } from "./labels";
 import type {
   AnswerAssistantBlockedReason,
   AnswerAssistantDraftResult,
   AnswerAssistantInput,
+  GenerateAnswerDraftOptions,
 } from "./types";
 
 function blockedResult(
@@ -59,7 +62,9 @@ function blockedResult(
 
 export async function generateInternalAnswerDraft(
   input: AnswerAssistantInput,
+  options: GenerateAnswerDraftOptions = {},
 ): Promise<AnswerAssistantDraftResult> {
+  const audience = options.audience ?? "admin";
   const validation = validateAnswerAssistantInput(input);
   if (!validation.ok || !validation.normalizedQuery) {
     return blockedResult(
@@ -78,7 +83,7 @@ export async function generateInternalAnswerDraft(
 
   const retrieval = await retrieveAnswerCandidates({
     query: normalizedQuery,
-    audience: "admin",
+    audience,
     domain: input.domain,
     purpose: input.purpose,
     requiresOfficialCheck,
@@ -185,6 +190,15 @@ export async function generateInternalAnswerDraft(
     );
   }
 
+  const pageNotices =
+    audience === "verified_planner"
+      ? VERIFIED_ANSWER_ASSIST_PAGE_NOTICES
+      : ANSWER_ASSIST_PAGE_NOTICES;
+  const reviewChecklist =
+    audience === "verified_planner"
+      ? VERIFIED_REVIEW_CHECKLIST
+      : ADMIN_REVIEW_CHECKLIST;
+
   return {
     ok: true,
     draft: providerResult.draft,
@@ -198,8 +212,8 @@ export async function generateInternalAnswerDraft(
     ),
     insufficientEvidence: false,
     candidateCount,
-    draftLabel: ANSWER_ASSIST_PAGE_NOTICES.draftLabel,
-    footerDisclaimer: ANSWER_ASSIST_PAGE_NOTICES.footerDisclaimer,
-    adminReviewChecklist: ADMIN_REVIEW_CHECKLIST,
+    draftLabel: pageNotices.draftLabel,
+    footerDisclaimer: pageNotices.footerDisclaimer,
+    adminReviewChecklist: reviewChecklist,
   };
 }

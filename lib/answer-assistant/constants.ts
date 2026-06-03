@@ -1,5 +1,7 @@
 // Answer Assistant admin draft MVP constants (PR-94).
 
+import { VERIFIED_ANSWER_ASSIST_RATE_LIMIT } from "./rate-limit";
+
 export const ANSWER_ASSIST_QUERY_MIN_LENGTH = 20;
 export const ANSWER_ASSIST_QUERY_MAX_LENGTH = 2000;
 export const ANSWER_ASSIST_MAX_URLS = 3;
@@ -44,3 +46,40 @@ export const INSUFFICIENT_EVIDENCE_MESSAGE =
 
 export const OUTPUT_SAFETY_BLOCKED_MESSAGE =
   "생성된 초안에 금지 표현이 포함되어 차단했습니다. 보험금·의료·손해사정·상품 강권 표현 없이 다시 요청해 주세요.";
+
+export const VERIFIED_ANSWER_ASSIST_PAGE_NOTICES = {
+  toolPurpose:
+    "이 기능은 검증 설계사의 업무 참고용 초안 보조 도구입니다. 생성된 문구는 고객에게 바로 발송하거나 커뮤니티에 자동 게시할 수 없습니다.",
+  sensitiveInput:
+    "고객명, 연락처, 계약번호, 병명, 진단명, 진단서 내용, 청구자료는 입력하지 마세요.",
+  prohibitedScope:
+    "보험금 지급 가능 여부, 손해사정성 판단, 의료정보 해석, 특정 상품 추천은 제공하지 않습니다.",
+  customerReview:
+    "생성된 초안은 고객에게 바로 발송하지 말고, 공식 약관과 보험사 안내 기준을 확인한 뒤 사용해야 합니다.",
+  footerDisclaimer:
+    "이 초안은 공개·검수 완료된 자료를 기반으로 작성된 업무 참고용 문안입니다. 고객 발송 전 사실관계, 공식 약관, 보험사 안내 기준을 반드시 확인하세요.",
+  draftLabel: "검증 설계사 검수 전 초안",
+  previewDisabled:
+    "현재 검증 설계사 제한 공개는 비활성화되어 있습니다. 입력·초안 생성은 실행되지 않습니다.",
+} as const;
+
+export const VERIFIED_REVIEW_CHECKLIST = [
+  "공식 약관 또는 보험사 안내 기준을 확인했는가",
+  "보험금 지급 가능성을 단정하지 않았는가",
+  "의료정보를 해석하지 않았는가",
+  "손해사정성 판단을 하지 않았는가",
+  "특정 상품 가입을 강권하지 않았는가",
+  "고객 개인정보가 포함되지 않았는가",
+  "출처 없는 사실 단정이 없는가",
+  "고객 발송 전 문구를 다시 검토했는가",
+] as const;
+
+export const VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES = {
+  FEATURE_DISABLED:
+    "현재 검증 설계사 제한 공개는 비활성화되어 있습니다. 입력 안전성 검사와 초안 생성은 실행되지 않습니다.",
+  RATE_LIMIT_MINUTE: (seconds: number) =>
+    `요청이 너무 많습니다. ${seconds}초 후 다시 시도해 주세요. (분당 ${VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perMinute}회 제한)`,
+  RATE_LIMIT_DAY: (seconds: number) =>
+    `일일 사용 한도에 도달했습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요. (일 ${VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perDay}회 제한)`,
+  UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
+} as const;

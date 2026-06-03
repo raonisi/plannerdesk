@@ -201,6 +201,11 @@ export const ANSWER_ASSIST_BLOCKED_MESSAGES: Record<
     "초안 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 근거 자료를 직접 확인해 주세요.",
   OUTPUT_SAFETY_BLOCKED:
     "생성된 초안에 금지 표현이 포함되어 차단했습니다. 보험금·의료·손해사정·상품 강권 표현 없이 다시 요청해 주세요.",
+  FEATURE_DISABLED:
+    "현재 검증 설계사 제한 공개는 비활성화되어 있습니다. 입력 안전성 검사와 초안 생성은 실행되지 않습니다.",
+  RATE_LIMIT_EXCEEDED:
+    "요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.",
+  UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
 };
 
 const VALID_PURPOSES = new Set<string>([

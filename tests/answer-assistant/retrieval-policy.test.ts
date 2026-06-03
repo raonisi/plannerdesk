@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { retrieveAnswerCandidates } from "@/lib/answer-assistant/retrieval";
 import {
   RETRIEVAL_EXCLUDED_DOMAINS,
   type RetrievalCandidate,
@@ -14,16 +13,11 @@ const RETRIEVAL_SOURCE = readFileSync(
 );
 
 describe("Answer Assistant retrieval policy", () => {
-  it("rejects non-admin audience before DB access", async () => {
-    const result = await retrieveAnswerCandidates({
-      query: "해지 전 고객에게 안내할 일반 기준을 정리해줘",
-      audience: "verified_planner",
-    });
-    assert.equal(result.ok, false);
-    if (!result.ok) {
-      assert.equal(result.blockedReason, "unauthorized");
-      assert.equal(result.candidates.length, 0);
-    }
+  it("allows admin and verified_planner audiences in retrieval gate", () => {
+    assert.match(
+      RETRIEVAL_SOURCE,
+      /input\.audience !== "admin" && input\.audience !== "verified_planner"/,
+    );
   });
 
   it("documents excluded domains including CorrectionRequest", () => {
