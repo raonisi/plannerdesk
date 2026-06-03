@@ -104,27 +104,27 @@ describe("Answer Assistant release decision (PR-98)", () => {
 });
 
 describe("Answer Assistant abuse cooldown (PR-98)", () => {
-  it("applies cooldown after repeated prompt injection blocks", () => {
+  it("applies cooldown after repeated prompt injection blocks", async () => {
     resetVerifiedAnswerAssistantRateLimitStore();
     const userId = "abuse-test-user";
 
     for (let index = 0; index < VERIFIED_ANSWER_ASSIST_RATE_LIMIT.promptInjectionBeforeCooldown; index += 1) {
-      recordVerifiedAnswerAssistantBlockedAttempt(userId, "PROMPT_INJECTION");
+      await recordVerifiedAnswerAssistantBlockedAttempt(userId, "PROMPT_INJECTION");
     }
 
-    const blocked = checkVerifiedAnswerAssistantRateLimit(userId);
+    const blocked = await checkVerifiedAnswerAssistantRateLimit(userId);
     assert.equal(blocked.allowed, false);
     if (!blocked.allowed) {
       assert.equal(blocked.reason, "abuse_cooldown");
     }
   });
 
-  it("does not consume minute quota when only checking", () => {
+  it("does not consume minute quota when only checking", async () => {
     resetVerifiedAnswerAssistantRateLimitStore();
     const userId = "quota-check-user";
-    checkVerifiedAnswerAssistantRateLimit(userId);
-    consumeVerifiedAnswerAssistantRateLimit(userId);
-    const snapshot = checkVerifiedAnswerAssistantRateLimit(userId);
+    await checkVerifiedAnswerAssistantRateLimit(userId);
+    await consumeVerifiedAnswerAssistantRateLimit(userId);
+    const snapshot = await checkVerifiedAnswerAssistantRateLimit(userId);
     assert.equal(snapshot.allowed, true);
   });
 });

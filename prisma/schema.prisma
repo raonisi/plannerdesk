@@ -344,28 +344,41 @@ enum CommunityReportStatus {
   deleted
 }
 
+// Answer assistant operational safety (PR-99-A). Metadata only — no prompt/draft/raw output.
+enum AnswerAssistantUsageAudience {
+  admin
+  verified_planner
+}
+
+enum AnswerAssistantUsageOutcome {
+  success
+  blocked
+}
+
 model User {
-  id                           String                @id @default(cuid())
+  id                           String                         @id @default(cuid())
   name                         String?
-  email                        String?               @unique
+  email                        String?                        @unique
   emailVerified                DateTime?
   image                        String?
-  role                         Role                  @default(anonymous_public)
-  status                       UserStatus            @default(active)
-  verificationStatus           VerificationStatus    @default(unverified)
+  role                         Role                           @default(anonymous_public)
+  status                       UserStatus                     @default(active)
+  verificationStatus           VerificationStatus             @default(unverified)
   accounts                     Account[]
   sessions                     Session[]
-  resolvedCorrectionRequests   CorrectionRequest[]   @relation("CorrectionRequestResolvedBy")
-  plannerVerifications         PlannerVerification[] @relation("PlannerVerificationUser")
-  reviewedPlannerVerifications PlannerVerification[] @relation("PlannerVerificationReviewer")
-  authoredCommunityPosts       CommunityPost[]       @relation("CommunityPostAuthor")
-  reviewedCommunityPosts       CommunityPost[]       @relation("CommunityPostReviewer")
-  blindedCommunityPosts        CommunityPost[]       @relation("CommunityPostBlindedBy")
-  deletedCommunityPosts        CommunityPost[]       @relation("CommunityPostDeletedBy")
-  submittedCommunityReports    CommunityReport[]     @relation("CommunityReportReporter")
-  reviewedCommunityReports     CommunityReport[]     @relation("CommunityReportReviewer")
-  createdAt                    DateTime              @default(now())
-  updatedAt                    DateTime              @updatedAt
+  resolvedCorrectionRequests   CorrectionRequest[]            @relation("CorrectionRequestResolvedBy")
+  plannerVerifications         PlannerVerification[]          @relation("PlannerVerificationUser")
+  reviewedPlannerVerifications PlannerVerification[]          @relation("PlannerVerificationReviewer")
+  authoredCommunityPosts       CommunityPost[]                @relation("CommunityPostAuthor")
+  reviewedCommunityPosts       CommunityPost[]                @relation("CommunityPostReviewer")
+  blindedCommunityPosts        CommunityPost[]                @relation("CommunityPostBlindedBy")
+  deletedCommunityPosts        CommunityPost[]                @relation("CommunityPostDeletedBy")
+  submittedCommunityReports    CommunityReport[]              @relation("CommunityReportReporter")
+  reviewedCommunityReports     CommunityReport[]              @relation("CommunityReportReviewer")
+  answerAssistantRateLimit     AnswerAssistantRateLimitState?
+  answerAssistantUsageAudits   AnswerAssistantUsageAudit[]
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
 }
 
 model Account {
@@ -754,4 +767,45 @@ model CommunityReport {
   @@index([postId, status])
   @@index([status, createdAt])
   @@index([reporterId, postId])
+}
+
+// Per-user durable rate limit counters for verified answer assistant (PR-99-A).
+model AnswerAssistantRateLimitState {
+  userId                    String    @id
+  user                      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  minuteWindowStart         DateTime
+  minuteCount               Int       @default(0)
+  dayWindowStart            DateTime
+  dayCount                  Int       @default(0)
+  abuseWindowStart          DateTime
+  blockedCountToday         Int       @default(0)
+  promptInjectionCountToday Int       @default(0)
+  providerErrorCountToday   Int       @default(0)
+  cooldownUntil             DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+}
+
+// Minimal usage audit — blockedReason/outcome metadata only (PR-99-A).
+model AnswerAssistantUsageAudit {
+  id                  String                       @id @default(cuid())
+  userId              String
+  user                User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audience            AnswerAssistantUsageAudience
+  outcome             AnswerAssistantUsageOutcome
+  requestPurpose      String?
+  blockedReason       String?
+  candidateCount      Int?
+  evidenceSourceIds   Json?
+  outputSafetyBlocked Boolean                      @default(false)
+  providerConfigured  Boolean?
+  providerErrorCode   String?
+  rateLimitBlocked    Boolean                      @default(false)
+  isAdminTester       Boolean                      @default(false)
+  createdAt           DateTime                     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@index([outcome, createdAt])
+  @@index([blockedReason])
 }

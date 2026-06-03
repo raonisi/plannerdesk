@@ -1,16 +1,18 @@
-// Verified answer assistant release readiness checks (PR-98).
+// Verified answer assistant release readiness checks (PR-98 / PR-99-A).
 
 import { isVerifiedAnswerAssistantAllowlistConfigured } from "./allowlist";
 import { isAnswerAssistantVerifiedPreviewEnabled } from "./feature-gate";
+import {
+  getAnswerAssistantRateLimitBackend,
+  getAnswerAssistantUsageAuditBackend,
+} from "./rate-limit-config";
 
-/** In-memory rate limit only until PR-99 durable store PR. */
 export function isVerifiedAnswerAssistantRateLimitDurable(): boolean {
-  return false;
+  return getAnswerAssistantRateLimitBackend() === "durable";
 }
 
-/** In-process usage buffer only — not persistent audit. */
 export function isVerifiedAnswerAssistantUsageAuditPersistent(): boolean {
-  return false;
+  return getAnswerAssistantUsageAuditBackend() === "durable";
 }
 
 export type VerifiedAnswerAssistantReleaseVerdict =
@@ -28,13 +30,13 @@ export function evaluateVerifiedAnswerAssistantReleaseReadiness(): {
 
   if (!isVerifiedAnswerAssistantRateLimitDurable()) {
     blockers.push(
-      "persistent rate limit store absent (in-memory only — production full release No-Go)",
+      "persistent rate limit store absent (memory backend — production full release No-Go)",
     );
   }
 
   if (!isVerifiedAnswerAssistantUsageAuditPersistent()) {
     warnings.push(
-      "persistent usage audit absent — allowlist pilot only until PR-99 audit store",
+      "persistent usage audit absent (memory backend — allowlist pilot only)",
     );
   }
 

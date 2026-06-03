@@ -11,6 +11,7 @@ import {
   checkVerifiedAnswerAssistantRateLimit,
   consumeVerifiedAnswerAssistantRateLimit,
   recordVerifiedAnswerAssistantBlockedAttempt,
+  recordVerifiedAnswerAssistantProviderError,
 } from "@/lib/answer-assistant/rate-limit";
 import {
   buildEvidenceSourceIds,
@@ -40,7 +41,7 @@ function blockedResult(
   };
 }
 
-function logVerifiedUsage(
+async function logVerifiedUsage(
   userId: string,
   input: AnswerAssistantInput,
   outcome: "success" | "blocked",
@@ -49,8 +50,8 @@ function logVerifiedUsage(
     rateLimitBlocked?: boolean;
     isAdminTester?: boolean;
   },
-): void {
-  logAnswerAssistantUsage({
+): Promise<void> {
+  await logAnswerAssistantUsage({
     timestamp: new Date().toISOString(),
     userId,
     audience: "verified_planner",
@@ -99,7 +100,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
       VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.FEATURE_DISABLED,
     );
     if (access.status === "feature_disabled") {
-      logVerifiedUsage(userId, parseAnswerAssistantFormData(formData), "blocked", result);
+      await logVerifiedUsage(userId, parseAnswerAssistantFormData(formData), "blocked", result);
     }
     return result;
   }
@@ -110,7 +111,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
       "NOT_ALLOWLISTED",
       VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED,
     );
-    logVerifiedUsage(
+    await logVerifiedUsage(
       access.userId,
       parseAnswerAssistantFormData(formData),
       "blocked",
@@ -129,7 +130,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
   const input = parseAnswerAssistantFormData(formData);
 
   // 6. Rate limit (before Safety Gate / provider)
-  const rateLimit = checkVerifiedAnswerAssistantRateLimit(access.userId);
+  const rateLimit = await checkVerifiedAnswerAssistantRateLimit(access.userId);
   if (!rateLimit.allowed) {
     const message =
       rateLimit.reason === "minute"
@@ -144,13 +145,13 @@ export async function generateVerifiedAnswerAssistantDraftAction(
               rateLimit.retryAfterSeconds,
             );
     const result = blockedResult("RATE_LIMIT_EXCEEDED", message);
-    logVerifiedUsage(access.userId, input, "blocked", result, {
+    await logVerifiedUsage(access.userId, input, "blocked", result, {
       rateLimitBlocked: true,
     });
     return result;
   }
 
-  consumeVerifiedAnswerAssistantRateLimit(access.userId);
+  await consumeVerifiedAnswerAssistantRateLimit(access.userId);
 
   // 7–12. Safety Gate, Retrieval, provider, Output Safety (generateInternalAnswerDraft)
   const result = await generateInternalAnswerDraft(input, {
@@ -162,13 +163,17 @@ export async function generateVerifiedAnswerAssistantDraftAction(
     result.safetyGatePassed === false &&
     result.blockedReason
   ) {
-    recordVerifiedAnswerAssistantBlockedAttempt(
+    await recordVerifiedAnswerAssistantBlockedAttempt(
       access.userId,
       result.blockedReason,
     );
   }
 
-  logVerifiedUsage(
+  if (!result.ok && result.blockedReason === "PROVIDER_ERROR") {
+    await recordVerifiedAnswerAssistantProviderError(access.userId);
+  }
+
+  await logVerifiedUsage(
     access.userId,
     input,
     result.ok ? "success" : "blocked",

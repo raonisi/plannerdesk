@@ -10,8 +10,8 @@ import {
   checkVerifiedAnswerAssistantRateLimit,
   consumeVerifiedAnswerAssistantRateLimit,
   resetVerifiedAnswerAssistantRateLimitStore,
-  VERIFIED_ANSWER_ASSIST_RATE_LIMIT,
 } from "@/lib/answer-assistant/rate-limit";
+import { VERIFIED_ANSWER_ASSIST_RATE_LIMIT } from "@/lib/answer-assistant/rate-limit-config";
 import {
   clearAnswerAssistantUsageLogBuffer,
   getAnswerAssistantUsageLogBuffer,
@@ -64,17 +64,17 @@ describe("Answer Assistant verified preview prep (PR-97-B)", () => {
 });
 
 describe("Answer Assistant verified rate limit", () => {
-  it("blocks after minute and day thresholds", () => {
+  it("blocks after minute and day thresholds", async () => {
     resetVerifiedAnswerAssistantRateLimitStore();
     const userId = "test-user-rate-limit";
 
     for (let index = 0; index < VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perMinute; index += 1) {
-      const check = checkVerifiedAnswerAssistantRateLimit(userId);
+      const check = await checkVerifiedAnswerAssistantRateLimit(userId);
       assert.equal(check.allowed, true);
-      consumeVerifiedAnswerAssistantRateLimit(userId);
+      await consumeVerifiedAnswerAssistantRateLimit(userId);
     }
 
-    const blocked = checkVerifiedAnswerAssistantRateLimit(userId);
+    const blocked = await checkVerifiedAnswerAssistantRateLimit(userId);
     assert.equal(blocked.allowed, false);
     if (!blocked.allowed) {
       assert.equal(blocked.reason, "minute");
@@ -83,9 +83,9 @@ describe("Answer Assistant verified rate limit", () => {
 });
 
 describe("Answer Assistant usage log", () => {
-  it("stores metadata only without query or draft text fields", () => {
+  it("stores metadata only without query or draft text fields", async () => {
     clearAnswerAssistantUsageLogBuffer();
-    logAnswerAssistantUsage({
+    await logAnswerAssistantUsage({
       timestamp: new Date().toISOString(),
       userId: "user-1",
       audience: "verified_planner",

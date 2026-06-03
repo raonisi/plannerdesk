@@ -1,6 +1,6 @@
 // Answer Assistant admin draft MVP constants (PR-94).
 
-import { VERIFIED_ANSWER_ASSIST_RATE_LIMIT } from "./rate-limit";
+import { VERIFIED_ANSWER_ASSIST_RATE_LIMIT } from "./rate-limit-config";
 
 export const ANSWER_ASSIST_QUERY_MIN_LENGTH = 20;
 export const ANSWER_ASSIST_QUERY_MAX_LENGTH = 2000;

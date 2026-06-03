@@ -1,0 +1,1149 @@
+diff --git a/.env.example b/.env.example
+index 0ca55d1..2ad93f1 100644
+--- a/.env.example
++++ b/.env.example
+@@ -21,6 +21,12 @@ AUTH_URL=http://localhost:3000
+ # NEXTAUTH_SECRET=
+ # NEXTAUTH_URL=http://localhost:3000
+ 
++# Verified answer assistant limited release (PR-98).
++# Default OFF when unset. Never set true without operator sign-off + allowlist.
++# ANSWER_ASSISTANT_VERIFIED_PREVIEW=false
++# Comma-separated User.id values only — no email or PII.
++# ANSWER_ASSISTANT_VERIFIED_ALLOWLIST=
++
+ # Google OAuth (required for admin sign-in in production):
+ AUTH_GOOGLE_ID=
+ AUTH_GOOGLE_SECRET=
+diff --git a/app/planner/answer-assistant/actions.ts b/app/planner/answer-assistant/actions.ts
+index 18c780e..da740d2 100644
+--- a/app/planner/answer-assistant/actions.ts
++++ b/app/planner/answer-assistant/actions.ts
+@@ -1,6 +1,7 @@
+ "use server";
+ 
+ import { generateInternalAnswerDraft } from "@/lib/answer-assistant/generate-draft";
++import { isAnswerDraftProviderConfigured } from "@/lib/answer-assistant/provider";
+ import {
+   VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES,
+   VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
+@@ -9,6 +10,7 @@ import { isAnswerAssistantVerifiedPreviewEnabled } from "@/lib/answer-assistant/
+ import {
+   checkVerifiedAnswerAssistantRateLimit,
+   consumeVerifiedAnswerAssistantRateLimit,
++  recordVerifiedAnswerAssistantBlockedAttempt,
+ } from "@/lib/answer-assistant/rate-limit";
+ import {
+   buildEvidenceSourceIds,
+@@ -19,6 +21,7 @@ import { getVerifiedAnswerAssistantAccess } from "@/lib/answer-assistant/verifie
+ import type {
+   AnswerAssistantBlockedReason,
+   AnswerAssistantDraftResult,
++  AnswerAssistantInput,
+ } from "@/lib/answer-assistant/types";
+ 
+ function blockedResult(
+@@ -39,10 +42,11 @@ function blockedResult(
+ 
+ function logVerifiedUsage(
+   userId: string,
++  input: AnswerAssistantInput,
+   outcome: "success" | "blocked",
+   result: AnswerAssistantDraftResult,
+   extra?: {
+-    rateLimitHit?: boolean;
++    rateLimitBlocked?: boolean;
+     isAdminTester?: boolean;
+   },
+ ): void {
+@@ -51,16 +55,20 @@ function logVerifiedUsage(
+     userId,
+     audience: "verified_planner",
+     outcome,
++    requestPurpose: input.purpose,
+     blockedReason: result.ok ? undefined : result.blockedReason,
+     candidateCount: result.candidateCount,
+     evidenceSourceIds: buildEvidenceSourceIds(result.evidence),
++    outputSafetyBlocked:
++      !result.ok && result.blockedReason === "OUTPUT_SAFETY_BLOCKED",
++    providerConfigured: isAnswerDraftProviderConfigured(),
+     providerErrorCode:
+       !result.ok && result.blockedReason === "PROVIDER_NOT_CONFIGURED"
+         ? "PROVIDER_NOT_CONFIGURED"
+         : !result.ok && result.blockedReason === "PROVIDER_ERROR"
+           ? "PROVIDER_ERROR"
+           : undefined,
+-    rateLimitHit: extra?.rateLimitHit,
++    rateLimitBlocked: extra?.rateLimitBlocked,
+     isAdminTester: extra?.isAdminTester,
+   });
+ }
+@@ -68,33 +76,59 @@ function logVerifiedUsage(
+ export async function generateVerifiedAnswerAssistantDraftAction(
+   formData: FormData,
+ ): Promise<AnswerAssistantDraftResult> {
++  // 1. Login + role + verification + allowlist (via access resolver)
+   const access = await getVerifiedAnswerAssistantAccess();
+ 
+   if (access.status === "locked") {
+-    return blockedResult(
+-      "UNAUTHORIZED",
+-      "로그인이 필요합니다.",
+-    );
++    return blockedResult("UNAUTHORIZED", "로그인이 필요합니다.");
+   }
+ 
+   if (access.status === "denied") {
+-    const result = blockedResult("UNAUTHORIZED", access.denyReason);
+-    return result;
++    return blockedResult("UNAUTHORIZED", access.denyReason);
+   }
+ 
++  // 2. Feature gate
+   if (
+     !isAnswerAssistantVerifiedPreviewEnabled() ||
+-    access.status === "feature_disabled" ||
+-    !access.canGenerate
++    access.status === "feature_disabled"
+   ) {
++    const userId =
++      access.status === "feature_disabled" ? access.userId : "unknown";
+     const result = blockedResult(
+       "FEATURE_DISABLED",
+       VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.FEATURE_DISABLED,
+     );
+-    logVerifiedUsage(access.userId, "blocked", result);
++    if (access.status === "feature_disabled") {
++      logVerifiedUsage(userId, parseAnswerAssistantFormData(formData), "blocked", result);
++    }
+     return result;
+   }
+ 
++  // 3. Allowlist (verified planners only — admin tester bypasses in access)
++  if (access.status === "not_allowlisted") {
++    const result = blockedResult(
++      "NOT_ALLOWLISTED",
++      VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED,
++    );
++    logVerifiedUsage(
++      access.userId,
++      parseAnswerAssistantFormData(formData),
++      "blocked",
++      result,
++    );
++    return result;
++  }
++
++  if (access.status !== "authenticated" || !access.canGenerate) {
++    return blockedResult(
++      "UNAUTHORIZED",
++      VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.UNAUTHORIZED,
++    );
++  }
++
++  const input = parseAnswerAssistantFormData(formData);
++
++  // 6. Rate limit (before Safety Gate / provider)
+   const rateLimit = checkVerifiedAnswerAssistantRateLimit(access.userId);
+   if (!rateLimit.allowed) {
+     const message =
+@@ -102,24 +136,45 @@ export async function generateVerifiedAnswerAssistantDraftAction(
+         ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.RATE_LIMIT_MINUTE(
+             rateLimit.retryAfterSeconds,
+           )
+-        : VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.RATE_LIMIT_DAY(
+-            rateLimit.retryAfterSeconds,
+-          );
++        : rateLimit.reason === "day"
++          ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.RATE_LIMIT_DAY(
++              rateLimit.retryAfterSeconds,
++            )
++          : VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.RATE_LIMIT_ABUSE(
++              rateLimit.retryAfterSeconds,
++            );
+     const result = blockedResult("RATE_LIMIT_EXCEEDED", message);
+-    logVerifiedUsage(access.userId, "blocked", result, { rateLimitHit: true });
++    logVerifiedUsage(access.userId, input, "blocked", result, {
++      rateLimitBlocked: true,
++    });
+     return result;
+   }
+ 
+   consumeVerifiedAnswerAssistantRateLimit(access.userId);
+ 
+-  const input = parseAnswerAssistantFormData(formData);
++  // 7–12. Safety Gate, Retrieval, provider, Output Safety (generateInternalAnswerDraft)
+   const result = await generateInternalAnswerDraft(input, {
+     audience: "verified_planner",
+   });
+ 
+-  logVerifiedUsage(access.userId, result.ok ? "success" : "blocked", result, {
+-    isAdminTester: access.isAdminTester,
+-  });
++  if (
++    !result.ok &&
++    result.safetyGatePassed === false &&
++    result.blockedReason
++  ) {
++    recordVerifiedAnswerAssistantBlockedAttempt(
++      access.userId,
++      result.blockedReason,
++    );
++  }
++
++  logVerifiedUsage(
++    access.userId,
++    input,
++    result.ok ? "success" : "blocked",
++    result,
++    { isAdminTester: access.isAdminTester },
++  );
+ 
+   return result;
+ }
+diff --git a/app/planner/answer-assistant/page.tsx b/app/planner/answer-assistant/page.tsx
+index ca85e17..92434ba 100644
+--- a/app/planner/answer-assistant/page.tsx
++++ b/app/planner/answer-assistant/page.tsx
+@@ -1,5 +1,6 @@
+ import Link from "next/link";
+ import { AnswerAssistantPanelShell } from "@/components/answer-assistant/answer-assistant-panel";
++import { VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES } from "@/lib/answer-assistant/constants";
+ import { VERIFIED_PREVIEW_DISABLED_MESSAGE } from "@/lib/answer-assistant/feature-gate";
+ import { getVerifiedAnswerAssistantAccess } from "@/lib/answer-assistant/verified-access";
+ import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+@@ -41,7 +42,9 @@ export default async function PlannerAnswerAssistantPage() {
+   const generationDisabledMessage =
+     access.status === "feature_disabled"
+       ? VERIFIED_PREVIEW_DISABLED_MESSAGE
+-      : undefined;
++      : access.status === "not_allowlisted"
++        ? VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES.NOT_ALLOWLISTED
++        : undefined;
+   const adminTesterNotice =
+     access.status === "authenticated" && access.isAdminTester
+       ? "관리자 테스트 모드입니다. 검증 설계사 제한 공개 UI를 확인 중이며, Safety Gate·Retrieval·Output Safety 정책은 동일하게 적용됩니다."
+diff --git a/docs/PR-98-VERIFIED-ANSWER-ASSISTANT-RELEASE-DECISION.md b/docs/PR-98-VERIFIED-ANSWER-ASSISTANT-RELEASE-DECISION.md
+new file mode 100644
+index 0000000..55ea768
+--- /dev/null
++++ b/docs/PR-98-VERIFIED-ANSWER-ASSISTANT-RELEASE-DECISION.md
+@@ -0,0 +1,279 @@
++# PR-98 Verified Answer Assistant Release Decision
++
++## 1. 목적
++
++PR-98의 목적은 verified-only 답변 보조 기능을 **즉시 전체 공개**하는 것이 아니라, **제한 공개 가능 여부를 운영 기준으로 판단**하고 **조건부 활성화 구조를 확정**하는 것이다.
++
++### 목적 (Yes)
++
++- verified-only 답변 보조 기능 활성화 가능 여부 판단
++- feature gate 활성화 조건 정리 (`ANSWER_ASSISTANT_VERIFIED_PREVIEW`)
++- allowlist 기반 제한 공개 기준 정리 (`ANSWER_ASSISTANT_VERIFIED_ALLOWLIST`)
++- rate limit·usage log·Safety Gate 검증
++- 운영자용 Go / No-Go 기준 확정
++- 실제 공개 이후 rollback 기준 확정
++
++### 목적이 아닌 것 (No)
++
++- public chatbot 오픈
++- GENERAL_USER / 비로그인 답변 기능
++- 고객·이메일·카카오톡 자동 발송
++- 커뮤니티 자동 댓글 / Q&A 자동 답변
++- 보험금 판단 / 의료 해석 / 손해사정 / 상품 추천 자동화
++- schema migration / provider secret 추가
++
++---
++
++## 2. PR-98 최종 판단 (Executive Summary)
++
++| 항목 | 판단 |
++| --- | --- |
++| **전체 VERIFIED_PLANNER 공개** | **No-Go** |
++| **allowlist 극소수 파일럿** | **조건부 Go** (gate ON + allowlist + sign-off) |
++| **ADMIN 내부 유지** | **Go** (기존 `/admin/answer-assistant` 영향 없음) |
++| **GENERAL_USER / public** | **No-Go** (변경 없음) |
++
++**No-Go 근거 (핵심):**
++
++1. **persistent rate limit store 부재** — in-memory only (PR-99 분리)
++2. **persistent usage audit 부재** — in-process buffer only
++3. **allowlist 미설정 시** verified planner 초안 생성 불가 (의도된 안전 기본값)
++4. **provider 미구성** — LLM 실연동 전 초안 생성 불가
++
++---
++
++## 3. 항목별 검증 결과
++
++| # | 항목 | 결과 | 근거 |
++| --- | --- | --- | --- |
++| 1 | PR-97-B feature gate 기본 OFF | **PASS** | `ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT = false`, env unset → OFF |
++| 2 | verified route shell | **PASS** | `/planner/answer-assistant`, noindex |
++| 3 | server action feature gate 차단 | **PASS** | `actions.ts` gate before generation |
++| 4 | VERIFIED_PLANNER 권한 확인 | **PASS** | `verified-access.ts` + approved verification |
++| 5 | SUSPENDED 차단 | **PASS** | blocking status + `suspendedAt` |
++| 6 | REJECTED 차단 | **PASS** | blocking status |
++| 7 | EXPIRED 차단 | **PASS** | blocking status |
++| 8 | DELETED 차단 | **PASS** | blocking status + `deletedAt` |
++| 9 | GENERAL_USER 차단 | **PASS** | role !== verified_planner |
++| 10 | PENDING_PLANNER 차단 | **PASS** | pending / under_review |
++| 11 | rate limit | **PARTIAL** | 3/분, 20/일, abuse cooldown — in-memory |
++| 12 | persistent rate limit store | **FAIL** | `isVerifiedAnswerAssistantRateLimitDurable() === false` |
++| 13 | usage log 최소화 | **PASS** | metadata only, no prompt/draft/raw |
++| 14 | raw prompt 저장 금지 | **PASS** | usage log schema excludes query |
++| 15 | raw output 저장 금지 | **PASS** | usage log schema excludes draft/raw |
++| 16 | Safety Gate | **PASS** | PR-97-A tests 37+ blocked cases |
++| 17 | Prompt Injection | **PASS** | expanded keywords + abuse cooldown |
++| 18 | Retrieval whitelist | **PASS** | public WHERE + select whitelist |
++| 19 | MessageTemplate safeCopy | **PASS** | retrieval uses safeCopy only |
++| 20 | adminMemo 제외 | **PASS** | retrieval policy tests |
++| 21 | CorrectionRequest 제외 | **PASS** | RETRIEVAL_EXCLUDED_DOMAINS |
++| 22 | Output Safety Scan | **PASS** | 19+ blocked phrases |
++| 23 | provider safety | **PARTIAL** | stub only, PROVIDER_NOT_CONFIGURED |
++| 24 | UI 고지 | **PASS** | VERIFIED_ANSWER_ASSIST_PAGE_NOTICES 4종 |
++| 25 | 자동 발송 부재 | **PASS** | UI + auth tests |
++| 26 | 자동 게시 부재 | **PASS** | UI tests |
++| 27 | 커뮤니티 자동 댓글 부재 | **PASS** | UI tests |
++| 28 | file/OCR 부재 | **PASS** | UI + scope |
++| 29 | vector/embedding 부재 | **PASS** | scope |
++| 30 | schema/migration 부재 | **PASS** | no migration in PR-98 |
++
++**판단 규칙 적용:** 핵심 항목 중 **persistent rate limit = FAIL** → **전체 제한 공개 No-Go**. allowlist 파일럿만 조건부 검토.
++
++---
++
++## 4. Feature Gate 활성화 정책
++
++### 4.1 기본값
++
++| 설정 | 기본값 | 설명 |
++| --- | --- | --- |
++| `ANSWER_ASSISTANT_VERIFIED_PREVIEW` | **unset → OFF** | public boolean, secret 아님 |
++| 코드 상수 | `false` | env 미설정 시 절대 ON 되지 않음 |
++
++**금지:**
++
++- 코드 상수 `true` 고정
++- production 기본 ON
++- env 미설정 시 ON
++- gate 없이 route/action 동작
++
++**허용:**
++
++- `ANSWER_ASSISTANT_VERIFIED_PREVIEW=true` 명시적 설정 + 운영 sign-off
++- allowlist 충족 시에만 verified planner 사용
++- ADMIN 테스트 (`ALLOW_ADMIN_VERIFIED_ANSWER_ASSISTANT_TEST`) — gate ON 시 UX 검증용
++
++### 4.2 Gate 처리 순서 (verified server action)
++
++1. 로그인 확인
++2. feature gate 확인
++3. allowlist 확인
++4. `PlannerVerification.status = approved` 확인
++5. SUSPENDED / REJECTED / EXPIRED / DELETED 차단
++6. rate limit 확인 (분/일/abuse cooldown)
++7. Safety Gate
++8. Retrieval whitelist
++9. insufficientEvidence 확인
++10. provider configured 확인
++11. 초안 생성
++12. Output Safety Scan
++13. 최소 usage log
++14. 결과 반환
++
++**provider 호출 없음 조건:** gate OFF, allowlist 미포함, 권한 실패, rate limit, Safety Gate, insufficient evidence, output safety 차단.
++
++---
++
++## 5. Allowlist 기반 제한 공개
++
++### 5.1 정책
++
++- 초기 공개는 **allowlist 기반** — 전체 verified planner 일괄 공개 아님
++- `ANSWER_ASSISTANT_VERIFIED_ALLOWLIST` — comma-separated **User.id** only
++- allowlist raw 값 **client 노출 금지**
++- 이메일·전화번호 등 PII allowlist 저장 금지
++
++### 5.2 allowlist 없을 때
++
++| 동작 | |
++| --- | --- |
++| route | shell + 고지 표시 |
++| form | 비활성 |
++| server action | `NOT_ALLOWLISTED` 차단 |
++| provider | 호출 없음 |
++| UI | "현재 제한 공개 대상이 아닙니다." |
++
++ADMIN tester는 allowlist bypass (gate ON + admin test policy).
++
++---
++
++## 6. Rate Limit 최종 조건
++
++| 한도 | 값 |
++| --- | --- |
++| 분당 | 3회 |
++| 일일 | 20회 |
++| Safety Gate 차단 누적 | 5회 → 24h cooldown |
++| Prompt Injection 누적 | 3회 → 24h cooldown |
++
++| Store | PR-98 상태 | Production 판단 |
++| --- | --- | --- |
++| in-memory | ✅ 구현 | dev/staging·allowlist 파일럿만 |
++| durable (Redis/DB) | ❌ 미구현 | **전체 공개 No-Go** → PR-99 |
++
++---
++
++## 7. Usage Log 최소화
++
++### 저장 금지 (유지)
++
++raw prompt, raw output, 고객/계약/의료/청구 정보, file/OCR, provider raw response
++
++### 저장 가능 (최소 메타데이터)
++
++userId, requestPurpose, blockedReason, candidateCount, evidenceSourceIds, outputSafetyBlocked, providerConfigured, providerErrorCode, rateLimitBlocked, timestamp
++
++**리스크:** persistent audit 없음 → allowlist 파일럿만 권장 (PR-99).
++
++---
++
++## 8. Verified UI 고지 (재확인)
++
++`VERIFIED_ANSWER_ASSIST_PAGE_NOTICES` — PR-96 §4.4 4종:
++
++1. 검증 설계사 업무 참고용 초안 보조
++2. 보험금·손해사정·의료·상품 추천 미제공
++3. 개인정보·의료정보·청구자료 입력 금지
++4. 고객 발송 전 공식 기준 확인 필요
++
++복사 버튼 없음. 자동 발송·게시·댓글 UI 없음.
++
++---
++
++## 9. 운영자 활성화 체크리스트
++
++활성화 전 **전부** 확인:
++
++- [ ] PR-95/97-A/97-B-QA sign-off 완료
++- [ ] 법무·운영·보안 sign-off
++- [ ] `ANSWER_ASSISTANT_VERIFIED_PREVIEW=true` Railway/운영 env에만 설정 (로컬 기본 OFF)
++- [ ] `ANSWER_ASSISTANT_VERIFIED_ALLOWLIST`에 파일럿 userId만 등록
++- [ ] allowlist에 PII 없음 (userId only)
++- [ ] GENERAL_USER / public route 미추가 확인
++- [ ] 자동 발송·게시·댓글 UI 부재 확인
++- [ ] provider 정책 확인 (미구성 시 PROVIDER_NOT_CONFIGURED)
++- [ ] rollback: env `false` + allowlist 비우기 → 즉시 차단
++- [ ] PR-99 durable rate limit / audit 일정 확정
++
++---
++
++## 10. Rollback 기준
++
++즉시 rollback (env OFF):
++
++- Output Safety 대량 차단
++- Prompt Injection abuse 급증
++- provider 오류율 급증
++- 운영·법무 이슈
++- allowlist 오설정
++
++Rollback 절차:
++
++1. `ANSWER_ASSISTANT_VERIFIED_PREVIEW=false`
++2. `ANSWER_ASSISTANT_VERIFIED_ALLOWLIST` 비우기 (optional)
++3. redeploy / env reload
++4. verified route → 준비 중 / NOT_ALLOWLISTED 안내
++
++---
++
++## 11. Go / No-Go 최종 결정
++
++| 범위 | PR-98 결정 |
++| --- | --- |
++| ADMIN 내부 | **Go** |
++| VERIFIED 전체 공개 | **No-Go** |
++| VERIFIED allowlist 파일럿 | **조건부 Go** |
++| GENERAL_USER | **No-Go** |
++| public chatbot | **No-Go** |
++
++---
++
++## 12. 후속 PR
++
++| PR | 내용 |
++| --- | --- |
++| PR-99 | durable rate limit + persistent usage audit |
++| PR-98-QA | gate ON + allowlist E2E, operator runbook |
++| PR-100 | provider 실연동 + output safety 회귀 (별도 보안 PR) |
++| PR-101 | allowlist 확대 / 전체 verified 검토 (durable store + audit 후) |
++
++---
++
++## 13. 변경 파일 (PR-98)
++
++| 파일 | 변경 |
++| --- | --- |
++| `lib/answer-assistant/feature-gate.ts` | env 기반 gate, 코드 default OFF |
++| `lib/answer-assistant/allowlist.ts` | **신규** — allowlist env |
++| `lib/answer-assistant/release-readiness.ts` | **신규** — No-Go 판단 헬퍼 |
++| `lib/answer-assistant/rate-limit.ts` | 3/분, abuse cooldown |
++| `lib/answer-assistant/usage-log.ts` | requestPurpose 등 메타 확장 |
++| `lib/answer-assistant/verified-access.ts` | allowlist 상태 |
++| `app/planner/answer-assistant/actions.ts` | gate 순서 + abuse log |
++| `app/planner/answer-assistant/page.tsx` | not_allowlisted UI |
++| `.env.example` | placeholder config |
++| `tests/answer-assistant/release-decision.test.ts` | **신규** |
++
++---
++
++## 14. 검증 명령어
++
++```bash
++npx prisma format
++npx prisma validate
++npx prisma generate
++npm run typecheck
++npm run lint
++npm run build
++npm run test
++```
+diff --git a/lib/answer-assistant/allowlist.ts b/lib/answer-assistant/allowlist.ts
+new file mode 100644
+index 0000000..4ad8dc8
+--- /dev/null
++++ b/lib/answer-assistant/allowlist.ts
+@@ -0,0 +1,37 @@
++// Allowlist-based verified answer assistant release (PR-98).
++// No DB schema — comma-separated userId list via env only.
++
++/**
++ * Parses ANSWER_ASSISTANT_VERIFIED_ALLOWLIST (comma-separated userIds).
++ * Empty or unset means no verified planner is allowlisted.
++ */
++export function getAnswerAssistantVerifiedAllowlistUserIds(): ReadonlySet<string> {
++  const raw = process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST?.trim();
++  if (!raw) {
++    return new Set();
++  }
++
++  const ids = raw
++    .split(",")
++    .map((value) => value.trim())
++    .filter(Boolean);
++
++  return new Set(ids);
++}
++
++export function isVerifiedAnswerAssistantAllowlistConfigured(): boolean {
++  return getAnswerAssistantVerifiedAllowlistUserIds().size > 0;
++}
++
++export function isUserOnVerifiedAnswerAssistantAllowlist(userId: string): boolean {
++  const allowlist = getAnswerAssistantVerifiedAllowlistUserIds();
++  if (allowlist.size === 0) {
++    return false;
++  }
++  return allowlist.has(userId);
++}
++
++/** Never expose raw allowlist to clients — server-side only. */
++export function getVerifiedAnswerAssistantAllowlistCount(): number {
++  return getAnswerAssistantVerifiedAllowlistUserIds().size;
++}
+diff --git a/lib/answer-assistant/constants.ts b/lib/answer-assistant/constants.ts
+index 7fb5afe..5ccb9c5 100644
+--- a/lib/answer-assistant/constants.ts
++++ b/lib/answer-assistant/constants.ts
+@@ -81,5 +81,8 @@ export const VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES = {
+     `요청이 너무 많습니다. ${seconds}초 후 다시 시도해 주세요. (분당 ${VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perMinute}회 제한)`,
+   RATE_LIMIT_DAY: (seconds: number) =>
+     `일일 사용 한도에 도달했습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요. (일 ${VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perDay}회 제한)`,
++  RATE_LIMIT_ABUSE: (seconds: number) =>
++    `반복 차단 요청으로 일시 제한되었습니다. ${Math.ceil(seconds / 3600)}시간 후 다시 시도해 주세요.`,
+   UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
++  NOT_ALLOWLISTED: "현재 제한 공개 대상이 아닙니다.",
+ } as const;
+diff --git a/lib/answer-assistant/feature-gate.ts b/lib/answer-assistant/feature-gate.ts
+index 5f2a7e4..260c48a 100644
+--- a/lib/answer-assistant/feature-gate.ts
++++ b/lib/answer-assistant/feature-gate.ts
+@@ -1,19 +1,37 @@
+-// VERIFIED_PLANNER answer assistant preview feature gate (PR-97-B).
+-// Default OFF — traffic must not open until a follow-up QA + Go sign-off PR.
++// VERIFIED_PLANNER answer assistant preview feature gate (PR-97-B / PR-98).
++// Default OFF — never enable in code. Explicit env only after operational sign-off.
+ 
+-/** Code constant default. Do not enable without operational sign-off. */
+-export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED = false;
++/** Code default when ANSWER_ASSISTANT_VERIFIED_PREVIEW env is unset. Must stay false. */
++export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT = false;
++
++/** @deprecated Use ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT — kept for tests. */
++export const ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED =
++  ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
+ 
+ /**
+- * When preview is enabled, admins may use the verified route for UX testing.
+- * Does not bypass Safety Gate, Retrieval whitelist, or Output Safety Scan.
++ * Public boolean config (not a secret).
++ * Set ANSWER_ASSISTANT_VERIFIED_PREVIEW=true only after PR-98 Go + allowlist configured.
+  */
+-export const ALLOW_ADMIN_VERIFIED_ANSWER_ASSISTANT_TEST = true;
+-
+ export function isAnswerAssistantVerifiedPreviewEnabled(): boolean {
+-  return ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED;
++  const raw = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW?.trim().toLowerCase();
++  if (!raw) {
++    return ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
++  }
++  if (raw === "true" || raw === "1") {
++    return true;
++  }
++  if (raw === "false" || raw === "0") {
++    return false;
++  }
++  return ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT;
+ }
+ 
++/**
++ * When preview is enabled, admins may use the verified route for UX testing.
++ * Does not bypass allowlist for verified planners, Safety Gate, or Output Safety.
++ */
++export const ALLOW_ADMIN_VERIFIED_ANSWER_ASSISTANT_TEST = true;
++
+ export function canAdminTestVerifiedAnswerAssistant(): boolean {
+   return (
+     isAnswerAssistantVerifiedPreviewEnabled() &&
+diff --git a/lib/answer-assistant/labels.ts b/lib/answer-assistant/labels.ts
+index 4b10d45..2df1878 100644
+--- a/lib/answer-assistant/labels.ts
++++ b/lib/answer-assistant/labels.ts
+@@ -96,6 +96,7 @@ export const BLOCKED_REASON_LABEL: Record<
+   FEATURE_DISABLED: "제한 공개 비활성화",
+   RATE_LIMIT_EXCEEDED: "사용량 제한",
+   UNAUTHORIZED: "권한 없음",
++  NOT_ALLOWLISTED: "제한 공개 대상 아님",
+ };
+ 
+ export function purposeRequiresOfficialCheck(
+diff --git a/lib/answer-assistant/rate-limit.ts b/lib/answer-assistant/rate-limit.ts
+index f9c132f..59d9f62 100644
+--- a/lib/answer-assistant/rate-limit.ts
++++ b/lib/answer-assistant/rate-limit.ts
+@@ -1,16 +1,21 @@
+-// In-process rate limit for verified answer assistant preview (PR-97-B).
+-// Replace with Redis/DB counters when shared infra is available.
++// In-process rate limit for verified answer assistant (PR-97-B / PR-98).
++// Durable store required for production full release — see release-readiness.ts.
++
++import type { AnswerAssistantBlockedReason } from "./types";
+ 
+ export const VERIFIED_ANSWER_ASSIST_RATE_LIMIT = {
+-  perMinute: 5,
++  perMinute: 3,
+   perDay: 20,
++  blockedAttemptsBeforeCooldown: 5,
++  promptInjectionBeforeCooldown: 3,
++  abuseCooldownMs: 86_400_000,
+ } as const;
+ 
+ export type VerifiedAnswerAssistantRateLimitResult =
+   | { allowed: true }
+   | {
+       allowed: false;
+-      reason: "minute" | "day";
++      reason: "minute" | "day" | "abuse_cooldown";
+       retryAfterSeconds: number;
+     };
+ 
+@@ -22,6 +27,12 @@ type WindowCounter = {
+ type UserRateLimitState = {
+   minute: WindowCounter;
+   day: WindowCounter;
++  abuse: {
++    blockedCount: number;
++    promptInjectionCount: number;
++    windowStartMs: number;
++    cooldownUntilMs: number | null;
++  };
+ };
+ 
+ const MINUTE_MS = 60_000;
+@@ -33,9 +44,16 @@ function getOrCreateState(userId: string): UserRateLimitState {
+   const existing = store.get(userId);
+   if (existing) return existing;
+ 
++  const now = Date.now();
+   const created: UserRateLimitState = {
+-    minute: { count: 0, windowStartMs: Date.now() },
+-    day: { count: 0, windowStartMs: Date.now() },
++    minute: { count: 0, windowStartMs: now },
++    day: { count: 0, windowStartMs: now },
++    abuse: {
++      blockedCount: 0,
++      promptInjectionCount: 0,
++      windowStartMs: now,
++      cooldownUntilMs: null,
++    },
+   };
+   store.set(userId, created);
+   return created;
+@@ -48,6 +66,14 @@ function rollWindow(counter: WindowCounter, windowMs: number, now: number): void
+   }
+ }
+ 
++function rollAbuseWindow(state: UserRateLimitState, now: number): void {
++  if (now - state.abuse.windowStartMs >= DAY_MS) {
++    state.abuse.blockedCount = 0;
++    state.abuse.promptInjectionCount = 0;
++    state.abuse.windowStartMs = now;
++  }
++}
++
+ export function checkVerifiedAnswerAssistantRateLimit(
+   userId: string,
+   now = Date.now(),
+@@ -55,6 +81,14 @@ export function checkVerifiedAnswerAssistantRateLimit(
+   const state = getOrCreateState(userId);
+   rollWindow(state.minute, MINUTE_MS, now);
+   rollWindow(state.day, DAY_MS, now);
++  rollAbuseWindow(state, now);
++
++  if (state.abuse.cooldownUntilMs && now < state.abuse.cooldownUntilMs) {
++    const retryAfterSeconds = Math.ceil(
++      (state.abuse.cooldownUntilMs - now) / 1000,
++    );
++    return { allowed: false, reason: "abuse_cooldown", retryAfterSeconds };
++  }
+ 
+   if (state.minute.count >= VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perMinute) {
+     const retryAfterSeconds = Math.ceil(
+@@ -84,6 +118,49 @@ export function consumeVerifiedAnswerAssistantRateLimit(
+   state.day.count += 1;
+ }
+ 
++const SAFETY_GATE_BLOCKED_REASONS: ReadonlySet<AnswerAssistantBlockedReason> =
++  new Set([
++    "PERSONAL_INFO",
++    "CONTRACT_INFO",
++    "MEDICAL_INFO",
++    "CLAIM_DOCUMENT",
++    "CLAIM_JUDGMENT",
++    "LOSS_ADJUSTMENT",
++    "PRODUCT_SOLICITATION",
++    "FEAR_MARKETING",
++    "PROMPT_INJECTION",
++  ]);
++
++export function recordVerifiedAnswerAssistantBlockedAttempt(
++  userId: string,
++  blockedReason: AnswerAssistantBlockedReason | undefined,
++  now = Date.now(),
++): void {
++  if (!blockedReason || !SAFETY_GATE_BLOCKED_REASONS.has(blockedReason)) {
++    return;
++  }
++
++  const state = getOrCreateState(userId);
++  rollAbuseWindow(state, now);
++  state.abuse.blockedCount += 1;
++
++  if (blockedReason === "PROMPT_INJECTION") {
++    state.abuse.promptInjectionCount += 1;
++  }
++
++  const hitBlockedThreshold =
++    state.abuse.blockedCount >=
++    VERIFIED_ANSWER_ASSIST_RATE_LIMIT.blockedAttemptsBeforeCooldown;
++  const hitInjectionThreshold =
++    state.abuse.promptInjectionCount >=
++    VERIFIED_ANSWER_ASSIST_RATE_LIMIT.promptInjectionBeforeCooldown;
++
++  if (hitBlockedThreshold || hitInjectionThreshold) {
++    state.abuse.cooldownUntilMs =
++      now + VERIFIED_ANSWER_ASSIST_RATE_LIMIT.abuseCooldownMs;
++  }
++}
++
+ /** Test helper — resets in-process counters. */
+ export function resetVerifiedAnswerAssistantRateLimitStore(): void {
+   store.clear();
+@@ -92,10 +169,22 @@ export function resetVerifiedAnswerAssistantRateLimitStore(): void {
+ export function getVerifiedAnswerAssistantRateLimitSnapshot(userId: string): {
+   minuteCount: number;
+   dayCount: number;
++  blockedCount: number;
++  promptInjectionCount: number;
+ } {
+   const state = store.get(userId);
+   if (!state) {
+-    return { minuteCount: 0, dayCount: 0 };
++    return {
++      minuteCount: 0,
++      dayCount: 0,
++      blockedCount: 0,
++      promptInjectionCount: 0,
++    };
+   }
+-  return { minuteCount: state.minute.count, dayCount: state.day.count };
++  return {
++    minuteCount: state.minute.count,
++    dayCount: state.day.count,
++    blockedCount: state.abuse.blockedCount,
++    promptInjectionCount: state.abuse.promptInjectionCount,
++  };
+ }
+diff --git a/lib/answer-assistant/release-readiness.ts b/lib/answer-assistant/release-readiness.ts
+new file mode 100644
+index 0000000..22e362c
+--- /dev/null
++++ b/lib/answer-assistant/release-readiness.ts
+@@ -0,0 +1,61 @@
++// Verified answer assistant release readiness checks (PR-98).
++
++import { isVerifiedAnswerAssistantAllowlistConfigured } from "./allowlist";
++import { isAnswerAssistantVerifiedPreviewEnabled } from "./feature-gate";
++
++/** In-memory rate limit only until PR-99 durable store PR. */
++export function isVerifiedAnswerAssistantRateLimitDurable(): boolean {
++  return false;
++}
++
++/** In-process usage buffer only — not persistent audit. */
++export function isVerifiedAnswerAssistantUsageAuditPersistent(): boolean {
++  return false;
++}
++
++export type VerifiedAnswerAssistantReleaseVerdict =
++  | "no_go"
++  | "allowlist_pilot_only"
++  | "ready_for_allowlist_activation";
++
++export function evaluateVerifiedAnswerAssistantReleaseReadiness(): {
++  verdict: VerifiedAnswerAssistantReleaseVerdict;
++  blockers: string[];
++  warnings: string[];
++} {
++  const blockers: string[] = [];
++  const warnings: string[] = [];
++
++  if (!isVerifiedAnswerAssistantRateLimitDurable()) {
++    blockers.push(
++      "persistent rate limit store absent (in-memory only — production full release No-Go)",
++    );
++  }
++
++  if (!isVerifiedAnswerAssistantUsageAuditPersistent()) {
++    warnings.push(
++      "persistent usage audit absent — allowlist pilot only until PR-99 audit store",
++    );
++  }
++
++  if (!isVerifiedAnswerAssistantAllowlistConfigured()) {
++    warnings.push(
++      "ANSWER_ASSISTANT_VERIFIED_ALLOWLIST unset or empty — no verified planner can generate",
++    );
++  }
++
++  if (isAnswerAssistantVerifiedPreviewEnabled()) {
++    warnings.push(
++      "ANSWER_ASSISTANT_VERIFIED_PREVIEW is true — verify allowlist and operator sign-off",
++    );
++  }
++
++  let verdict: VerifiedAnswerAssistantReleaseVerdict = "no_go";
++  if (blockers.length === 0 && warnings.length > 0) {
++    verdict = "allowlist_pilot_only";
++  } else if (blockers.length === 0 && warnings.length === 0) {
++    verdict = "ready_for_allowlist_activation";
++  }
++
++  return { verdict, blockers, warnings };
++}
+diff --git a/lib/answer-assistant/types.ts b/lib/answer-assistant/types.ts
+index d02d682..20c00cf 100644
+--- a/lib/answer-assistant/types.ts
++++ b/lib/answer-assistant/types.ts
+@@ -35,7 +35,8 @@ export type AnswerAssistantBlockedReason =
+   | "OUTPUT_SAFETY_BLOCKED"
+   | "FEATURE_DISABLED"
+   | "RATE_LIMIT_EXCEEDED"
+-  | "UNAUTHORIZED";
++  | "UNAUTHORIZED"
++  | "NOT_ALLOWLISTED";
+ 
+ export type AnswerAssistantDraftMode = "rules_based" | "llm";
+ 
+diff --git a/lib/answer-assistant/usage-log.ts b/lib/answer-assistant/usage-log.ts
+index a112fca..ed5ed76 100644
+--- a/lib/answer-assistant/usage-log.ts
++++ b/lib/answer-assistant/usage-log.ts
+@@ -1,7 +1,7 @@
+-// Minimal answer assistant usage metadata (PR-97-B).
++// Minimal answer assistant usage metadata (PR-97-B / PR-98).
+ // Does NOT store request text, draft text, or raw provider output.
+ 
+-import type { AnswerAssistantBlockedReason } from "./types";
++import type { AnswerAssistantBlockedReason, AnswerAssistantPurpose } from "./types";
+ import type { RetrievalSourceType } from "./retrieval-types";
+ 
+ export type AnswerAssistantUsageAudience = "admin" | "verified_planner";
+@@ -13,11 +13,14 @@ export interface AnswerAssistantUsageLogEntry {
+   userId: string;
+   audience: AnswerAssistantUsageAudience;
+   outcome: AnswerAssistantUsageOutcome;
+-  blockedReason?: AnswerAssistantBlockedReason | "FEATURE_DISABLED" | "RATE_LIMIT_EXCEEDED" | "UNAUTHORIZED";
++  requestPurpose?: AnswerAssistantPurpose;
++  blockedReason?: AnswerAssistantBlockedReason;
+   candidateCount?: number;
+   evidenceSourceIds?: Array<{ id: string; type: RetrievalSourceType | string }>;
++  outputSafetyBlocked?: boolean;
++  providerConfigured?: boolean;
+   providerErrorCode?: "PROVIDER_NOT_CONFIGURED" | "PROVIDER_ERROR";
+-  rateLimitHit?: boolean;
++  rateLimitBlocked?: boolean;
+   isAdminTester?: boolean;
+ }
+ 
+diff --git a/lib/answer-assistant/validation.ts b/lib/answer-assistant/validation.ts
+index 67881a8..5778c00 100644
+--- a/lib/answer-assistant/validation.ts
++++ b/lib/answer-assistant/validation.ts
+@@ -206,6 +206,8 @@ export const ANSWER_ASSIST_BLOCKED_MESSAGES: Record<
+   RATE_LIMIT_EXCEEDED:
+     "요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.",
+   UNAUTHORIZED: "검증 설계사 권한이 필요합니다.",
++  NOT_ALLOWLISTED:
++    "현재 제한 공개 대상이 아닙니다. 단계적 공개 대상에 포함되면 별도 안내됩니다.",
+ };
+ 
+ const VALID_PURPOSES = new Set<string>([
+diff --git a/lib/answer-assistant/verified-access.ts b/lib/answer-assistant/verified-access.ts
+index c90f16c..2f3b0c4 100644
+--- a/lib/answer-assistant/verified-access.ts
++++ b/lib/answer-assistant/verified-access.ts
+@@ -1,9 +1,10 @@
+-// Verified planner access for answer assistant preview route (PR-97-B).
++// Verified planner access for answer assistant preview route (PR-97-B / PR-98).
+ 
+ import { auth } from "@/auth";
+ import { canAccessAdmin } from "@/lib/auth/rbac";
+ import { prisma } from "@/lib/prisma";
+ import type { PlannerVerificationStatus, UserStatus } from "@prisma/client";
++import { isUserOnVerifiedAnswerAssistantAllowlist } from "./allowlist";
+ import {
+   canAdminTestVerifiedAnswerAssistant,
+   isAnswerAssistantVerifiedPreviewEnabled,
+@@ -26,6 +27,11 @@ export type VerifiedAnswerAssistantAccessState =
+       email: string | null;
+       canViewShell: boolean;
+     }
++  | {
++      status: "not_allowlisted";
++      userId: string;
++      email: string | null;
++    }
+   | {
+       status: "denied";
+       email: string | null;
+@@ -171,6 +177,14 @@ export async function getVerifiedAnswerAssistantAccess(): Promise<VerifiedAnswer
+     };
+   }
+ 
++  if (!isUserOnVerifiedAnswerAssistantAllowlist(userId)) {
++    return {
++      status: "not_allowlisted",
++      userId,
++      email,
++    };
++  }
++
+   return {
+     status: "authenticated",
+     userId,
+@@ -198,6 +212,10 @@ export async function requireVerifiedAnswerAssistantAccess(): Promise<{
+     throw new Error("VERIFIED_ANSWER_ASSIST_FEATURE_DISABLED");
+   }
+ 
++  if (access.status === "not_allowlisted") {
++    throw new Error("VERIFIED_ANSWER_ASSIST_NOT_ALLOWLISTED");
++  }
++
+   if (!access.canGenerate) {
+     throw new Error("VERIFIED_ANSWER_ASSIST_GENERATION_DISABLED");
+   }
+diff --git a/tests/answer-assistant/release-decision.test.ts b/tests/answer-assistant/release-decision.test.ts
+new file mode 100644
+index 0000000..9ef8ae9
+--- /dev/null
++++ b/tests/answer-assistant/release-decision.test.ts
+@@ -0,0 +1,130 @@
++import assert from "node:assert/strict";
++import { readFileSync } from "node:fs";
++import { join } from "node:path";
++import { describe, it } from "node:test";
++import {
++  getAnswerAssistantVerifiedAllowlistUserIds,
++  isUserOnVerifiedAnswerAssistantAllowlist,
++  isVerifiedAnswerAssistantAllowlistConfigured,
++} from "@/lib/answer-assistant/allowlist";
++import {
++  ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT,
++  isAnswerAssistantVerifiedPreviewEnabled,
++} from "@/lib/answer-assistant/feature-gate";
++import {
++  evaluateVerifiedAnswerAssistantReleaseReadiness,
++  isVerifiedAnswerAssistantRateLimitDurable,
++} from "@/lib/answer-assistant/release-readiness";
++import {
++  checkVerifiedAnswerAssistantRateLimit,
++  consumeVerifiedAnswerAssistantRateLimit,
++  recordVerifiedAnswerAssistantBlockedAttempt,
++  resetVerifiedAnswerAssistantRateLimitStore,
++  VERIFIED_ANSWER_ASSIST_RATE_LIMIT,
++} from "@/lib/answer-assistant/rate-limit";
++
++const PLANNER_ACTIONS = readFileSync(
++  join(process.cwd(), "app/planner/answer-assistant/actions.ts"),
++  "utf8",
++);
++
++describe("Answer Assistant release decision (PR-98)", () => {
++  it("keeps code default OFF and requires explicit env for activation", () => {
++    assert.equal(ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT, false);
++    const previous = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
++    delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
++    assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
++    process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "true";
++    assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), true);
++    process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = "false";
++    assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
++    if (previous === undefined) {
++      delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
++    } else {
++      process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = previous;
++    }
++  });
++
++  it("treats empty allowlist as not configured", () => {
++    const previous = process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
++    delete process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
++    assert.equal(isVerifiedAnswerAssistantAllowlistConfigured(), false);
++    assert.equal(isUserOnVerifiedAnswerAssistantAllowlist("user-a"), false);
++
++    process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST = "user-a, user-b";
++    assert.equal(getAnswerAssistantVerifiedAllowlistUserIds().size, 2);
++    assert.equal(isUserOnVerifiedAnswerAssistantAllowlist("user-a"), true);
++    assert.equal(isUserOnVerifiedAnswerAssistantAllowlist("user-c"), false);
++
++    if (previous === undefined) {
++      delete process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST;
++    } else {
++      process.env.ANSWER_ASSISTANT_VERIFIED_ALLOWLIST = previous;
++    }
++  });
++
++  it("reports No-Go when durable rate limit store is absent", () => {
++    assert.equal(isVerifiedAnswerAssistantRateLimitDurable(), false);
++    const readiness = evaluateVerifiedAnswerAssistantReleaseReadiness();
++    assert.equal(readiness.verdict, "no_go");
++    assert.ok(
++      readiness.blockers.some((blocker) =>
++        blocker.includes("persistent rate limit"),
++      ),
++    );
++  });
++
++  it("server action enforces gate order: access, feature gate, allowlist, rate limit", () => {
++    assert.match(PLANNER_ACTIONS, /getVerifiedAnswerAssistantAccess/);
++    assert.match(PLANNER_ACTIONS, /isAnswerAssistantVerifiedPreviewEnabled/);
++    assert.match(PLANNER_ACTIONS, /NOT_ALLOWLISTED/);
++    assert.match(PLANNER_ACTIONS, /checkVerifiedAnswerAssistantRateLimit/);
++    assert.match(PLANNER_ACTIONS, /recordVerifiedAnswerAssistantBlockedAttempt/);
++    assert.match(PLANNER_ACTIONS, /generateInternalAnswerDraft/);
++
++    const fnStart = PLANNER_ACTIONS.indexOf(
++      "export async function generateVerifiedAnswerAssistantDraftAction",
++    );
++    const body = PLANNER_ACTIONS.slice(fnStart);
++    const accessIndex = body.indexOf("getVerifiedAnswerAssistantAccess");
++    const gateIndex = body.indexOf("isAnswerAssistantVerifiedPreviewEnabled");
++    const allowlistIndex = body.indexOf("NOT_ALLOWLISTED");
++    const rateIndex = body.indexOf("checkVerifiedAnswerAssistantRateLimit");
++    const generateIndex = body.indexOf("generateInternalAnswerDraft");
++    assert.ok(accessIndex < gateIndex);
++    assert.ok(gateIndex < allowlistIndex);
++    assert.ok(allowlistIndex < rateIndex);
++    assert.ok(rateIndex < generateIndex);
++  });
++
++  it("uses PR-98 rate limit defaults (3/min, 20/day)", () => {
++    assert.equal(VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perMinute, 3);
++    assert.equal(VERIFIED_ANSWER_ASSIST_RATE_LIMIT.perDay, 20);
++  });
++});
++
++describe("Answer Assistant abuse cooldown (PR-98)", () => {
++  it("applies cooldown after repeated prompt injection blocks", () => {
++    resetVerifiedAnswerAssistantRateLimitStore();
++    const userId = "abuse-test-user";
++
++    for (let index = 0; index < VERIFIED_ANSWER_ASSIST_RATE_LIMIT.promptInjectionBeforeCooldown; index += 1) {
++      recordVerifiedAnswerAssistantBlockedAttempt(userId, "PROMPT_INJECTION");
++    }
++
++    const blocked = checkVerifiedAnswerAssistantRateLimit(userId);
++    assert.equal(blocked.allowed, false);
++    if (!blocked.allowed) {
++      assert.equal(blocked.reason, "abuse_cooldown");
++    }
++  });
++
++  it("does not consume minute quota when only checking", () => {
++    resetVerifiedAnswerAssistantRateLimitStore();
++    const userId = "quota-check-user";
++    checkVerifiedAnswerAssistantRateLimit(userId);
++    consumeVerifiedAnswerAssistantRateLimit(userId);
++    const snapshot = checkVerifiedAnswerAssistantRateLimit(userId);
++    assert.equal(snapshot.allowed, true);
++  });
++});
+diff --git a/tests/answer-assistant/verified-prep.test.ts b/tests/answer-assistant/verified-prep.test.ts
+index eba0621..bb01316 100644
+--- a/tests/answer-assistant/verified-prep.test.ts
++++ b/tests/answer-assistant/verified-prep.test.ts
+@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
+ import { join } from "node:path";
+ import { describe, it } from "node:test";
+ import {
+-  ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED,
++  ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT,
+   isAnswerAssistantVerifiedPreviewEnabled,
+ } from "@/lib/answer-assistant/feature-gate";
+ import {
+@@ -28,8 +28,15 @@ const PAGE_SOURCE = readFileSync(join(PLANNER_ROOT, "page.tsx"), "utf8");
+ 
+ describe("Answer Assistant verified preview prep (PR-97-B)", () => {
+   it("keeps feature gate default OFF", () => {
+-    assert.equal(ANSWER_ASSISTANT_VERIFIED_PREVIEW_ENABLED, false);
++    assert.equal(ANSWER_ASSISTANT_VERIFIED_PREVIEW_CODE_DEFAULT, false);
++    const previous = process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
++    delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
+     assert.equal(isAnswerAssistantVerifiedPreviewEnabled(), false);
++    if (previous === undefined) {
++      delete process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW;
++    } else {
++      process.env.ANSWER_ASSISTANT_VERIFIED_PREVIEW = previous;
++    }
+   });
+ 
+   it("planner page uses verified access guard and noindex metadata", () => {
+@@ -41,6 +48,7 @@ describe("Answer Assistant verified preview prep (PR-97-B)", () => {
+   it("verified server action checks feature gate before generation", () => {
+     assert.match(ACTIONS_SOURCE, /isAnswerAssistantVerifiedPreviewEnabled/);
+     assert.match(ACTIONS_SOURCE, /FEATURE_DISABLED/);
++    assert.match(ACTIONS_SOURCE, /NOT_ALLOWLISTED/);
+     assert.match(ACTIONS_SOURCE, /checkVerifiedAnswerAssistantRateLimit/);
+     assert.match(ACTIONS_SOURCE, /logAnswerAssistantUsage/);
+     assert.match(ACTIONS_SOURCE, /audience:\s*"verified_planner"/);
