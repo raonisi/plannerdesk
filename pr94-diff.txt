@@ -1,0 +1,2072 @@
+diff --git a/app/admin/answer-assistant/actions.ts b/app/admin/answer-assistant/actions.ts
+new file mode 100644
+index 0000000..0c2923c
+--- /dev/null
++++ b/app/admin/answer-assistant/actions.ts
+@@ -0,0 +1,28 @@
++"use server";
++
++import { requireAdminAccess } from "@/lib/auth/access";
++import { generateInternalAnswerDraft } from "@/lib/answer-assistant/generate-draft";
++import {
++  parseAnswerAssistantFormData,
++} from "@/lib/answer-assistant/validation";
++import type { AnswerAssistantDraftResult } from "@/lib/answer-assistant/types";
++
++export async function generateAnswerAssistantDraftAction(
++  formData: FormData,
++): Promise<AnswerAssistantDraftResult> {
++  try {
++    await requireAdminAccess();
++  } catch {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: "관리자 권한이 필요합니다.",
++      evidence: [],
++      warnings: [],
++      candidateCount: 0,
++    };
++  }
++
++  const input = parseAnswerAssistantFormData(formData);
++  return generateInternalAnswerDraft(input);
++}
+diff --git a/app/admin/answer-assistant/answer-assistant-panel.tsx b/app/admin/answer-assistant/answer-assistant-panel.tsx
+new file mode 100644
+index 0000000..293f385
+--- /dev/null
++++ b/app/admin/answer-assistant/answer-assistant-panel.tsx
+@@ -0,0 +1,301 @@
++"use client";
++
++import { useMemo, useState, useTransition } from "react";
++import { hasClientSensitiveSignal } from "@/lib/correction-request/validation";
++import {
++  ANSWER_ASSIST_PAGE_NOTICES,
++  ANSWER_ASSIST_QUERY_MAX_LENGTH,
++  ANSWER_ASSIST_QUERY_MIN_LENGTH,
++} from "@/lib/answer-assistant/constants";
++import {
++  ANSWER_ASSIST_DOMAIN_OPTIONS,
++  ANSWER_ASSIST_PURPOSE_OPTIONS,
++  ANSWER_ASSIST_TONE_OPTIONS,
++  RETRIEVAL_SOURCE_TYPE_LABEL,
++} from "@/lib/answer-assistant/labels";
++import type {
++  AnswerAssistantDraftResult,
++  AnswerAssistantEvidenceItem,
++} from "@/lib/answer-assistant/types";
++import { generateAnswerAssistantDraftAction } from "./actions";
++
++export function AnswerAssistantPanel() {
++  const [isPending, startTransition] = useTransition();
++  const [purpose, setPurpose] = useState("GENERAL_EXPLANATION");
++  const [tone, setTone] = useState("neutral");
++  const [domain, setDomain] = useState("all");
++  const [query, setQuery] = useState("");
++  const [requiresOfficialCheck, setRequiresOfficialCheck] = useState(false);
++  const [result, setResult] = useState<AnswerAssistantDraftResult | null>(null);
++
++  const queryLength = query.trim().length;
++  const containsSensitiveSignal = useMemo(
++    () => hasClientSensitiveSignal(query),
++    [query],
++  );
++
++  const queryInvalid =
++    queryLength > 0 &&
++    (queryLength < ANSWER_ASSIST_QUERY_MIN_LENGTH ||
++      queryLength > ANSWER_ASSIST_QUERY_MAX_LENGTH);
++
++  const submitDisabled =
++    isPending ||
++    containsSensitiveSignal ||
++    queryInvalid ||
++    queryLength < ANSWER_ASSIST_QUERY_MIN_LENGTH;
++
++  const handleSubmit = () => {
++    if (submitDisabled) return;
++
++    const formData = new FormData();
++    formData.set("purpose", purpose);
++    formData.set("tone", tone);
++    formData.set("domain", domain);
++    formData.set("query", query);
++    if (requiresOfficialCheck) {
++      formData.set("requiresOfficialCheck", "true");
++    }
++
++    startTransition(async () => {
++      const next = await generateAnswerAssistantDraftAction(formData);
++      setResult(next);
++    });
++  };
++
++  return (
++    <div className="space-y-8">
++      <section className="rounded-lg border border-[#d6a36e] bg-[#fff8ec] px-4 py-4 text-sm leading-relaxed text-[#5c4520]">
++        <p>{ANSWER_ASSIST_PAGE_NOTICES.toolPurpose}</p>
++        <p className="mt-2">{ANSWER_ASSIST_PAGE_NOTICES.sensitiveInput}</p>
++        <p className="mt-2">{ANSWER_ASSIST_PAGE_NOTICES.prohibitedScope}</p>
++      </section>
++
++      <section className="rounded-lg border border-[#d9c9a8] bg-white p-5 sm:p-6">
++        <div className="space-y-4">
++          <label className="block text-sm font-semibold text-[#102235]">
++            요청 목적
++            <select
++              className="mt-1 min-h-10 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm"
++              onChange={(event) => setPurpose(event.target.value)}
++              value={purpose}
++            >
++              {ANSWER_ASSIST_PURPOSE_OPTIONS.map((option) => (
++                <option key={option.value} value={option.value}>
++                  {option.label}
++                </option>
++              ))}
++            </select>
++            <span className="mt-1 block text-xs font-normal text-[#5f6670]">
++              {
++                ANSWER_ASSIST_PURPOSE_OPTIONS.find(
++                  (option) => option.value === purpose,
++                )?.description
++              }
++            </span>
++          </label>
++
++          <label className="block text-sm font-semibold text-[#102235]">
++            질문 또는 작성 요청
++            <textarea
++              className="mt-2 min-h-40 w-full rounded-lg border border-[#d9c9a8] px-3 py-2 text-sm text-[#102235] outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/15"
++              maxLength={ANSWER_ASSIST_QUERY_MAX_LENGTH}
++              onChange={(event) => setQuery(event.target.value)}
++              placeholder="예: 해지 전 고객에게 안내할 일반 기준을 정리해 주세요."
++              value={query}
++            />
++            <span className="mt-1 block text-xs font-normal text-[#5f6670]">
++              {queryLength}/{ANSWER_ASSIST_QUERY_MAX_LENGTH}자 (최소{" "}
++              {ANSWER_ASSIST_QUERY_MIN_LENGTH}자)
++            </span>
++          </label>
++
++          <div className="grid gap-4 sm:grid-cols-2">
++            <label className="block text-sm font-semibold text-[#102235]">
++              답변 톤
++              <select
++                className="mt-1 min-h-10 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm"
++                onChange={(event) => setTone(event.target.value)}
++                value={tone}
++              >
++                {ANSWER_ASSIST_TONE_OPTIONS.map((option) => (
++                  <option key={option.value} value={option.value}>
++                    {option.label}
++                  </option>
++                ))}
++              </select>
++            </label>
++
++            <label className="block text-sm font-semibold text-[#102235]">
++              참고 도메인
++              <select
++                className="mt-1 min-h-10 w-full rounded-lg border border-[#d9c9a8] bg-white px-3 text-sm"
++                onChange={(event) => setDomain(event.target.value)}
++                value={domain}
++              >
++                {ANSWER_ASSIST_DOMAIN_OPTIONS.map((option) => (
++                  <option key={option.value} value={option.value}>
++                    {option.label}
++                  </option>
++                ))}
++              </select>
++            </label>
++          </div>
++
++          <label className="flex items-start gap-2 text-sm text-[#303845]">
++            <input
++              checked={requiresOfficialCheck}
++              className="mt-1"
++              onChange={(event) =>
++                setRequiresOfficialCheck(event.target.checked)
++              }
++              type="checkbox"
++            />
++            <span>
++              공식 확인 필요 항목을 결과에 강조합니다 (약관·공시·보험사 안내
++              확인 경로).
++            </span>
++          </label>
++
++          {containsSensitiveSignal ? (
++            <p className="text-sm text-[#9a4b1f]" role="alert">
++              개인정보·의료정보·보험금 판단성 표현이 포함되어 있으면 처리되지
++              않습니다.
++            </p>
++          ) : null}
++
++          <button
++            className="min-h-11 rounded-lg bg-[#102235] px-5 text-sm font-semibold text-white hover:bg-[#1b344e] disabled:cursor-not-allowed disabled:opacity-50"
++            disabled={submitDisabled}
++            onClick={handleSubmit}
++            type="button"
++          >
++            {isPending ? "초안 생성 중…" : "관리자 검수용 초안 생성"}
++          </button>
++        </div>
++      </section>
++
++      {result ? <AnswerAssistantResultPanel result={result} /> : null}
++    </div>
++  );
++}
++
++function AnswerAssistantResultPanel({
++  result,
++}: {
++  result: AnswerAssistantDraftResult;
++}) {
++  if (!result.ok) {
++    return (
++      <section
++        className="rounded-lg border border-[#d6a36e] bg-[#fff5e1] px-4 py-4"
++        role="alert"
++      >
++        <h2 className="text-sm font-semibold text-[#7b4b19]">처리되지 않음</h2>
++        <p className="mt-2 text-sm leading-relaxed text-[#7b4b19]">
++          {result.message}
++        </p>
++        {result.blockedReason ? (
++          <p className="mt-2 text-xs text-[#9a6a3a]">
++            사유 코드: {result.blockedReason}
++          </p>
++        ) : null}
++        {result.evidence.length > 0 ? (
++          <EvidenceList count={result.candidateCount} items={result.evidence} />
++        ) : null}
++      </section>
++    );
++  }
++
++  return (
++    <section className="space-y-4 rounded-lg border border-[#d9c9a8] bg-[#fbf7ee] p-5 sm:p-6">
++      <div>
++        <p className="text-xs font-semibold uppercase tracking-wide text-[#aa8137]">
++          {result.draftLabel}
++        </p>
++        {result.providerNotice ? (
++          <p className="mt-2 text-sm text-[#5f6670]">{result.providerNotice}</p>
++        ) : null}
++      </div>
++
++      <article className="rounded-lg border border-[#e8dcc4] bg-white p-4">
++        <pre className="whitespace-pre-wrap text-sm leading-relaxed text-[#102235]">
++          {result.draft}
++        </pre>
++      </article>
++
++      <EvidenceList count={result.candidateCount} items={result.evidence} />
++
++      {result.officialCheckItems.length > 0 ? (
++        <div>
++          <h3 className="text-sm font-semibold text-[#102235]">
++            공식 확인 필요 항목
++          </h3>
++          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#4f5661]">
++            {result.officialCheckItems.map((item) => (
++              <li key={item}>{item}</li>
++            ))}
++          </ul>
++        </div>
++      ) : null}
++
++      {result.warnings.length > 0 ? (
++        <div>
++          <h3 className="text-sm font-semibold text-[#102235]">경고</h3>
++          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#7b4b19]">
++            {result.warnings.map((warning) => (
++              <li key={warning}>{warning}</li>
++            ))}
++          </ul>
++        </div>
++      ) : null}
++
++      <p className="rounded-md border border-[#d9c9a8] bg-white px-3 py-3 text-xs leading-relaxed text-[#5f6670]">
++        {result.footerDisclaimer}
++      </p>
++    </section>
++  );
++}
++
++function EvidenceList({
++  items,
++  count,
++}: {
++  items: AnswerAssistantEvidenceItem[];
++  count: number;
++}) {
++  if (items.length === 0) return null;
++
++  return (
++    <div>
++      <h3 className="text-sm font-semibold text-[#102235]">
++        참고 근거 ({count}건)
++      </h3>
++      <ul className="mt-2 space-y-2">
++        {items.map((item) => (
++          <li
++            className="rounded-md border border-[#e8dcc4] bg-white px-3 py-2 text-sm"
++            key={`${item.type}-${item.id}`}
++          >
++            <p className="font-semibold text-[#102235]">
++              [{RETRIEVAL_SOURCE_TYPE_LABEL[item.type]}] {item.title}
++            </p>
++            {item.summary ? (
++              <p className="mt-1 text-[#4f5661]">{item.summary}</p>
++            ) : null}
++            {item.sourceUrl ? (
++              <p className="mt-1 break-all text-xs text-[#7a612d]">
++                {item.sourceUrl}
++              </p>
++            ) : null}
++            {item.isOfficialSource ? (
++              <p className="mt-1 text-xs font-semibold text-[#2f6b3a]">
++                공식 출처
++              </p>
++            ) : null}
++          </li>
++        ))}
++      </ul>
++    </div>
++  );
++}
+diff --git a/app/admin/answer-assistant/page.tsx b/app/admin/answer-assistant/page.tsx
+new file mode 100644
+index 0000000..40b5319
+--- /dev/null
++++ b/app/admin/answer-assistant/page.tsx
+@@ -0,0 +1,73 @@
++import Link from "next/link";
++import { getAdminAccess } from "@/lib/auth/access";
++import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
++import { AnswerAssistantPanel } from "./answer-assistant-panel";
++
++export const dynamic = "force-dynamic";
++
++export const metadata = {
++  title: "답변 보조 초안 | PlannerDesk Admin",
++  description:
++    "관리자 검수용 답변 초안 생성 도구입니다. 고객 자동 발송·커뮤니티 자동 게시는 제공하지 않습니다.",
++};
++
++export default async function AdminAnswerAssistantPage() {
++  const access = await getAdminAccess();
++
++  if (access.status === "locked") {
++    return <AdminLockedState />;
++  }
++
++  if (access.status === "denied") {
++    return (
++      <AdminAccessDeniedState email={access.session.user?.email ?? null} />
++    );
++  }
++
++  return (
++    <div className={`min-h-screen ${surfaces.page}`}>
++      <header
++        className={`${surfaces.hero} border-b ${borders.divider} px-6 py-4 sm:px-8`}
++      >
++        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
++          <div>
++            <p className="text-xs font-semibold uppercase tracking-wide text-[#d8c08f]">
++              PlannerDesk Admin
++            </p>
++            <h1 className="text-xl font-bold text-white">답변 보조 · 관리자 초안</h1>
++          </div>
++          <Link
++            className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++            href="/admin"
++          >
++            데스크로 돌아가기
++          </Link>
++        </div>
++      </header>
++
++      <main className="mx-auto max-w-5xl px-6 py-8 sm:px-8">
++        <p className={`${textStyles.body} max-w-3xl`}>
++          검수·공개 완료 자료만 근거로 관리자 검토용 초안을 생성합니다. 보험금
++          판단·의료 해석·상품 추천·고객 자동 발송·커뮤니티 자동 게시는 제공하지
++          않습니다.
++        </p>
++
++        <div className="mt-6">
++          <AdminSafetyNotice
++            policySummary="생성 결과는 DB에 저장되지 않으며, 고객 발송·커뮤니티 자동 게시 버튼은 제공하지 않습니다."
++            showNeedsReview
++          />
++        </div>
++
++        <div
++          className={`mt-8 ${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-6`}
++        >
++          <AnswerAssistantPanel />
++        </div>
++      </main>
++    </div>
++  );
++}
+diff --git a/lib/answer-assistant/constants.ts b/lib/answer-assistant/constants.ts
+new file mode 100644
+index 0000000..c049281
+--- /dev/null
++++ b/lib/answer-assistant/constants.ts
+@@ -0,0 +1,35 @@
++// Answer Assistant admin draft MVP constants (PR-94).
++
++export const ANSWER_ASSIST_QUERY_MIN_LENGTH = 20;
++export const ANSWER_ASSIST_QUERY_MAX_LENGTH = 2000;
++export const ANSWER_ASSIST_MAX_URLS = 3;
++export const ANSWER_ASSIST_MAX_CANDIDATES = 8;
++export const ANSWER_ASSIST_MAX_PER_DOMAIN = 3;
++
++export const ANSWER_ASSIST_VALIDATION_MESSAGES = {
++  tooShort: `요청문은 ${ANSWER_ASSIST_QUERY_MIN_LENGTH}자 이상 입력해 주세요.`,
++  tooLong: `요청문은 ${ANSWER_ASSIST_QUERY_MAX_LENGTH}자 이하로 입력해 주세요.`,
++  empty: "요청문을 입력해 주세요.",
++  invalid: "요청문 형식을 확인해 주세요.",
++  urlSpam: "요청문에 포함된 링크가 너무 많습니다. 필요한 공식 링크만 남기고 다시 입력해 주세요.",
++} as const;
++
++export const ANSWER_ASSIST_PAGE_NOTICES = {
++  toolPurpose:
++    "이 기능은 관리자 검수용 초안 생성 도구입니다. 생성된 문구는 고객에게 바로 발송하거나 커뮤니티에 자동 게시할 수 없습니다.",
++  sensitiveInput:
++    "고객명, 연락처, 계약번호, 병명, 진단명, 진단서 내용, 청구자료는 입력하지 마세요.",
++  prohibitedScope:
++    "보험금 지급 가능 여부, 손해사정성 판단, 의료정보 해석, 특정 상품 추천은 제공하지 않습니다.",
++  footerDisclaimer:
++    "이 초안은 공개·검수 완료된 자료를 기반으로 작성된 관리자 검토용 문안입니다. 고객 발송 전 사실관계, 공식 약관, 보험사 안내 기준을 반드시 확인하세요.",
++  draftLabel: "관리자 검수 전 초안",
++  providerNotConfigured:
++    "LLM provider가 구성되지 않았습니다. 검색된 근거를 바탕으로 규칙 기반 초안을 조립했습니다.",
++} as const;
++
++export const INSUFFICIENT_EVIDENCE_MESSAGE =
++  "근거 자료가 부족하여 초안을 생성하지 않았습니다. 공식 약관, 보험사 안내, 검수 완료 지식 문서를 먼저 확인해 주세요.";
++
++export const OUTPUT_SAFETY_BLOCKED_MESSAGE =
++  "생성된 초안에 금지 표현이 포함되어 차단했습니다.";
+diff --git a/lib/answer-assistant/draft-builder.ts b/lib/answer-assistant/draft-builder.ts
+new file mode 100644
+index 0000000..28aa07d
+--- /dev/null
++++ b/lib/answer-assistant/draft-builder.ts
+@@ -0,0 +1,118 @@
++// Rules-based draft assembly when LLM provider is unavailable (PR-94).
++
++import {
++  ANSWER_ASSIST_PAGE_NOTICES,
++} from "./constants";
++import {
++  ANSWER_ASSIST_PURPOSE_OPTIONS,
++  ANSWER_ASSIST_TONE_OPTIONS,
++} from "./labels";
++import type { RetrievalCandidate } from "./retrieval-types";
++import type { AnswerAssistantInput } from "./types";
++
++function purposeLabel(purpose: AnswerAssistantInput["purpose"]): string {
++  return (
++    ANSWER_ASSIST_PURPOSE_OPTIONS.find((option) => option.value === purpose)
++      ?.label ?? purpose
++  );
++}
++
++function toneLabel(tone: AnswerAssistantInput["tone"]): string {
++  return (
++    ANSWER_ASSIST_TONE_OPTIONS.find((option) => option.value === tone)?.label ??
++    tone
++  );
++}
++
++function buildOfficialCheckItems(
++  candidates: RetrievalCandidate[],
++  needsOfficialCheck: boolean,
++): string[] {
++  const items: string[] = [];
++
++  if (needsOfficialCheck) {
++    items.push("공식 약관·보험사 안내·공시 자료에서 최종 문구를 확인하세요.");
++  }
++
++  for (const candidate of candidates.slice(0, 3)) {
++    if (candidate.sourceUrl) {
++      items.push(
++        `${candidate.title}: ${candidate.sourceUrl} (공식 출처 확인 필요)`,
++      );
++    }
++  }
++
++  if (items.length === 0) {
++    items.push(
++      "개별 사실관계, 약관 조항, 보험사 안내 기준은 관리자가 직접 확인해야 합니다.",
++    );
++  }
++
++  return items;
++}
++
++export function buildRulesBasedDraft(params: {
++  input: AnswerAssistantInput;
++  normalizedQuery: string;
++  candidates: RetrievalCandidate[];
++  needsOfficialCheck: boolean;
++}): string {
++  const { input, normalizedQuery, candidates, needsOfficialCheck } = params;
++  const topCandidates = candidates.slice(0, 4);
++  const lines: string[] = [];
++
++  lines.push(`## ${ANSWER_ASSIST_PAGE_NOTICES.draftLabel}`);
++  lines.push("");
++  lines.push(`> ${ANSWER_ASSIST_PAGE_NOTICES.providerNotConfigured}`);
++  lines.push("");
++  lines.push("### 요청 요약");
++  lines.push(
++    `- 목적: ${purposeLabel(input.purpose)} · 톤: ${toneLabel(input.tone)}`,
++  );
++  lines.push(`- 요청: ${normalizedQuery}`);
++  lines.push("");
++  lines.push("### 초안 (근거 기반 참고 문안)");
++  lines.push(
++    "아래 문단은 검수·공개 완료 자료를 바탕으로 조립한 **관리자 검토용 참고 초안**입니다. 고객 발송용 최종 문구가 아닙니다.",
++  );
++  lines.push("");
++
++  if (topCandidates.length === 0) {
++    lines.push("- 근거 자료가 없어 본문 초안을 조립하지 않았습니다.");
++  } else {
++    for (const candidate of topCandidates) {
++      const snippet = candidate.safeText ?? candidate.summary ?? "";
++      lines.push(`- **${candidate.title}**`);
++      if (snippet) {
++        lines.push(`  ${snippet}`);
++      }
++      if (candidate.sourceUrl) {
++        lines.push(`  참고: ${candidate.sourceUrl}`);
++      }
++      lines.push(
++        "  ※ 개별 지급 여부·의료 해석·상품 추천은 포함하지 않습니다.",
++      );
++    }
++  }
++
++  lines.push("");
++  lines.push("### 공식 확인 필요");
++  for (const item of buildOfficialCheckItems(candidates, needsOfficialCheck)) {
++    lines.push(`- ${item}`);
++  }
++
++  lines.push("");
++  lines.push("### 관리자 검수 필요");
++  lines.push(
++    "이 초안은 자동 생성된 참고 문안입니다. 사실관계, 약관, 보험사 공식 안내를 확인한 뒤에만 활용하세요.",
++  );
++
++  return lines.join("\n");
++}
++
++export function buildOfficialCheckItemsForResult(
++  candidates: RetrievalCandidate[],
++  needsOfficialCheck: boolean,
++): string[] {
++  return buildOfficialCheckItems(candidates, needsOfficialCheck);
++}
+diff --git a/lib/answer-assistant/generate-draft.ts b/lib/answer-assistant/generate-draft.ts
+new file mode 100644
+index 0000000..5402bbc
+--- /dev/null
++++ b/lib/answer-assistant/generate-draft.ts
+@@ -0,0 +1,184 @@
++// Answer Assistant draft generation orchestration (PR-94).
++
++import {
++  ANSWER_ASSIST_BLOCKED_MESSAGES,
++  validateAnswerAssistantInput,
++} from "./validation";
++import {
++  retrieveAnswerCandidates,
++  toEvidenceItems,
++} from "./retrieval";
++import {
++  buildOfficialCheckItemsForResult,
++  buildRulesBasedDraft,
++} from "./draft-builder";
++import { validateGeneratedDraft } from "./output-safety";
++import {
++  isAnswerDraftProviderConfigured,
++  runAnswerDraftProvider,
++} from "./provider";
++import {
++  ANSWER_ASSIST_PAGE_NOTICES,
++  INSUFFICIENT_EVIDENCE_MESSAGE,
++  OUTPUT_SAFETY_BLOCKED_MESSAGE,
++} from "./constants";
++import { purposeRequiresOfficialCheck } from "./labels";
++import type {
++  AnswerAssistantBlockedReason,
++  AnswerAssistantDraftResult,
++  AnswerAssistantInput,
++} from "./types";
++
++function blockedResult(
++  blockedReason: AnswerAssistantBlockedReason,
++  message: string,
++  candidateCount = 0,
++  evidence: ReturnType<typeof toEvidenceItems> = [],
++  extra?: Partial<{
++    needsOfficialCheck: boolean;
++    insufficientEvidence: boolean;
++    warnings: string[];
++  }>,
++): AnswerAssistantDraftResult {
++  return {
++    ok: false,
++    blockedReason,
++    message,
++    evidence,
++    warnings: extra?.warnings ?? [],
++    candidateCount,
++    needsOfficialCheck: extra?.needsOfficialCheck,
++    insufficientEvidence: extra?.insufficientEvidence,
++  };
++}
++
++export async function generateInternalAnswerDraft(
++  input: AnswerAssistantInput,
++): Promise<AnswerAssistantDraftResult> {
++  const validation = validateAnswerAssistantInput(input);
++  if (!validation.ok || !validation.normalizedQuery) {
++    return blockedResult(
++      validation.blockedReason ?? "VALIDATION",
++      validation.message,
++    );
++  }
++
++  const normalizedQuery = validation.normalizedQuery;
++  const requiresOfficialCheck =
++    input.requiresOfficialCheck ||
++    purposeRequiresOfficialCheck(input.purpose);
++
++  const retrieval = await retrieveAnswerCandidates({
++    query: normalizedQuery,
++    audience: "admin",
++    domain: input.domain,
++    purpose: input.purpose,
++    requiresOfficialCheck,
++  });
++
++  if (!retrieval.ok) {
++    return blockedResult(
++      "VALIDATION",
++      retrieval.blockedMessage ?? "요청을 처리할 수 없습니다.",
++    );
++  }
++
++  const evidence = toEvidenceItems(retrieval.candidates);
++  const candidateCount = retrieval.candidates.length;
++  const warnings: string[] = [];
++
++  if (retrieval.insufficientEvidence) {
++    return blockedResult(
++      "INSUFFICIENT_EVIDENCE",
++      INSUFFICIENT_EVIDENCE_MESSAGE,
++      candidateCount,
++      evidence,
++      {
++        needsOfficialCheck: retrieval.needsOfficialCheck,
++        insufficientEvidence: true,
++        warnings,
++      },
++    );
++  }
++
++  if (retrieval.needsOfficialCheck) {
++    warnings.push(
++      "공식 약관·보험사 안내·공시 자료에서 최종 확인이 필요합니다.",
++    );
++  }
++
++  const officialCheckItems = buildOfficialCheckItemsForResult(
++    retrieval.candidates,
++    Boolean(retrieval.needsOfficialCheck || requiresOfficialCheck),
++  );
++
++  let draft = "";
++  let draftMode: "rules_based" | "llm" = "rules_based";
++  const providerConfigured = isAnswerDraftProviderConfigured();
++
++  if (providerConfigured) {
++    const providerResult = await runAnswerDraftProvider({
++      input,
++      normalizedQuery,
++      candidates: retrieval.candidates,
++      needsOfficialCheck: Boolean(retrieval.needsOfficialCheck),
++    });
++
++    if (!providerResult.ok || !providerResult.draft) {
++      return blockedResult(
++        providerResult.errorMessage === "PROVIDER_NOT_CONFIGURED"
++          ? "PROVIDER_NOT_CONFIGURED"
++          : "PROVIDER_ERROR",
++        providerResult.errorMessage === "PROVIDER_NOT_CONFIGURED"
++          ? ANSWER_ASSIST_BLOCKED_MESSAGES.PROVIDER_NOT_CONFIGURED
++          : ANSWER_ASSIST_BLOCKED_MESSAGES.PROVIDER_ERROR,
++        candidateCount,
++        evidence,
++        { warnings },
++      );
++    }
++
++    draft = providerResult.draft;
++    draftMode = "llm";
++  } else {
++    draft = buildRulesBasedDraft({
++      input,
++      normalizedQuery,
++      candidates: retrieval.candidates,
++      needsOfficialCheck: Boolean(
++        retrieval.needsOfficialCheck || requiresOfficialCheck,
++      ),
++    });
++  }
++
++  const outputSafety = validateGeneratedDraft(draft);
++  if (!outputSafety.ok) {
++    return blockedResult(
++      "OUTPUT_SAFETY_BLOCKED",
++      OUTPUT_SAFETY_BLOCKED_MESSAGE,
++      candidateCount,
++      evidence,
++      { warnings },
++    );
++  }
++
++  return {
++    ok: true,
++    draft,
++    draftMode,
++    providerConfigured,
++    providerNotice: providerConfigured
++      ? undefined
++      : ANSWER_ASSIST_PAGE_NOTICES.providerNotConfigured,
++    evidence,
++    officialCheckItems,
++    warnings,
++    needsOfficialCheck: Boolean(
++      retrieval.needsOfficialCheck || requiresOfficialCheck,
++    ),
++    insufficientEvidence: false,
++    candidateCount,
++    draftLabel: ANSWER_ASSIST_PAGE_NOTICES.draftLabel,
++    footerDisclaimer: ANSWER_ASSIST_PAGE_NOTICES.footerDisclaimer,
++  };
++}
+diff --git a/lib/answer-assistant/labels.ts b/lib/answer-assistant/labels.ts
+new file mode 100644
+index 0000000..1296c69
+--- /dev/null
++++ b/lib/answer-assistant/labels.ts
+@@ -0,0 +1,84 @@
++// Answer Assistant UI labels (PR-94).
++
++import type {
++  AnswerAssistantDomainFilter,
++  AnswerAssistantPurpose,
++  AnswerAssistantTone,
++} from "./types";
++import type { RetrievalSourceType } from "./retrieval-types";
++
++export const ANSWER_ASSIST_PURPOSE_OPTIONS: {
++  value: AnswerAssistantPurpose;
++  label: string;
++  description: string;
++}[] = [
++  {
++    value: "GENERAL_EXPLANATION",
++    label: "일반 설명 초안",
++    description: "공개 자료 기반 일반 기준 설명",
++  },
++  {
++    value: "CUSTOMER_SAFE_MESSAGE",
++    label: "고객 안내 문구",
++    description: "중립적 고객 안내 문구 초안",
++  },
++  {
++    value: "KNOWLEDGE_SUMMARY",
++    label: "지식 아카이브 요약",
++    description: "검수 완료 지식 문서 요약 초안",
++  },
++  {
++    value: "DISCLOSURE_GUIDE",
++    label: "공시·약관 확인 경로",
++    description: "공식 공시·약관 확인 경로 안내",
++  },
++  {
++    value: "CLAIM_DOCUMENT_GUIDE",
++    label: "청구서류 안내",
++    description: "청구서류 안내 페이지 확인 항목 정리",
++  },
++  {
++    value: "COMMUNITY_REPLY_DRAFT",
++    label: "커뮤니티 답글 초안",
++    description: "관리자 검수용 답글 초안 (자동 게시 없음)",
++  },
++];
++
++export const ANSWER_ASSIST_TONE_OPTIONS: {
++  value: AnswerAssistantTone;
++  label: string;
++}[] = [
++  { value: "neutral", label: "중립" },
++  { value: "formal", label: "격식" },
++  { value: "concise", label: "간결" },
++  { value: "consultative", label: "상담형" },
++];
++
++export const ANSWER_ASSIST_DOMAIN_OPTIONS: {
++  value: AnswerAssistantDomainFilter;
++  label: string;
++}[] = [
++  { value: "all", label: "전체 (허용 도메인)" },
++  { value: "knowledge_article", label: "지식 아카이브" },
++  { value: "disclosure_link", label: "공시·약관" },
++  { value: "message_template", label: "고객 안내 문구 (safeCopy)" },
++  { value: "insurer", label: "보험사 디렉토리" },
++  { value: "claim_document", label: "청구서류 안내" },
++];
++
++export const RETRIEVAL_SOURCE_TYPE_LABEL: Record<RetrievalSourceType, string> =
++  {
++    knowledge_article: "지식 아카이브",
++    disclosure_link: "공시·약관",
++    message_template: "고객 안내 문구",
++    insurer: "보험사",
++    claim_document: "청구서류",
++  };
++
++export function purposeRequiresOfficialCheck(
++  purpose: AnswerAssistantPurpose,
++): boolean {
++  return (
++    purpose === "DISCLOSURE_GUIDE" || purpose === "CLAIM_DOCUMENT_GUIDE"
++  );
++}
+diff --git a/lib/answer-assistant/output-safety.ts b/lib/answer-assistant/output-safety.ts
+new file mode 100644
+index 0000000..9ed5bf3
+--- /dev/null
++++ b/lib/answer-assistant/output-safety.ts
+@@ -0,0 +1,51 @@
++// Generated draft output safety scan (PR-94).
++
++const OUTPUT_BLOCKED_PHRASES = [
++  "지급됩니다",
++  "받을 수 있습니다",
++  "면책입니다",
++  "부지급입니다",
++  "보장됩니다",
++  "진단서상 가능합니다",
++  "손해사정 결과가 맞습니다",
++  "무조건 가입",
++  "100% 보장",
++  "확정 지급",
++  "보험금 지급됩니다",
++  "반드시 보장",
++  "지급 확정",
++] as const;
++
++const RESIDENT_ID_PATTERN = /\b\d{6}-\d{7}\b/;
++const PHONE_PATTERN = /\b01[016789][-\s]?\d{3,4}[-\s]?\d{4}\b/;
++const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
++const CONTRACT_CONTEXT_PATTERN =
++  /(계약번호|증권번호|계좌번호|고객번호)[^0-9]{0,16}\d{4,}/i;
++
++function normalizeForScan(value: string): string {
++  return value.normalize("NFKC").toLowerCase();
++}
++
++export function validateGeneratedDraft(text: string): {
++  ok: boolean;
++  matchedPhrase?: string;
++} {
++  const normalized = normalizeForScan(text);
++
++  for (const phrase of OUTPUT_BLOCKED_PHRASES) {
++    if (normalized.includes(phrase.toLowerCase())) {
++      return { ok: false, matchedPhrase: phrase };
++    }
++  }
++
++  if (
++    RESIDENT_ID_PATTERN.test(text) ||
++    PHONE_PATTERN.test(text) ||
++    EMAIL_PATTERN.test(text) ||
++    CONTRACT_CONTEXT_PATTERN.test(text)
++  ) {
++    return { ok: false, matchedPhrase: "민감정보 패턴" };
++  }
++
++  return { ok: true };
++}
+diff --git a/lib/answer-assistant/provider.ts b/lib/answer-assistant/provider.ts
+new file mode 100644
+index 0000000..0ce6c90
+--- /dev/null
++++ b/lib/answer-assistant/provider.ts
+@@ -0,0 +1,76 @@
++// Answer draft LLM provider adapter (PR-94 stub — no API keys added).
++
++import type { RetrievalCandidate } from "./retrieval-types";
++import type { AnswerAssistantInput } from "./types";
++
++/**
++ * No approved LLM provider abstraction exists in the repository yet.
++ * PR-94 must not add API keys or external provider packages.
++ */
++export function isAnswerDraftProviderConfigured(): boolean {
++  return false;
++}
++
++export interface AnswerDraftProviderInput {
++  input: AnswerAssistantInput;
++  normalizedQuery: string;
++  candidates: RetrievalCandidate[];
++  needsOfficialCheck: boolean;
++}
++
++export interface AnswerDraftProviderResult {
++  ok: boolean;
++  draft?: string;
++  errorMessage?: string;
++}
++
++/** Reserved for a future approved provider adapter. */
++export function buildAnswerAssistantPrompt(
++  payload: AnswerDraftProviderInput,
++): { system: string; user: string } {
++  const contextLines = payload.candidates
++    .slice(0, 5)
++    .map(
++      (candidate, index) =>
++        `${index + 1}. [${candidate.type}] ${candidate.title}${
++          candidate.sourceUrl ? ` (${candidate.sourceUrl})` : ""
++        }\n${candidate.safeText ?? candidate.summary ?? ""}`,
++    )
++    .join("\n\n");
++
++  return {
++    system: [
++      "PlannerDesk 관리자 검수용 초안만 작성한다.",
++      "보험금 지급 가능성, 손해사정성, 의료정보 해석, 특정 상품 추천, 가입 강권, 공포 조장을 금지한다.",
++      "제공된 근거 밖 사실 단정을 금지한다.",
++      "정보 부족 시 정보 부족을 명시하고 공식 확인 필요 항목을 표시한다.",
++      "마지막에 관리자 검수 필요를 표시한다.",
++    ].join("\n"),
++    user: [
++      `목적: ${payload.input.purpose}`,
++      `톤: ${payload.input.tone}`,
++      `요청: ${payload.normalizedQuery}`,
++      `공식 확인 필요: ${payload.needsOfficialCheck ? "예" : "아니오"}`,
++      "",
++      "근거:",
++      contextLines,
++    ].join("\n"),
++  };
++}
++
++export async function runAnswerDraftProvider(
++  payload: AnswerDraftProviderInput,
++): Promise<AnswerDraftProviderResult> {
++  void payload;
++  if (!isAnswerDraftProviderConfigured()) {
++    return {
++      ok: false,
++      errorMessage: "PROVIDER_NOT_CONFIGURED",
++    };
++  }
++
++  return {
++    ok: false,
++    errorMessage: "PROVIDER_NOT_IMPLEMENTED",
++  };
++}
+diff --git a/lib/answer-assistant/retrieval-types.ts b/lib/answer-assistant/retrieval-types.ts
+index 890a778..4468e59 100644
+--- a/lib/answer-assistant/retrieval-types.ts
++++ b/lib/answer-assistant/retrieval-types.ts
+@@ -69,13 +69,23 @@ export interface RetrievalPolicyResult {
+   insufficientEvidence?: boolean;
+ }
+ 
+-/** Query input contract for PR-94 (validation only in that PR). */
++export type AnswerAssistantPurposeForRetrieval =
++  | "GENERAL_EXPLANATION"
++  | "CUSTOMER_SAFE_MESSAGE"
++  | "KNOWLEDGE_SUMMARY"
++  | "DISCLOSURE_GUIDE"
++  | "CLAIM_DOCUMENT_GUIDE"
++  | "COMMUNITY_REPLY_DRAFT";
++
++/** Query input contract for PR-94 retrieval execution. */
+ export interface RetrievalQueryInput {
+   query: string;
+   audience: RetrievalAudience;
+   /** Optional domain scope; default searches all allowed domains. */
+   domain?: RetrievalSourceType | "all";
+   limit?: number;
++  purpose?: AnswerAssistantPurposeForRetrieval;
++  requiresOfficialCheck?: boolean;
+ }
+ 
+ export type RetrievalQueryResult =
+diff --git a/lib/answer-assistant/retrieval-where.ts b/lib/answer-assistant/retrieval-where.ts
+new file mode 100644
+index 0000000..06abf82
+--- /dev/null
++++ b/lib/answer-assistant/retrieval-where.ts
+@@ -0,0 +1,16 @@
++// Stricter KnowledgeArticle visibility for answer-assist retrieval (PR-93/94).
++
++import {
++  KnowledgeArticleStatus,
++  KnowledgeRiskLevel,
++  type Prisma,
++} from "@prisma/client";
++
++/** Answer-assist baseline — stricter than PUBLIC_KNOWLEDGE_WHERE. */
++export const ANSWER_ASSIST_KNOWLEDGE_WHERE = {
++  isPublished: true,
++  status: KnowledgeArticleStatus.verified,
++  aiUsable: true,
++  riskLevel: { not: KnowledgeRiskLevel.blocked },
++  reviewedById: { not: null },
++} as const satisfies Prisma.KnowledgeArticleWhereInput;
+diff --git a/lib/answer-assistant/retrieval.ts b/lib/answer-assistant/retrieval.ts
+new file mode 100644
+index 0000000..0aba543
+--- /dev/null
++++ b/lib/answer-assistant/retrieval.ts
+@@ -0,0 +1,502 @@
++// Answer Assistant retrieval execution (PR-94).
++
++import { PUBLIC_VERIFICATION_STATUSES } from "@/lib/public/insurers";
++import { PUBLIC_DISCLOSURE_LINK_WHERE } from "@/lib/public/disclosure-links";
++import { PUBLIC_MESSAGE_TEMPLATE_WHERE } from "@/lib/public/message-templates";
++import { PUBLIC_CATEGORY_LABEL } from "@/lib/public/knowledge-display";
++import { publicDisclosureCategoryLabels } from "@/lib/public/disclosure-display";
++import { categoryLabels as claimCategoryLabels } from "@/lib/claim-documents/category-labels";
++import { CATEGORY_LABELS as insurerCategoryLabels } from "@/lib/directory/formatting";
++import { findProhibitedPhrase as findMessageTemplateProhibitedPhrase } from "@/lib/message-template/safety";
++import { isValidAdminUrl } from "@/lib/validators/disclosure-link";
++import { prisma } from "@/lib/prisma";
++import {
++  ANSWER_ASSIST_MAX_CANDIDATES,
++  ANSWER_ASSIST_MAX_PER_DOMAIN,
++  INSUFFICIENT_EVIDENCE_MESSAGE,
++} from "./constants";
++import { purposeRequiresOfficialCheck } from "./labels";
++import { ANSWER_ASSIST_KNOWLEDGE_WHERE } from "./retrieval-where";
++import {
++  RETRIEVAL_SOURCE_PRIORITY,
++  type RetrievalCandidate,
++  type RetrievalQueryInput,
++  type RetrievalQueryResult,
++  type RetrievalSourceType,
++} from "./retrieval-types";
++import type { AnswerAssistantPurpose } from "./types";
++
++function toIsoDate(value: Date | null | undefined): string | undefined {
++  if (!value) return undefined;
++  return value.toISOString().slice(0, 10);
++}
++
++function truncateText(text: string | null | undefined, max = 240): string {
++  if (!text) return "";
++  const normalized = text.replace(/\s+/g, " ").trim();
++  if (normalized.length <= max) return normalized;
++  return `${normalized.slice(0, max)}…`;
++}
++
++function compareCandidates(a: RetrievalCandidate, b: RetrievalCandidate): number {
++  if (a.priority !== b.priority) return a.priority - b.priority;
++  const aDate =
++    a.reviewedAt ?? a.lastVerifiedAt ?? a.updatedAt ?? "";
++  const bDate =
++    b.reviewedAt ?? b.lastVerifiedAt ?? b.updatedAt ?? "";
++  return bDate.localeCompare(aDate);
++}
++
++function limitPerDomain(
++  candidates: RetrievalCandidate[],
++  maxTotal: number,
++): RetrievalCandidate[] {
++  const counts = new Map<RetrievalSourceType, number>();
++  const selected: RetrievalCandidate[] = [];
++
++  for (const candidate of candidates) {
++    const count = counts.get(candidate.type) ?? 0;
++    if (count >= ANSWER_ASSIST_MAX_PER_DOMAIN) continue;
++    selected.push(candidate);
++    counts.set(candidate.type, count + 1);
++    if (selected.length >= maxTotal) break;
++  }
++
++  return selected;
++}
++
++async function searchKnowledgeArticles(
++  query: string,
++  limit: number,
++): Promise<RetrievalCandidate[]> {
++  const records = await prisma.knowledgeArticle.findMany({
++    where: {
++      ...ANSWER_ASSIST_KNOWLEDGE_WHERE,
++      OR: [
++        { title: { contains: query, mode: "insensitive" } },
++        { summary: { contains: query, mode: "insensitive" } },
++        { safeCopy: { contains: query, mode: "insensitive" } },
++        { workflowLabel: { contains: query, mode: "insensitive" } },
++        { tags: { has: query } },
++      ],
++    },
++    take: limit,
++    orderBy: [{ updatedAt: "desc" }, { title: "asc" }],
++    select: {
++      id: true,
++      title: true,
++      summary: true,
++      safeCopy: true,
++      category: true,
++      sourceTitle: true,
++      sourceUrl: true,
++      updatedAt: true,
++      publishedAt: true,
++    },
++  });
++
++  return records.map((row) => ({
++    id: row.id,
++    type: "knowledge_article" as const,
++    title: row.title,
++    summary: truncateText(row.summary),
++    safeText: truncateText(row.safeCopy ?? row.summary),
++    sourceName: row.sourceTitle ?? undefined,
++    sourceUrl: row.sourceUrl ?? undefined,
++    categoryLabel: PUBLIC_CATEGORY_LABEL[row.category],
++    priority: RETRIEVAL_SOURCE_PRIORITY.knowledge_article_verified,
++    updatedAt: toIsoDate(row.updatedAt),
++    reviewedAt: toIsoDate(row.publishedAt),
++    isOfficialSource: Boolean(row.sourceUrl),
++  }));
++}
++
++async function searchDisclosureLinks(
++  query: string,
++  limit: number,
++): Promise<RetrievalCandidate[]> {
++  const records = await prisma.disclosureLink.findMany({
++    where: {
++      ...PUBLIC_DISCLOSURE_LINK_WHERE,
++      OR: [
++        { title: { contains: query, mode: "insensitive" } },
++        { description: { contains: query, mode: "insensitive" } },
++        { sourceName: { contains: query, mode: "insensitive" } },
++        { insurer: { name: { contains: query, mode: "insensitive" } } },
++      ],
++    },
++    take: limit,
++    orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
++    select: {
++      id: true,
++      title: true,
++      description: true,
++      url: true,
++      category: true,
++      sourceName: true,
++      isOfficialSource: true,
++      lastVerifiedAt: true,
++      updatedAt: true,
++      reviewedAt: true,
++      insurer: { select: { name: true } },
++    },
++  });
++
++  const candidates: RetrievalCandidate[] = [];
++
++  for (const row of records) {
++    const url = row.url?.trim();
++    if (!url || !isValidAdminUrl(url)) continue;
++
++    candidates.push({
++      id: row.id,
++      type: "disclosure_link",
++      title: row.title,
++      summary: truncateText(row.description),
++      safeText: truncateText(row.description),
++      sourceName: row.sourceName ?? row.insurer?.name ?? undefined,
++      sourceUrl: url,
++      categoryLabel: publicDisclosureCategoryLabels[row.category],
++      priority: row.isOfficialSource
++        ? RETRIEVAL_SOURCE_PRIORITY.disclosure_link_official
++        : RETRIEVAL_SOURCE_PRIORITY.disclosure_link,
++      updatedAt: toIsoDate(row.updatedAt),
++      reviewedAt: toIsoDate(row.reviewedAt),
++      lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
++      isOfficialSource: row.isOfficialSource,
++    });
++  }
++
++  return candidates;
++}
++
++async function searchMessageTemplates(
++  query: string,
++  limit: number,
++): Promise<RetrievalCandidate[]> {
++  const records = await prisma.messageTemplate.findMany({
++    where: {
++      ...PUBLIC_MESSAGE_TEMPLATE_WHERE,
++      OR: [
++        { title: { contains: query, mode: "insensitive" } },
++        { description: { contains: query, mode: "insensitive" } },
++        { safeCopy: { contains: query, mode: "insensitive" } },
++        { useCase: { contains: query, mode: "insensitive" } },
++      ],
++    },
++    take: limit * 2,
++    orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
++    select: {
++      id: true,
++      title: true,
++      description: true,
++      safeCopy: true,
++      category: true,
++      channel: true,
++      audienceType: true,
++      useCase: true,
++      tone: true,
++      updatedAt: true,
++      reviewedAt: true,
++    },
++  });
++
++  const candidates: RetrievalCandidate[] = [];
++
++  for (const row of records) {
++    const safeCopy = row.safeCopy?.trim();
++    if (!safeCopy) continue;
++    if (findMessageTemplateProhibitedPhrase(safeCopy)) continue;
++
++    candidates.push({
++      id: row.id,
++      type: "message_template",
++      title: row.title,
++      summary: truncateText(row.description),
++      safeText: truncateText(safeCopy),
++      categoryLabel: row.useCase || row.category,
++      priority: RETRIEVAL_SOURCE_PRIORITY.message_template_safe_copy,
++      updatedAt: toIsoDate(row.updatedAt),
++      reviewedAt: toIsoDate(row.reviewedAt),
++    });
++
++    if (candidates.length >= limit) break;
++  }
++
++  return candidates;
++}
++
++async function searchInsurers(
++  query: string,
++  limit: number,
++): Promise<RetrievalCandidate[]> {
++  const records = await prisma.insurer.findMany({
++    where: {
++      isPublished: true,
++      verificationStatus: { in: [...PUBLIC_VERIFICATION_STATUSES] },
++      OR: [
++        { name: { contains: query, mode: "insensitive" } },
++        { cardPaymentNote: { contains: query, mode: "insensitive" } },
++      ],
++    },
++    take: limit,
++    orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
++    select: {
++      id: true,
++      name: true,
++      category: true,
++      officialWebsiteUrl: true,
++      claimPageUrl: true,
++      termsUrl: true,
++      customerCenterPhone: true,
++      updatedAt: true,
++      lastVerifiedAt: true,
++    },
++  });
++
++  return records.map((row) => {
++    const officialUrl =
++      row.termsUrl ?? row.claimPageUrl ?? row.officialWebsiteUrl ?? undefined;
++    const summaryParts = [
++      insurerCategoryLabels[row.category],
++      row.customerCenterPhone ? `고객센터 ${row.customerCenterPhone}` : null,
++    ].filter(Boolean);
++
++    return {
++      id: row.id,
++      type: "insurer" as const,
++      title: row.name,
++      summary: summaryParts.join(" · "),
++      safeText: summaryParts.join(" · "),
++      sourceUrl: officialUrl,
++      sourceName: row.name,
++      categoryLabel: insurerCategoryLabels[row.category],
++      priority: officialUrl
++        ? RETRIEVAL_SOURCE_PRIORITY.insurer_official_url
++        : RETRIEVAL_SOURCE_PRIORITY.insurer,
++      updatedAt: toIsoDate(row.updatedAt),
++      lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
++      isOfficialSource: Boolean(officialUrl),
++    };
++  });
++}
++
++async function searchClaimDocuments(
++  query: string,
++  limit: number,
++): Promise<RetrievalCandidate[]> {
++  const records = await prisma.claimDocument.findMany({
++    where: {
++      isPublished: true,
++      verificationStatus: { in: [...PUBLIC_VERIFICATION_STATUSES] },
++      OR: [
++        { title: { contains: query, mode: "insensitive" } },
++        { summary: { contains: query, mode: "insensitive" } },
++        { requiredDocuments: { contains: query, mode: "insensitive" } },
++        { optionalDocuments: { contains: query, mode: "insensitive" } },
++        { customerMessageTemplate: { contains: query, mode: "insensitive" } },
++        { cautionNote: { contains: query, mode: "insensitive" } },
++        { insurer: { name: { contains: query, mode: "insensitive" } } },
++      ],
++    },
++    take: limit,
++    orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
++    select: {
++      id: true,
++      title: true,
++      summary: true,
++      category: true,
++      officialSourceUrl: true,
++      claimFormUrl: true,
++      cautionNote: true,
++      updatedAt: true,
++      lastVerifiedAt: true,
++      insurer: { select: { name: true } },
++    },
++  });
++
++  return records.map((row) => {
++    const sourceUrl = row.officialSourceUrl ?? row.claimFormUrl ?? undefined;
++    return {
++      id: row.id,
++      type: "claim_document" as const,
++      title: row.title,
++      summary: truncateText(
++        [row.summary, row.insurer?.name].filter(Boolean).join(" · "),
++      ),
++      safeText: truncateText(
++        [row.summary, row.cautionNote].filter(Boolean).join(" "),
++      ),
++      sourceName: row.insurer?.name ?? undefined,
++      sourceUrl,
++      categoryLabel: claimCategoryLabels[row.category],
++      priority: RETRIEVAL_SOURCE_PRIORITY.claim_document,
++      updatedAt: toIsoDate(row.updatedAt),
++      lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
++      isOfficialSource: Boolean(sourceUrl),
++    };
++  });
++}
++
++const DOMAIN_SEARCHERS: Record<
++  RetrievalSourceType,
++  (query: string, limit: number) => Promise<RetrievalCandidate[]>
++> = {
++  knowledge_article: searchKnowledgeArticles,
++  disclosure_link: searchDisclosureLinks,
++  message_template: searchMessageTemplates,
++  insurer: searchInsurers,
++  claim_document: searchClaimDocuments,
++};
++
++function hasOfficialCandidate(candidates: RetrievalCandidate[]): boolean {
++  return candidates.some(
++    (candidate) =>
++      candidate.isOfficialSource ||
++      candidate.type === "disclosure_link" ||
++      (candidate.type === "insurer" && Boolean(candidate.sourceUrl)),
++  );
++}
++
++function hasFactualCandidate(candidates: RetrievalCandidate[]): boolean {
++  return candidates.some(
++    (candidate) =>
++      candidate.type === "knowledge_article" ||
++      candidate.type === "disclosure_link" ||
++      candidate.type === "claim_document" ||
++      (candidate.type === "insurer" && Boolean(candidate.sourceUrl)),
++  );
++}
++
++function assessEvidencePolicy(
++  candidates: RetrievalCandidate[],
++  purpose: AnswerAssistantPurpose,
++  requiresOfficialCheck: boolean,
++): { needsOfficialCheck: boolean; insufficientEvidence: boolean } {
++  if (candidates.length === 0) {
++    return { needsOfficialCheck: true, insufficientEvidence: true };
++  }
++
++  const officialRequired =
++    requiresOfficialCheck || purposeRequiresOfficialCheck(purpose);
++  const hasOfficial = hasOfficialCandidate(candidates);
++  const hasFactual = hasFactualCandidate(candidates);
++  const onlyTemplates = candidates.every(
++    (candidate) => candidate.type === "message_template",
++  );
++
++  let needsOfficialCheck = false;
++  let insufficientEvidence = false;
++
++  if (officialRequired && !hasOfficial) {
++    needsOfficialCheck = true;
++    insufficientEvidence = true;
++  }
++
++  if (
++    onlyTemplates &&
++    (purpose === "GENERAL_EXPLANATION" ||
++      purpose === "KNOWLEDGE_SUMMARY" ||
++      purpose === "DISCLOSURE_GUIDE")
++  ) {
++    needsOfficialCheck = true;
++    insufficientEvidence = true;
++  }
++
++  if (purpose === "DISCLOSURE_GUIDE" && !hasOfficial) {
++    needsOfficialCheck = true;
++    insufficientEvidence = true;
++  }
++
++  if (purpose === "KNOWLEDGE_SUMMARY" && !hasFactual) {
++    insufficientEvidence = true;
++  }
++
++  if (
++    purpose === "CLAIM_DOCUMENT_GUIDE" &&
++    !candidates.some((candidate) => candidate.type === "claim_document")
++  ) {
++    insufficientEvidence = true;
++  }
++
++  return { needsOfficialCheck, insufficientEvidence };
++}
++
++export async function retrieveAnswerCandidates(
++  input: RetrievalQueryInput,
++): Promise<RetrievalQueryResult> {
++  if (input.audience !== "admin") {
++    return {
++      ok: false,
++      allowed: false,
++      blockedReason: "unauthorized",
++      blockedMessage: "관리자 권한이 필요합니다.",
++      candidates: [],
++    };
++  }
++
++  const query = input.query.trim();
++  const limit = input.limit ?? ANSWER_ASSIST_MAX_CANDIDATES;
++  const perDomainLimit = Math.min(ANSWER_ASSIST_MAX_PER_DOMAIN, limit);
++
++  const domains: RetrievalSourceType[] =
++    input.domain && input.domain !== "all"
++      ? [input.domain]
++      : [
++          "disclosure_link",
++          "knowledge_article",
++          "message_template",
++          "claim_document",
++          "insurer",
++        ];
++
++  const batches = await Promise.all(
++    domains.map((domain) => DOMAIN_SEARCHERS[domain](query, perDomainLimit)),
++  );
++
++  const merged = batches.flat().sort(compareCandidates);
++  const candidates = limitPerDomain(merged, limit);
++
++  const purpose = input.purpose ?? "GENERAL_EXPLANATION";
++  const requiresOfficialCheck = Boolean(input.requiresOfficialCheck);
++  const policy = assessEvidencePolicy(
++    candidates,
++    purpose,
++    requiresOfficialCheck,
++  );
++
++  return {
++    ok: true,
++    allowed: true,
++    candidates,
++    needsOfficialCheck: policy.needsOfficialCheck,
++    insufficientEvidence: policy.insufficientEvidence,
++    blockedMessage: policy.insufficientEvidence
++      ? INSUFFICIENT_EVIDENCE_MESSAGE
++      : undefined,
++  };
++}
++
++export function toEvidenceItems(
++  candidates: RetrievalCandidate[],
++): {
++  id: string;
++  type: RetrievalSourceType;
++  title: string;
++  summary?: string;
++  sourceName?: string;
++  sourceUrl?: string;
++  categoryLabel?: string;
++  isOfficialSource?: boolean;
++}[] {
++  return candidates.map((candidate) => ({
++    id: candidate.id,
++    type: candidate.type,
++    title: candidate.title,
++    summary: candidate.summary,
++    sourceName: candidate.sourceName,
++    sourceUrl: candidate.sourceUrl,
++    categoryLabel: candidate.categoryLabel,
++    isOfficialSource: candidate.isOfficialSource,
++  }));
++}
+diff --git a/lib/answer-assistant/types.ts b/lib/answer-assistant/types.ts
+new file mode 100644
+index 0000000..674afe4
+--- /dev/null
++++ b/lib/answer-assistant/types.ts
+@@ -0,0 +1,102 @@
++// Answer Assistant admin draft types (PR-94).
++
++import type { RetrievalCandidate, RetrievalSourceType } from "./retrieval-types";
++
++export type AnswerAssistantPurpose =
++  | "GENERAL_EXPLANATION"
++  | "CUSTOMER_SAFE_MESSAGE"
++  | "KNOWLEDGE_SUMMARY"
++  | "DISCLOSURE_GUIDE"
++  | "CLAIM_DOCUMENT_GUIDE"
++  | "COMMUNITY_REPLY_DRAFT";
++
++export type AnswerAssistantTone =
++  | "neutral"
++  | "formal"
++  | "concise"
++  | "consultative";
++
++export type AnswerAssistantDomainFilter = RetrievalSourceType | "all";
++
++export type AnswerAssistantBlockedReason =
++  | "PERSONAL_INFO"
++  | "CONTRACT_INFO"
++  | "MEDICAL_INFO"
++  | "CLAIM_DOCUMENT"
++  | "CLAIM_JUDGMENT"
++  | "LOSS_ADJUSTMENT"
++  | "PRODUCT_SOLICITATION"
++  | "FEAR_MARKETING"
++  | "PROMPT_INJECTION"
++  | "VALIDATION"
++  | "INSUFFICIENT_EVIDENCE"
++  | "PROVIDER_NOT_CONFIGURED"
++  | "PROVIDER_ERROR"
++  | "OUTPUT_SAFETY_BLOCKED";
++
++export type AnswerAssistantDraftMode = "rules_based" | "llm";
++
++export interface AnswerAssistantInput {
++  purpose: AnswerAssistantPurpose;
++  query: string;
++  tone: AnswerAssistantTone;
++  domain: AnswerAssistantDomainFilter;
++  requiresOfficialCheck: boolean;
++}
++
++export interface AnswerAssistantEvidenceItem {
++  id: string;
++  type: RetrievalSourceType;
++  title: string;
++  summary?: string;
++  sourceName?: string;
++  sourceUrl?: string;
++  categoryLabel?: string;
++  isOfficialSource?: boolean;
++}
++
++export interface AnswerAssistantSuccessResult {
++  ok: true;
++  draft: string;
++  draftMode: AnswerAssistantDraftMode;
++  providerConfigured: boolean;
++  providerNotice?: string;
++  evidence: AnswerAssistantEvidenceItem[];
++  officialCheckItems: string[];
++  warnings: string[];
++  needsOfficialCheck: boolean;
++  insufficientEvidence: false;
++  candidateCount: number;
++  draftLabel: string;
++  footerDisclaimer: string;
++}
++
++export interface AnswerAssistantBlockedResult {
++  ok: false;
++  blockedReason: AnswerAssistantBlockedReason;
++  message: string;
++  evidence: AnswerAssistantEvidenceItem[];
++  warnings: string[];
++  needsOfficialCheck?: boolean;
++  insufficientEvidence?: boolean;
++  candidateCount: number;
++}
++
++export type AnswerAssistantDraftResult =
++  | AnswerAssistantSuccessResult
++  | AnswerAssistantBlockedResult;
++
++export interface AnswerAssistantValidationResult {
++  ok: boolean;
++  blockedReason?: AnswerAssistantBlockedReason;
++  message: string;
++  normalizedQuery?: string;
++}
++
++export interface AnswerAssistantRetrievalContext {
++  purpose: AnswerAssistantPurpose;
++  requiresOfficialCheck: boolean;
++  candidates: RetrievalCandidate[];
++  needsOfficialCheck: boolean;
++  insufficientEvidence: boolean;
++}
+diff --git a/lib/answer-assistant/validation.ts b/lib/answer-assistant/validation.ts
+new file mode 100644
+index 0000000..febe4d0
+--- /dev/null
++++ b/lib/answer-assistant/validation.ts
+@@ -0,0 +1,395 @@
++// Answer Assistant input validation and blocked-question classification (PR-94).
++
++import { sanitizeCorrectionPlainText } from "@/lib/correction-request/sanitize";
++import {
++  ANSWER_ASSIST_MAX_URLS,
++  ANSWER_ASSIST_QUERY_MAX_LENGTH,
++  ANSWER_ASSIST_QUERY_MIN_LENGTH,
++  ANSWER_ASSIST_VALIDATION_MESSAGES,
++} from "./constants";
++import type {
++  AnswerAssistantBlockedReason,
++  AnswerAssistantInput,
++  AnswerAssistantValidationResult,
++} from "./types";
++
++const BLOCKED_URL_PROTOCOLS = ["javascript:", "data:", "file:", "vbscript:"];
++
++const URL_IN_TEXT_PATTERN = /(?:https?:\/\/|www\.)[^\s<>"']+/gi;
++
++const RESIDENT_ID_PATTERN = /\b\d{6}-\d{7}\b/;
++const PHONE_PATTERN = /\b01[016789][-\s]?\d{3,4}[-\s]?\d{4}\b/;
++const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
++const LONG_DIGITS_PATTERN = /\b\d{10,}\b/;
++const CONTRACT_CONTEXT_PATTERN =
++  /(계약번호|증권번호|계좌번호|고객번호)[^0-9]{0,16}\d{4,}/i;
++const REPEATED_SPECIAL_PATTERN = /([!@#$%^&*()_+=\[\]{}|\\;:'",.<>/?`~])\1{5,}/;
++
++const PERSONAL_INFO_KEYWORDS = [
++  "주민등록번호",
++  "주민번호",
++  "연락처",
++  "휴대폰",
++  "휴대전화",
++  "전화번호",
++  "이메일",
++  "주소",
++  "계좌번호",
++  "고객명",
++  "신분증",
++] as const;
++
++const CONTRACT_INFO_KEYWORDS = [
++  "계약번호",
++  "증권번호",
++  "고객번호",
++  "증권",
++  "계약자",
++] as const;
++
++const MEDICAL_INFO_KEYWORDS = [
++  "병명",
++  "진단명",
++  "진단서",
++  "소견서",
++  "진료기록",
++  "처방",
++  "처방전",
++  "수술명",
++  "입원일",
++  "퇴원일",
++  "병원명",
++  "검사결과",
++  "장애",
++  "투약",
++  "약제비",
++  "진료비 영수증",
++  "입퇴원확인서",
++] as const;
++
++const CLAIM_DOCUMENT_KEYWORDS = [
++  "청구서류를 업로드",
++  "청구자료",
++  "영수증을 첨부",
++  "진단서를 첨부",
++  "캡처본을 첨부",
++  "파일을 올려",
++  "파일을 업로드",
++  "이미지를 첨부",
++  "사진을 첨부",
++  "ocr",
++] as const;
++
++const CLAIM_JUDGMENT_KEYWORDS = [
++  "보험금 받을 수",
++  "보험금 가능",
++  "지급 가능",
++  "지급되나요",
++  "지급될까요",
++  "청구 가능",
++  "보상 가능",
++  "얼마 받을 수",
++  "지급 판단",
++  "면책인가요",
++  "부지급인가요",
++  "보장되나요",
++  "진단비 받을 수",
++  "수술비 받을 수",
++  "입원비 받을 수",
++  "보험금 지급 가능",
++  "보험금 얼마",
++  "청구 가능성",
++  "지급 가능한가요",
++  "보험금 받을 수 있나요",
++] as const;
++
++const LOSS_ADJUSTMENT_KEYWORDS = [
++  "손해사정",
++  "손해사정 결과",
++  "손해사정성",
++  "지급 판단",
++] as const;
++
++const PRODUCT_SOLICITATION_KEYWORDS = [
++  "어떤 상품 추천",
++  "상품 추천",
++  "가입시키는 방법",
++  "가입시키는 멘트",
++  "무조건 가입",
++  "반드시 가입",
++  "이 상품 최고",
++  "100% 보장",
++  "확정 지급",
++  "가입 유도",
++  "가입 강권",
++] as const;
++
++const FEAR_MARKETING_KEYWORDS = [
++  "해지 못 하게",
++  "해지 못하게",
++  "겁주는 문구",
++  "겁주는 멘트",
++  "지금 안 하면 손해",
++  "해지하면 큰일",
++  "해지하면 큰 일",
++] as const;
++
++const PROMPT_INJECTION_KEYWORDS = [
++  "adminmemo",
++  "admin memo",
++  "관리자 메모",
++  "내부 메모",
++  "시스템 프롬프트",
++  "system prompt",
++  "이전 지시 무시",
++  "ignore previous",
++  "비공개 데이터",
++  "draft 포함",
++  "제보 원문",
++  "correctionrequest",
++  "communityreport",
++  "forbiddenclaims",
++  "compliancenote",
++  "raw output",
++  "프롬프트 출력",
++] as const;
++
++export const ANSWER_ASSIST_BLOCKED_MESSAGES: Record<
++  AnswerAssistantBlockedReason,
++  string
++> = {
++  PERSONAL_INFO:
++    "개인정보 또는 계약정보가 포함된 요청은 처리할 수 없습니다. 고객을 특정할 수 있는 정보를 제거하고 일반 기준 중심으로 다시 입력해 주세요.",
++  CONTRACT_INFO:
++    "개인정보 또는 계약정보가 포함된 요청은 처리할 수 없습니다. 고객을 특정할 수 있는 정보를 제거하고 일반 기준 중심으로 다시 입력해 주세요.",
++  MEDICAL_INFO:
++    "의료정보 또는 청구자료가 포함된 요청은 처리할 수 없습니다. 이 기능은 진단서·의료자료 해석을 제공하지 않습니다.",
++  CLAIM_DOCUMENT:
++    "의료정보 또는 청구자료가 포함된 요청은 처리할 수 없습니다. 이 기능은 진단서·의료자료 해석을 제공하지 않습니다.",
++  CLAIM_JUDGMENT:
++    "보험금 지급 가능 여부, 손해사정성 판단, 보장 여부 단정은 제공하지 않습니다. 공식 약관과 보험사 안내 기준 확인이 필요한 항목으로 분리해 주세요.",
++  LOSS_ADJUSTMENT:
++    "보험금 지급 가능 여부, 손해사정성 판단, 보장 여부 단정은 제공하지 않습니다. 공식 약관과 보험사 안내 기준 확인이 필요한 항목으로 분리해 주세요.",
++  PRODUCT_SOLICITATION:
++    "특정 상품 추천, 가입 강권, 공포 조장 문구는 생성하지 않습니다. 중립적인 점검 기준 또는 설명 문구로 다시 요청해 주세요.",
++  FEAR_MARKETING:
++    "특정 상품 추천, 가입 강권, 공포 조장 문구는 생성하지 않습니다. 중립적인 점검 기준 또는 설명 문구로 다시 요청해 주세요.",
++  PROMPT_INJECTION:
++    "요청 형식이 허용 범위를 벗어났습니다. 공개·검수 완료 자료 기반의 일반 설명 요청으로 다시 입력해 주세요.",
++  VALIDATION: ANSWER_ASSIST_VALIDATION_MESSAGES.invalid,
++  INSUFFICIENT_EVIDENCE:
++    "근거 자료가 부족하여 초안을 생성하지 않았습니다. 공식 약관, 보험사 안내, 검수 완료 지식 문서를 먼저 확인해 주세요.",
++  PROVIDER_NOT_CONFIGURED:
++    "답변 생성 provider가 구성되지 않았습니다. 근거 자료를 확인한 뒤 수동으로 초안을 작성해 주세요.",
++  PROVIDER_ERROR:
++    "초안 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 근거 자료를 직접 확인해 주세요.",
++  OUTPUT_SAFETY_BLOCKED:
++    "생성된 초안에 금지 표현이 포함되어 차단했습니다.",
++};
++
++const VALID_PURPOSES = new Set<string>([
++  "GENERAL_EXPLANATION",
++  "CUSTOMER_SAFE_MESSAGE",
++  "KNOWLEDGE_SUMMARY",
++  "DISCLOSURE_GUIDE",
++  "CLAIM_DOCUMENT_GUIDE",
++  "COMMUNITY_REPLY_DRAFT",
++]);
++
++const VALID_TONES = new Set<string>([
++  "neutral",
++  "formal",
++  "concise",
++  "consultative",
++]);
++
++function normalizeForScan(value: string): string {
++  return value.normalize("NFKC").toLowerCase();
++}
++
++function containsKeyword(
++  text: string,
++  keywords: readonly string[],
++): boolean {
++  const normalized = normalizeForScan(text);
++  return keywords.some((keyword) => normalized.includes(keyword.toLowerCase()));
++}
++
++function countSafeUrls(text: string): number {
++  const matches = text.match(URL_IN_TEXT_PATTERN);
++  if (!matches) return 0;
++  let count = 0;
++  for (const raw of matches) {
++    const candidate = raw.startsWith("www.") ? `https://${raw}` : raw;
++    const lower = candidate.toLowerCase();
++    if (BLOCKED_URL_PROTOCOLS.some((p) => lower.startsWith(p))) {
++      return 99;
++    }
++    try {
++      const url = new URL(candidate);
++      if (url.protocol === "http:" || url.protocol === "https:") {
++        count += 1;
++      }
++    } catch {
++      // ignore malformed URL fragments
++    }
++  }
++  return count;
++}
++
++export function classifyBlockedQuestion(
++  query: string,
++): AnswerAssistantBlockedReason | null {
++  const combined = query.trim();
++  if (!combined) return "VALIDATION";
++
++  if (
++    RESIDENT_ID_PATTERN.test(combined) ||
++    PHONE_PATTERN.test(combined) ||
++    EMAIL_PATTERN.test(combined) ||
++    LONG_DIGITS_PATTERN.test(combined) ||
++    CONTRACT_CONTEXT_PATTERN.test(combined)
++  ) {
++    return "PERSONAL_INFO";
++  }
++
++  if (containsKeyword(combined, PERSONAL_INFO_KEYWORDS)) {
++    return "PERSONAL_INFO";
++  }
++
++  if (containsKeyword(combined, CONTRACT_INFO_KEYWORDS)) {
++    return "CONTRACT_INFO";
++  }
++
++  if (containsKeyword(combined, MEDICAL_INFO_KEYWORDS)) {
++    return "MEDICAL_INFO";
++  }
++
++  if (containsKeyword(combined, CLAIM_DOCUMENT_KEYWORDS)) {
++    return "CLAIM_DOCUMENT";
++  }
++
++  if (containsKeyword(combined, LOSS_ADJUSTMENT_KEYWORDS)) {
++    return "LOSS_ADJUSTMENT";
++  }
++
++  if (containsKeyword(combined, CLAIM_JUDGMENT_KEYWORDS)) {
++    return "CLAIM_JUDGMENT";
++  }
++
++  if (containsKeyword(combined, FEAR_MARKETING_KEYWORDS)) {
++    return "FEAR_MARKETING";
++  }
++
++  if (containsKeyword(combined, PRODUCT_SOLICITATION_KEYWORDS)) {
++    return "PRODUCT_SOLICITATION";
++  }
++
++  if (containsKeyword(combined, PROMPT_INJECTION_KEYWORDS)) {
++    return "PROMPT_INJECTION";
++  }
++
++  return null;
++}
++
++export function validateAnswerAssistantInput(
++  input: AnswerAssistantInput,
++): AnswerAssistantValidationResult {
++  if (!VALID_PURPOSES.has(input.purpose)) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.invalid,
++    };
++  }
++
++  if (!VALID_TONES.has(input.tone)) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.invalid,
++    };
++  }
++
++  const sanitized = sanitizeCorrectionPlainText(input.query);
++  if (sanitized.blocked) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.invalid,
++    };
++  }
++
++  const normalizedQuery = sanitized.text.replace(/\s+/g, " ").trim();
++  if (!normalizedQuery) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.empty,
++    };
++  }
++
++  if (normalizedQuery.length < ANSWER_ASSIST_QUERY_MIN_LENGTH) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.tooShort,
++    };
++  }
++
++  if (normalizedQuery.length > ANSWER_ASSIST_QUERY_MAX_LENGTH) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.tooLong,
++    };
++  }
++
++  if (REPEATED_SPECIAL_PATTERN.test(normalizedQuery)) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.invalid,
++    };
++  }
++
++  const urlCount = countSafeUrls(normalizedQuery);
++  if (urlCount >= 99 || urlCount > ANSWER_ASSIST_MAX_URLS) {
++    return {
++      ok: false,
++      blockedReason: "VALIDATION",
++      message: ANSWER_ASSIST_VALIDATION_MESSAGES.urlSpam,
++    };
++  }
++
++  const blocked = classifyBlockedQuestion(normalizedQuery);
++  if (blocked) {
++    return {
++      ok: false,
++      blockedReason: blocked,
++      message: ANSWER_ASSIST_BLOCKED_MESSAGES[blocked],
++    };
++  }
++
++  return { ok: true, message: "", normalizedQuery };
++}
++
++export function parseAnswerAssistantFormData(
++  formData: FormData,
++): AnswerAssistantInput {
++  const purpose = String(formData.get("purpose") ?? "GENERAL_EXPLANATION");
++  const tone = String(formData.get("tone") ?? "neutral");
++  const domain = String(formData.get("domain") ?? "all");
++  const query = String(formData.get("query") ?? "");
++  const requiresOfficialCheck =
++    formData.get("requiresOfficialCheck") === "on" ||
++    formData.get("requiresOfficialCheck") === "true";
++
++  return {
++    purpose: purpose as AnswerAssistantInput["purpose"],
++    tone: tone as AnswerAssistantInput["tone"],
++    domain: domain as AnswerAssistantInput["domain"],
++    query,
++    requiresOfficialCheck,
++  };
++}

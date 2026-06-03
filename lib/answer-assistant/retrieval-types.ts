@@ -69,13 +69,23 @@ export interface RetrievalPolicyResult {
   insufficientEvidence?: boolean;
 }
 
-/** Query input contract for PR-94 (validation only in that PR). */
+export type AnswerAssistantPurposeForRetrieval =
+  | "GENERAL_EXPLANATION"
+  | "CUSTOMER_SAFE_MESSAGE"
+  | "KNOWLEDGE_SUMMARY"
+  | "DISCLOSURE_GUIDE"
+  | "CLAIM_DOCUMENT_GUIDE"
+  | "COMMUNITY_REPLY_DRAFT";
+
+/** Query input contract for PR-94 retrieval execution. */
 export interface RetrievalQueryInput {
   query: string;
   audience: RetrievalAudience;
   /** Optional domain scope; default searches all allowed domains. */
   domain?: RetrievalSourceType | "all";
   limit?: number;
+  purpose?: AnswerAssistantPurposeForRetrieval;
+  requiresOfficialCheck?: boolean;
 }
 
 export type RetrievalQueryResult =
