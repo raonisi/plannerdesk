@@ -1,29 +1,30 @@
 import Link from "next/link";
 import { getAdminAccess } from "@/lib/auth/access";
-import { previewAnswerAssistantRetentionCleanup } from "@/lib/answer-assistant/retention-cleanup";
-import { loadBetaFeedbackDashboard } from "@/lib/answer-assistant/beta-feedback-dashboard";
-import RetentionStatusPanel from "@/components/admin/answer-assistant/RetentionStatusPanel";
-import type { BetaFeedbackDashboardSearchParams } from "@/lib/answer-assistant/beta-feedback-dashboard";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import {
+  getBetaExpansionOperationalBanner,
+  loadBetaExpansionDecisionReport,
+} from "@/lib/answer-assistant/beta-expansion-decision";
+import type { BetaExpansionDecisionSearchParams } from "@/lib/answer-assistant/beta-expansion-decision";
+import BetaExpansionDecisionView from "@/components/admin/answer-assistant/BetaExpansionDecisionView";
+import { borders, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
-import BetaFeedbackReviewView from "@/components/admin/answer-assistant/BetaFeedbackReviewView";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "답변 보조 Beta 피드백 검토 | PlannerDesk Admin",
+  title: "답변 보조 Beta 확대 판단 | PlannerDesk Admin",
   description:
-    "allowlist beta 안전 피드백을 분류·수동 검토합니다. 원문·초안·자동 제재는 제공하지 않습니다.",
+    "allowlist beta 운영 집계를 바탕으로 확대 여부 판단 자료를 제공합니다. 자동 확대·gate ON은 수행하지 않습니다.",
   robots: { index: false, follow: false },
 };
 
-export default async function AdminAnswerAssistantFeedbackPage({
+export default async function AdminAnswerAssistantBetaDecisionPage({
   searchParams,
 }: {
-  searchParams: Promise<BetaFeedbackDashboardSearchParams>;
+  searchParams: Promise<BetaExpansionDecisionSearchParams>;
 }) {
   const access = await getAdminAccess();
 
@@ -38,20 +39,16 @@ export default async function AdminAnswerAssistantFeedbackPage({
   }
 
   const resolved = await searchParams;
-  let data = null;
-  let retentionPreview = null;
+  let report = null;
   let loadFailed = false;
 
   try {
-    const [dashboard, retention] = await Promise.all([
-      loadBetaFeedbackDashboard(resolved),
-      previewAnswerAssistantRetentionCleanup(),
-    ]);
-    data = dashboard;
-    retentionPreview = retention;
+    report = await loadBetaExpansionDecisionReport(resolved);
   } catch {
     loadFailed = true;
   }
+
+  const banner = getBetaExpansionOperationalBanner();
 
   return (
     <div className={`min-h-screen ${surfaces.page}`}>
@@ -64,7 +61,7 @@ export default async function AdminAnswerAssistantFeedbackPage({
               PlannerDesk Admin
             </p>
             <h1 className="text-xl font-bold text-white">
-              답변 보조 · Beta 안전 피드백
+              답변 보조 · Beta 확대 판단
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -76,21 +73,21 @@ export default async function AdminAnswerAssistantFeedbackPage({
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+              href="/admin/answer-assistant/feedback"
+            >
+              Beta 피드백
+            </Link>
+            <Link
+              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
               href="/admin/answer-assistant/cleanup"
             >
               Retention
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
-              href="/admin/answer-assistant/beta-decision"
-            >
-              Beta 판단
-            </Link>
-            <Link
-              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
               href="/admin/answer-assistant"
             >
-              답변 보조
+              답변 보조 도구
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
@@ -104,26 +101,28 @@ export default async function AdminAnswerAssistantFeedbackPage({
 
       <main className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
         <p className={`${textStyles.body} max-w-3xl`}>
-          beta 사용자 structured 피드백과 usage audit 메타데이터를 연결해 안전
-          신호를 분류합니다. beta 확대·자동 제재·allowlist 변경은 이 화면에서
+          PR-99-B allowlist beta, usage audit, feedback safety review, retention
+          cleanup 집계를 종합해 <strong>다음 운영 방향 판단 자료</strong>만 제공합니다.
+          beta 확대 실행·allowlist 자동 변경·feature gate 자동 ON은 이 화면에서
           수행하지 않습니다.
         </p>
 
         <div className="mt-6">
           <AdminSafetyNotice
-            policySummary="피드백·audit 모두 상담 원문·생성 초안·raw prompt/output을 저장·표시하지 않습니다."
+            policySummary="집계·권고만 표시합니다. raw prompt/output, 생성 초안, 고객·의료·계약 정보는 조회·저장하지 않습니다."
             showNeedsReview={false}
           />
         </div>
 
         {loadFailed ? (
           <AdminPageStateNotice kind="error" className="mt-6" />
-        ) : data ? (
-          <div className="mt-8 space-y-6">
-            {retentionPreview ? (
-              <RetentionStatusPanel preview={retentionPreview} compact />
-            ) : null}
-            <BetaFeedbackReviewView data={data} filters={resolved} />
+        ) : report ? (
+          <div className="mt-8">
+            <BetaExpansionDecisionView
+              report={report}
+              filters={resolved}
+              banner={banner}
+            />
           </div>
         ) : null}
       </main>

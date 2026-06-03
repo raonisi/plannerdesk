@@ -60,6 +60,12 @@ export default async function AdminAnswerAssistantPage() {
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+              href="/admin/answer-assistant/beta-decision"
+            >
+              Beta 판단
+            </Link>
+            <Link
+              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
               href="/admin"
             >
               데스크로 돌아가기
