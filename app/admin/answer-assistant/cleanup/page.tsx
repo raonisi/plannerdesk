@@ -1,30 +1,24 @@
 import Link from "next/link";
 import { getAdminAccess } from "@/lib/auth/access";
 import { previewAnswerAssistantRetentionCleanup } from "@/lib/answer-assistant/retention-cleanup";
-import { loadUsageAuditDashboard } from "@/lib/answer-assistant/usage-audit-dashboard";
-import RetentionStatusPanel from "@/components/admin/answer-assistant/RetentionStatusPanel";
-import type { UsageAuditDashboardSearchParams } from "@/lib/answer-assistant/usage-audit-dashboard";
+import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
-import UsageAuditDashboardView from "@/components/admin/answer-assistant/UsageAuditDashboardView";
+import RetentionCleanupView from "@/components/admin/answer-assistant/RetentionCleanupView";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "답변 보조 Usage Audit | PlannerDesk Admin",
+  title: "답변 보조 Retention Cleanup | PlannerDesk Admin",
   description:
-    "Answer Assistant 사용·차단 집계 대시보드입니다. 원문·초안·고객정보는 표시하지 않습니다.",
+    "Answer Assistant 운영 데이터 보관기간 preview 및 ADMIN 수동 cleanup입니다.",
   robots: { index: false, follow: false },
 };
 
-export default async function AdminAnswerAssistantAuditPage({
-  searchParams,
-}: {
-  searchParams: Promise<UsageAuditDashboardSearchParams>;
-}) {
+export default async function AdminAnswerAssistantCleanupPage() {
   const access = await getAdminAccess();
 
   if (access.status === "locked") {
@@ -37,18 +31,37 @@ export default async function AdminAnswerAssistantAuditPage({
     );
   }
 
-  const resolved = await searchParams;
-  let data = null;
-  let retentionPreview = null;
+  let preview = null;
+  let recentLogs: Array<{
+    id: string;
+    mode: string;
+    createdAt: string;
+    rateLimitDeleted: number;
+    usageAuditDeleted: number;
+    feedbackDeleted: number;
+    cleanupLogDeleted: number;
+  }> = [];
   let loadFailed = false;
 
   try {
-    const [dashboard, retention] = await Promise.all([
-      loadUsageAuditDashboard(resolved),
-      previewAnswerAssistantRetentionCleanup(),
-    ]);
-    data = dashboard;
-    retentionPreview = retention;
+    preview = await previewAnswerAssistantRetentionCleanup();
+    const logs = await prisma.answerAssistantCleanupLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 15,
+      select: {
+        id: true,
+        mode: true,
+        createdAt: true,
+        rateLimitDeleted: true,
+        usageAuditDeleted: true,
+        feedbackDeleted: true,
+        cleanupLogDeleted: true,
+      },
+    });
+    recentLogs = logs.map((log) => ({
+      ...log,
+      createdAt: log.createdAt.toISOString(),
+    }));
   } catch {
     loadFailed = true;
   }
@@ -64,27 +77,15 @@ export default async function AdminAnswerAssistantAuditPage({
               PlannerDesk Admin
             </p>
             <h1 className="text-xl font-bold text-white">
-              답변 보조 · Usage Audit
+              답변 보조 · Retention Cleanup
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
-              href="/admin/answer-assistant/feedback"
+              href="/admin/answer-assistant/audit"
             >
-              Beta 피드백
-            </Link>
-            <Link
-              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
-              href="/admin/answer-assistant/cleanup"
-            >
-              Retention
-            </Link>
-            <Link
-              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
-              href="/admin/answer-assistant"
-            >
-              답변 보조 도구
+              Usage Audit
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
@@ -98,25 +99,23 @@ export default async function AdminAnswerAssistantAuditPage({
 
       <main className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
         <p className={`${textStyles.body} max-w-3xl`}>
-          allowlist beta 운영 중 Answer Assistant 호출·차단 현황을 집계합니다. 관리자만
-          접근할 수 있으며, 요청 원문·생성 초안·고객·의료·계약 정보는 조회할 수 없습니다.
+          usage audit, rate limit state, beta feedback의 만료 데이터를 preview한 뒤
+          ADMIN만 삭제할 수 있습니다. 삭제 대상 건수만 표시하며 원문·초안은 조회하지
+          않습니다.
         </p>
 
         <div className="mt-6">
           <AdminSafetyNotice
-            policySummary="이 화면은 outcome·blockedReason·rate limit 등 메타데이터 집계만 표시합니다. CSV보내기와 raw prompt/output 조회는 제공하지 않습니다."
+            policySummary="무조건 삭제·자동 스케줄·beta 확대 없음. execute는 env 허용 + 확인 문구 + preview 건수 일치 시에만 동작합니다."
             showNeedsReview={false}
           />
         </div>
 
         {loadFailed ? (
           <AdminPageStateNotice kind="error" className="mt-6" />
-        ) : data ? (
-          <div className="mt-8 space-y-6">
-            {retentionPreview ? (
-              <RetentionStatusPanel preview={retentionPreview} compact />
-            ) : null}
-            <UsageAuditDashboardView data={data} filters={resolved} />
+        ) : preview ? (
+          <div className="mt-8">
+            <RetentionCleanupView preview={preview} recentLogs={recentLogs} />
           </div>
         ) : null}
       </main>

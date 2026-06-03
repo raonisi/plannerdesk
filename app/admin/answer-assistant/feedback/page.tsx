@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getAdminAccess } from "@/lib/auth/access";
+import { previewAnswerAssistantRetentionCleanup } from "@/lib/answer-assistant/retention-cleanup";
 import { loadBetaFeedbackDashboard } from "@/lib/answer-assistant/beta-feedback-dashboard";
+import RetentionStatusPanel from "@/components/admin/answer-assistant/RetentionStatusPanel";
 import type { BetaFeedbackDashboardSearchParams } from "@/lib/answer-assistant/beta-feedback-dashboard";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
@@ -37,10 +39,16 @@ export default async function AdminAnswerAssistantFeedbackPage({
 
   const resolved = await searchParams;
   let data = null;
+  let retentionPreview = null;
   let loadFailed = false;
 
   try {
-    data = await loadBetaFeedbackDashboard(resolved);
+    const [dashboard, retention] = await Promise.all([
+      loadBetaFeedbackDashboard(resolved),
+      previewAnswerAssistantRetentionCleanup(),
+    ]);
+    data = dashboard;
+    retentionPreview = retention;
   } catch {
     loadFailed = true;
   }
@@ -65,6 +73,12 @@ export default async function AdminAnswerAssistantFeedbackPage({
               href="/admin/answer-assistant/audit"
             >
               Usage Audit
+            </Link>
+            <Link
+              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+              href="/admin/answer-assistant/cleanup"
+            >
+              Retention
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
@@ -99,7 +113,10 @@ export default async function AdminAnswerAssistantFeedbackPage({
         {loadFailed ? (
           <AdminPageStateNotice kind="error" className="mt-6" />
         ) : data ? (
-          <div className="mt-8">
+          <div className="mt-8 space-y-6">
+            {retentionPreview ? (
+              <RetentionStatusPanel preview={retentionPreview} compact />
+            ) : null}
             <BetaFeedbackReviewView data={data} filters={resolved} />
           </div>
         ) : null}
