@@ -170,6 +170,16 @@ export default function BetaExpansionDecisionView({
         <p className="mt-3 text-xs text-[#4f5661]">
           후보: {report.decisionCandidates.join(" · ")}
         </p>
+        {report.decision === "LIMITED_EXPANSION_CANDIDATE" ? (
+          <p className="mt-3">
+            <Link
+              href={`/admin/answer-assistant/expansion-plan${filterQs}`}
+              className="text-sm font-semibold text-[#aa8137] hover:underline"
+            >
+              PR-104-C Allowlist 확대 계획 →
+            </Link>
+          </p>
+        ) : null}
       </section>
 
       <section>

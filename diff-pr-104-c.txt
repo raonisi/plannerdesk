@@ -1,0 +1,1534 @@
+diff --git a/.env.example b/.env.example
+index 6e0688b..d0fda67 100644
+--- a/.env.example
++++ b/.env.example
+@@ -52,6 +52,10 @@ AUTH_URL=http://localhost:3000
+ # ANSWER_ASSISTANT_BETA_DECISION_MIN_REQUESTS=20
+ # ANSWER_ASSISTANT_BETA_DECISION_CLEANUP_OVERDUE_DAYS=90
+ # ANSWER_ASSISTANT_BETA_DECISION_FEEDBACK_BACKLOG_MAX=15
++# PR-104-C limited allowlist expansion plan (report only — no auto apply)
++# ANSWER_ASSISTANT_EXPANSION_WAVE1_MAX_ADD=3
++# ANSWER_ASSISTANT_EXPANSION_WAVE2_CUMULATIVE_CAP=10
++# ANSWER_ASSISTANT_EXPANSION_CANDIDATE_PREVIEW_LIMIT=25
+ 
+ # Google OAuth (required for admin sign-in in production):
+ AUTH_GOOGLE_ID=
+diff --git a/app/admin/answer-assistant/beta-decision/page.tsx b/app/admin/answer-assistant/beta-decision/page.tsx
+index 3073db9..5e5cd26 100644
+--- a/app/admin/answer-assistant/beta-decision/page.tsx
++++ b/app/admin/answer-assistant/beta-decision/page.tsx
+@@ -77,6 +77,12 @@ export default async function AdminAnswerAssistantBetaDecisionPage({
+             >
+               Beta 피드백
+             </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/expansion-plan"
++            >
++              확대 계획
++            </Link>
+             <Link
+               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+               href="/admin/answer-assistant/cleanup"
+diff --git a/app/admin/answer-assistant/expansion-plan/page.tsx b/app/admin/answer-assistant/expansion-plan/page.tsx
+new file mode 100644
+index 0000000..93c9960
+--- /dev/null
++++ b/app/admin/answer-assistant/expansion-plan/page.tsx
+@@ -0,0 +1,116 @@
++import Link from "next/link";
++import { getAdminAccess } from "@/lib/auth/access";
++import { loadAllowlistExpansionPlanReport } from "@/lib/answer-assistant/allowlist-expansion-plan";
++import type { BetaExpansionDecisionSearchParams } from "@/lib/answer-assistant/beta-expansion-decision";
++import AllowlistExpansionPlanView from "@/components/admin/answer-assistant/AllowlistExpansionPlanView";
++import { borders, surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
++import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
++
++export const dynamic = "force-dynamic";
++
++export const metadata = {
++  title: "답변 보조 Allowlist 확대 계획 | PlannerDesk Admin",
++  description:
++    "allowlist beta 소폭 확대 운영 계획입니다. 자동 확대·env 자동 반영은 수행하지 않습니다.",
++  robots: { index: false, follow: false },
++};
++
++export default async function AdminAnswerAssistantExpansionPlanPage({
++  searchParams,
++}: {
++  searchParams: Promise<BetaExpansionDecisionSearchParams>;
++}) {
++  const access = await getAdminAccess();
++
++  if (access.status === "locked") {
++    return <AdminLockedState />;
++  }
++
++  if (access.status === "denied") {
++    return (
++      <AdminAccessDeniedState email={access.session.user?.email ?? null} />
++    );
++  }
++
++  const resolved = await searchParams;
++  let report = null;
++  let loadFailed = false;
++
++  try {
++    report = await loadAllowlistExpansionPlanReport(resolved);
++  } catch {
++    loadFailed = true;
++  }
++
++  return (
++    <div className={`min-h-screen ${surfaces.page}`}>
++      <header
++        className={`${surfaces.hero} border-b ${borders.divider} px-6 py-4 sm:px-8`}
++      >
++        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
++          <div>
++            <p className="text-xs font-semibold uppercase tracking-wide text-[#d8c08f]">
++              PlannerDesk Admin
++            </p>
++            <h1 className="text-xl font-bold text-white">
++              답변 보조 · Allowlist 확대 계획
++            </h1>
++          </div>
++          <div className="flex flex-wrap gap-2">
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/beta-decision"
++            >
++              Beta 판단
++            </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/audit"
++            >
++              Usage Audit
++            </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant"
++            >
++              답변 보조 도구
++            </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin"
++            >
++              관리자 홈
++            </Link>
++          </div>
++        </div>
++      </header>
++
++      <main className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
++        <p className={`${textStyles.body} max-w-3xl`}>
++          PR-103에서 <code>LIMITED_EXPANSION_CANDIDATE</code>일 때만 검토하는{" "}
++          <strong>제한 allowlist 확대 계획</strong>입니다. Wave 단위 소폭 확대
++          기준·후보·모니터링·rollback을 문서화하며, allowlist env 자동 반영은 하지
++          않습니다.
++        </p>
++
++        <div className="mt-6">
++          <AdminSafetyNotice
++            policySummary="확대 후보는 집계·선정 기준만 표시합니다. raw prompt/output, 고객·의료·계약 정보, allowlist 전체 목록은 노출하지 않습니다."
++            showNeedsReview={false}
++          />
++        </div>
++
++        {loadFailed ? (
++          <AdminPageStateNotice kind="error" className="mt-6" />
++        ) : report ? (
++          <div className="mt-8">
++            <AllowlistExpansionPlanView report={report} filters={resolved} />
++          </div>
++        ) : null}
++      </main>
++    </div>
++  );
++}
+diff --git a/app/admin/answer-assistant/page.tsx b/app/admin/answer-assistant/page.tsx
+index e0b0a16..4120b03 100644
+--- a/app/admin/answer-assistant/page.tsx
++++ b/app/admin/answer-assistant/page.tsx
+@@ -64,6 +64,12 @@ export default async function AdminAnswerAssistantPage() {
+             >
+               Beta 판단
+             </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/expansion-plan"
++            >
++              확대 계획
++            </Link>
+             <Link
+               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+               href="/admin"
+diff --git a/components/admin/answer-assistant/AllowlistExpansionPlanView.tsx b/components/admin/answer-assistant/AllowlistExpansionPlanView.tsx
+new file mode 100644
+index 0000000..0607e3d
+--- /dev/null
++++ b/components/admin/answer-assistant/AllowlistExpansionPlanView.tsx
+@@ -0,0 +1,296 @@
++import Link from "next/link";
++import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
++import type { AllowlistExpansionPlanReport } from "@/lib/answer-assistant/allowlist-expansion-plan";
++import { betaExpansionDecisionFilterQuery } from "@/lib/answer-assistant/beta-expansion-decision";
++import type { BetaExpansionDecisionSearchParams } from "@/lib/answer-assistant/beta-expansion-decision";
++
++const PLAN_DECISION_LABEL: Record<
++  AllowlistExpansionPlanReport["decision"],
++  string
++> = {
++  EXPANSION_BLOCKED: "확대 보류 (EXPANSION_BLOCKED)",
++  KEEP_CURRENT_ALLOWLIST: "현 allowlist 유지 (KEEP_CURRENT_ALLOWLIST)",
++  READY_FOR_WAVE_1_PLAN: "Wave 1 계획 준비 (READY_FOR_WAVE_1_PLAN)",
++  READY_FOR_WAVE_2_PLAN: "Wave 2 계획 준비 (READY_FOR_WAVE_2_PLAN)",
++  EXPANSION_REQUIRES_IMPROVEMENT: "개선 후 재검토 (EXPANSION_REQUIRES_IMPROVEMENT)",
++  PAUSE_AND_FIX_REQUIRED: "중단·수정 필요 (PAUSE_AND_FIX_REQUIRED)",
++};
++
++function formatDate(iso: string): string {
++  return iso.slice(0, 10);
++}
++
++function StatusBadge({ met }: { met: boolean }) {
++  return (
++    <span
++      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
++        met
++          ? "bg-[#edf7f2] text-[#1f6b55] ring-1 ring-[#b9d5c9]"
++          : "bg-[#fdf2f2] text-[#8b2e2e] ring-1 ring-[#e8c4c4]"
++      }`}
++    >
++      {met ? "충족" : "미충족"}
++    </span>
++  );
++}
++
++export default function AllowlistExpansionPlanView({
++  report,
++  filters,
++}: {
++  report: AllowlistExpansionPlanReport;
++  filters: BetaExpansionDecisionSearchParams;
++}) {
++  const filterQs = betaExpansionDecisionFilterQuery(filters);
++
++  return (
++    <div className="space-y-8">
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">기간 필터</h2>
++        <form className="mt-3 flex flex-wrap items-end gap-3" method="get">
++          <label className="text-xs text-[#4f5661]">
++            시작일 (UTC)
++            <input
++              type="date"
++              name="createdFrom"
++              defaultValue={
++                filters.createdFrom ?? formatDate(report.period.start)
++              }
++              className="mt-1 block rounded border border-[#d6d8dc] px-2 py-1.5 text-sm"
++            />
++          </label>
++          <label className="text-xs text-[#4f5661]">
++            종료일 (UTC)
++            <input
++              type="date"
++              name="createdTo"
++              defaultValue={filters.createdTo ?? formatDate(report.period.end)}
++              className="mt-1 block rounded border border-[#d6d8dc] px-2 py-1.5 text-sm"
++            />
++          </label>
++          <button
++            type="submit"
++            className="min-h-9 rounded-lg bg-[#102235] px-4 text-sm font-semibold text-white"
++          >
++            기간 적용
++          </button>
++        </form>
++        <p className="mt-2 text-xs text-[#4f5661]">
++          PR-103 decision: <strong>{report.pr103Decision}</strong> · 현 allowlist{" "}
++          {report.currentAllowlistCount}명 (userId 목록은 노출하지 않음)
++        </p>
++        <p className="mt-1 text-xs">
++          <Link
++            href={`/admin/answer-assistant/beta-decision${filterQs}`}
++            className="font-semibold text-[#aa8137] hover:underline"
++          >
++            Beta 확대 판단 (PR-103) →
++          </Link>
++        </p>
++      </section>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5`}
++      >
++        <h2 className="text-base font-bold text-[#102235]">Expansion Plan 권고</h2>
++        <p className={`mt-2 ${textStyles.body}`}>
++          <strong>확대 실행 PR이 아닙니다.</strong> allowlist env 수동 반영은 운영자
++          sign-off 후 별도 절차만 해당합니다.
++        </p>
++        <p className="mt-3 text-lg font-bold text-[#102235]">
++          {PLAN_DECISION_LABEL[report.decision]}
++        </p>
++        <ul className="mt-2 list-disc pl-5 text-sm text-[#4f5661]">
++          {report.decisionRationale.map((line) => (
++            <li key={line}>{line}</li>
++          ))}
++        </ul>
++        <p className="mt-3 text-xs text-[#4f5661]">
++          전제 조건: {report.preconditionsMet ? "충족" : "보류"} · 활성 Wave{" "}
++          {report.activeWave}
++        </p>
++        <p className="mt-1 text-xs text-[#4f5661]">
++          다음 PR 후보: {report.nextPrCandidates.join(" · ")}
++        </p>
++      </section>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">확대 가능 전제 조건</h2>
++        {!report.preconditionsMet ? (
++          <p className="mt-2 text-sm font-semibold text-[#8b2e2e]">
++            하나 이상 미충족 — expansion plan 보류
++          </p>
++        ) : (
++          <p className="mt-2 text-sm text-[#1f6b55]">전제 조건 충족 — 계획 검토 가능</p>
++        )}
++        <table className="mt-3 w-full text-sm">
++          <thead>
++            <tr className="border-b border-[#e8e0d0] text-left text-xs text-[#4f5661]">
++              <th className="pb-2 font-semibold">조건</th>
++              <th className="pb-2 font-semibold">상태</th>
++              <th className="pb-2 font-semibold">상세</th>
++            </tr>
++          </thead>
++          <tbody>
++            {report.preconditions.map((row) => (
++              <tr key={row.key} className="border-b border-[#f0ebe3]">
++                <td className="py-2 pr-2">{row.label}</td>
++                <td className="py-2">
++                  <StatusBadge met={row.met} />
++                </td>
++                <td className="py-2 text-xs text-[#4f5661]">{row.detail}</td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      </section>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">Wave별 확대 계획</h2>
++        <p className="mt-2 text-xs text-[#4f5661]">
++          Wave 1 제안 추가 인원: {report.wave1SuggestedAdds}명 (수동 반영)
++        </p>
++        <div className="mt-4 grid gap-3 sm:grid-cols-2">
++          {report.waves.map((wave) => (
++            <div
++              key={wave.wave}
++              className={`rounded-lg border p-4 ${
++                wave.status === "current"
++                  ? "border-[#b9d5c9] bg-[#edf7f2]"
++                  : wave.status === "blocked"
++                    ? "border-[#e8c4c4] bg-[#fdf2f2]"
++                    : "border-[#d9c9a8] bg-[#f7f1e5]"
++              }`}
++            >
++              <p className="text-xs font-semibold uppercase text-[#4f5661]">
++                {wave.status}
++              </p>
++              <h3 className="mt-1 font-bold text-[#102235]">{wave.title}</h3>
++              <p className="mt-2 text-xs text-[#4f5661]">{wave.purpose}</p>
++              <dl className="mt-2 space-y-1 text-xs">
++                {wave.maxAdd !== null ? (
++                  <div>
++                    <dt className="text-[#4f5661]">추가 상한</dt>
++                    <dd className="font-semibold">{wave.maxAdd}명</dd>
++                  </div>
++                ) : null}
++                {wave.cumulativeCap !== null ? (
++                  <div>
++                    <dt className="text-[#4f5661]">누적 상한</dt>
++                    <dd className="font-semibold">{wave.cumulativeCap}명</dd>
++                  </div>
++                ) : null}
++                <div>
++                  <dt className="text-[#4f5661]">최소 운영 기간</dt>
++                  <dd className="font-semibold">{wave.minOperationDays}일</dd>
++                </div>
++              </dl>
++            </div>
++          ))}
++        </div>
++      </section>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">확대 후보 (수동 선정)</h2>
++        <p className="mt-2 text-xs text-[#4f5661]">
++          PlannerVerification approved · allowlist 미포함 · 운영자 수동 승인 필요.
++          동의 체크 UI는 후속 PR.
++        </p>
++        <p className="mt-1 text-sm font-semibold text-[#102235]">
++          자격 후보 {report.eligibleCandidateCount}명 / 미리보기{" "}
++          {report.candidates.length}건
++        </p>
++        {report.candidates.length === 0 ? (
++          <p className="mt-3 text-sm text-[#4f5661]">데이터 없음</p>
++        ) : (
++          <table className="mt-3 w-full text-sm">
++            <thead>
++              <tr className="border-b border-[#e8e0d0] text-left text-xs text-[#4f5661]">
++                <th className="pb-2 font-semibold">표시명</th>
++                <th className="pb-2 font-semibold">userId</th>
++                <th className="pb-2 font-semibold">후보</th>
++                <th className="pb-2 font-semibold">제외 사유</th>
++              </tr>
++            </thead>
++            <tbody>
++              {report.candidates.map((row) => (
++                <tr key={row.verificationId} className="border-b border-[#f0ebe3]">
++                  <td className="py-2 pr-2">{row.displayName}</td>
++                  <td className="py-2 font-mono text-xs">{row.userIdPrefix}</td>
++                  <td className="py-2">
++                    <StatusBadge met={row.eligible} />
++                  </td>
++                  <td className="py-2 text-xs text-[#4f5661]">
++                    {row.excludeReason ?? "—"}
++                  </td>
++                </tr>
++              ))}
++            </tbody>
++          </table>
++        )}
++      </section>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">확대 후 모니터링</h2>
++        <ul className="mt-3 grid gap-1 text-sm sm:grid-cols-2">
++          {report.monitoring.map((item) => (
++            <li key={item.label} className="flex justify-between gap-2">
++              <span className="text-[#4f5661]">{item.label}</span>
++              <span className="font-semibold tabular-nums">{item.value}</span>
++            </li>
++          ))}
++        </ul>
++      </section>
++
++      <section className="grid gap-4 sm:grid-cols-2">
++        <div
++          className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++        >
++          <h2 className="text-sm font-bold text-[#8b2e2e]">Rollback 검토</h2>
++          <ul className="mt-2 list-disc pl-5 text-xs text-[#4f5661]">
++            {report.rollbackTriggers.map((t) => (
++              <li key={t}>{t}</li>
++            ))}
++          </ul>
++          <p className="mt-3 text-xs text-[#4f5661]">
++            gate OFF·allowlist 보류·축소는 운영자 수동. PR-104-A 분기.
++          </p>
++        </div>
++        <div
++          className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++        >
++          <h2 className="text-sm font-bold text-[#8b2e2e]">확대 중단 검토</h2>
++          <ul className="mt-2 list-disc pl-5 text-xs text-[#4f5661]">
++            {report.pauseTriggers.slice(0, 8).map((t) => (
++              <li key={t}>{t}</li>
++            ))}
++          </ul>
++        </div>
++      </section>
++
++      <section className="rounded-lg border border-[#d9c9a8] bg-[#f7f1e5] p-4 text-sm">
++        <h2 className="font-bold text-[#7b5b19]">금지 유지</h2>
++        <ul className="mt-2 list-disc pl-5 text-[#4f5661]">
++          {report.forbiddenReminders.map((item) => (
++            <li key={item}>{item}</li>
++          ))}
++        </ul>
++        <p className="mt-3 text-xs">{report.expansionScopeNote}</p>
++        <p className="mt-2 text-xs">
++          allowlist 자동 추가 · 전체 VERIFIED 공개 · feature gate ON · beta 즉시 확대
++          버튼 없음
++        </p>
++      </section>
++    </div>
++  );
++}
+diff --git a/components/admin/answer-assistant/BetaExpansionDecisionView.tsx b/components/admin/answer-assistant/BetaExpansionDecisionView.tsx
+index 979b318..2b09cc2 100644
+--- a/components/admin/answer-assistant/BetaExpansionDecisionView.tsx
++++ b/components/admin/answer-assistant/BetaExpansionDecisionView.tsx
+@@ -170,6 +170,16 @@ export default function BetaExpansionDecisionView({
+         <p className="mt-3 text-xs text-[#4f5661]">
+           후보: {report.decisionCandidates.join(" · ")}
+         </p>
++        {report.decision === "LIMITED_EXPANSION_CANDIDATE" ? (
++          <p className="mt-3">
++            <Link
++              href={`/admin/answer-assistant/expansion-plan${filterQs}`}
++              className="text-sm font-semibold text-[#aa8137] hover:underline"
++            >
++              PR-104-C Allowlist 확대 계획 →
++            </Link>
++          </p>
++        ) : null}
+       </section>
+ 
+       <section>
+diff --git a/docs/PR-104C-ANSWER-ASSISTANT-LIMITED-ALLOWLIST-EXPANSION-PLAN.md b/docs/PR-104C-ANSWER-ASSISTANT-LIMITED-ALLOWLIST-EXPANSION-PLAN.md
+new file mode 100644
+index 0000000..bf51d6e
+--- /dev/null
++++ b/docs/PR-104C-ANSWER-ASSISTANT-LIMITED-ALLOWLIST-EXPANSION-PLAN.md
+@@ -0,0 +1,96 @@
++# PR-104-C: Answer Assistant Limited Allowlist Expansion Plan
++
++**Branch:** `pr-104c-answer-assistant-limited-allowlist-expansion-plan`
++
++## Purpose
++
++PR-103 `LIMITED_EXPANSION_CANDIDATE`일 때만, allowlist beta를 **소폭** 확대하기 위한 **운영 계획·관리자 검토 구조**를 제공합니다.
++
++**이 PR은 확대 실행 PR이 아닙니다.** allowlist 자동 확대, env 자동 저장, feature gate 자동 ON, 전체 VERIFIED 공개는 구현하지 않습니다.
++
++## Route
++
++| Route | Access |
++| --- | --- |
++| `/admin/answer-assistant/expansion-plan` | ADMIN only (`getAdminAccess`) |
++| `/admin/answer-assistant/beta-decision` | PR-103 연동 |
++
++## PR-103 연동
++
++- `loadBetaExpansionDecisionReport` 재사용
++- 전제 조건·No-Go·모니터링 지표 동기화
++- PR-103 decision ≠ `LIMITED_EXPANSION_CANDIDATE` → expansion plan **보류**
++
++## Expansion plan decision types
++
++| Value | Meaning |
++| --- | --- |
++| `EXPANSION_BLOCKED` | 전제 미충족·확대 불가 |
++| `KEEP_CURRENT_ALLOWLIST` | 현 allowlist 유지 |
++| `READY_FOR_WAVE_1_PLAN` | Wave 1 소폭 추가 계획 검토 |
++| `READY_FOR_WAVE_2_PLAN` | Wave 2 / 재검토 단계 |
++| `EXPANSION_REQUIRES_IMPROVEMENT` | 개선 후 재검토 |
++| `PAUSE_AND_FIX_REQUIRED` | 중단·safety fix (PR-104-A) |
++
++## Waves
++
++| Wave | 규모 (기본) | 기간 |
++| --- | --- | --- |
++| 0 | 현 allowlist 유지 | — |
++| 1 | min(3명, 현 인원 20%) | 7~14일 |
++| 2 | +5명, 누적 10명 이하 | 14일+ |
++| 3 | 장기 재검토 (전체 공개 아님) | 30일+ |
++
++## Candidate criteria
++
++**포함 후보 (DB 미리보기):**
++
++- `PlannerVerification.status = approved`, `deletedAt = null`
++- `User.role = verified_planner`, `User.status = active`
++- allowlist 미포함
++- abuse 신호 없음 (prompt injection / rate limit / 차단 반복)
++
++**제외:** suspended/rejected/expired, abuse 반복, 운영자 미승인
++
++동의 체크 UI는 후속 PR — 기준만 문서화.
++
++## Rollback (manual)
++
++- feature gate OFF 권고
++- 신규 allowlist 추가 보류
++- PR-104-A beta pause / safety fix
++
++자동 rollback 없음.
++
++## Config (optional env)
++
++| Env | Default |
++| --- | --- |
++| `ANSWER_ASSISTANT_EXPANSION_WAVE1_MAX_ADD` | 3 |
++| `ANSWER_ASSISTANT_EXPANSION_WAVE2_CUMULATIVE_CAP` | 10 |
++| `ANSWER_ASSISTANT_EXPANSION_CANDIDATE_PREVIEW_LIMIT` | 25 |
++
++## Modules
++
++| Path | Role |
++| --- | --- |
++| `lib/answer-assistant/allowlist-expansion-plan-config.ts` | Wave thresholds |
++| `lib/answer-assistant/allowlist-expansion-plan.ts` | Plan load + evaluate |
++| `app/admin/answer-assistant/expansion-plan/` | ADMIN UI |
++
++## Next PR candidates
++
++- **PR-104-C-EXECUTE** (or ops runbook): env allowlist 수동 반영 + sign-off
++- **PR-104-A**: pause / safety fix
++- **PR-103-QA**: decision + plan QA
++
++## Validation
++
++```bash
++npm run typecheck
++npm run lint
++npm run build
++npm test
++```
++
++No schema migration.
+diff --git a/lib/answer-assistant/allowlist-expansion-plan-config.ts b/lib/answer-assistant/allowlist-expansion-plan-config.ts
+new file mode 100644
+index 0000000..69e462b
+--- /dev/null
++++ b/lib/answer-assistant/allowlist-expansion-plan-config.ts
+@@ -0,0 +1,125 @@
++// Limited allowlist expansion plan thresholds (PR-104-C). Plan only — no auto apply.
++
++function parsePositiveInt(
++  value: string | undefined,
++  fallback: number,
++  min: number,
++  max: number,
++): number {
++  if (!value?.trim()) return fallback;
++  const parsed = Number.parseInt(value.trim(), 10);
++  if (!Number.isFinite(parsed)) return fallback;
++  return Math.min(max, Math.max(min, parsed));
++}
++
++export const ALLOWLIST_EXPANSION_PLAN_DEFAULTS = {
++  wave1MaxAdd: 3,
++  wave1PctCap: 20,
++  wave2MaxAdd: 5,
++  wave2CumulativeCap: 10,
++  wave1MinDays: 7,
++  wave2MinDays: 14,
++  wave3MinDays: 30,
++  promptInjectionRepeatMin: 3,
++  rateLimitRepeatMin: 5,
++  highBlockRepeatMin: 10,
++  candidatePreviewLimit: 25,
++} as const;
++
++export type AllowlistExpansionPlanConfig = {
++  wave1MaxAdd: number;
++  wave1PctCap: number;
++  wave2MaxAdd: number;
++  wave2CumulativeCap: number;
++  wave1MinDays: number;
++  wave2MinDays: number;
++  wave3MinDays: number;
++  promptInjectionRepeatMin: number;
++  rateLimitRepeatMin: number;
++  highBlockRepeatMin: number;
++  candidatePreviewLimit: number;
++};
++
++export function getAllowlistExpansionPlanConfig(): AllowlistExpansionPlanConfig {
++  return {
++    wave1MaxAdd: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE1_MAX_ADD,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave1MaxAdd,
++      1,
++      10,
++    ),
++    wave1PctCap: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE1_PCT_CAP,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave1PctCap,
++      5,
++      50,
++    ),
++    wave2MaxAdd: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE2_MAX_ADD,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave2MaxAdd,
++      1,
++      20,
++    ),
++    wave2CumulativeCap: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE2_CUMULATIVE_CAP,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave2CumulativeCap,
++      3,
++      50,
++    ),
++    wave1MinDays: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE1_MIN_DAYS,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave1MinDays,
++      3,
++      60,
++    ),
++    wave2MinDays: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE2_MIN_DAYS,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave2MinDays,
++      7,
++      90,
++    ),
++    wave3MinDays: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_WAVE3_MIN_DAYS,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.wave3MinDays,
++      14,
++      180,
++    ),
++    promptInjectionRepeatMin: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_PROMPT_INJECTION_REPEAT_MIN,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.promptInjectionRepeatMin,
++      2,
++      20,
++    ),
++    rateLimitRepeatMin: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_RATE_LIMIT_REPEAT_MIN,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.rateLimitRepeatMin,
++      3,
++      50,
++    ),
++    highBlockRepeatMin: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_HIGH_BLOCK_REPEAT_MIN,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.highBlockRepeatMin,
++      5,
++      50,
++    ),
++    candidatePreviewLimit: parsePositiveInt(
++      process.env.ANSWER_ASSISTANT_EXPANSION_CANDIDATE_PREVIEW_LIMIT,
++      ALLOWLIST_EXPANSION_PLAN_DEFAULTS.candidatePreviewLimit,
++      5,
++      100,
++    ),
++  };
++}
++
++export function computeWave1AddSlots(
++  currentAllowlistCount: number,
++  config: AllowlistExpansionPlanConfig,
++): number {
++  const pctSlots = Math.floor(
++    (currentAllowlistCount * config.wave1PctCap) / 100,
++  );
++  if (currentAllowlistCount === 0) {
++    return Math.min(config.wave1MaxAdd, 3);
++  }
++  return Math.min(config.wave1MaxAdd, pctSlots > 0 ? pctSlots : config.wave1MaxAdd);
++}
+diff --git a/lib/answer-assistant/allowlist-expansion-plan.ts b/lib/answer-assistant/allowlist-expansion-plan.ts
+new file mode 100644
+index 0000000..3980566
+--- /dev/null
++++ b/lib/answer-assistant/allowlist-expansion-plan.ts
+@@ -0,0 +1,558 @@
++// Limited allowlist expansion plan (PR-104-C). Plan/report only — no allowlist auto apply.
++
++import type { Prisma } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import {
++  getAnswerAssistantVerifiedAllowlistUserIds,
++  getVerifiedAnswerAssistantAllowlistCount,
++} from "./allowlist";
++import {
++  assertAnswerAssistantAuditSchemaSafe,
++  buildBetaExpansionAuditWhere,
++  loadBetaExpansionDecisionReport,
++  resolveBetaExpansionDecisionPeriod,
++  type BetaExpansionDecisionReport,
++  type BetaExpansionDecisionSearchParams,
++} from "./beta-expansion-decision";
++import {
++  computeWave1AddSlots,
++  getAllowlistExpansionPlanConfig,
++  type AllowlistExpansionPlanConfig,
++} from "./allowlist-expansion-plan-config";
++
++export { computeWave1AddSlots } from "./allowlist-expansion-plan-config";
++import { truncateUsageAuditUserId } from "./usage-audit-dashboard";
++
++export type AnswerAssistantExpansionPlanDecision =
++  | "EXPANSION_BLOCKED"
++  | "KEEP_CURRENT_ALLOWLIST"
++  | "READY_FOR_WAVE_1_PLAN"
++  | "READY_FOR_WAVE_2_PLAN"
++  | "EXPANSION_REQUIRES_IMPROVEMENT"
++  | "PAUSE_AND_FIX_REQUIRED";
++
++export type ExpansionPreconditionRow = {
++  key: string;
++  label: string;
++  met: boolean;
++  detail: string;
++};
++
++export type ExpansionWavePlanRow = {
++  wave: 0 | 1 | 2 | 3;
++  title: string;
++  purpose: string;
++  maxAdd: number | null;
++  cumulativeCap: number | null;
++  minOperationDays: number;
++  status: "current" | "planned" | "blocked" | "review";
++};
++
++export type ExpansionCandidateRow = {
++  verificationId: string;
++  userIdPrefix: string;
++  displayName: string;
++  eligible: boolean;
++  excludeReason: string | null;
++};
++
++export type ExpansionMonitoringChecklist = {
++  label: string;
++  value: number | string;
++  source: "usage" | "feedback" | "retention";
++}[];
++
++export type AllowlistExpansionPlanReport = {
++  period: { start: string; end: string };
++  pr103Decision: BetaExpansionDecisionReport["decision"];
++  pr103NextPr: string;
++  currentAllowlistCount: number;
++  preconditions: ExpansionPreconditionRow[];
++  preconditionsMet: boolean;
++  waves: ExpansionWavePlanRow[];
++  activeWave: 0 | 1 | 2 | 3;
++  wave1SuggestedAdds: number;
++  eligibleCandidateCount: number;
++  candidates: ExpansionCandidateRow[];
++  monitoring: ExpansionMonitoringChecklist;
++  rollbackTriggers: string[];
++  pauseTriggers: string[];
++  decision: AnswerAssistantExpansionPlanDecision;
++  decisionRationale: string[];
++  expansionScopeNote: string;
++  forbiddenReminders: string[];
++  nextPrCandidates: string[];
++  config: AllowlistExpansionPlanConfig;
++};
++
++export function buildExpansionPreconditions(
++  decisionReport: BetaExpansionDecisionReport,
++): ExpansionPreconditionRow[] {
++  const { feedback, usage, retention, operational, decision } = decisionReport;
++
++  return [
++    {
++      key: "pr103_limited_candidate",
++      label: "PR-103 decision = LIMITED_EXPANSION_CANDIDATE",
++      met: decision === "LIMITED_EXPANSION_CANDIDATE",
++      detail: `현재: ${decision}`,
++    },
++    {
++      key: "critical_stop",
++      label: "CRITICAL_STOP 0건",
++      met: feedback.criticalFeedback === 0,
++      detail: `${feedback.criticalFeedback}건`,
++    },
++    {
++      key: "field_exposure",
++      label: "FIELD_EXPOSURE_RISK 0건",
++      met: feedback.fieldExposureRisk === 0,
++      detail: `${feedback.fieldExposureRisk}건`,
++    },
++    {
++      key: "output_safety_miss",
++      label: "OUTPUT_SAFETY_MISS 0건",
++      met: feedback.outputSafetyMiss === 0,
++      detail: `${feedback.outputSafetyMiss}건`,
++    },
++    {
++      key: "claim_judgment",
++      label: "CLAIM_JUDGMENT_RISK 0건",
++      met: feedback.claimJudgmentRisk === 0,
++      detail: `${feedback.claimJudgmentRisk}건`,
++    },
++    {
++      key: "medical_interpretation",
++      label: "MEDICAL_INTERPRETATION_RISK 0건",
++      met: feedback.medicalInterpretationRisk === 0,
++      detail: `${feedback.medicalInterpretationRisk}건`,
++    },
++    {
++      key: "loss_adjustment",
++      label: "LOSS_ADJUSTMENT_RISK 0건",
++      met: feedback.lossAdjustmentRisk === 0,
++      detail: `${feedback.lossAdjustmentRisk}건`,
++    },
++    {
++      key: "product_solicitation",
++      label: "PRODUCT_SOLICITATION_RISK 0건",
++      met: feedback.productSolicitationRisk === 0,
++      detail: `${feedback.productSolicitationRisk}건`,
++    },
++    {
++      key: "schema_safe",
++      label: "raw prompt/output 저장 흔적 없음 (schema)",
++      met: assertAnswerAssistantAuditSchemaSafe(),
++      detail: assertAnswerAssistantAuditSchemaSafe() ? "통과" : "점검 필요",
++    },
++    {
++      key: "permission_denied",
++      label: "GENERAL_USER 접근 시도 없음",
++      met: usage.permissionDenied === 0,
++      detail: `${usage.permissionDenied}건`,
++    },
++    {
++      key: "rate_limit",
++      label: "durable rate limit 정상",
++      met: operational.rateLimitHealthy,
++      detail: operational.rateLimitHealthy ? "정상" : "점검 필요",
++    },
++    {
++      key: "usage_audit",
++      label: "usage audit 정상",
++      met: operational.usageAuditHealthy,
++      detail: operational.usageAuditHealthy ? "정상" : "점검 필요",
++    },
++    {
++      key: "retention",
++      label: "retention cleanup 정상",
++      met: !retention.cleanupOverdue,
++      detail: retention.cleanupOverdue ? "지연" : "정상",
++    },
++    {
++      key: "feedback_backlog",
++      label: "feedback review backlog 낮음",
++      met: !decisionReport.improvementTriggers.includes("FEEDBACK_REVIEW_BACKLOG"),
++      detail: `${feedback.reviewBacklog}건`,
++    },
++    {
++      key: "rollback_documented",
++      label: "rollback 절차 확인됨 (운영자 수동)",
++      met: true,
++      detail: "문서·화면 기준 제공",
++    },
++    {
++      key: "no_auto_send",
++      label: "자동 발송·자동 게시 없음",
++      met: true,
++      detail: "제품 범위 유지",
++    },
++  ];
++}
++
++export function resolveActiveExpansionWave(
++  currentCount: number,
++  preconditionsMet: boolean,
++  config: AllowlistExpansionPlanConfig,
++): 0 | 1 | 2 | 3 {
++  if (!preconditionsMet) return 0;
++  if (currentCount >= config.wave2CumulativeCap) return 3;
++  if (currentCount <= config.wave1MaxAdd) return 1;
++  return 2;
++}
++
++export function buildExpansionWavePlan(
++  currentCount: number,
++  preconditionsMet: boolean,
++  activeWave: 0 | 1 | 2 | 3,
++  config: AllowlistExpansionPlanConfig,
++): ExpansionWavePlanRow[] {
++  const wave1Adds = computeWave1AddSlots(currentCount, config);
++  const wave1Cap = Math.min(
++    currentCount + wave1Adds,
++    config.wave2CumulativeCap,
++  );
++
++  return [
++    {
++      wave: 0,
++      title: "Wave 0 — 현재 allowlist 유지",
++      purpose: "PR-103 decision 검토 · PR-104-C 계획 수립",
++      maxAdd: 0,
++      cumulativeCap: currentCount,
++      minOperationDays: 0,
++      status: activeWave === 0 ? "current" : preconditionsMet ? "planned" : "blocked",
++    },
++    {
++      wave: 1,
++      title: "Wave 1 — 극소수 추가",
++      purpose: `최대 ${wave1Adds}명 또는 현 인원의 ${config.wave1PctCap}% 이하 중 작은 값`,
++      maxAdd: wave1Adds,
++      cumulativeCap: wave1Cap,
++      minOperationDays: config.wave1MinDays,
++      status:
++        activeWave === 1
++          ? "current"
++          : preconditionsMet && currentCount < config.wave2CumulativeCap
++            ? "planned"
++            : "blocked",
++    },
++    {
++      wave: 2,
++      title: "Wave 2 — 제한적 추가",
++      purpose: `추가 최대 ${config.wave2MaxAdd}명 · 누적 ${config.wave2CumulativeCap}명 이하`,
++      maxAdd: config.wave2MaxAdd,
++      cumulativeCap: config.wave2CumulativeCap,
++      minOperationDays: config.wave2MinDays,
++      status: activeWave === 2 ? "current" : preconditionsMet ? "planned" : "blocked",
++    },
++    {
++      wave: 3,
++      title: "Wave 3 — 확대 재검토",
++      purpose: "전체 VERIFIED 공개 아님 — 장기 별도 검토",
++      maxAdd: null,
++      cumulativeCap: null,
++      minOperationDays: config.wave3MinDays,
++      status: activeWave === 3 ? "review" : "blocked",
++    },
++  ];
++}
++
++export type ExpansionPlanEvaluationInput = {
++  pr103Decision: BetaExpansionDecisionReport["decision"];
++  preconditionsMet: boolean;
++  noGoTriggers: string[];
++  improvementTriggers: string[];
++  currentAllowlistCount: number;
++  wave2CumulativeCap: number;
++  wave1SuggestedAdds: number;
++};
++
++export function evaluateAllowlistExpansionPlan(
++  input: ExpansionPlanEvaluationInput,
++): Pick<
++  AllowlistExpansionPlanReport,
++  "decision" | "decisionRationale" | "nextPrCandidates"
++> {
++  const {
++    pr103Decision,
++    preconditionsMet,
++    noGoTriggers,
++    improvementTriggers,
++    currentAllowlistCount,
++    wave2CumulativeCap,
++    wave1SuggestedAdds,
++  } = input;
++
++  const rationale: string[] = [];
++  const nextPrCandidates: string[] = [];
++
++  if (
++    pr103Decision === "PAUSE_BETA" ||
++    noGoTriggers.some((t) =>
++      [
++        "CRITICAL_STOP",
++        "FIELD_EXPOSURE_RISK",
++        "OUTPUT_SAFETY_MISS",
++        "CLAIM_JUDGMENT_RISK",
++        "MEDICAL_INTERPRETATION_RISK",
++        "LOSS_ADJUSTMENT_RISK",
++      ].includes(t),
++    )
++  ) {
++    rationale.push("치명적 No-Go 신호 — 확대 계획 보류, safety fix 우선.");
++    nextPrCandidates.push("PR-104-A", "PR-103-QA");
++    return {
++      decision: "PAUSE_AND_FIX_REQUIRED",
++      decisionRationale: rationale,
++      nextPrCandidates,
++    };
++  }
++
++  if (!preconditionsMet || pr103Decision !== "LIMITED_EXPANSION_CANDIDATE") {
++    if (improvementTriggers.length > 0) {
++      rationale.push("PR-103 개선 항목 또는 전제 조건 미충족 — 계획만 검토.");
++      nextPrCandidates.push("PR-104-B", "PR-104-D", "PR-103");
++      return {
++        decision: "EXPANSION_REQUIRES_IMPROVEMENT",
++        decisionRationale: rationale,
++        nextPrCandidates,
++      };
++    }
++    rationale.push("제한 확대 전제 미충족 — 현 allowlist 유지 또는 차단.");
++    nextPrCandidates.push("PR-104-D", "PR-103");
++    return {
++      decision:
++        pr103Decision === "CONTINUE_CURRENT_BETA"
++          ? "KEEP_CURRENT_ALLOWLIST"
++          : "EXPANSION_BLOCKED",
++      decisionRationale: rationale,
++      nextPrCandidates,
++    };
++  }
++
++  if (currentAllowlistCount >= wave2CumulativeCap) {
++    rationale.push(
++      "누적 allowlist가 Wave 2 상한에 도달 — Wave 3 재검토만 해당.",
++    );
++    nextPrCandidates.push("PR-103", "PR-104-D");
++    return {
++      decision: "READY_FOR_WAVE_2_PLAN",
++      decisionRationale: rationale,
++      nextPrCandidates,
++    };
++  }
++
++  if (wave1SuggestedAdds > 0) {
++    rationale.push(
++      `Wave 1 계획: 수동으로 최대 ${wave1SuggestedAdds}명 추가 검토 (env 반영은 별도 PR).`,
++    );
++    nextPrCandidates.push("PR-104-C-EXECUTE", "PR-103-QA");
++    return {
++      decision: "READY_FOR_WAVE_1_PLAN",
++      decisionRationale: rationale,
++      nextPrCandidates,
++    };
++  }
++
++  rationale.push("확대 슬롯 0 — 현 allowlist 유지.");
++  nextPrCandidates.push("PR-104-D");
++  return {
++    decision: "KEEP_CURRENT_ALLOWLIST",
++    decisionRationale: rationale,
++    nextPrCandidates,
++  };
++}
++
++export const EXPANSION_ROLLBACK_TRIGGERS = [
++  "CRITICAL_STOP 발생",
++  "FIELD_EXPOSURE_RISK 발생",
++  "OUTPUT_SAFETY_MISS 발생",
++  "CLAIM_JUDGMENT_RISK 발생",
++  "MEDICAL_INTERPRETATION_RISK 발생",
++  "LOSS_ADJUSTMENT_RISK 발생",
++  "raw prompt/output 저장 흔적",
++  "rate limit / usage audit 미작동",
++  "자동 발송 연결 발견",
++] as const;
++
++export const EXPANSION_PAUSE_TRIGGERS = [
++  ...EXPANSION_ROLLBACK_TRIGGERS,
++  "provider secret 노출 위험",
++  "GENERAL_USER / SUSPENDED 접근 가능성",
++] as const;
++
++async function loadAbuseExcludedUserIds(
++  auditWhere: Prisma.AnswerAssistantUsageAuditWhereInput,
++  config: AllowlistExpansionPlanConfig,
++): Promise<Set<string>> {
++  const excluded = new Set<string>();
++
++  const [injectionGroups, rateLimitGroups, blockedGroups] = await Promise.all([
++    prisma.answerAssistantUsageAudit.groupBy({
++      by: ["userId"],
++      where: { ...auditWhere, blockedReason: "PROMPT_INJECTION" },
++      _count: { _all: true },
++    }),
++    prisma.answerAssistantUsageAudit.groupBy({
++      by: ["userId"],
++      where: { ...auditWhere, rateLimitBlocked: true },
++      _count: { _all: true },
++    }),
++    prisma.answerAssistantUsageAudit.groupBy({
++      by: ["userId"],
++      where: { ...auditWhere, outcome: "blocked" },
++      _count: { _all: true },
++    }),
++  ]);
++
++  for (const row of injectionGroups) {
++    if (row._count._all >= config.promptInjectionRepeatMin) {
++      excluded.add(row.userId);
++    }
++  }
++  for (const row of rateLimitGroups) {
++    if (row._count._all >= config.rateLimitRepeatMin) {
++      excluded.add(row.userId);
++    }
++  }
++  for (const row of blockedGroups) {
++    if (row._count._all >= config.highBlockRepeatMin) {
++      excluded.add(row.userId);
++    }
++  }
++
++  return excluded;
++}
++
++export async function loadAllowlistExpansionPlanReport(
++  params: BetaExpansionDecisionSearchParams = {},
++): Promise<AllowlistExpansionPlanReport> {
++  const config = getAllowlistExpansionPlanConfig();
++  const decisionReport = await loadBetaExpansionDecisionReport(params);
++  const period = resolveBetaExpansionDecisionPeriod(params);
++  const auditWhere = buildBetaExpansionAuditWhere(period);
++  const allowlistIds = getAnswerAssistantVerifiedAllowlistUserIds();
++  const currentAllowlistCount = getVerifiedAnswerAssistantAllowlistCount();
++
++  const preconditions = buildExpansionPreconditions(decisionReport);
++  const preconditionsMet = preconditions.every((row) => row.met);
++
++  const wave1SuggestedAdds = computeWave1AddSlots(
++    currentAllowlistCount,
++    config,
++  );
++  const activeWave = resolveActiveExpansionWave(
++    currentAllowlistCount,
++    preconditionsMet,
++    config,
++  );
++  const waves = buildExpansionWavePlan(
++    currentAllowlistCount,
++    preconditionsMet,
++    activeWave,
++    config,
++  );
++
++  const abuseExcluded = await loadAbuseExcludedUserIds(auditWhere, config);
++
++  const approvedVerifications = await prisma.plannerVerification.findMany({
++    where: {
++      status: "approved",
++      deletedAt: null,
++      userId: { notIn: [...allowlistIds] },
++      user: {
++        status: "active",
++        role: "verified_planner",
++      },
++    },
++    orderBy: { reviewedAt: "desc" },
++    take: config.candidatePreviewLimit,
++    select: {
++      id: true,
++      userId: true,
++      displayName: true,
++      status: true,
++    },
++  });
++
++  const candidates: ExpansionCandidateRow[] = approvedVerifications.map(
++    (row) => {
++      let excludeReason: string | null = null;
++      if (abuseExcluded.has(row.userId)) {
++        excludeReason = "prompt injection / rate limit / 차단 반복";
++      }
++      return {
++        verificationId: row.id,
++        userIdPrefix: truncateUsageAuditUserId(row.userId),
++        displayName: row.displayName,
++        eligible: excludeReason === null,
++        excludeReason,
++      };
++    },
++  );
++
++  const eligibleCandidateCount = candidates.filter((c) => c.eligible).length;
++
++  const evaluated = evaluateAllowlistExpansionPlan({
++    pr103Decision: decisionReport.decision,
++    preconditionsMet,
++    noGoTriggers: decisionReport.noGoTriggers,
++    improvementTriggers: decisionReport.improvementTriggers,
++    currentAllowlistCount,
++    wave2CumulativeCap: config.wave2CumulativeCap,
++    wave1SuggestedAdds,
++  });
++
++  const monitoring: ExpansionMonitoringChecklist = [
++    { label: "total requests", value: decisionReport.usage.totalBetaRequests, source: "usage" },
++    { label: "blocked", value: decisionReport.usage.blocked, source: "usage" },
++    { label: "rate limited", value: decisionReport.usage.rateLimited, source: "usage" },
++    { label: "prompt injection", value: decisionReport.usage.promptInjectionBlocked, source: "usage" },
++    { label: "output safety blocked", value: decisionReport.usage.outputSafetyBlocked, source: "usage" },
++    { label: "provider error", value: decisionReport.usage.providerError, source: "usage" },
++    { label: "insufficient evidence", value: decisionReport.usage.insufficientEvidence, source: "usage" },
++    { label: "not allowlisted", value: decisionReport.usage.notAllowlisted, source: "usage" },
++    { label: "permission denied", value: decisionReport.usage.permissionDenied, source: "usage" },
++    { label: "feedback total", value: decisionReport.feedback.totalFeedback, source: "feedback" },
++    { label: "CRITICAL_STOP", value: decisionReport.feedback.criticalFeedback, source: "feedback" },
++    { label: "FIELD_EXPOSURE_RISK", value: decisionReport.feedback.fieldExposureRisk, source: "feedback" },
++    { label: "OUTPUT_SAFETY_MISS", value: decisionReport.feedback.outputSafetyMiss, source: "feedback" },
++    { label: "CLAIM_JUDGMENT_RISK", value: decisionReport.feedback.claimJudgmentRisk, source: "feedback" },
++    { label: "EVIDENCE_MISSING", value: decisionReport.feedback.evidenceMissing, source: "feedback" },
++    { label: "UI_CONFUSING", value: decisionReport.feedback.uiConfusing, source: "feedback" },
++    {
++      label: "cleanup overdue",
++      value: decisionReport.retention.cleanupOverdue ? "예" : "아니오",
++      source: "retention",
++    },
++  ];
++
++  return {
++    period: decisionReport.period,
++    pr103Decision: decisionReport.decision,
++    pr103NextPr: decisionReport.nextPr,
++    currentAllowlistCount,
++    preconditions,
++    preconditionsMet,
++    waves,
++    activeWave: activeWave as 0 | 1 | 2 | 3,
++    wave1SuggestedAdds,
++    eligibleCandidateCount,
++    candidates,
++    monitoring,
++    rollbackTriggers: [...EXPANSION_ROLLBACK_TRIGGERS],
++    pauseTriggers: [...EXPANSION_PAUSE_TRIGGERS],
++    config,
++    expansionScopeNote:
++      "allowlist 변경은 ANSWER_ASSISTANT_VERIFIED_ALLOWLIST env 수동 반영만 해당합니다. 자동 저장·gate ON·전체 VERIFIED 공개 없음.",
++    forbiddenReminders: [
++      "allowlist 자동 확대 금지",
++      "allowlist 자동 env 저장 금지",
++      "feature gate 자동 ON 금지",
++      "전체 VERIFIED_PLANNER / GENERAL_USER / public chatbot 금지",
++      "고객·커뮤니티 자동 발송·게시 금지",
++    ],
++    ...evaluated,
++  };
++}
+diff --git a/tests/answer-assistant/allowlist-expansion-plan.test.ts b/tests/answer-assistant/allowlist-expansion-plan.test.ts
+new file mode 100644
+index 0000000..a309a2e
+--- /dev/null
++++ b/tests/answer-assistant/allowlist-expansion-plan.test.ts
+@@ -0,0 +1,237 @@
++import assert from "node:assert/strict";
++import { readFileSync } from "node:fs";
++import { join } from "node:path";
++import { describe, it } from "node:test";
++
++import {
++  buildExpansionPreconditions,
++  evaluateAllowlistExpansionPlan,
++  computeWave1AddSlots,
++} from "@/lib/answer-assistant/allowlist-expansion-plan";
++import { getAllowlistExpansionPlanConfig } from "@/lib/answer-assistant/allowlist-expansion-plan-config";
++import type { BetaExpansionDecisionReport } from "@/lib/answer-assistant/beta-expansion-decision";
++
++const ROOT = process.cwd();
++
++function minimalDecisionReport(
++  overrides: Partial<BetaExpansionDecisionReport> = {},
++): BetaExpansionDecisionReport {
++  return {
++    period: { start: "2026-01-01T00:00:00.000Z", end: "2026-02-01T00:00:00.000Z" },
++    usage: {
++      totalBetaRequests: 50,
++      success: 30,
++      blocked: 20,
++      rateLimited: 2,
++      promptInjectionBlocked: 0,
++      outputSafetyBlocked: 0,
++      providerError: 1,
++      insufficientEvidence: 2,
++      permissionDenied: 0,
++      notAllowlisted: 1,
++      providerNotConfigured: 0,
++    },
++    feedback: {
++      totalFeedback: 3,
++      criticalFeedback: 0,
++      needsFix: 1,
++      unsafeOutput: 0,
++      fieldExposureRisk: 0,
++      outputSafetyMiss: 0,
++      claimJudgmentRisk: 0,
++      medicalInterpretationRisk: 0,
++      lossAdjustmentRisk: 0,
++      productSolicitationRisk: 0,
++      evidenceMissing: 0,
++      wrongSource: 0,
++      uiConfusing: 0,
++      tooRestrictive: 0,
++      blockedIncorrectly: 0,
++      reviewBacklog: 2,
++    },
++    retention: {
++      lastCleanupDate: null,
++      cleanupOverdue: false,
++      oldAuditCandidateCount: 0,
++      oldFeedbackCandidateCount: 0,
++      criticalFeedbackProtectedCount: 0,
++      linkedUsageAuditProtectedCount: 0,
++    },
++    operational: {
++      rateLimitHealthy: true,
++      usageAuditHealthy: true,
++      retentionHealthy: true,
++      cleanupOverdue: false,
++      betaOperational: true,
++      allowlistBetaStatus: "operational",
++      providerErrorElevated: false,
++      permissionDeniedElevated: false,
++      notAllowlistedElevated: false,
++    },
++    safetyNoGoRows: [],
++    noGoTriggers: [],
++    improvementTriggers: [],
++    maintainConditionsMet: [],
++    maintainConditionsMissing: [],
++    expansionConditionsMet: ["min_operation_days", "min_beta_requests"],
++    expansionConditionsMissing: [],
++    decision: "LIMITED_EXPANSION_CANDIDATE",
++    decisionCandidates: ["LIMITED_EXPANSION_CANDIDATE"],
++    rationale: ["stable"],
++    noGoReasons: [],
++    improvementItems: [],
++    expansionScopeNote: "allowlist only",
++    forbiddenReminders: [],
++    nextPr: "PR-104-C",
++    nextPrSummary: "plan",
++    config: {
++      minOperationDays: 14,
++      minBetaRequests: 20,
++      cleanupOverdueDays: 90,
++      feedbackBacklogMax: 15,
++      improvementEvidenceMissingMin: 3,
++      improvementProviderErrorMin: 5,
++      improvementInsufficientEvidencePct: 25,
++      improvementNotAllowlistedMin: 10,
++      improvementRateLimitedMin: 15,
++      providerErrorRateMaxPct: 15,
++    },
++    ...overrides,
++  };
++}
++
++describe("Answer Assistant allowlist expansion plan (PR-104-C)", () => {
++  it("admin expansion-plan route is admin-only and noindex", () => {
++    const page = readFileSync(
++      join(ROOT, "app/admin/answer-assistant/expansion-plan/page.tsx"),
++      "utf8",
++    );
++    assert.match(page, /getAdminAccess/);
++    assert.match(page, /index:\s*false/);
++    assert.doesNotMatch(page, /verified_planner/);
++  });
++
++  it("does not expose auto allowlist apply controls", () => {
++    const view = readFileSync(
++      join(
++        ROOT,
++        "components/admin/answer-assistant/AllowlistExpansionPlanView.tsx",
++      ),
++      "utf8",
++    );
++    assert.doesNotMatch(view, /<button[^>]*>[^<]*allowlist/i);
++    assert.doesNotMatch(view, /<button[^>]*>[^<]*확대/i);
++    assert.match(view, /확대 실행 PR이 아닙니다/);
++    assert.match(view, /allowlist 자동/);
++  });
++
++  it("plan module avoids forbidden payload field names", () => {
++    const source = readFileSync(
++      join(ROOT, "lib/answer-assistant/allowlist-expansion-plan.ts"),
++      "utf8",
++    );
++    for (const field of [
++      "rawPrompt",
++      "rawOutput",
++      "generatedAnswer",
++      "customerName",
++      "contractNumber",
++    ]) {
++      assert.equal(source.includes(`${field}:`), false);
++    }
++  });
++
++  it("critical signal yields PAUSE_AND_FIX_REQUIRED", () => {
++    const report = minimalDecisionReport({
++      feedback: {
++        ...minimalDecisionReport().feedback,
++        criticalFeedback: 1,
++      },
++      noGoTriggers: ["CRITICAL_STOP"],
++      decision: "PAUSE_BETA",
++    });
++    const pre = buildExpansionPreconditions(report);
++    const result = evaluateAllowlistExpansionPlan({
++      pr103Decision: report.decision,
++      preconditionsMet: pre.every((r) => r.met),
++      noGoTriggers: report.noGoTriggers,
++      improvementTriggers: [],
++      currentAllowlistCount: 2,
++      wave2CumulativeCap: 10,
++      wave1SuggestedAdds: 3,
++    });
++    assert.equal(result.decision, "PAUSE_AND_FIX_REQUIRED");
++    assert.notEqual(result.decision, "READY_FOR_WAVE_1_PLAN");
++  });
++
++  it("non LIMITED decision blocks wave 1 ready", () => {
++    const report = minimalDecisionReport({
++      decision: "EXPANSION_NOT_READY",
++    });
++    const pre = buildExpansionPreconditions(report);
++    const result = evaluateAllowlistExpansionPlan({
++      pr103Decision: report.decision,
++      preconditionsMet: pre.every((r) => r.met),
++      noGoTriggers: [],
++      improvementTriggers: ["EVIDENCE_MISSING"],
++      currentAllowlistCount: 2,
++      wave2CumulativeCap: 10,
++      wave1SuggestedAdds: 3,
++    });
++    assert.ok(
++      result.decision === "EXPANSION_BLOCKED" ||
++        result.decision === "EXPANSION_REQUIRES_IMPROVEMENT" ||
++        result.decision === "KEEP_CURRENT_ALLOWLIST",
++    );
++    assert.notEqual(result.decision, "READY_FOR_WAVE_1_PLAN");
++  });
++
++  it("LIMITED_EXPANSION_CANDIDATE with preconditions can be READY_FOR_WAVE_1", () => {
++    const report = minimalDecisionReport();
++    const pre = buildExpansionPreconditions(report);
++    assert.ok(pre.every((r) => r.met));
++    const result = evaluateAllowlistExpansionPlan({
++      pr103Decision: "LIMITED_EXPANSION_CANDIDATE",
++      preconditionsMet: true,
++      noGoTriggers: [],
++      improvementTriggers: [],
++      currentAllowlistCount: 2,
++      wave2CumulativeCap: 10,
++      wave1SuggestedAdds: 3,
++    });
++    assert.equal(result.decision, "READY_FOR_WAVE_1_PLAN");
++  });
++
++  it("wave1 slots respect max and percent cap", () => {
++    const config = getAllowlistExpansionPlanConfig();
++    assert.equal(computeWave1AddSlots(0, config), Math.min(config.wave1MaxAdd, 3));
++    assert.ok(computeWave1AddSlots(10, config) <= config.wave1MaxAdd);
++  });
++
++  it("documents PR-104-C", () => {
++    const doc = readFileSync(
++      join(
++        ROOT,
++        "docs/PR-104C-ANSWER-ASSISTANT-LIMITED-ALLOWLIST-EXPANSION-PLAN.md",
++      ),
++      "utf8",
++    );
++    assert.match(doc, /PR-104-C/);
++    assert.match(doc, /확대 실행 PR이 아닙니다/);
++    assert.match(doc, /Wave 1/);
++    assert.match(doc, /자동 확대/);
++  });
++
++  it("links from beta-decision and admin hub", () => {
++    const decisionPage = readFileSync(
++      join(ROOT, "app/admin/answer-assistant/beta-decision/page.tsx"),
++      "utf8",
++    );
++    const adminPage = readFileSync(
++      join(ROOT, "app/admin/answer-assistant/page.tsx"),
++      "utf8",
++    );
++    assert.match(decisionPage, /expansion-plan/);
++    assert.match(adminPage, /expansion-plan/);
++  });
++});
