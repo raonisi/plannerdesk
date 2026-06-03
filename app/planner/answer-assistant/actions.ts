@@ -51,8 +51,8 @@ async function logVerifiedUsage(
     rateLimitBlocked?: boolean;
     isAdminTester?: boolean;
   },
-): Promise<void> {
-  await logAnswerAssistantUsage({
+): Promise<string | undefined> {
+  return logAnswerAssistantUsage({
     timestamp: new Date().toISOString(),
     userId,
     audience: "verified_planner",
@@ -189,7 +189,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
     await recordVerifiedAnswerAssistantProviderError(access.userId);
   }
 
-  await logVerifiedUsage(
+  const usageAuditId = await logVerifiedUsage(
     access.userId,
     input,
     result.ok ? "success" : "blocked",
@@ -197,7 +197,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
     { isAdminTester: access.isAdminTester },
   );
 
-  return result;
+  return { ...result, usageAuditId };
 }
 
 export async function getVerifiedAnswerAssistantPreviewNotice(): Promise<string> {

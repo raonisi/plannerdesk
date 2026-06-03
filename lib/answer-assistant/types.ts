@@ -66,6 +66,8 @@ export interface AnswerAssistantEvidenceItem {
 
 export interface AnswerAssistantSuccessResult {
   ok: true;
+  /** Durable usage audit row id when persisted (PR-101 feedback link). */
+  usageAuditId?: string;
   draft: string;
   draftMode: AnswerAssistantDraftMode;
   providerConfigured: boolean;
@@ -83,6 +85,8 @@ export interface AnswerAssistantSuccessResult {
 
 export interface AnswerAssistantBlockedResult {
   ok: false;
+  /** Durable usage audit row id when persisted (PR-101 feedback link). */
+  usageAuditId?: string;
   blockedReason: AnswerAssistantBlockedReason;
   message: string;
   evidence: AnswerAssistantEvidenceItem[];

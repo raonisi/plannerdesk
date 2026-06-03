@@ -38,7 +38,7 @@ function pushToMemoryBuffer(entry: AnswerAssistantUsageLogEntry): void {
 
 export async function logAnswerAssistantUsage(
   entry: AnswerAssistantUsageLogEntry,
-): Promise<void> {
+): Promise<string | undefined> {
   pushToMemoryBuffer(entry);
 
   if (process.env.NODE_ENV !== "production") {
@@ -47,11 +47,12 @@ export async function logAnswerAssistantUsage(
 
   if (getAnswerAssistantUsageAuditBackend() === "durable") {
     try {
-      await persistAnswerAssistantUsageAudit(entry);
+      return await persistAnswerAssistantUsageAudit(entry);
     } catch (error) {
       console.error("[answer-assistant-usage-audit] persist failed", error);
     }
   }
+  return undefined;
 }
 
 /** Test helper — returns recent in-memory entries without PII payloads. */

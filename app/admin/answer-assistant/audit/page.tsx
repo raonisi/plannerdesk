@@ -62,6 +62,12 @@ export default async function AdminAnswerAssistantAuditPage({
           <div className="flex flex-wrap gap-2">
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+              href="/admin/answer-assistant/feedback"
+            >
+              Beta 피드백
+            </Link>
+            <Link
+              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
               href="/admin/answer-assistant"
             >
               답변 보조 도구

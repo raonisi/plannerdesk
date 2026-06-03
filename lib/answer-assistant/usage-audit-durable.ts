@@ -5,8 +5,8 @@ import type { AnswerAssistantUsageLogEntry } from "./usage-log";
 
 export async function persistAnswerAssistantUsageAudit(
   entry: AnswerAssistantUsageLogEntry,
-): Promise<void> {
-  await prisma.answerAssistantUsageAudit.create({
+): Promise<string> {
+  const row = await prisma.answerAssistantUsageAudit.create({
     data: {
       userId: entry.userId,
       audience: entry.audience,
@@ -22,7 +22,9 @@ export async function persistAnswerAssistantUsageAudit(
       isAdminTester: entry.isAdminTester ?? false,
       createdAt: new Date(entry.timestamp),
     },
+    select: { id: true },
   });
+  return row.id;
 }
 
 /** Test helper — removes audit rows for a user. */

@@ -79,7 +79,8 @@ describe("Answer Assistant durable rate limit / audit (PR-99-A)", () => {
     assert.match(ACTIONS, /await checkVerifiedAnswerAssistantRateLimit/);
     assert.match(ACTIONS, /await consumeVerifiedAnswerAssistantRateLimit/);
     assert.match(ACTIONS, /recordVerifiedAnswerAssistantProviderError/);
-    assert.match(ACTIONS, /await logAnswerAssistantUsage/);
+    assert.match(ACTIONS, /await logVerifiedUsage/);
+    assert.match(ACTIONS, /return logAnswerAssistantUsage/);
   });
 
   it("usage audit forbids sensitive payload fields", async () => {

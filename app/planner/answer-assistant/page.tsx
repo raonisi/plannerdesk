@@ -45,6 +45,10 @@ export default async function PlannerAnswerAssistantPage() {
 
   const generationEnabled =
     access.status === "authenticated" && access.canGenerate;
+  const showBetaFeedback =
+    generationEnabled &&
+    access.status === "authenticated" &&
+    !access.isAdminTester;
   const generationDisabledMessage =
     access.status === "feature_disabled"
       ? VERIFIED_PREVIEW_DISABLED_MESSAGE
@@ -96,6 +100,7 @@ export default async function PlannerAnswerAssistantPage() {
           <AnswerAssistantPanelShell
             adminTesterNotice={adminTesterNotice}
             betaActiveNotice={betaActiveNotice}
+            showBetaFeedback={showBetaFeedback}
             generationDisabledMessage={generationDisabledMessage}
             generationEnabled={generationEnabled}
             submitAction={generateVerifiedAnswerAssistantDraftAction}

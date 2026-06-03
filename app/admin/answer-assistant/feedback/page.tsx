@@ -1,20 +1,28 @@
 import Link from "next/link";
 import { getAdminAccess } from "@/lib/auth/access";
+import { loadBetaFeedbackDashboard } from "@/lib/answer-assistant/beta-feedback-dashboard";
+import type { BetaFeedbackDashboardSearchParams } from "@/lib/answer-assistant/beta-feedback-dashboard";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
-import { AnswerAssistantPanel } from "./answer-assistant-panel";
+import BetaFeedbackReviewView from "@/components/admin/answer-assistant/BetaFeedbackReviewView";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "답변 보조 초안 | PlannerDesk Admin",
+  title: "답변 보조 Beta 피드백 검토 | PlannerDesk Admin",
   description:
-    "관리자 검수용 답변 초안 생성 도구입니다. 고객 자동 발송·커뮤니티 자동 게시는 제공하지 않습니다.",
+    "allowlist beta 안전 피드백을 분류·수동 검토합니다. 원문·초안·자동 제재는 제공하지 않습니다.",
+  robots: { index: false, follow: false },
 };
 
-export default async function AdminAnswerAssistantPage() {
+export default async function AdminAnswerAssistantFeedbackPage({
+  searchParams,
+}: {
+  searchParams: Promise<BetaFeedbackDashboardSearchParams>;
+}) {
   const access = await getAdminAccess();
 
   if (access.status === "locked") {
@@ -27,17 +35,29 @@ export default async function AdminAnswerAssistantPage() {
     );
   }
 
+  const resolved = await searchParams;
+  let data = null;
+  let loadFailed = false;
+
+  try {
+    data = await loadBetaFeedbackDashboard(resolved);
+  } catch {
+    loadFailed = true;
+  }
+
   return (
     <div className={`min-h-screen ${surfaces.page}`}>
       <header
         className={`${surfaces.hero} border-b ${borders.divider} px-6 py-4 sm:px-8`}
       >
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#d8c08f]">
               PlannerDesk Admin
             </p>
-            <h1 className="text-xl font-bold text-white">답변 보조 · 관리자 초안</h1>
+            <h1 className="text-xl font-bold text-white">
+              답변 보조 · Beta 안전 피드백
+            </h1>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
@@ -48,39 +68,41 @@ export default async function AdminAnswerAssistantPage() {
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
-              href="/admin/answer-assistant/feedback"
+              href="/admin/answer-assistant"
             >
-              Beta 피드백
+              답변 보조
             </Link>
             <Link
               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
               href="/admin"
             >
-              데스크로 돌아가기
+              관리자 홈
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8 sm:px-8">
+      <main className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
         <p className={`${textStyles.body} max-w-3xl`}>
-          검수·공개 완료 자료만 근거로 관리자 검토용 초안을 생성합니다. 보험금
-          판단·의료 해석·상품 추천·고객 자동 발송·커뮤니티 자동 게시는 제공하지
-          않습니다.
+          beta 사용자 structured 피드백과 usage audit 메타데이터를 연결해 안전
+          신호를 분류합니다. beta 확대·자동 제재·allowlist 변경은 이 화면에서
+          수행하지 않습니다.
         </p>
 
         <div className="mt-6">
           <AdminSafetyNotice
-            policySummary="생성 결과는 DB에 저장되지 않으며, 고객 발송·커뮤니티 자동 게시 버튼은 제공하지 않습니다."
-            showNeedsReview
+            policySummary="피드백·audit 모두 상담 원문·생성 초안·raw prompt/output을 저장·표시하지 않습니다."
+            showNeedsReview={false}
           />
         </div>
 
-        <div
-          className={`mt-8 ${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-6`}
-        >
-          <AnswerAssistantPanel />
-        </div>
+        {loadFailed ? (
+          <AdminPageStateNotice kind="error" className="mt-6" />
+        ) : data ? (
+          <div className="mt-8">
+            <BetaFeedbackReviewView data={data} filters={resolved} />
+          </div>
+        ) : null}
       </main>
     </div>
   );

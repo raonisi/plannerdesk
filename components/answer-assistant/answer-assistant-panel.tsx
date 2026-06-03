@@ -15,6 +15,7 @@ import {
   BLOCKED_REASON_LABEL,
   RETRIEVAL_SOURCE_TYPE_LABEL,
 } from "@/lib/answer-assistant/labels";
+import { BetaSafetyFeedbackForm } from "@/components/answer-assistant/beta-feedback-form";
 import type {
   AnswerAssistantDraftResult,
   AnswerAssistantEvidenceItem,
@@ -27,6 +28,7 @@ export interface AnswerAssistantPanelShellProps {
   generationEnabled: boolean;
   generationDisabledMessage?: string;
   betaActiveNotice?: string;
+  showBetaFeedback?: boolean;
   adminTesterNotice?: string;
   submitAction: (formData: FormData) => Promise<AnswerAssistantDraftResult>;
 }
@@ -36,6 +38,7 @@ export function AnswerAssistantPanelShell({
   generationEnabled,
   generationDisabledMessage,
   betaActiveNotice,
+  showBetaFeedback = false,
   adminTesterNotice,
   submitAction,
 }: AnswerAssistantPanelShellProps) {
@@ -240,10 +243,15 @@ export function AnswerAssistantPanelShell({
       </section>
 
       {result ? (
-        <AnswerAssistantResultPanel
-          checklistTitle={checklistTitle}
-          result={result}
-        />
+        <>
+          <AnswerAssistantResultPanel
+            checklistTitle={checklistTitle}
+            result={result}
+          />
+          {variant === "verified" && showBetaFeedback ? (
+            <BetaSafetyFeedbackForm usageAuditId={result.usageAuditId} />
+          ) : null}
+        </>
       ) : null}
     </div>
   );

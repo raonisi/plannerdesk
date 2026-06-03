@@ -355,30 +355,81 @@ enum AnswerAssistantUsageOutcome {
   blocked
 }
 
+// Beta safety feedback (PR-101). Structured signals only — no prompt/draft/PII.
+enum AnswerAssistantFeedbackType {
+  post_session
+  blocked_experience
+  safety_concern
+  ui_understanding
+  other_signal
+}
+
+enum AnswerAssistantSafetySignal {
+  blocking_felt_wrong
+  evidence_too_weak
+  output_too_assertive
+  missing_disclaimer
+  prompt_injection_risk
+  privacy_risk
+  none
+}
+
+enum AnswerAssistantFeedbackSeverity {
+  low
+  medium
+  high
+}
+
+enum AnswerAssistantFeedbackUsefulness {
+  not_useful
+  partial
+  helpful
+  not_applicable
+}
+
+enum AnswerAssistantFeedbackNoteCategory {
+  blocking
+  evidence
+  output_safety
+  ui_copy
+  rate_limit
+  other
+}
+
+enum AnswerAssistantFeedbackReviewStatus {
+  new
+  triaged
+  incident_candidate
+  dismissed
+  resolved
+}
+
 model User {
-  id                           String                         @id @default(cuid())
-  name                         String?
-  email                        String?                        @unique
-  emailVerified                DateTime?
-  image                        String?
-  role                         Role                           @default(anonymous_public)
-  status                       UserStatus                     @default(active)
-  verificationStatus           VerificationStatus             @default(unverified)
-  accounts                     Account[]
-  sessions                     Session[]
-  resolvedCorrectionRequests   CorrectionRequest[]            @relation("CorrectionRequestResolvedBy")
-  plannerVerifications         PlannerVerification[]          @relation("PlannerVerificationUser")
-  reviewedPlannerVerifications PlannerVerification[]          @relation("PlannerVerificationReviewer")
-  authoredCommunityPosts       CommunityPost[]                @relation("CommunityPostAuthor")
-  reviewedCommunityPosts       CommunityPost[]                @relation("CommunityPostReviewer")
-  blindedCommunityPosts        CommunityPost[]                @relation("CommunityPostBlindedBy")
-  deletedCommunityPosts        CommunityPost[]                @relation("CommunityPostDeletedBy")
-  submittedCommunityReports    CommunityReport[]              @relation("CommunityReportReporter")
-  reviewedCommunityReports     CommunityReport[]              @relation("CommunityReportReviewer")
-  answerAssistantRateLimit     AnswerAssistantRateLimitState?
-  answerAssistantUsageAudits   AnswerAssistantUsageAudit[]
-  createdAt                    DateTime                       @default(now())
-  updatedAt                    DateTime                       @updatedAt
+  id                                  String                         @id @default(cuid())
+  name                                String?
+  email                               String?                        @unique
+  emailVerified                       DateTime?
+  image                               String?
+  role                                Role                           @default(anonymous_public)
+  status                              UserStatus                     @default(active)
+  verificationStatus                  VerificationStatus             @default(unverified)
+  accounts                            Account[]
+  sessions                            Session[]
+  resolvedCorrectionRequests          CorrectionRequest[]            @relation("CorrectionRequestResolvedBy")
+  plannerVerifications                PlannerVerification[]          @relation("PlannerVerificationUser")
+  reviewedPlannerVerifications        PlannerVerification[]          @relation("PlannerVerificationReviewer")
+  authoredCommunityPosts              CommunityPost[]                @relation("CommunityPostAuthor")
+  reviewedCommunityPosts              CommunityPost[]                @relation("CommunityPostReviewer")
+  blindedCommunityPosts               CommunityPost[]                @relation("CommunityPostBlindedBy")
+  deletedCommunityPosts               CommunityPost[]                @relation("CommunityPostDeletedBy")
+  submittedCommunityReports           CommunityReport[]              @relation("CommunityReportReporter")
+  reviewedCommunityReports            CommunityReport[]              @relation("CommunityReportReviewer")
+  answerAssistantRateLimit            AnswerAssistantRateLimitState?
+  answerAssistantUsageAudits          AnswerAssistantUsageAudit[]
+  answerAssistantBetaFeedbacks        AnswerAssistantBetaFeedback[]  @relation("AnswerAssistantBetaFeedbackUser")
+  reviewedAnswerAssistantBetaFeedback AnswerAssistantBetaFeedback[]  @relation("AnswerAssistantBetaFeedbackReviewer")
+  createdAt                           DateTime                       @default(now())
+  updatedAt                           DateTime                       @updatedAt
 }
 
 model Account {
@@ -788,24 +839,55 @@ model AnswerAssistantRateLimitState {
 
 // Minimal usage audit — blockedReason/outcome metadata only (PR-99-A).
 model AnswerAssistantUsageAudit {
-  id                  String                       @id @default(cuid())
+  id                  String                        @id @default(cuid())
   userId              String
-  user                User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   audience            AnswerAssistantUsageAudience
   outcome             AnswerAssistantUsageOutcome
   requestPurpose      String?
   blockedReason       String?
   candidateCount      Int?
   evidenceSourceIds   Json?
-  outputSafetyBlocked Boolean                      @default(false)
+  outputSafetyBlocked Boolean                       @default(false)
   providerConfigured  Boolean?
   providerErrorCode   String?
-  rateLimitBlocked    Boolean                      @default(false)
-  isAdminTester       Boolean                      @default(false)
-  createdAt           DateTime                     @default(now())
+  rateLimitBlocked    Boolean                       @default(false)
+  isAdminTester       Boolean                       @default(false)
+  createdAt           DateTime                      @default(now())
+  betaFeedbacks       AnswerAssistantBetaFeedback[]
 
   @@index([userId, createdAt])
   @@index([createdAt])
   @@index([outcome, createdAt])
   @@index([blockedReason])
+}
+
+// Structured beta safety feedback linked to usage audit metadata (PR-101).
+model AnswerAssistantBetaFeedback {
+  id           String                               @id @default(cuid())
+  usageAuditId String?
+  usageAudit   AnswerAssistantUsageAudit?           @relation(fields: [usageAuditId], references: [id], onDelete: SetNull)
+  userId       String?
+  user         User?                                @relation("AnswerAssistantBetaFeedbackUser", fields: [userId], references: [id], onDelete: SetNull)
+  feedbackType AnswerAssistantFeedbackType
+  safetySignal AnswerAssistantSafetySignal?
+  severity     AnswerAssistantFeedbackSeverity      @default(low)
+  usefulness   AnswerAssistantFeedbackUsefulness?
+  noteCategory AnswerAssistantFeedbackNoteCategory?
+  shortNote    String?                              @db.VarChar(120)
+  adminStatus  AnswerAssistantFeedbackReviewStatus  @default(new)
+  adminMemo    String?                              @db.VarChar(500)
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?                                @relation("AnswerAssistantBetaFeedbackReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime                             @default(now())
+  updatedAt    DateTime                             @updatedAt
+
+  @@index([usageAuditId])
+  @@index([userId])
+  @@index([feedbackType])
+  @@index([safetySignal])
+  @@index([severity])
+  @@index([adminStatus])
+  @@index([createdAt])
 }

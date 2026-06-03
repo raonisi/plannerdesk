@@ -1,0 +1,2169 @@
+diff --git a/app/admin/answer-assistant/audit/page.tsx b/app/admin/answer-assistant/audit/page.tsx
+index f36cf53..8c0030b 100644
+--- a/app/admin/answer-assistant/audit/page.tsx
++++ b/app/admin/answer-assistant/audit/page.tsx
+@@ -60,6 +60,12 @@ export default async function AdminAnswerAssistantAuditPage({
+             </h1>
+           </div>
+           <div className="flex flex-wrap gap-2">
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/feedback"
++            >
++              Beta 피드백
++            </Link>
+             <Link
+               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+               href="/admin/answer-assistant"
+diff --git a/app/admin/answer-assistant/feedback/actions.ts b/app/admin/answer-assistant/feedback/actions.ts
+new file mode 100644
+index 0000000..7cb7d49
+--- /dev/null
++++ b/app/admin/answer-assistant/feedback/actions.ts
+@@ -0,0 +1,80 @@
++"use server";
++
++import type { AnswerAssistantFeedbackReviewStatus } from "@prisma/client";
++import { revalidatePath } from "next/cache";
++import { requireAdminAccess } from "@/lib/auth/access";
++import { BETA_FEEDBACK_ADMIN_MEMO_MAX_LENGTH } from "@/lib/answer-assistant/beta-feedback-constants";
++import { prisma } from "@/lib/prisma";
++
++const REVIEW_STATUSES = new Set<string>([
++  "new",
++  "triaged",
++  "incident_candidate",
++  "dismissed",
++  "resolved",
++]);
++
++export type UpdateBetaFeedbackReviewResult =
++  | { ok: true }
++  | { ok: false; message: string };
++
++/** Manual operator review only — no auto-sanction or allowlist changes. */
++export async function updateBetaFeedbackReviewStatusAction(
++  formData: FormData,
++): Promise<void> {
++  const result = await updateBetaFeedbackReviewStatus(formData);
++  if (!result.ok) {
++    throw new Error(result.message);
++  }
++}
++
++export async function updateBetaFeedbackReviewStatus(
++  formData: FormData,
++): Promise<UpdateBetaFeedbackReviewResult> {
++  const session = await requireAdminAccess();
++  const reviewerId = session.user?.id;
++  if (!reviewerId) {
++    return { ok: false, message: "관리자 세션을 확인할 수 없습니다." };
++  }
++
++  const feedbackId = String(formData.get("feedbackId") ?? "").trim();
++  const adminStatus = String(formData.get("adminStatus") ?? "").trim();
++  const adminMemoRaw = String(formData.get("adminMemo") ?? "").trim();
++
++  if (!feedbackId) {
++    return { ok: false, message: "피드백 ID가 필요합니다." };
++  }
++
++  if (!REVIEW_STATUSES.has(adminStatus)) {
++    return { ok: false, message: "검토 상태를 확인해 주세요." };
++  }
++
++  if (adminMemoRaw.length > BETA_FEEDBACK_ADMIN_MEMO_MAX_LENGTH) {
++    return {
++      ok: false,
++      message: `관리자 메모는 ${BETA_FEEDBACK_ADMIN_MEMO_MAX_LENGTH}자 이하입니다.`,
++    };
++  }
++
++  const existing = await prisma.answerAssistantBetaFeedback.findUnique({
++    where: { id: feedbackId },
++    select: { id: true },
++  });
++  if (!existing) {
++    return { ok: false, message: "피드백을 찾을 수 없습니다." };
++  }
++
++  await prisma.answerAssistantBetaFeedback.update({
++    where: { id: feedbackId },
++    data: {
++      adminStatus: adminStatus as AnswerAssistantFeedbackReviewStatus,
++      adminMemo: adminMemoRaw || null,
++      reviewedAt: new Date(),
++      reviewedById: reviewerId,
++    },
++  });
++
++  revalidatePath("/admin/answer-assistant/feedback");
++  return { ok: true };
++}
++
+diff --git a/app/admin/answer-assistant/feedback/page.tsx b/app/admin/answer-assistant/feedback/page.tsx
+new file mode 100644
+index 0000000..302fa1b
+--- /dev/null
++++ b/app/admin/answer-assistant/feedback/page.tsx
+@@ -0,0 +1,109 @@
++import Link from "next/link";
++import { getAdminAccess } from "@/lib/auth/access";
++import { loadBetaFeedbackDashboard } from "@/lib/answer-assistant/beta-feedback-dashboard";
++import type { BetaFeedbackDashboardSearchParams } from "@/lib/answer-assistant/beta-feedback-dashboard";
++import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
++import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
++import AdminLockedState from "@/components/admin/AdminLockedState";
++import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
++import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
++import BetaFeedbackReviewView from "@/components/admin/answer-assistant/BetaFeedbackReviewView";
++
++export const dynamic = "force-dynamic";
++
++export const metadata = {
++  title: "답변 보조 Beta 피드백 검토 | PlannerDesk Admin",
++  description:
++    "allowlist beta 안전 피드백을 분류·수동 검토합니다. 원문·초안·자동 제재는 제공하지 않습니다.",
++  robots: { index: false, follow: false },
++};
++
++export default async function AdminAnswerAssistantFeedbackPage({
++  searchParams,
++}: {
++  searchParams: Promise<BetaFeedbackDashboardSearchParams>;
++}) {
++  const access = await getAdminAccess();
++
++  if (access.status === "locked") {
++    return <AdminLockedState />;
++  }
++
++  if (access.status === "denied") {
++    return (
++      <AdminAccessDeniedState email={access.session.user?.email ?? null} />
++    );
++  }
++
++  const resolved = await searchParams;
++  let data = null;
++  let loadFailed = false;
++
++  try {
++    data = await loadBetaFeedbackDashboard(resolved);
++  } catch {
++    loadFailed = true;
++  }
++
++  return (
++    <div className={`min-h-screen ${surfaces.page}`}>
++      <header
++        className={`${surfaces.hero} border-b ${borders.divider} px-6 py-4 sm:px-8`}
++      >
++        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
++          <div>
++            <p className="text-xs font-semibold uppercase tracking-wide text-[#d8c08f]">
++              PlannerDesk Admin
++            </p>
++            <h1 className="text-xl font-bold text-white">
++              답변 보조 · Beta 안전 피드백
++            </h1>
++          </div>
++          <div className="flex flex-wrap gap-2">
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/audit"
++            >
++              Usage Audit
++            </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant"
++            >
++              답변 보조
++            </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin"
++            >
++              관리자 홈
++            </Link>
++          </div>
++        </div>
++      </header>
++
++      <main className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
++        <p className={`${textStyles.body} max-w-3xl`}>
++          beta 사용자 structured 피드백과 usage audit 메타데이터를 연결해 안전
++          신호를 분류합니다. beta 확대·자동 제재·allowlist 변경은 이 화면에서
++          수행하지 않습니다.
++        </p>
++
++        <div className="mt-6">
++          <AdminSafetyNotice
++            policySummary="피드백·audit 모두 상담 원문·생성 초안·raw prompt/output을 저장·표시하지 않습니다."
++            showNeedsReview={false}
++          />
++        </div>
++
++        {loadFailed ? (
++          <AdminPageStateNotice kind="error" className="mt-6" />
++        ) : data ? (
++          <div className="mt-8">
++            <BetaFeedbackReviewView data={data} filters={resolved} />
++          </div>
++        ) : null}
++      </main>
++    </div>
++  );
++}
+diff --git a/app/admin/answer-assistant/page.tsx b/app/admin/answer-assistant/page.tsx
+index 85db7dd..0095286 100644
+--- a/app/admin/answer-assistant/page.tsx
++++ b/app/admin/answer-assistant/page.tsx
+@@ -46,6 +46,12 @@ export default async function AdminAnswerAssistantPage() {
+             >
+               Usage Audit
+             </Link>
++            <Link
++              className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
++              href="/admin/answer-assistant/feedback"
++            >
++              Beta 피드백
++            </Link>
+             <Link
+               className="min-h-10 rounded-lg border border-[#d8c08f]/40 bg-white/10 px-4 text-sm font-semibold text-white hover:bg-white/20"
+               href="/admin"
+diff --git a/app/planner/answer-assistant/actions.ts b/app/planner/answer-assistant/actions.ts
+index 14f4d68..fcdc415 100644
+--- a/app/planner/answer-assistant/actions.ts
++++ b/app/planner/answer-assistant/actions.ts
+@@ -51,8 +51,8 @@ async function logVerifiedUsage(
+     rateLimitBlocked?: boolean;
+     isAdminTester?: boolean;
+   },
+-): Promise<void> {
+-  await logAnswerAssistantUsage({
++): Promise<string | undefined> {
++  return logAnswerAssistantUsage({
+     timestamp: new Date().toISOString(),
+     userId,
+     audience: "verified_planner",
+@@ -189,7 +189,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
+     await recordVerifiedAnswerAssistantProviderError(access.userId);
+   }
+ 
+-  await logVerifiedUsage(
++  const usageAuditId = await logVerifiedUsage(
+     access.userId,
+     input,
+     result.ok ? "success" : "blocked",
+@@ -197,7 +197,7 @@ export async function generateVerifiedAnswerAssistantDraftAction(
+     { isAdminTester: access.isAdminTester },
+   );
+ 
+-  return result;
++  return { ...result, usageAuditId };
+ }
+ 
+ export async function getVerifiedAnswerAssistantPreviewNotice(): Promise<string> {
+diff --git a/app/planner/answer-assistant/feedback-actions.ts b/app/planner/answer-assistant/feedback-actions.ts
+new file mode 100644
+index 0000000..2343ae3
+--- /dev/null
++++ b/app/planner/answer-assistant/feedback-actions.ts
+@@ -0,0 +1,51 @@
++"use server";
++
++import { isVerifiedAnswerAssistantAllowlistBetaOperational } from "@/lib/answer-assistant/allowlist-beta";
++import { persistBetaSafetyFeedback } from "@/lib/answer-assistant/beta-feedback-persist";
++import {
++  BETA_FEEDBACK_ERROR_MESSAGES,
++  validateBetaFeedbackSubmit,
++} from "@/lib/answer-assistant/beta-feedback-validation";
++import { getVerifiedAnswerAssistantAccess } from "@/lib/answer-assistant/verified-access";
++
++export type SubmitBetaFeedbackResult =
++  | { ok: true; feedbackId: string }
++  | { ok: false; message: string };
++
++export async function submitAnswerAssistantBetaFeedbackAction(
++  formData: FormData,
++): Promise<SubmitBetaFeedbackResult> {
++  const access = await getVerifiedAnswerAssistantAccess();
++
++  if (
++    access.status !== "authenticated" ||
++    !access.canGenerate ||
++    access.isAdminTester
++  ) {
++    return { ok: false, message: "beta 피드백은 allowlist 파일럿 사용자만 제출할 수 있습니다." };
++  }
++
++  if (!isVerifiedAnswerAssistantAllowlistBetaOperational()) {
++    return { ok: false, message: "현재 beta 운영이 활성화되어 있지 않습니다." };
++  }
++
++  const validation = validateBetaFeedbackSubmit({
++    feedbackType: String(formData.get("feedbackType") ?? ""),
++    safetySignal: String(formData.get("safetySignal") ?? ""),
++    severity: String(formData.get("severity") ?? ""),
++    usefulness: String(formData.get("usefulness") ?? ""),
++    noteCategory: String(formData.get("noteCategory") ?? ""),
++    shortNote: String(formData.get("shortNote") ?? ""),
++    usageAuditId: String(formData.get("usageAuditId") ?? ""),
++  });
++
++  if (!validation.ok || !validation.data) {
++    return {
++      ok: false,
++      message:
++        validation.message ?? BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++    };
++  }
++
++  return persistBetaSafetyFeedback(access.userId, validation.data);
++}
+diff --git a/app/planner/answer-assistant/page.tsx b/app/planner/answer-assistant/page.tsx
+index 086d16f..0dfedcb 100644
+--- a/app/planner/answer-assistant/page.tsx
++++ b/app/planner/answer-assistant/page.tsx
+@@ -45,6 +45,10 @@ export default async function PlannerAnswerAssistantPage() {
+ 
+   const generationEnabled =
+     access.status === "authenticated" && access.canGenerate;
++  const showBetaFeedback =
++    generationEnabled &&
++    access.status === "authenticated" &&
++    !access.isAdminTester;
+   const generationDisabledMessage =
+     access.status === "feature_disabled"
+       ? VERIFIED_PREVIEW_DISABLED_MESSAGE
+@@ -96,6 +100,7 @@ export default async function PlannerAnswerAssistantPage() {
+           <AnswerAssistantPanelShell
+             adminTesterNotice={adminTesterNotice}
+             betaActiveNotice={betaActiveNotice}
++            showBetaFeedback={showBetaFeedback}
+             generationDisabledMessage={generationDisabledMessage}
+             generationEnabled={generationEnabled}
+             submitAction={generateVerifiedAnswerAssistantDraftAction}
+diff --git a/components/admin/answer-assistant/BetaFeedbackReviewView.tsx b/components/admin/answer-assistant/BetaFeedbackReviewView.tsx
+new file mode 100644
+index 0000000..2fa1bd4
+--- /dev/null
++++ b/components/admin/answer-assistant/BetaFeedbackReviewView.tsx
+@@ -0,0 +1,296 @@
++import Link from "next/link";
++import {
++  BETA_SAFETY_REVIEW_DECISION_CRITERIA,
++  BETA_SAFETY_REVIEW_OPERATOR_RULES,
++} from "@/lib/answer-assistant/beta-feedback-review-criteria";
++import {
++  BETA_FEEDBACK_REVIEW_STATUS_LABEL,
++  BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS,
++  BETA_FEEDBACK_TYPE_OPTIONS,
++} from "@/lib/answer-assistant/beta-feedback-labels";
++import {
++  betaFeedbackDashboardFilterQuery,
++  type BetaFeedbackDashboardData,
++  type BetaFeedbackDashboardSearchParams,
++} from "@/lib/answer-assistant/beta-feedback-dashboard";
++import { borders, shadows, surfaces } from "@/lib/design-system";
++import { updateBetaFeedbackReviewStatusAction } from "@/app/admin/answer-assistant/feedback/actions";
++
++function MetricTile({ label, value }: { label: string; value: number }) {
++  return (
++    <div className="rounded-lg border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-[#102235]">
++      <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
++        {label}
++      </p>
++      <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
++    </div>
++  );
++}
++
++export default function BetaFeedbackReviewView({
++  data,
++  filters,
++}: {
++  data: BetaFeedbackDashboardData;
++  filters: BetaFeedbackDashboardSearchParams;
++}) {
++  const filterQs = (overrides: Partial<BetaFeedbackDashboardSearchParams> = {}) =>
++    betaFeedbackDashboardFilterQuery(filters, overrides);
++
++  return (
++    <>
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} mb-6 rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">Beta 운영 상태</h2>
++        <p className="mt-2 text-xs text-[#4f5661]">
++          gate {data.operational.betaGateEnabled ? "ON" : "OFF"} · allowlist{" "}
++          {data.operational.allowlistPilotCount} · status{" "}
++          {data.operational.allowlistBetaStatus}
++        </p>
++      </section>
++
++      <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
++        <MetricTile label="전체 피드백" value={data.summary.total} />
++        <MetricTile label="신규" value={data.summary.newCount} />
++        <MetricTile label="인시던트 후보" value={data.summary.incidentCandidates} />
++        <MetricTile label="HIGH 심각도" value={data.summary.highSeverity} />
++        <MetricTile label="안전 우려 유형" value={data.summary.safetyConcern} />
++      </section>
++
++      <form
++        className={`${surfaces.card} ${borders.default} ${shadows.card} mb-6 grid gap-3 rounded-lg p-4 md:grid-cols-2 lg:grid-cols-4`}
++        method="get"
++      >
++        <select
++          className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          name="feedbackType"
++          defaultValue={filters.feedbackType ?? "all"}
++        >
++          <option value="all">유형 전체</option>
++          {BETA_FEEDBACK_TYPE_OPTIONS.map((o) => (
++            <option key={o.value} value={o.value}>
++              {o.label}
++            </option>
++          ))}
++        </select>
++        <select
++          className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          name="safetySignal"
++          defaultValue={filters.safetySignal ?? "all"}
++        >
++          <option value="all">안전 신호 전체</option>
++          {BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS.map((o) => (
++            <option key={o.value} value={o.value}>
++              {o.label}
++            </option>
++          ))}
++        </select>
++        <select
++          className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          name="severity"
++          defaultValue={filters.severity ?? "all"}
++        >
++          <option value="all">심각도 전체</option>
++          <option value="low">낮음</option>
++          <option value="medium">중간</option>
++          <option value="high">높음</option>
++        </select>
++        <select
++          className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          name="adminStatus"
++          defaultValue={filters.adminStatus ?? "all"}
++        >
++          <option value="all">검토 상태 전체</option>
++          {Object.entries(BETA_FEEDBACK_REVIEW_STATUS_LABEL).map(([k, v]) => (
++            <option key={k} value={k}>
++              {v}
++            </option>
++          ))}
++        </select>
++        <input
++          className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          name="createdFrom"
++          type="date"
++          defaultValue={filters.createdFrom ?? ""}
++        />
++        <input
++          className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++          name="createdTo"
++          type="date"
++          defaultValue={filters.createdTo ?? ""}
++        />
++        <label className="flex min-h-11 items-center gap-2 rounded-md border border-[#d9c9a8] bg-white px-3 text-xs">
++          <input
++            defaultChecked={filters.incidentOnly === "true"}
++            name="incidentOnly"
++            type="checkbox"
++            value="true"
++          />
++          인시던트 후보만
++        </label>
++        <button
++          type="submit"
++          className="min-h-11 rounded-md bg-[#10243E] px-4 text-sm font-semibold text-[#F7F3E8]"
++        >
++          필터
++        </button>
++      </form>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} mb-6 rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">수동 검토 판단 기준</h2>
++        <p className="mt-2 text-xs text-[#4f5661]">
++          자동 제재·allowlist 제거·gate OFF 없음. 운영자가 아래 기준으로 수동 판단합니다.
++        </p>
++        <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-[#4f5661]">
++          {BETA_SAFETY_REVIEW_OPERATOR_RULES.map((rule) => (
++            <li key={rule}>{rule}</li>
++          ))}
++        </ul>
++        <details className="mt-4 text-xs text-[#4f5661]">
++          <summary className="cursor-pointer font-semibold text-[#102235]">
++            유지 / 중단 / 개선 / 확대 보류 기준
++          </summary>
++          <div className="mt-2 space-y-3">
++            {(
++              Object.entries(BETA_SAFETY_REVIEW_DECISION_CRITERIA) as [
++                string,
++                readonly string[],
++              ][]
++            ).map(([key, items]) => (
++              <div key={key}>
++                <p className="font-semibold text-[#102235]">{key}</p>
++                <ul className="mt-1 list-disc pl-5">
++                  {items.map((item) => (
++                    <li key={item}>{item}</li>
++                  ))}
++                </ul>
++              </div>
++            ))}
++          </div>
++        </details>
++      </section>
++
++      <section
++        className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-4`}
++      >
++        <h2 className="text-sm font-bold text-[#102235]">피드백 목록</h2>
++        <p className="mt-1 text-xs text-[#4f5661]">
++          usage audit 메타데이터만 연결 · 원문·초안 미표시
++        </p>
++        {data.rows.length === 0 ? (
++          <p className="mt-4 text-sm text-[#4f5661]">피드백이 없습니다.</p>
++        ) : (
++          <ul className="mt-4 space-y-4">
++            {data.rows.map((row) => (
++              <li
++                key={row.id}
++                className="rounded-lg border border-[#e8e0d0] bg-[#fbf7ee] p-4 text-sm"
++              >
++                <div className="flex flex-wrap items-center gap-2">
++                  <span className="font-semibold text-[#102235]">
++                    {row.feedbackTypeLabel}
++                  </span>
++                  {row.incidentHint ? (
++                    <span className="rounded-full bg-[#fdf2f2] px-2 py-0.5 text-xs font-semibold text-[#8b2e2e] ring-1 ring-[#e8c4c4]">
++                      인시던트 힌트
++                    </span>
++                  ) : null}
++                  <span className="text-xs text-[#4f5661]">
++                    {row.createdAt.slice(0, 19).replace("T", " ")} UTC
++                  </span>
++                </div>
++                <p className="mt-2 text-xs text-[#4f5661]">
++                  신호: {row.safetySignalLabel ?? "—"} · 심각도: {row.severity} ·
++                  검토: {row.adminStatusLabel}
++                  {row.userIdPrefix ? ` · user ${row.userIdPrefix}` : ""}
++                </p>
++                {row.usageAuditId ? (
++                  <p className="mt-1 text-xs text-[#4f5661]">
++                    audit: {row.usageAuditId.slice(0, 12)}… · outcome{" "}
++                    {row.auditOutcome ?? "—"}
++                    {row.auditBlockedReason
++                      ? ` · ${row.auditBlockedReason}`
++                      : ""}
++                    {row.auditRateLimitBlocked ? " · RL" : ""}
++                    {row.auditOutputSafetyBlocked ? " · OS" : ""}
++                  </p>
++                ) : null}
++                {row.shortNote ? (
++                  <p className="mt-2 rounded-md bg-white px-2 py-1 text-xs text-[#303845]">
++                    메모: {row.shortNote}
++                  </p>
++                ) : null}
++
++                <form
++                  action={updateBetaFeedbackReviewStatusAction}
++                  className="mt-3 flex flex-wrap items-end gap-2 border-t border-[#e8e0d0] pt-3"
++                >
++                  <input name="feedbackId" type="hidden" value={row.id} />
++                  <label className="text-xs">
++                    검토 상태
++                    <select
++                      className="ml-1 min-h-9 rounded border border-[#d9c9a8] bg-white px-2 text-xs"
++                      name="adminStatus"
++                      defaultValue={row.adminStatus}
++                    >
++                      {Object.entries(BETA_FEEDBACK_REVIEW_STATUS_LABEL).map(
++                        ([k, v]) => (
++                          <option key={k} value={k}>
++                            {v}
++                          </option>
++                        ),
++                      )}
++                    </select>
++                  </label>
++                  <label className="flex-1 text-xs">
++                    관리자 메모
++                    <input
++                      className="mt-1 min-h-9 w-full min-w-[12rem] rounded border border-[#d9c9a8] bg-white px-2 text-xs"
++                      name="adminMemo"
++                      placeholder="수동 검토 메모 (500자 이하)"
++                      maxLength={500}
++                    />
++                  </label>
++                  <button
++                    type="submit"
++                    className="min-h-9 rounded bg-[#102235] px-3 text-xs font-semibold text-white"
++                  >
++                    저장
++                  </button>
++                </form>
++              </li>
++            ))}
++          </ul>
++        )}
++        <div className="mt-4 flex flex-wrap gap-2 text-sm text-[#4f5661]">
++          <span>
++            총 {data.totalRows}건 · {data.page}/{data.pageCount}
++          </span>
++          {data.page > 1 ? (
++            <Link
++              href={`/admin/answer-assistant/feedback${filterQs({
++                page: String(data.page - 1),
++              })}`}
++              className="rounded border border-[#d9c9a8] px-2 py-1 text-xs font-semibold"
++            >
++              이전
++            </Link>
++          ) : null}
++          {data.page < data.pageCount ? (
++            <Link
++              href={`/admin/answer-assistant/feedback${filterQs({
++                page: String(data.page + 1),
++              })}`}
++              className="rounded border border-[#d9c9a8] px-2 py-1 text-xs font-semibold"
++            >
++              다음
++            </Link>
++          ) : null}
++        </div>
++      </section>
++    </>
++  );
++}
+diff --git a/components/answer-assistant/answer-assistant-panel.tsx b/components/answer-assistant/answer-assistant-panel.tsx
+index 85686d3..87f77e1 100644
+--- a/components/answer-assistant/answer-assistant-panel.tsx
++++ b/components/answer-assistant/answer-assistant-panel.tsx
+@@ -15,6 +15,7 @@ import {
+   BLOCKED_REASON_LABEL,
+   RETRIEVAL_SOURCE_TYPE_LABEL,
+ } from "@/lib/answer-assistant/labels";
++import { BetaSafetyFeedbackForm } from "@/components/answer-assistant/beta-feedback-form";
+ import type {
+   AnswerAssistantDraftResult,
+   AnswerAssistantEvidenceItem,
+@@ -27,6 +28,7 @@ export interface AnswerAssistantPanelShellProps {
+   generationEnabled: boolean;
+   generationDisabledMessage?: string;
+   betaActiveNotice?: string;
++  showBetaFeedback?: boolean;
+   adminTesterNotice?: string;
+   submitAction: (formData: FormData) => Promise<AnswerAssistantDraftResult>;
+ }
+@@ -36,6 +38,7 @@ export function AnswerAssistantPanelShell({
+   generationEnabled,
+   generationDisabledMessage,
+   betaActiveNotice,
++  showBetaFeedback = false,
+   adminTesterNotice,
+   submitAction,
+ }: AnswerAssistantPanelShellProps) {
+@@ -240,10 +243,15 @@ export function AnswerAssistantPanelShell({
+       </section>
+ 
+       {result ? (
+-        <AnswerAssistantResultPanel
+-          checklistTitle={checklistTitle}
+-          result={result}
+-        />
++        <>
++          <AnswerAssistantResultPanel
++            checklistTitle={checklistTitle}
++            result={result}
++          />
++          {variant === "verified" && showBetaFeedback ? (
++            <BetaSafetyFeedbackForm usageAuditId={result.usageAuditId} />
++          ) : null}
++        </>
+       ) : null}
+     </div>
+   );
+diff --git a/components/answer-assistant/beta-feedback-form.tsx b/components/answer-assistant/beta-feedback-form.tsx
+new file mode 100644
+index 0000000..d5a0a71
+--- /dev/null
++++ b/components/answer-assistant/beta-feedback-form.tsx
+@@ -0,0 +1,187 @@
++"use client";
++
++import { useMemo, useState, useTransition } from "react";
++import { hasClientSensitiveSignal } from "@/lib/correction-request/validation";
++import { submitAnswerAssistantBetaFeedbackAction } from "@/app/planner/answer-assistant/feedback-actions";
++import { BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH } from "@/lib/answer-assistant/beta-feedback-constants";
++import {
++  BETA_FEEDBACK_NOTE_CATEGORY_OPTIONS,
++  BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS,
++  BETA_FEEDBACK_SEVERITY_OPTIONS,
++  BETA_FEEDBACK_TYPE_OPTIONS,
++  BETA_FEEDBACK_USEFULNESS_OPTIONS,
++} from "@/lib/answer-assistant/beta-feedback-labels";
++
++export function BetaSafetyFeedbackForm({
++  usageAuditId,
++}: {
++  usageAuditId?: string;
++}) {
++  const [feedbackType, setFeedbackType] = useState("post_session");
++  const [safetySignal, setSafetySignal] = useState("none");
++  const [severity, setSeverity] = useState("low");
++  const [usefulness, setUsefulness] = useState("not_applicable");
++  const [noteCategory, setNoteCategory] = useState("none");
++  const [shortNote, setShortNote] = useState("");
++  const [message, setMessage] = useState<string | null>(null);
++  const [submitted, setSubmitted] = useState(false);
++  const [isPending, startTransition] = useTransition();
++
++  const sensitive = useMemo(
++    () => hasClientSensitiveSignal(shortNote),
++    [shortNote],
++  );
++
++  const handleSubmit = () => {
++    if (submitted || sensitive) return;
++    const formData = new FormData();
++    formData.set("feedbackType", feedbackType);
++    formData.set("safetySignal", safetySignal);
++    formData.set("severity", severity);
++    formData.set("usefulness", usefulness);
++    formData.set("noteCategory", noteCategory);
++    formData.set("shortNote", shortNote);
++    if (usageAuditId) {
++      formData.set("usageAuditId", usageAuditId);
++    }
++
++    startTransition(async () => {
++      const result = await submitAnswerAssistantBetaFeedbackAction(formData);
++      if (result.ok) {
++        setSubmitted(true);
++        setMessage("beta 안전 피드백이 저장되었습니다. 상담 원문·생성 초안은 저장되지 않습니다.");
++      } else {
++        setMessage(result.message);
++      }
++    });
++  };
++
++  return (
++    <section className="rounded-lg border border-[#c8d2dc] bg-[#eef3f7] px-4 py-4 text-sm text-[#102235]">
++      <h2 className="font-semibold">beta 안전 피드백 (선택)</h2>
++      <p className="mt-2 text-xs leading-relaxed text-[#4f5661]">
++        답변 품질 평가가 아니라 beta 운영 안전 신호 수집용입니다. 고객 상담
++        원문·생성 초안·개인정보는 입력하지 마세요.
++      </p>
++
++      {submitted ? (
++        <p className="mt-3 text-sm text-[#1f6b55]" role="status">
++          {message}
++        </p>
++      ) : (
++        <fieldset className="mt-4 space-y-3" disabled={isPending}>
++          <label className="block">
++            <span className="text-xs font-semibold">피드백 유형</span>
++            <select
++              className="mt-1 min-h-10 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++              onChange={(e) => setFeedbackType(e.target.value)}
++              value={feedbackType}
++            >
++              {BETA_FEEDBACK_TYPE_OPTIONS.map((o) => (
++                <option key={o.value} value={o.value}>
++                  {o.label}
++                </option>
++              ))}
++            </select>
++          </label>
++
++          <label className="block">
++            <span className="text-xs font-semibold">안전 신호</span>
++            <select
++              className="mt-1 min-h-10 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++              onChange={(e) => setSafetySignal(e.target.value)}
++              value={safetySignal}
++            >
++              {BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS.map((o) => (
++                <option key={o.value} value={o.value}>
++                  {o.label}
++                </option>
++              ))}
++            </select>
++          </label>
++
++          <div className="grid gap-3 sm:grid-cols-2">
++            <label className="block">
++              <span className="text-xs font-semibold">심각도</span>
++              <select
++                className="mt-1 min-h-10 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                onChange={(e) => setSeverity(e.target.value)}
++                value={severity}
++              >
++                {BETA_FEEDBACK_SEVERITY_OPTIONS.map((o) => (
++                  <option key={o.value} value={o.value}>
++                    {o.label}
++                  </option>
++                ))}
++              </select>
++            </label>
++            <label className="block">
++              <span className="text-xs font-semibold">도움 정도</span>
++              <select
++                className="mt-1 min-h-10 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++                onChange={(e) => setUsefulness(e.target.value)}
++                value={usefulness}
++              >
++                {BETA_FEEDBACK_USEFULNESS_OPTIONS.map((o) => (
++                  <option key={o.value} value={o.value}>
++                    {o.label}
++                  </option>
++                ))}
++              </select>
++            </label>
++          </div>
++
++          <label className="block">
++            <span className="text-xs font-semibold">분류 (선택)</span>
++            <select
++              className="mt-1 min-h-10 w-full rounded-md border border-[#d9c9a8] bg-white px-3 text-sm"
++              onChange={(e) => setNoteCategory(e.target.value)}
++              value={noteCategory}
++            >
++              <option value="none">선택 안 함</option>
++              {BETA_FEEDBACK_NOTE_CATEGORY_OPTIONS.map((o) => (
++                <option key={o.value} value={o.value}>
++                  {o.label}
++                </option>
++              ))}
++            </select>
++          </label>
++
++          <label className="block">
++            <span className="text-xs font-semibold">
++              추가 메모 (선택, {BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH}자 이하)
++            </span>
++            <textarea
++              className="mt-1 min-h-[4rem] w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm"
++              maxLength={BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH}
++              onChange={(e) => setShortNote(e.target.value)}
++              placeholder="상담 원문·고객명·진단명 없이 운영 신호만 간단히"
++              value={shortNote}
++            />
++          </label>
++
++          {sensitive ? (
++            <p className="text-xs text-[#8b2e2e]" role="alert">
++              민감정보로 보이는 내용은 저장되지 않습니다.
++            </p>
++          ) : null}
++
++          {message && !submitted ? (
++            <p className="text-xs text-[#8b2e2e]" role="alert">
++              {message}
++            </p>
++          ) : null}
++
++          <button
++            className="min-h-10 rounded-lg border border-[#102235] bg-white px-4 text-sm font-semibold text-[#102235] hover:bg-[#f7f1e5] disabled:opacity-50"
++            disabled={isPending || sensitive}
++            onClick={handleSubmit}
++            type="button"
++          >
++            {isPending ? "제출 중…" : "안전 피드백 제출"}
++          </button>
++        </fieldset>
++      )}
++    </section>
++  );
++}
+diff --git a/docs/PR-101-ANSWER-ASSISTANT-BETA-FEEDBACK-SAFETY-REVIEW.md b/docs/PR-101-ANSWER-ASSISTANT-BETA-FEEDBACK-SAFETY-REVIEW.md
+new file mode 100644
+index 0000000..856311e
+--- /dev/null
++++ b/docs/PR-101-ANSWER-ASSISTANT-BETA-FEEDBACK-SAFETY-REVIEW.md
+@@ -0,0 +1,58 @@
++# PR-101: Answer Assistant Beta Feedback Safety Review
++
++**Branch:** `pr-101-answer-assistant-beta-feedback-safety-review`
++
++## Purpose
++
++allowlist beta 운영 중 **안전 신호**를 structured 피드백으로 수집하고, 관리자가 usage audit 메타데이터와 함께 **수동 검토**합니다. beta 확대·전체 공개·자동 제재 PR이 아닙니다.
++
++## Routes
++
++| Route | Access |
++| --- | --- |
++| `/planner/answer-assistant` | allowlist beta 파일럿 — 피드백 제출 UI |
++| `/admin/answer-assistant/feedback` | ADMIN only — 검토 대시보드 |
++| `/admin/answer-assistant/audit` | PR-100 usage audit (연동 참고) |
++
++## Feedback policy
++
++- **목적:** 차단 적절성, 근거 부족, output safety, UI 고지 이해, beta 유지/중단 판단 자료
++- **금지:** 상담 원문, 생성 초안, raw prompt/output, PII, 의료·계약 정보
++- **형식:** 선택형 필드 중심 + `shortNote` 최대 120자 + 민감정보 validation
++- **연결:** `usageAuditId` (durable audit row) — 본인 audit만 연결
++
++## Data model
++
++`AnswerAssistantBetaFeedback` + enums (`AnswerAssistantFeedbackType`, `AnswerAssistantSafetySignal`, …).  
++Migration: `20260603140000_add_answer_assistant_beta_feedback`.
++
++## Admin review
++
++- 상태: `new` · `triaged` · `incident_candidate` · `dismissed` · `resolved` (**수동 변경만**)
++- **인시던트 힌트:** HIGH severity, `safety_concern`, 특정 safety signal — 자동 상태 변경 없음
++- **판단 기준:** `BETA_SAFETY_REVIEW_DECISION_CRITERIA` (maintain / pause / improve / hold_expansion)
++
++## Explicitly not implemented
++
++- 자동 제재, 자동 allowlist 제거, 자동 feature gate OFF
++- 전체 VERIFIED_PLANNER / GENERAL_USER / public chatbot
++- CSV export, raw payload 조회
++
++## Modules
++
++| Path | Role |
++| --- | --- |
++| `lib/answer-assistant/beta-feedback-validation.ts` | Submit validation |
++| `lib/answer-assistant/beta-feedback-persist.ts` | DB persist |
++| `lib/answer-assistant/beta-feedback-dashboard.ts` | Admin aggregates |
++| `app/planner/answer-assistant/feedback-actions.ts` | Pilot submit |
++| `app/admin/answer-assistant/feedback/actions.ts` | Manual review update |
++
++## Validation
++
++```bash
++npm run typecheck
++npm run lint
++npm run build
++npm test
++```
+diff --git a/lib/answer-assistant/beta-feedback-constants.ts b/lib/answer-assistant/beta-feedback-constants.ts
+new file mode 100644
+index 0000000..7afeda6
+--- /dev/null
++++ b/lib/answer-assistant/beta-feedback-constants.ts
+@@ -0,0 +1,21 @@
++// Beta safety feedback limits (PR-101).
++
++export const BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH = 120;
++export const BETA_FEEDBACK_ADMIN_MEMO_MAX_LENGTH = 500;
++export const BETA_FEEDBACK_MAX_PER_USER_PER_DAY = 10;
++
++export const BETA_FEEDBACK_FORBIDDEN_STORED_FIELDS = [
++  "query",
++  "draft",
++  "rawOutput",
++  "rawPrompt",
++  "prompt",
++  "generatedAnswer",
++  "phone",
++  "email",
++  "contractNumber",
++  "medicalInfo",
++  "ocrText",
++  "fileUrl",
++  "customerMessage",
++] as const;
+diff --git a/lib/answer-assistant/beta-feedback-dashboard.ts b/lib/answer-assistant/beta-feedback-dashboard.ts
+new file mode 100644
+index 0000000..3c24561
+--- /dev/null
++++ b/lib/answer-assistant/beta-feedback-dashboard.ts
+@@ -0,0 +1,334 @@
++// Admin beta feedback safety review dashboard (PR-101).
++
++import type {
++  AnswerAssistantFeedbackReviewStatus,
++  AnswerAssistantFeedbackSeverity,
++  AnswerAssistantFeedbackType,
++  AnswerAssistantSafetySignal,
++  Prisma,
++} from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import {
++  adminListPageCount,
++  ADMIN_LIST_PAGE_SIZE,
++  parseAdminListPage,
++} from "@/lib/admin/list-pagination";
++import { getAllowlistBetaOperationalStatus } from "./allowlist-beta";
++import { getVerifiedAnswerAssistantAllowlistCount } from "./allowlist";
++import {
++  isAnswerAssistantVerifiedBetaEnabled,
++  isAnswerAssistantVerifiedGateEnvEnabled,
++  isAnswerAssistantVerifiedPreviewEnabled,
++} from "./feature-gate";
++import {
++  BETA_FEEDBACK_REVIEW_STATUS_LABEL,
++} from "./beta-feedback-labels";
++import {
++  BETA_FEEDBACK_TYPE_OPTIONS,
++  BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS,
++} from "./beta-feedback-labels";
++import { isBetaFeedbackIncidentCandidateHint } from "./beta-feedback-validation";
++import { truncateUsageAuditUserId } from "./usage-audit-dashboard";
++
++export type BetaFeedbackDashboardSearchParams = {
++  feedbackType?: string;
++  safetySignal?: string;
++  severity?: string;
++  adminStatus?: string;
++  incidentOnly?: string;
++  createdFrom?: string;
++  createdTo?: string;
++  page?: string;
++};
++
++export type BetaFeedbackListRow = {
++  id: string;
++  createdAt: string;
++  feedbackType: AnswerAssistantFeedbackType;
++  feedbackTypeLabel: string;
++  safetySignal: AnswerAssistantSafetySignal | null;
++  safetySignalLabel: string | null;
++  severity: AnswerAssistantFeedbackSeverity;
++  adminStatus: AnswerAssistantFeedbackReviewStatus;
++  adminStatusLabel: string;
++  incidentHint: boolean;
++  usageAuditId: string | null;
++  userIdPrefix: string | null;
++  shortNote: string | null;
++  auditOutcome: string | null;
++  auditBlockedReason: string | null;
++  auditRateLimitBlocked: boolean | null;
++  auditOutputSafetyBlocked: boolean | null;
++};
++
++export type BetaFeedbackDashboardData = {
++  summary: {
++    total: number;
++    newCount: number;
++    incidentCandidates: number;
++    highSeverity: number;
++    safetyConcern: number;
++  };
++  byFeedbackType: { label: string; count: number }[];
++  bySafetySignal: { label: string; count: number }[];
++  byAdminStatus: { label: string; count: number }[];
++  operational: {
++    betaGateEnabled: boolean;
++    betaEnvEnabled: boolean;
++    allowlistPilotCount: number;
++    allowlistBetaStatus: string;
++    verifiedGenerationEnabled: boolean;
++  };
++  rows: BetaFeedbackListRow[];
++  totalRows: number;
++  page: number;
++  pageCount: number;
++};
++
++function parseDateStart(value: string | undefined): Date | undefined {
++  if (!value?.trim()) return undefined;
++  const d = new Date(`${value.trim()}T00:00:00.000Z`);
++  return Number.isNaN(d.getTime()) ? undefined : d;
++}
++
++function parseDateEnd(value: string | undefined): Date | undefined {
++  if (!value?.trim()) return undefined;
++  const d = new Date(`${value.trim()}T23:59:59.999Z`);
++  return Number.isNaN(d.getTime()) ? undefined : d;
++}
++
++export function buildBetaFeedbackDashboardWhere(
++  params: BetaFeedbackDashboardSearchParams,
++): Prisma.AnswerAssistantBetaFeedbackWhereInput {
++  const and: Prisma.AnswerAssistantBetaFeedbackWhereInput[] = [];
++
++  const typeValues = BETA_FEEDBACK_TYPE_OPTIONS.map((o) => o.value);
++  if (
++    params.feedbackType &&
++    params.feedbackType !== "all" &&
++    typeValues.includes(params.feedbackType as AnswerAssistantFeedbackType)
++  ) {
++    and.push({
++      feedbackType: params.feedbackType as AnswerAssistantFeedbackType,
++    });
++  }
++
++  const signalValues = BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS.map((o) => o.value);
++  if (
++    params.safetySignal &&
++    params.safetySignal !== "all" &&
++    signalValues.includes(params.safetySignal as AnswerAssistantSafetySignal)
++  ) {
++    and.push({
++      safetySignal: params.safetySignal as AnswerAssistantSafetySignal,
++    });
++  }
++
++  if (
++    params.severity &&
++    params.severity !== "all" &&
++    ["low", "medium", "high"].includes(params.severity)
++  ) {
++    and.push({
++      severity: params.severity as AnswerAssistantFeedbackSeverity,
++    });
++  }
++
++  if (
++    params.adminStatus &&
++    params.adminStatus !== "all" &&
++    Object.keys(BETA_FEEDBACK_REVIEW_STATUS_LABEL).includes(params.adminStatus)
++  ) {
++    and.push({
++      adminStatus: params.adminStatus as AnswerAssistantFeedbackReviewStatus,
++    });
++  }
++
++  if (params.incidentOnly === "true") {
++    and.push({ adminStatus: "incident_candidate" });
++  }
++
++  const createdFrom = parseDateStart(params.createdFrom);
++  const createdTo = parseDateEnd(params.createdTo);
++  if (createdFrom || createdTo) {
++    const createdAt: Prisma.DateTimeFilter = {};
++    if (createdFrom) createdAt.gte = createdFrom;
++    if (createdTo) createdAt.lte = createdTo;
++    and.push({ createdAt });
++  }
++
++  if (and.length === 0) return {};
++  if (and.length === 1) return and[0]!;
++  return { AND: and };
++}
++
++export function betaFeedbackDashboardFilterQuery(
++  params: BetaFeedbackDashboardSearchParams,
++  overrides: Partial<BetaFeedbackDashboardSearchParams> = {},
++): string {
++  const merged = { ...params, ...overrides };
++  const parts = new URLSearchParams();
++  if (merged.feedbackType && merged.feedbackType !== "all") {
++    parts.set("feedbackType", merged.feedbackType);
++  }
++  if (merged.safetySignal && merged.safetySignal !== "all") {
++    parts.set("safetySignal", merged.safetySignal);
++  }
++  if (merged.severity && merged.severity !== "all") {
++    parts.set("severity", merged.severity);
++  }
++  if (merged.adminStatus && merged.adminStatus !== "all") {
++    parts.set("adminStatus", merged.adminStatus);
++  }
++  if (merged.incidentOnly === "true") parts.set("incidentOnly", "true");
++  if (merged.createdFrom) parts.set("createdFrom", merged.createdFrom);
++  if (merged.createdTo) parts.set("createdTo", merged.createdTo);
++  if (merged.page && merged.page !== "1") parts.set("page", merged.page);
++  const qs = parts.toString();
++  return qs ? `?${qs}` : "";
++}
++
++const FEEDBACK_LIST_SELECT = {
++  id: true,
++  createdAt: true,
++  feedbackType: true,
++  safetySignal: true,
++  severity: true,
++  adminStatus: true,
++  usageAuditId: true,
++  userId: true,
++  shortNote: true,
++  usageAudit: {
++    select: {
++      outcome: true,
++      blockedReason: true,
++      rateLimitBlocked: true,
++      outputSafetyBlocked: true,
++    },
++  },
++} as const satisfies Prisma.AnswerAssistantBetaFeedbackSelect;
++
++export async function loadBetaFeedbackDashboard(
++  params: BetaFeedbackDashboardSearchParams,
++): Promise<BetaFeedbackDashboardData> {
++  const where = buildBetaFeedbackDashboardWhere(params);
++  const page = parseAdminListPage(params.page);
++
++  const typeLabel = Object.fromEntries(
++    BETA_FEEDBACK_TYPE_OPTIONS.map((o) => [o.value, o.label]),
++  );
++  const signalLabel = Object.fromEntries(
++    BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS.map((o) => [o.value, o.label]),
++  );
++
++  const [
++    total,
++    newCount,
++    incidentCandidates,
++    highSeverity,
++    safetyConcern,
++    typeGroups,
++    signalGroups,
++    statusGroups,
++    totalFiltered,
++    listRows,
++  ] = await Promise.all([
++    prisma.answerAssistantBetaFeedback.count({ where }),
++    prisma.answerAssistantBetaFeedback.count({
++      where: { ...where, adminStatus: "new" },
++    }),
++    prisma.answerAssistantBetaFeedback.count({
++      where: { ...where, adminStatus: "incident_candidate" },
++    }),
++    prisma.answerAssistantBetaFeedback.count({
++      where: { ...where, severity: "high" },
++    }),
++    prisma.answerAssistantBetaFeedback.count({
++      where: { ...where, feedbackType: "safety_concern" },
++    }),
++    prisma.answerAssistantBetaFeedback.groupBy({
++      by: ["feedbackType"],
++      where,
++      _count: { _all: true },
++    }),
++    prisma.answerAssistantBetaFeedback.groupBy({
++      by: ["safetySignal"],
++      where: { ...where, safetySignal: { not: null } },
++      _count: { _all: true },
++    }),
++    prisma.answerAssistantBetaFeedback.groupBy({
++      by: ["adminStatus"],
++      where,
++      _count: { _all: true },
++    }),
++    prisma.answerAssistantBetaFeedback.count({ where }),
++    prisma.answerAssistantBetaFeedback.findMany({
++      where,
++      orderBy: [{ severity: "desc" }, { createdAt: "desc" }],
++      skip: (page - 1) * ADMIN_LIST_PAGE_SIZE,
++      take: ADMIN_LIST_PAGE_SIZE,
++      select: FEEDBACK_LIST_SELECT,
++    }),
++  ]);
++
++  const rows: BetaFeedbackListRow[] = listRows.map((row) => ({
++    id: row.id,
++    createdAt: row.createdAt.toISOString(),
++    feedbackType: row.feedbackType,
++    feedbackTypeLabel: typeLabel[row.feedbackType] ?? row.feedbackType,
++    safetySignal: row.safetySignal,
++    safetySignalLabel: row.safetySignal
++      ? (signalLabel[row.safetySignal] ?? row.safetySignal)
++      : null,
++    severity: row.severity,
++    adminStatus: row.adminStatus,
++    adminStatusLabel: BETA_FEEDBACK_REVIEW_STATUS_LABEL[row.adminStatus],
++    incidentHint: isBetaFeedbackIncidentCandidateHint({
++      feedbackType: row.feedbackType,
++      safetySignal: row.safetySignal,
++      severity: row.severity,
++    }),
++    usageAuditId: row.usageAuditId,
++    userIdPrefix: row.userId ? truncateUsageAuditUserId(row.userId) : null,
++    shortNote: row.shortNote,
++    auditOutcome: row.usageAudit?.outcome ?? null,
++    auditBlockedReason: row.usageAudit?.blockedReason ?? null,
++    auditRateLimitBlocked: row.usageAudit?.rateLimitBlocked ?? null,
++    auditOutputSafetyBlocked: row.usageAudit?.outputSafetyBlocked ?? null,
++  }));
++
++  return {
++    summary: {
++      total,
++      newCount,
++      incidentCandidates,
++      highSeverity,
++      safetyConcern,
++    },
++    byFeedbackType: typeGroups.map((g) => ({
++      label: typeLabel[g.feedbackType] ?? g.feedbackType,
++      count: g._count._all,
++    })),
++    bySafetySignal: signalGroups
++      .filter((g) => g.safetySignal)
++      .map((g) => ({
++        label: signalLabel[g.safetySignal!] ?? g.safetySignal!,
++        count: g._count._all,
++      })),
++    byAdminStatus: statusGroups.map((g) => ({
++      label: BETA_FEEDBACK_REVIEW_STATUS_LABEL[g.adminStatus],
++      count: g._count._all,
++    })),
++    operational: {
++      betaGateEnabled: isAnswerAssistantVerifiedGateEnvEnabled(),
++      betaEnvEnabled: isAnswerAssistantVerifiedBetaEnabled(),
++      allowlistPilotCount: getVerifiedAnswerAssistantAllowlistCount(),
++      allowlistBetaStatus: getAllowlistBetaOperationalStatus(),
++      verifiedGenerationEnabled: isAnswerAssistantVerifiedPreviewEnabled(),
++    },
++    rows,
++    totalRows: totalFiltered,
++    page,
++    pageCount: adminListPageCount(totalFiltered),
++  };
++}
+diff --git a/lib/answer-assistant/beta-feedback-labels.ts b/lib/answer-assistant/beta-feedback-labels.ts
+new file mode 100644
+index 0000000..8d12c86
+--- /dev/null
++++ b/lib/answer-assistant/beta-feedback-labels.ts
+@@ -0,0 +1,97 @@
++// Beta feedback UI labels (PR-101).
++
++import type {
++  AnswerAssistantFeedbackNoteCategory,
++  AnswerAssistantFeedbackReviewStatus,
++  AnswerAssistantFeedbackSeverity,
++  AnswerAssistantFeedbackType,
++  AnswerAssistantFeedbackUsefulness,
++  AnswerAssistantSafetySignal,
++} from "@prisma/client";
++
++export const BETA_FEEDBACK_TYPE_OPTIONS: {
++  value: AnswerAssistantFeedbackType;
++  label: string;
++  description: string;
++}[] = [
++  {
++    value: "post_session",
++    label: "세션 후 안전 신호",
++    description: "방금 사용한 세션의 안전·차단·고지 관련 신호",
++  },
++  {
++    value: "blocked_experience",
++    label: "차단 경험",
++    description: "차단이 적절했는지, 과도했는지",
++  },
++  {
++    value: "safety_concern",
++    label: "안전 우려",
++    description: "출력·근거·개인정보 노출 우려",
++  },
++  {
++    value: "ui_understanding",
++    label: "UI·고지 이해",
++    description: "beta 고지·제한 안내 이해도",
++  },
++  {
++    value: "other_signal",
++    label: "기타 신호",
++    description: "위 분류에 해당하지 않는 운영 신호",
++  },
++];
++
++export const BETA_FEEDBACK_SAFETY_SIGNAL_OPTIONS: {
++  value: AnswerAssistantSafetySignal;
++  label: string;
++}[] = [
++  { value: "none", label: "특이 신호 없음" },
++  { value: "blocking_felt_wrong", label: "차단이 부적절/과도함" },
++  { value: "evidence_too_weak", label: "근거·출처 부족" },
++  { value: "output_too_assertive", label: "출력이 단정적임" },
++  { value: "missing_disclaimer", label: "고지·면책 부족" },
++  { value: "prompt_injection_risk", label: "우회·주입 위험" },
++  { value: "privacy_risk", label: "개인정보·민감정보 우려" },
++];
++
++export const BETA_FEEDBACK_SEVERITY_OPTIONS: {
++  value: AnswerAssistantFeedbackSeverity;
++  label: string;
++}[] = [
++  { value: "low", label: "낮음" },
++  { value: "medium", label: "중간" },
++  { value: "high", label: "높음" },
++];
++
++export const BETA_FEEDBACK_USEFULNESS_OPTIONS: {
++  value: AnswerAssistantFeedbackUsefulness;
++  label: string;
++}[] = [
++  { value: "not_applicable", label: "해당 없음" },
++  { value: "not_useful", label: "도움 안 됨" },
++  { value: "partial", label: "일부 도움" },
++  { value: "helpful", label: "도움 됨" },
++];
++
++export const BETA_FEEDBACK_NOTE_CATEGORY_OPTIONS: {
++  value: AnswerAssistantFeedbackNoteCategory;
++  label: string;
++}[] = [
++  { value: "blocking", label: "차단" },
++  { value: "evidence", label: "근거" },
++  { value: "output_safety", label: "출력 안전" },
++  { value: "ui_copy", label: "UI·고지" },
++  { value: "rate_limit", label: "사용량 제한" },
++  { value: "other", label: "기타" },
++];
++
++export const BETA_FEEDBACK_REVIEW_STATUS_LABEL: Record<
++  AnswerAssistantFeedbackReviewStatus,
++  string
++> = {
++  new: "신규",
++  triaged: "분류 완료",
++  incident_candidate: "인시던트 후보",
++  dismissed: "기각",
++  resolved: "조치 완료",
++};
+diff --git a/lib/answer-assistant/beta-feedback-persist.ts b/lib/answer-assistant/beta-feedback-persist.ts
+new file mode 100644
+index 0000000..36cd1e2
+--- /dev/null
++++ b/lib/answer-assistant/beta-feedback-persist.ts
+@@ -0,0 +1,57 @@
++// Persist structured beta safety feedback (PR-101).
++
++import { prisma } from "@/lib/prisma";
++import type { BetaFeedbackValidatedPayload } from "./beta-feedback-validation";
++import { BETA_FEEDBACK_MAX_PER_USER_PER_DAY } from "./beta-feedback-constants";
++
++export async function countBetaFeedbackTodayForUser(
++  userId: string,
++): Promise<number> {
++  const start = new Date();
++  start.setUTCHours(0, 0, 0, 0);
++  return prisma.answerAssistantBetaFeedback.count({
++    where: { userId, createdAt: { gte: start } },
++  });
++}
++
++export async function persistBetaSafetyFeedback(
++  userId: string,
++  payload: BetaFeedbackValidatedPayload,
++): Promise<{ ok: true; feedbackId: string } | { ok: false; message: string }> {
++  const todayCount = await countBetaFeedbackTodayForUser(userId);
++  if (todayCount >= BETA_FEEDBACK_MAX_PER_USER_PER_DAY) {
++    return {
++      ok: false,
++      message: "오늘 제출 가능한 beta 피드백 한도에 도달했습니다.",
++    };
++  }
++
++  if (payload.usageAuditId) {
++    const audit = await prisma.answerAssistantUsageAudit.findFirst({
++      where: { id: payload.usageAuditId, userId },
++      select: { id: true },
++    });
++    if (!audit) {
++      return {
++        ok: false,
++        message: "연결할 usage audit을 확인할 수 없습니다.",
++      };
++    }
++  }
++
++  const row = await prisma.answerAssistantBetaFeedback.create({
++    data: {
++      userId,
++      usageAuditId: payload.usageAuditId,
++      feedbackType: payload.feedbackType,
++      safetySignal: payload.safetySignal,
++      severity: payload.severity,
++      usefulness: payload.usefulness,
++      noteCategory: payload.noteCategory,
++      shortNote: payload.shortNote,
++    },
++    select: { id: true },
++  });
++
++  return { ok: true, feedbackId: row.id };
++}
+diff --git a/lib/answer-assistant/beta-feedback-review-criteria.ts b/lib/answer-assistant/beta-feedback-review-criteria.ts
+new file mode 100644
+index 0000000..6479f6c
+--- /dev/null
++++ b/lib/answer-assistant/beta-feedback-review-criteria.ts
+@@ -0,0 +1,40 @@
++// Beta feedback safety review decision criteria (PR-101). Documentation constants only.
++
++export type BetaSafetyReviewRecommendation =
++  | "maintain_beta"
++  | "pause_beta"
++  | "improve_before_continue"
++  | "hold_expansion";
++
++export const BETA_SAFETY_REVIEW_DECISION_CRITERIA = {
++  maintain_beta: [
++    "Output safety·rate limit·allowlist 차단 비율이 예상 범위",
++    "HIGH severity·incident_candidate 비율이 낮음",
++    "Prompt injection·privacy_risk 신호가 반복되지 않음",
++    "운영자 수동 검토 backlog가 관리 가능",
++  ],
++  pause_beta: [
++    "incident_candidate가 단기간에 다수 누적",
++    "output_too_assertive·missing_disclaimer 신호 급증",
++    "provider 오류·rate limit abuse가 동시에 증가",
++    "allowlist 외 접근 시도와 함께 안전 신호 악화",
++  ],
++  improve_before_continue: [
++    "blocking_felt_wrong·evidence_too_weak 피드백이 집중",
++    "UI·고지 이해 부족(ui_understanding) 다수",
++    "차단 정책 조정 필요하나 전체 공개는 아직 부적절",
++  ],
++  hold_expansion: [
++    "전체 VERIFIED_PLANNER 공개는 금지 — allowlist 유지",
++    "GENERAL_USER·public chatbot 확대 금지",
++    "자동 allowlist 제거·자동 gate OFF 금지 — 운영자 수동 판단만",
++  ],
++} as const;
++
++export const BETA_SAFETY_REVIEW_OPERATOR_RULES = [
++  "피드백은 structured 분류만 저장 — 상담 원문·생성 초안·raw prompt/output 금지",
++  "인시던트 후보는 adminStatus 수동 변경으로만 표시",
++  "자동 제재·자동 allowlist 제거·자동 feature gate OFF 금지",
++  "usage audit dashboard와 함께 집계·추세 확인",
++  "beta 확대 결정은 별도 PR·운영 sign-off 필요",
++] as const;
+diff --git a/lib/answer-assistant/beta-feedback-validation.ts b/lib/answer-assistant/beta-feedback-validation.ts
+new file mode 100644
+index 0000000..1a3fc74
+--- /dev/null
++++ b/lib/answer-assistant/beta-feedback-validation.ts
+@@ -0,0 +1,222 @@
++// Beta safety feedback validation (PR-101). Blocks PII/medical/prompt storage.
++
++import type {
++  AnswerAssistantFeedbackNoteCategory,
++  AnswerAssistantFeedbackSeverity,
++  AnswerAssistantFeedbackType,
++  AnswerAssistantFeedbackUsefulness,
++  AnswerAssistantSafetySignal,
++} from "@prisma/client";
++import { hasClientSensitiveSignal } from "@/lib/correction-request/validation";
++import { BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH } from "./beta-feedback-constants";
++
++const FEEDBACK_TYPES = new Set<string>([
++  "post_session",
++  "blocked_experience",
++  "safety_concern",
++  "ui_understanding",
++  "other_signal",
++]);
++
++const SAFETY_SIGNALS = new Set<string>([
++  "blocking_felt_wrong",
++  "evidence_too_weak",
++  "output_too_assertive",
++  "missing_disclaimer",
++  "prompt_injection_risk",
++  "privacy_risk",
++  "none",
++]);
++
++const SEVERITIES = new Set<string>(["low", "medium", "high"]);
++
++const USEFULNESS = new Set<string>([
++  "not_useful",
++  "partial",
++  "helpful",
++  "not_applicable",
++]);
++
++const NOTE_CATEGORIES = new Set<string>([
++  "blocking",
++  "evidence",
++  "output_safety",
++  "ui_copy",
++  "rate_limit",
++  "other",
++]);
++
++const HTML_PATTERN = /<[^>]+>|javascript:|on\w+\s*=/i;
++const URL_COUNT_MAX = 2;
++
++export type BetaFeedbackBlockReason =
++  | "VALIDATION"
++  | "SENSITIVE_CONTENT"
++  | "HTML_INJECTION";
++
++export interface BetaFeedbackSubmitInput {
++  feedbackType: string;
++  safetySignal: string;
++  severity: string;
++  usefulness: string;
++  noteCategory: string;
++  shortNote: string;
++  usageAuditId?: string;
++}
++
++export interface BetaFeedbackValidatedPayload {
++  feedbackType: AnswerAssistantFeedbackType;
++  safetySignal: AnswerAssistantSafetySignal;
++  severity: AnswerAssistantFeedbackSeverity;
++  usefulness: AnswerAssistantFeedbackUsefulness;
++  noteCategory: AnswerAssistantFeedbackNoteCategory | null;
++  shortNote: string | null;
++  usageAuditId: string | null;
++}
++
++export interface BetaFeedbackValidationResult {
++  ok: boolean;
++  reason?: BetaFeedbackBlockReason;
++  message: string;
++  data?: BetaFeedbackValidatedPayload;
++}
++
++export const BETA_FEEDBACK_ERROR_MESSAGES = {
++  VALIDATION: "선택 항목을 확인해 주세요.",
++  SENSITIVE_CONTENT:
++    "개인정보·의료·계약·상담 원문으로 보이는 내용은 저장하지 않습니다. 분류만 선택해 주세요.",
++  HTML_INJECTION: "허용되지 않는 형식입니다.",
++} as const;
++
++function countUrls(text: string): number {
++  const matches = text.match(/https?:\/\/|www\./gi);
++  return matches?.length ?? 0;
++}
++
++function sanitizeShortNote(raw: string): string {
++  return raw.replace(/\s+/g, " ").trim();
++}
++
++export function validateBetaFeedbackSubmit(
++  input: BetaFeedbackSubmitInput,
++): BetaFeedbackValidationResult {
++  if (!FEEDBACK_TYPES.has(input.feedbackType)) {
++    return {
++      ok: false,
++      reason: "VALIDATION",
++      message: BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++    };
++  }
++
++  if (!SAFETY_SIGNALS.has(input.safetySignal)) {
++    return {
++      ok: false,
++      reason: "VALIDATION",
++      message: BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++    };
++  }
++
++  if (!SEVERITIES.has(input.severity)) {
++    return {
++      ok: false,
++      reason: "VALIDATION",
++      message: BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++    };
++  }
++
++  if (!USEFULNESS.has(input.usefulness)) {
++    return {
++      ok: false,
++      reason: "VALIDATION",
++      message: BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++    };
++  }
++
++  const noteCategoryRaw = input.noteCategory?.trim();
++  let noteCategory: AnswerAssistantFeedbackNoteCategory | null = null;
++  if (noteCategoryRaw && noteCategoryRaw !== "none") {
++    if (!NOTE_CATEGORIES.has(noteCategoryRaw)) {
++      return {
++        ok: false,
++        reason: "VALIDATION",
++        message: BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++      };
++    }
++    noteCategory = noteCategoryRaw as AnswerAssistantFeedbackNoteCategory;
++  }
++
++  const usageAuditId = input.usageAuditId?.trim() || null;
++  if (usageAuditId && !/^c[a-z0-9]{20,30}$/i.test(usageAuditId)) {
++    return {
++      ok: false,
++      reason: "VALIDATION",
++      message: BETA_FEEDBACK_ERROR_MESSAGES.VALIDATION,
++    };
++  }
++
++  const shortNoteRaw = sanitizeShortNote(input.shortNote ?? "");
++  let shortNote: string | null = null;
++  if (shortNoteRaw.length > 0) {
++    if (shortNoteRaw.length > BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH) {
++      return {
++        ok: false,
++        reason: "VALIDATION",
++        message: `추가 메모는 ${BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH}자 이하로 입력해 주세요.`,
++      };
++    }
++    if (HTML_PATTERN.test(shortNoteRaw)) {
++      return {
++        ok: false,
++        reason: "HTML_INJECTION",
++        message: BETA_FEEDBACK_ERROR_MESSAGES.HTML_INJECTION,
++      };
++    }
++    if (countUrls(shortNoteRaw) > URL_COUNT_MAX) {
++      return {
++        ok: false,
++        reason: "VALIDATION",
++        message: "링크는 최대 2개까지 입력할 수 있습니다.",
++      };
++    }
++    if (hasClientSensitiveSignal(shortNoteRaw)) {
++      return {
++        ok: false,
++        reason: "SENSITIVE_CONTENT",
++        message: BETA_FEEDBACK_ERROR_MESSAGES.SENSITIVE_CONTENT,
++      };
++    }
++    shortNote = shortNoteRaw;
++  }
++
++  return {
++    ok: true,
++    message: "ok",
++    data: {
++      feedbackType: input.feedbackType as AnswerAssistantFeedbackType,
++      safetySignal: input.safetySignal as AnswerAssistantSafetySignal,
++      severity: input.severity as AnswerAssistantFeedbackSeverity,
++      usefulness: input.usefulness as AnswerAssistantFeedbackUsefulness,
++      noteCategory,
++      shortNote,
++      usageAuditId,
++    },
++  };
++}
++
++/** Suggests incident review when operator triages — not auto-applied. */
++export function isBetaFeedbackIncidentCandidateHint(payload: {
++  feedbackType: AnswerAssistantFeedbackType;
++  safetySignal: AnswerAssistantSafetySignal | null;
++  severity: AnswerAssistantFeedbackSeverity;
++}): boolean {
++  if (payload.severity === "high") return true;
++  if (payload.feedbackType === "safety_concern") return true;
++  if (
++    payload.safetySignal === "privacy_risk" ||
++    payload.safetySignal === "prompt_injection_risk" ||
++    payload.safetySignal === "output_too_assertive"
++  ) {
++    return true;
++  }
++  return false;
++}
+diff --git a/lib/answer-assistant/types.ts b/lib/answer-assistant/types.ts
+index 20c00cf..3b30374 100644
+--- a/lib/answer-assistant/types.ts
++++ b/lib/answer-assistant/types.ts
+@@ -66,6 +66,8 @@ export interface AnswerAssistantEvidenceItem {
+ 
+ export interface AnswerAssistantSuccessResult {
+   ok: true;
++  /** Durable usage audit row id when persisted (PR-101 feedback link). */
++  usageAuditId?: string;
+   draft: string;
+   draftMode: AnswerAssistantDraftMode;
+   providerConfigured: boolean;
+@@ -83,6 +85,8 @@ export interface AnswerAssistantSuccessResult {
+ 
+ export interface AnswerAssistantBlockedResult {
+   ok: false;
++  /** Durable usage audit row id when persisted (PR-101 feedback link). */
++  usageAuditId?: string;
+   blockedReason: AnswerAssistantBlockedReason;
+   message: string;
+   evidence: AnswerAssistantEvidenceItem[];
+diff --git a/lib/answer-assistant/usage-audit-durable.ts b/lib/answer-assistant/usage-audit-durable.ts
+index 565a7e1..0cee120 100644
+--- a/lib/answer-assistant/usage-audit-durable.ts
++++ b/lib/answer-assistant/usage-audit-durable.ts
+@@ -5,8 +5,8 @@ import type { AnswerAssistantUsageLogEntry } from "./usage-log";
+ 
+ export async function persistAnswerAssistantUsageAudit(
+   entry: AnswerAssistantUsageLogEntry,
+-): Promise<void> {
+-  await prisma.answerAssistantUsageAudit.create({
++): Promise<string> {
++  const row = await prisma.answerAssistantUsageAudit.create({
+     data: {
+       userId: entry.userId,
+       audience: entry.audience,
+@@ -22,7 +22,9 @@ export async function persistAnswerAssistantUsageAudit(
+       isAdminTester: entry.isAdminTester ?? false,
+       createdAt: new Date(entry.timestamp),
+     },
++    select: { id: true },
+   });
++  return row.id;
+ }
+ 
+ /** Test helper — removes audit rows for a user. */
+diff --git a/lib/answer-assistant/usage-log.ts b/lib/answer-assistant/usage-log.ts
+index 7085fad..8600170 100644
+--- a/lib/answer-assistant/usage-log.ts
++++ b/lib/answer-assistant/usage-log.ts
+@@ -38,7 +38,7 @@ function pushToMemoryBuffer(entry: AnswerAssistantUsageLogEntry): void {
+ 
+ export async function logAnswerAssistantUsage(
+   entry: AnswerAssistantUsageLogEntry,
+-): Promise<void> {
++): Promise<string | undefined> {
+   pushToMemoryBuffer(entry);
+ 
+   if (process.env.NODE_ENV !== "production") {
+@@ -47,11 +47,12 @@ export async function logAnswerAssistantUsage(
+ 
+   if (getAnswerAssistantUsageAuditBackend() === "durable") {
+     try {
+-      await persistAnswerAssistantUsageAudit(entry);
++      return await persistAnswerAssistantUsageAudit(entry);
+     } catch (error) {
+       console.error("[answer-assistant-usage-audit] persist failed", error);
+     }
+   }
++  return undefined;
+ }
+ 
+ /** Test helper — returns recent in-memory entries without PII payloads. */
+diff --git a/prisma/migrations/20260603140000_add_answer_assistant_beta_feedback/migration.sql b/prisma/migrations/20260603140000_add_answer_assistant_beta_feedback/migration.sql
+new file mode 100644
+index 0000000..5edb1f0
+--- /dev/null
++++ b/prisma/migrations/20260603140000_add_answer_assistant_beta_feedback/migration.sql
+@@ -0,0 +1,68 @@
++-- CreateEnum
++CREATE TYPE "AnswerAssistantFeedbackType" AS ENUM ('post_session', 'blocked_experience', 'safety_concern', 'ui_understanding', 'other_signal');
++
++-- CreateEnum
++CREATE TYPE "AnswerAssistantSafetySignal" AS ENUM ('blocking_felt_wrong', 'evidence_too_weak', 'output_too_assertive', 'missing_disclaimer', 'prompt_injection_risk', 'privacy_risk', 'none');
++
++-- CreateEnum
++CREATE TYPE "AnswerAssistantFeedbackSeverity" AS ENUM ('low', 'medium', 'high');
++
++-- CreateEnum
++CREATE TYPE "AnswerAssistantFeedbackUsefulness" AS ENUM ('not_useful', 'partial', 'helpful', 'not_applicable');
++
++-- CreateEnum
++CREATE TYPE "AnswerAssistantFeedbackNoteCategory" AS ENUM ('blocking', 'evidence', 'output_safety', 'ui_copy', 'rate_limit', 'other');
++
++-- CreateEnum
++CREATE TYPE "AnswerAssistantFeedbackReviewStatus" AS ENUM ('new', 'triaged', 'incident_candidate', 'dismissed', 'resolved');
++
++-- CreateTable
++CREATE TABLE "AnswerAssistantBetaFeedback" (
++    "id" TEXT NOT NULL,
++    "usageAuditId" TEXT,
++    "userId" TEXT,
++    "feedbackType" "AnswerAssistantFeedbackType" NOT NULL,
++    "safetySignal" "AnswerAssistantSafetySignal",
++    "severity" "AnswerAssistantFeedbackSeverity" NOT NULL DEFAULT 'low',
++    "usefulness" "AnswerAssistantFeedbackUsefulness",
++    "noteCategory" "AnswerAssistantFeedbackNoteCategory",
++    "shortNote" VARCHAR(120),
++    "adminStatus" "AnswerAssistantFeedbackReviewStatus" NOT NULL DEFAULT 'new',
++    "adminMemo" VARCHAR(500),
++    "reviewedAt" TIMESTAMP(3),
++    "reviewedById" TEXT,
++    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
++    "updatedAt" TIMESTAMP(3) NOT NULL,
++
++    CONSTRAINT "AnswerAssistantBetaFeedback_pkey" PRIMARY KEY ("id")
++);
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_usageAuditId_idx" ON "AnswerAssistantBetaFeedback"("usageAuditId");
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_userId_idx" ON "AnswerAssistantBetaFeedback"("userId");
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_feedbackType_idx" ON "AnswerAssistantBetaFeedback"("feedbackType");
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_safetySignal_idx" ON "AnswerAssistantBetaFeedback"("safetySignal");
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_severity_idx" ON "AnswerAssistantBetaFeedback"("severity");
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_adminStatus_idx" ON "AnswerAssistantBetaFeedback"("adminStatus");
++
++-- CreateIndex
++CREATE INDEX "AnswerAssistantBetaFeedback_createdAt_idx" ON "AnswerAssistantBetaFeedback"("createdAt");
++
++-- AddForeignKey
++ALTER TABLE "AnswerAssistantBetaFeedback" ADD CONSTRAINT "AnswerAssistantBetaFeedback_usageAuditId_fkey" FOREIGN KEY ("usageAuditId") REFERENCES "AnswerAssistantUsageAudit"("id") ON DELETE SET NULL ON UPDATE CASCADE;
++
++-- AddForeignKey
++ALTER TABLE "AnswerAssistantBetaFeedback" ADD CONSTRAINT "AnswerAssistantBetaFeedback_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
++
++-- AddForeignKey
++ALTER TABLE "AnswerAssistantBetaFeedback" ADD CONSTRAINT "AnswerAssistantBetaFeedback_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index d07493e..59a51c1 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -355,6 +355,55 @@ enum AnswerAssistantUsageOutcome {
+   blocked
+ }
+ 
++// Beta safety feedback (PR-101). Structured signals only — no prompt/draft/PII.
++enum AnswerAssistantFeedbackType {
++  post_session
++  blocked_experience
++  safety_concern
++  ui_understanding
++  other_signal
++}
++
++enum AnswerAssistantSafetySignal {
++  blocking_felt_wrong
++  evidence_too_weak
++  output_too_assertive
++  missing_disclaimer
++  prompt_injection_risk
++  privacy_risk
++  none
++}
++
++enum AnswerAssistantFeedbackSeverity {
++  low
++  medium
++  high
++}
++
++enum AnswerAssistantFeedbackUsefulness {
++  not_useful
++  partial
++  helpful
++  not_applicable
++}
++
++enum AnswerAssistantFeedbackNoteCategory {
++  blocking
++  evidence
++  output_safety
++  ui_copy
++  rate_limit
++  other
++}
++
++enum AnswerAssistantFeedbackReviewStatus {
++  new
++  triaged
++  incident_candidate
++  dismissed
++  resolved
++}
++
+ model User {
+   id                           String                         @id @default(cuid())
+   name                         String?
+@@ -375,9 +424,11 @@ model User {
+   deletedCommunityPosts        CommunityPost[]                @relation("CommunityPostDeletedBy")
+   submittedCommunityReports    CommunityReport[]              @relation("CommunityReportReporter")
+   reviewedCommunityReports     CommunityReport[]              @relation("CommunityReportReviewer")
+-  answerAssistantRateLimit     AnswerAssistantRateLimitState?
+-  answerAssistantUsageAudits   AnswerAssistantUsageAudit[]
+-  createdAt                    DateTime                       @default(now())
++  answerAssistantRateLimit            AnswerAssistantRateLimitState?
++  answerAssistantUsageAudits          AnswerAssistantUsageAudit[]
++  answerAssistantBetaFeedbacks        AnswerAssistantBetaFeedback[]  @relation("AnswerAssistantBetaFeedbackUser")
++  reviewedAnswerAssistantBetaFeedback AnswerAssistantBetaFeedback[]  @relation("AnswerAssistantBetaFeedbackReviewer")
++  createdAt                           DateTime                       @default(now())
+   updatedAt                    DateTime                       @updatedAt
+ }
+ 
+@@ -803,9 +854,40 @@ model AnswerAssistantUsageAudit {
+   rateLimitBlocked    Boolean                      @default(false)
+   isAdminTester       Boolean                      @default(false)
+   createdAt           DateTime                     @default(now())
++  betaFeedbacks       AnswerAssistantBetaFeedback[]
+ 
+   @@index([userId, createdAt])
+   @@index([createdAt])
+   @@index([outcome, createdAt])
+   @@index([blockedReason])
+ }
++
++// Structured beta safety feedback linked to usage audit metadata (PR-101).
++model AnswerAssistantBetaFeedback {
++  id           String                            @id @default(cuid())
++  usageAuditId String?
++  usageAudit   AnswerAssistantUsageAudit?        @relation(fields: [usageAuditId], references: [id], onDelete: SetNull)
++  userId       String?
++  user         User?                             @relation("AnswerAssistantBetaFeedbackUser", fields: [userId], references: [id], onDelete: SetNull)
++  feedbackType AnswerAssistantFeedbackType
++  safetySignal AnswerAssistantSafetySignal?
++  severity     AnswerAssistantFeedbackSeverity   @default(low)
++  usefulness   AnswerAssistantFeedbackUsefulness?
++  noteCategory AnswerAssistantFeedbackNoteCategory?
++  shortNote    String?                           @db.VarChar(120)
++  adminStatus  AnswerAssistantFeedbackReviewStatus @default(new)
++  adminMemo    String?                           @db.VarChar(500)
++  reviewedAt   DateTime?
++  reviewedById String?
++  reviewedBy   User?                             @relation("AnswerAssistantBetaFeedbackReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
++  createdAt    DateTime                          @default(now())
++  updatedAt    DateTime                          @updatedAt
++
++  @@index([usageAuditId])
++  @@index([userId])
++  @@index([feedbackType])
++  @@index([safetySignal])
++  @@index([severity])
++  @@index([adminStatus])
++  @@index([createdAt])
++}
+diff --git a/tests/answer-assistant/beta-feedback.test.ts b/tests/answer-assistant/beta-feedback.test.ts
+new file mode 100644
+index 0000000..93269a2
+--- /dev/null
++++ b/tests/answer-assistant/beta-feedback.test.ts
+@@ -0,0 +1,123 @@
++import assert from "node:assert/strict";
++import { readFileSync } from "node:fs";
++import { join } from "node:path";
++import { describe, it } from "node:test";
++
++import {
++  BETA_FEEDBACK_FORBIDDEN_STORED_FIELDS,
++  BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH,
++} from "@/lib/answer-assistant/beta-feedback-constants";
++import {
++  isBetaFeedbackIncidentCandidateHint,
++  validateBetaFeedbackSubmit,
++} from "@/lib/answer-assistant/beta-feedback-validation";
++import { BETA_SAFETY_REVIEW_OPERATOR_RULES } from "@/lib/answer-assistant/beta-feedback-review-criteria";
++
++const ROOT = process.cwd();
++
++describe("Answer Assistant beta feedback (PR-101)", () => {
++  it("schema adds minimal feedback model without prompt fields", () => {
++    const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
++    const migration = readFileSync(
++      join(
++        ROOT,
++        "prisma/migrations/20260603140000_add_answer_assistant_beta_feedback/migration.sql",
++      ),
++      "utf8",
++    );
++    assert.match(schema, /model AnswerAssistantBetaFeedback/);
++    assert.match(migration, /AnswerAssistantBetaFeedback/);
++    assert.doesNotMatch(schema, /rawPrompt/);
++    assert.doesNotMatch(schema, /rawOutput/);
++  });
++
++  it("rejects sensitive shortNote", () => {
++    const result = validateBetaFeedbackSubmit({
++      feedbackType: "safety_concern",
++      safetySignal: "privacy_risk",
++      severity: "high",
++      usefulness: "not_applicable",
++      noteCategory: "other",
++      shortNote: "고객 홍길동 연락처 010-1234-5678",
++      usageAuditId: "",
++    });
++    assert.equal(result.ok, false);
++    assert.equal(result.reason, "SENSITIVE_CONTENT");
++  });
++
++  it("accepts structured feedback without note", () => {
++    const result = validateBetaFeedbackSubmit({
++      feedbackType: "blocked_experience",
++      safetySignal: "blocking_felt_wrong",
++      severity: "medium",
++      usefulness: "partial",
++      noteCategory: "blocking",
++      shortNote: "",
++      usageAuditId: "",
++    });
++    assert.equal(result.ok, true);
++    assert.equal(result.data?.shortNote, null);
++  });
++
++  it("incident hint is advisory only", () => {
++    assert.equal(
++      isBetaFeedbackIncidentCandidateHint({
++        feedbackType: "safety_concern",
++        safetySignal: "none",
++        severity: "low",
++      }),
++      true,
++    );
++    assert.equal(
++      BETA_SAFETY_REVIEW_OPERATOR_RULES.some((r) =>
++        r.includes("자동"),
++      ),
++      true,
++    );
++  });
++
++  it("admin feedback route is admin-only", () => {
++    const page = readFileSync(
++      join(ROOT, "app/admin/answer-assistant/feedback/page.tsx"),
++      "utf8",
++    );
++    assert.match(page, /getAdminAccess/);
++    assert.match(page, /index:\s*false/);
++    assert.doesNotMatch(page, /auto.*allowlist/i);
++  });
++
++  it("planner feedback action requires allowlist beta", () => {
++    const actions = readFileSync(
++      join(ROOT, "app/planner/answer-assistant/feedback-actions.ts"),
++      "utf8",
++    );
++    assert.match(actions, /isVerifiedAnswerAssistantAllowlistBetaOperational/);
++    assert.match(actions, /persistBetaSafetyFeedback/);
++    assert.doesNotMatch(actions, /rawPrompt/);
++  });
++
++  it("panel includes beta feedback form for verified pilots", () => {
++    const panel = readFileSync(
++      join(ROOT, "components/answer-assistant/answer-assistant-panel.tsx"),
++      "utf8",
++    );
++    assert.match(panel, /BetaSafetyFeedbackForm/);
++    assert.match(panel, /showBetaFeedback/);
++  });
++
++  it("short note max length matches schema", () => {
++    assert.equal(BETA_FEEDBACK_SHORT_NOTE_MAX_LENGTH, 120);
++    for (const field of BETA_FEEDBACK_FORBIDDEN_STORED_FIELDS) {
++      assert.ok(field.length > 0);
++    }
++  });
++
++  it("documents PR-101", () => {
++    const doc = readFileSync(
++      join(ROOT, "docs/PR-101-ANSWER-ASSISTANT-BETA-FEEDBACK-SAFETY-REVIEW.md"),
++      "utf8",
++    );
++    assert.match(doc, /\/admin\/answer-assistant\/feedback/);
++    assert.match(doc, /자동 제재/);
++  });
++});
+diff --git a/tests/answer-assistant/durable-rate-limit-audit.test.ts b/tests/answer-assistant/durable-rate-limit-audit.test.ts
+index a0ad798..938b1b3 100644
+--- a/tests/answer-assistant/durable-rate-limit-audit.test.ts
++++ b/tests/answer-assistant/durable-rate-limit-audit.test.ts
+@@ -79,7 +79,8 @@ describe("Answer Assistant durable rate limit / audit (PR-99-A)", () => {
+     assert.match(ACTIONS, /await checkVerifiedAnswerAssistantRateLimit/);
+     assert.match(ACTIONS, /await consumeVerifiedAnswerAssistantRateLimit/);
+     assert.match(ACTIONS, /recordVerifiedAnswerAssistantProviderError/);
+-    assert.match(ACTIONS, /await logAnswerAssistantUsage/);
++    assert.match(ACTIONS, /await logVerifiedUsage/);
++    assert.match(ACTIONS, /return logAnswerAssistantUsage/);
+   });
+ 
+   it("usage audit forbids sensitive payload fields", async () => {
