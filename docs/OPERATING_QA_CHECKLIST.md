@@ -12,6 +12,10 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Post-deploy smoke results (PR117):** [PR-117-POST-LIMITED-RELEASE-SMOKE-OPS.md](PR-117-POST-LIMITED-RELEASE-SMOKE-OPS.md)
 
+**User 1st feedback (PR118):** [PR-118-USER-FEEDBACK-OPS.md](PR-118-USER-FEEDBACK-OPS.md)
+
+**Operational data quality (PR119):** [PR-119-OPERATIONAL-DATA-QUALITY-QA.md](PR-119-OPERATIONAL-DATA-QUALITY-QA.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

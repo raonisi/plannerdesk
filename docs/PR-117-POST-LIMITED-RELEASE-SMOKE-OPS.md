@@ -41,3 +41,5 @@
 - [ ] bulk/allowlist 실제 변경 없음
 
 **Codex:** 기본 생략. [PR-117-SMOKE-FAILURE-AND-DEPLOY-DECISION.md](./PR-117-SMOKE-FAILURE-AND-DEPLOY-DECISION.md) 참조.
+
+**다음 (사용자 피드백):** [PR-118-USER-FEEDBACK-OPS.md](./PR-118-USER-FEEDBACK-OPS.md)
