@@ -24,10 +24,18 @@ The database-backed features (Insurer Directory, Claim Document Library, and Aut
 
 Railway compiles and deploys the application based on standard Next.js parameters. Ensure these settings are declared in your deployment settings:
 
-- **Build Command**:
+- **Build Command** (no DB migration):
   ```bash
   npm run build
   ```
+  Runs `prisma generate` and `next build` only. Does **not** execute `prisma migrate deploy`.
+
+- **Migration deploy** (operator-only, separate step):
+  ```bash
+  npm run release:migrate
+  ```
+  Uses `prisma migrate deploy`. Requires reviewed migrations in `prisma/migrations/` and valid `DATABASE_URL` / `DIRECT_URL`. Run only after environment and backup checks.
+
 - **Start Command**:
   ```bash
   npm run start
@@ -53,4 +61,4 @@ Admin paths (`/admin/*`) require the `DATABASE_URL` for database access and the 
 
 - **Automatic Deploys**: Merges into the `main` branch trigger automated production builds on Railway. Make sure all local validation checks (`npm run typecheck`, `npm run lint`, `npm run build`) pass before committing and pushing code.
 - **Environment Boundaries**: `.env` and `.env.*` configuration files are strictly gitignored to prevent credentials leakage. Maintain only the dummy placeholders in `.env.example`.
-- **Database Migrations Policy**: Do not run arbitrary database alterations (`npx prisma db push` or direct SQL overrides) on the production database. Database migrations must be packaged as SQL files under `prisma/migrations` in reviewed pull requests and deployed via CI pipelines using the `DIRECT_URL` environment variable.
+- **Database Migrations Policy**: Do not run arbitrary database alterations (`npx prisma db push` or direct SQL overrides) on the production database. Migrations must be packaged as SQL under `prisma/migrations/` in reviewed PRs and applied with `npm run release:migrate` (or `npm run db:migrate:deploy`) by an operator — **not** during `npm run build` or default CI. CI runs `npm run build` without touching the database.

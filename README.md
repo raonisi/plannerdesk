@@ -31,7 +31,7 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Run the production build locally:
+Run the production build locally (does not apply DB migrations):
 
 ```bash
 npm run build
@@ -40,11 +40,24 @@ npm run start
 
 The production server uses `PORT` when it is set and falls back to `3000`.
 
+Apply reviewed migrations to a database only when intentional (requires `DATABASE_URL` / `DIRECT_URL`):
+
+```bash
+npm run release:migrate
+```
+
 ## Quality Checks
+
+```bash
+npm run verify
+```
+
+Or step by step:
 
 ```bash
 npm run typecheck
 npm run lint
+npm run test
 npm run build
 npx prisma validate
 npx prisma generate
@@ -66,7 +79,8 @@ Railway can detect this repository as a Node/Next.js app from `package.json`.
 
 Recommended Railway settings:
 
-- Build command: `npm run build`
+- Build command: `npm run build` (no `migrate deploy`)
+- Migration deploy: `npm run release:migrate` (operator-only, separate from build)
 - Start command: `npm run start`
 - Node version: use the `engines.node` value from `package.json`
 

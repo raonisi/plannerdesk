@@ -11,7 +11,8 @@ Regenerate all codex skills after updating agents: `node scripts/codex-agents-to
 
 ## How to apply
 
-1. **Classify** the request (feature, bug, review, content, DB, AI, docs).
+1. **Read** `.cursor/skills/plannerdesk-cursor-implementation-protocol/SKILL.md` for plan → implement → validate → report workflow (Cursor + Antigravity; Codex limited-review only).
+2. **Classify** the request (feature, bug, review, content, DB, AI, docs).
 2. **Pick 1–3 agent lenses** from the workstream table (combine when needed).
 3. **Read** `.codex/agents/<name>.toml` for full checklists before implementing or merging.
 4. **Always run** `risk-manager` + product-boundary checks on user-facing insurance content.

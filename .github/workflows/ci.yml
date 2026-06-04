@@ -28,5 +28,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm run test
+
       - name: Build
+        # build = prisma generate + next build only (no prisma migrate deploy)
         run: npm run build

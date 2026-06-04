@@ -7,11 +7,11 @@ PlannerDesk deploys to Railway as a standard Next.js application.
 - Runtime: Node.js
 - Framework: Next.js App Router
 - Package manager: npm
-- Build command: `npm run build`
+- Build command: `npm run build` (Prisma Client generate + Next.js build only — **no** `migrate deploy`)
 - Start command: `npm run start`
-- Database: not connected yet
+- Migration deploy (operator-only): `npm run release:migrate` or `npm run db:migrate:deploy`
 
-The current static MVP does not require `DATABASE_URL`.
+See [docs/PR-105-BUILD-MIGRATION-SEPARATION.md](PR-105-BUILD-MIGRATION-SEPARATION.md) for build vs migration boundaries.
 
 ## Railway
 
@@ -23,6 +23,14 @@ Use:
 npm run build
 npm run start
 ```
+
+`npm run build` does **not** run database migrations. After a reviewed migration PR is merged, an operator runs migrations explicitly before or as part of a controlled release:
+
+```bash
+npm run release:migrate
+```
+
+Requires `DATABASE_URL` and `DIRECT_URL` on the target environment. Confirm backup and rollback steps first. Do not run against production from local machines without approval.
 
 The start script reads Railway's `PORT` environment variable and falls back to `3000` for local production smoke tests.
 

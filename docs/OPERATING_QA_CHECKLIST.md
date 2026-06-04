@@ -35,13 +35,27 @@ Run these checks from the repository root before every release merge:
   ```
   Expected: ESLint exits with no errors.
 
-- [ ] **Production build**
+- [ ] **Production build** (no migration deploy)
   ```bash
   npm run build
   ```
-  Expected: Next.js compiles successfully. `/directory` and
+  Expected: Prisma Client generates and Next.js compiles successfully.
+  This command does **not** run `prisma migrate deploy`. `/directory` and
   `/claim-documents` may appear as dynamic routes because they read published
   database records at runtime.
+
+- [ ] **Optional: full non-DB verify**
+  ```bash
+  npm run verify
+  ```
+  Expected: lint, tests, typecheck, and build all pass without database migration.
+
+- [ ] **Database migration deploy** (operator-only, separate release step)
+  ```bash
+  npm run release:migrate
+  ```
+  Expected: only run against the intended environment after migration PR
+  review, backup confirmation, and rollback plan. Not part of CI or `npm run build`.
 
 - [ ] **Dependency audit**
   ```bash

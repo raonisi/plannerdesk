@@ -41,7 +41,7 @@ Current MVP excludes:
 - Prefer simple app-router Next.js structure until product needs justify more layers.
 - Keep the landing experience premium, calm, mobile-first, and professional.
 - Avoid patterns that make the product feel like an insurance link farm or sales flyer.
-- Run `npm run typecheck`, `npm run lint`, and `npm run build` before release changes.
+- Run `npm run typecheck`, `npm run lint`, and `npm run build` before release changes (`npm run build` does not run `prisma migrate deploy`; use `npm run release:migrate` only in an approved operator release step).
 
 ## Specialist Agents (Codex + Cursor)
 
