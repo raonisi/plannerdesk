@@ -58,6 +58,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **External release / monetization judgment (PR140, no billing):** [PR-140-EXTERNAL-RELEASE-READINESS-OPS.md](PR-140-EXTERNAL-RELEASE-READINESS-OPS.md)
 
+**Limited external beta readiness (PR141, manual approval only):** [PR-141-LIMITED-BETA-OPS.md](PR-141-LIMITED-BETA-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

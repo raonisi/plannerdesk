@@ -37,3 +37,7 @@ PR121~PR139 결과를 바탕으로 외부 설계사 공개·유료화 논의 가
 ## Codex
 
 외부 공개·권한·개인정보·AA·visibility 판단 PR — **제한검수 권장**. 결제 코드 없음.
+
+## 후속
+
+- [PR-141-LIMITED-BETA-OPS.md](./PR-141-LIMITED-BETA-OPS.md) — 제한 베타 준비 (실행 없음)
