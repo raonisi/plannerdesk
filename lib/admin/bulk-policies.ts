@@ -8,6 +8,8 @@ import {
   ROLE_SUPER_ADMIN,
   type PlannerDeskRole,
 } from "@/lib/auth/rbac";
+import type { BulkRunError } from "@/lib/admin/bulk-run";
+import { bulkRunError } from "@/lib/admin/bulk-run";
 
 export const ADMIN_BULK_DOMAINS = [
   "insurers",
@@ -492,4 +494,47 @@ export function isBulkActionImplemented(
 ): boolean {
   const live = IMPLEMENTED_BULK_DOMAINS[domain];
   return live?.includes(actionId) ?? false;
+}
+
+export function isGloballyForbiddenBulkOperation(
+  operation: string,
+): operation is GlobalForbiddenBulkOperation {
+  return (GLOBAL_FORBIDDEN_BULK_OPERATIONS as readonly string[]).includes(
+    operation,
+  );
+}
+
+/** Server-side gate before any Prisma bulk write (PR107). */
+export function validateServerBulkAction(
+  domain: AdminBulkDomain,
+  actionId: AdminBulkActionId,
+): BulkRunError | null {
+  const domainPolicy = getBulkDomainPolicy(domain);
+
+  if (!domainPolicy.enabled) {
+    return bulkRunError(
+      domainPolicy.futureNotice ??
+        `${domainPolicy.label} 일괄 작업은 아직 사용할 수 없습니다.`,
+    );
+  }
+
+  if (!domainPolicy.supportedActionIds.includes(actionId)) {
+    return bulkRunError("이 영역에서 지원하지 않는 일괄 작업입니다.");
+  }
+
+  const action = getBulkActionPolicy(actionId);
+
+  if (
+    action.implementationStatus === "planned" ||
+    action.riskLevel === "blocked" ||
+    actionId === "importDrafts"
+  ) {
+    return bulkRunError("정책상 허용되지 않는 일괄 작업입니다.");
+  }
+
+  if (!isBulkActionImplemented(domain, actionId)) {
+    return bulkRunError("아직 연결되지 않은 일괄 작업입니다.");
+  }
+
+  return null;
 }

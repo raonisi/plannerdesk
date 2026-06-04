@@ -25,7 +25,10 @@ import {
 } from "./access";
 import { ADMIN_CLAIM_DOC_COPY, wouldPublishDraft } from "./visibility";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
-import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import {
+  getBulkActionPolicy,
+  validateServerBulkAction,
+} from "@/lib/admin/bulk-policies";
 import type { BulkRunResponse } from "@/lib/admin/bulk-run";
 import { bulkRunError } from "@/lib/admin/bulk-run";
 import { runClaimDocumentBulkByAction } from "@/lib/admin/bulk-verification-actions";
@@ -517,6 +520,9 @@ async function runClaimDocumentBulk(
   } catch (error) {
     handleUnauthorized("/admin/claim-documents", error);
   }
+
+  const blocked = validateServerBulkAction("claimDocuments", actionId);
+  if (blocked) return blocked;
 
   const policy = getBulkActionPolicy(actionId);
   const result = await runClaimDocumentBulkByAction(

@@ -14,7 +14,10 @@ import {
   revalidatePublicContentPaths,
 } from "@/lib/admin/actions";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
-import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import {
+  getBulkActionPolicy,
+  validateServerBulkAction,
+} from "@/lib/admin/bulk-policies";
 import type { BulkRunResponse } from "@/lib/admin/bulk-run";
 import { bulkRunError } from "@/lib/admin/bulk-run";
 import { runDisclosureLinkBulkByAction } from "@/lib/admin/disclosure-link-bulk-actions";
@@ -512,6 +515,9 @@ async function runDisclosureLinkBulk(
   } catch (error) {
     handleAdminUnauthorized(ADMIN_PATH, error);
   }
+
+  const blocked = validateServerBulkAction("disclosureLinks", actionId);
+  if (blocked) return blocked;
 
   const policy = getBulkActionPolicy(actionId);
   const result = await runDisclosureLinkBulkByAction(

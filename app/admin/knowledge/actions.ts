@@ -16,7 +16,10 @@ import {
   redirectWithError,
 } from "@/lib/admin/actions";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
-import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import {
+  getBulkActionPolicy,
+  validateServerBulkAction,
+} from "@/lib/admin/bulk-policies";
 import type { BulkRunResponse } from "@/lib/admin/bulk-run";
 import { bulkRunError } from "@/lib/admin/bulk-run";
 import { runKnowledgeBulkByAction } from "@/lib/admin/knowledge-bulk-actions";
@@ -583,6 +586,9 @@ async function runKnowledgeBulk(
   } catch (error) {
     handleUnauthorized("/admin/knowledge", error);
   }
+
+  const blocked = validateServerBulkAction("knowledgeArticles", actionId);
+  if (blocked) return blocked;
 
   const policy = getBulkActionPolicy(actionId);
   const result = await runKnowledgeBulkByAction(

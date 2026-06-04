@@ -17,7 +17,10 @@ import {
   revalidatePublicContentPaths,
 } from "@/lib/admin/actions";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
-import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import {
+  getBulkActionPolicy,
+  validateServerBulkAction,
+} from "@/lib/admin/bulk-policies";
 import type { BulkRunResponse } from "@/lib/admin/bulk-run";
 import { bulkRunError } from "@/lib/admin/bulk-run";
 import { runMessageTemplateBulkByAction } from "@/lib/admin/message-template-bulk-actions";
@@ -679,6 +682,9 @@ async function runMessageTemplateBulk(
   } catch (error) {
     handleAdminUnauthorized(ADMIN_PATH, error);
   }
+
+  const blocked = validateServerBulkAction("messageTemplates", actionId);
+  if (blocked) return blocked;
 
   const policy = getBulkActionPolicy(actionId);
   const result = await runMessageTemplateBulkByAction(

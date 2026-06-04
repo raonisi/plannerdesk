@@ -22,7 +22,10 @@ import {
 } from "./access";
 import { ADMIN_VISIBILITY_COPY, wouldPublishDraft } from "./visibility";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
-import { getBulkActionPolicy } from "@/lib/admin/bulk-policies";
+import {
+  getBulkActionPolicy,
+  validateServerBulkAction,
+} from "@/lib/admin/bulk-policies";
 import type { BulkRunResponse } from "@/lib/admin/bulk-run";
 import { bulkRunError } from "@/lib/admin/bulk-run";
 import { runInsurerBulkByAction } from "@/lib/admin/bulk-verification-actions";
@@ -387,6 +390,9 @@ async function runInsurerBulk(
   } catch (error) {
     handleUnauthorized("/admin/insurers", error);
   }
+
+  const blocked = validateServerBulkAction("insurers", actionId);
+  if (blocked) return blocked;
 
   const policy = getBulkActionPolicy(actionId);
   const result = await runInsurerBulkByAction(

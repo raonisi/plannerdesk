@@ -17,9 +17,9 @@ PR-ADMIN-BULK-00 — shared foundation for PlannerDesk admin bulk operations.
 |--------|-------------|-------------------|
 | `insurers` | `/admin/insurers` | **PR-ADMIN-BULK-01** — server actions + list UI |
 | `claimDocuments` | `/admin/claim-documents` | **PR-ADMIN-BULK-01** — server actions + list UI |
-| `knowledgeArticles` | `/admin/knowledge` | Policy + components ready |
-| `disclosureLinks` | (future) | Policy only — **buttons hidden**, “준비 중” |
-| `messageTemplates` | (future) | Policy only — **buttons hidden**, “준비 중” |
+| `knowledgeArticles` | `/admin/knowledge` | Server actions + list UI |
+| `disclosureLinks` | `/admin/disclosure-links` | Server actions + list UI |
+| `messageTemplates` | `/admin/message-templates` | Server actions + list UI |
 
 ## Components
 
@@ -50,11 +50,11 @@ Import from `@/components/admin/bulk` or individual files.
 
 | Action | insurers | claimDocuments | knowledgeArticles | disclosureLinks | messageTemplates |
 |--------|----------|----------------|-------------------|-----------------|------------------|
-| markNeedsReview | ✓ | ✓ | ✓ | — | — |
-| markVerified | ✓ | ✓ | ✓ | — | — |
-| setPublishedFalse | ✓ | ✓ | ✓ | — | — |
-| setPublishedTrue | ✓ | ✓ | ✓ | — | — |
-| archive | — | — | ✓ | — | — |
+| markNeedsReview | ✓ | ✓ | ✓ | ✓ | ✓ |
+| markVerified | ✓ | ✓ | ✓ | ✓ | ✓ |
+| setPublishedFalse | ✓ | ✓ | ✓ | ✓ | ✓ |
+| setPublishedTrue | ✓ | ✓ | ✓ | ✓ | ✓ |
+| archive | — | — | ✓ | ✓ | ✓ |
 | importDrafts | planned | planned | planned | planned | planned |
 
 ## Publish rules (canonical)
@@ -78,6 +78,8 @@ Align server actions with:
 | Publish (`setPublishedTrue`) | `canPublishContent` — use `requirePublisherAccess` / `requireContentManagerAccess` in server actions |
 
 **Never rely on client UI alone.** Each domain PR must call `requireContentManagerAccess` or `requirePublisherAccess` before writes.
+
+**PR107 server gate:** `validateServerBulkAction(domain, actionId)` in `lib/admin/bulk-policies.ts` runs in each `run*Bulk` server action after RBAC and before Prisma. See `docs/PR-107-ADMIN-BULK-SAFETY-QA.md`.
 
 ## Safety rules
 
