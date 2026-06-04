@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
@@ -95,6 +96,7 @@ export function DirectoryExplorer({
 }) {
   const searchParams = useSearchParams();
   const searchFromQuery = searchParams.get("search");
+  const insurerFromQuery = searchParams.get("insurer");
   const allClaimItems = useMemo(
     () => buildClaimLibraryItems(claimDocuments),
     [claimDocuments],
@@ -109,6 +111,20 @@ export function DirectoryExplorer({
   const [correctionPreselectedId, setCorrectionPreselectedId] = useState<
     string | null
   >(null);
+  const highlightedInsurerRef = useRef<HTMLDivElement | null>(null);
+
+  const insurerFromQueryMatch = useMemo(() => {
+    if (!insurerFromQuery) return null;
+    return insurers.find((insurer) => insurer.id === insurerFromQuery) ?? null;
+  }, [insurerFromQuery, insurers]);
+
+  useEffect(() => {
+    if (!insurerFromQueryMatch) return;
+    highlightedInsurerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [insurerFromQueryMatch]);
 
   const openCorrectionRequest = useCallback((insurerId?: string) => {
     setCorrectionPreselectedId(insurerId ?? null);
@@ -119,6 +135,10 @@ export function DirectoryExplorer({
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
 
     return insurers.filter((insurer) => {
+      if (insurerFromQuery && insurer.id !== insurerFromQuery) {
+        return false;
+      }
+
       const matchText = [
         insurer.name,
         insurer.officialWebsiteUrl,
@@ -140,13 +160,37 @@ export function DirectoryExplorer({
 
       return matchesQuery && matchesCategory && matchesView;
     });
-  }, [activeTab, insurers, isFavorite, query]);
+  }, [activeTab, insurerFromQuery, insurers, isFavorite, query]);
 
   const showFavoritesEmpty =
     activeTab === "favorites" && filteredInsurers.length === 0;
 
   return (
     <div className="space-y-6">
+      {insurerFromQueryMatch ? (
+        <section
+          aria-label="선택한 보험사 안내"
+          className="rounded-xl border border-[#d9c9a8] bg-[#fff9ed] px-4 py-3 text-sm leading-6 text-[#4f5661]"
+        >
+          <p>
+            <span className="font-bold text-[#102235]">
+              {insurerFromQueryMatch.name}
+            </span>
+            {" "}기준으로 청구 정보를 표시합니다.{" "}
+            <Link
+              className="font-semibold text-[#7a612d] underline underline-offset-2"
+              href={`/claim-documents?insurer=${encodeURIComponent(insurerFromQueryMatch.id)}`}
+            >
+              필요서류 확인
+            </Link>
+          </p>
+        </section>
+      ) : insurerFromQuery ? (
+        <section className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm leading-6 text-[#5B6470]">
+          요청한 보험사를 찾을 수 없습니다. 검색어로 다시 찾아보세요.
+        </section>
+      ) : null}
+
       {/* 탭 영역 */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
@@ -206,14 +250,21 @@ export function DirectoryExplorer({
           }
         >
           {filteredInsurers.map((insurer) => (
-            <InsurerActionCard
-              claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
-              insurer={insurer}
-              isFavorite={isFavorite(insurer.id)}
+            <div
+              id={insurer.id === insurerFromQuery ? "directory-insurer-focus" : undefined}
               key={insurer.id}
-              onRequestCorrection={openCorrectionRequest}
-              onToggleFavorite={toggle}
-            />
+              ref={
+                insurer.id === insurerFromQuery ? highlightedInsurerRef : undefined
+              }
+            >
+              <InsurerActionCard
+                claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
+                insurer={insurer}
+                isFavorite={isFavorite(insurer.id)}
+                onRequestCorrection={openCorrectionRequest}
+                onToggleFavorite={toggle}
+              />
+            </div>
           ))}
         </div>
       ) : (

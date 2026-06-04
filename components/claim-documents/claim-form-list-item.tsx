@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalTabAnchor, StatusBadge } from "@/components/content-page";
+import { ExternalTabAnchor } from "@/components/content-page";
 import { categoryLabels } from "@/lib/claim-documents/category-labels";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
-import type { VerificationStatus as ClientVerificationStatus } from "@/lib/content";
+import { publicClaimTrustHint } from "@/lib/directory/formatting";
 
 export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
@@ -18,6 +18,7 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
     item.kind === "pdf" ? item.categoryLabel : categoryLabels[item.document.category];
   const status =
     item.kind === "pdf" ? item.verificationStatus : item.document.verificationStatus;
+  const trustHint = publicClaimTrustHint(status);
 
   async function handleCopyRequest() {
     const doc = item.kind === "pdf" ? null : item.document;
@@ -47,9 +48,9 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
             <p className="mt-2 break-keep text-base font-bold leading-6 text-slate-900">
               {title}
             </p>
-            <div className="mt-2 text-xs text-slate-500">
-              <StatusBadge status={status as ClientVerificationStatus} />
-            </div>
+            {trustHint ? (
+              <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
+            ) : null}
           </div>
           <div className="grid gap-2 sm:flex lg:justify-end">
             <ExternalTabAnchor
@@ -75,7 +76,7 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
 
   const doc = item.document;
   const primaryHref = doc.claimFormUrl ?? doc.officialSourceUrl;
-  const primaryLabel = doc.claimFormUrl ? "PDF 열기" : "공식 청구안내";
+  const primaryLabel = doc.claimFormUrl ? "PDF 열기" : "청구안내 보기";
 
   return (
     <li className="border-t border-slate-200 first:border-t-0">
@@ -94,9 +95,9 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
               {doc.summary}
             </p>
           ) : null}
-          <div className="mt-2 text-xs text-slate-500">
-            <StatusBadge status={status as ClientVerificationStatus} />
-          </div>
+          {trustHint ? (
+            <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
+          ) : null}
         </div>
         <div className="grid gap-2 sm:flex lg:justify-end">
           {primaryHref ? (

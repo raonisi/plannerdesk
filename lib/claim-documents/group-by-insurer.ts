@@ -10,6 +10,8 @@ export type InsurerClaimGroup = {
   key: string;
   label: string;
   items: ClaimLibraryItem[];
+  /** Public directory deep-link when a guide row carries insurerId. */
+  directoryInsurerId: string | null;
 };
 
 export function groupClaimItemsByInsurer(
@@ -32,8 +34,18 @@ export function groupClaimItemsByInsurer(
       key,
       label: insurerGroupLabel(key),
       items: groupItems.sort((a, b) => compareItems(a, b)),
+      directoryInsurerId: resolveDirectoryInsurerId(groupItems),
     }))
     .sort((a, b) => compareGroupKeys(a.key, b.key));
+}
+
+function resolveDirectoryInsurerId(items: ClaimLibraryItem[]): string | null {
+  for (const item of items) {
+    if (item.kind === "guide" && item.document.insurerId) {
+      return item.document.insurerId;
+    }
+  }
+  return null;
 }
 
 function compareGroupKeys(a: string, b: string): number {

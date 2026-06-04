@@ -13,6 +13,7 @@ import {
 import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
+import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { getDisclosureLinksForInsurer } from "@/lib/content/disclosure-match";
 import type { PublicInsurer } from "@/lib/public/insurers";
@@ -23,8 +24,8 @@ import {
   cardPaymentStatusLabel,
   claimFaxDisplay,
   lastVerifiedLabel,
+  publicContentTrustHint,
   telHref,
-  verificationStatusLabel,
 } from "@/lib/directory/formatting";
 import { buttons } from "@/lib/design-system";
 
@@ -294,6 +295,14 @@ export function InsurerActionCard({
           isFavorite={isFavorite}
           onToggleFavorite={onToggleFavorite}
         />
+
+        <div className="mt-5">
+          <InsurerQuickClaimActions
+            claimItemCount={claimItems.length}
+            insurer={insurer}
+            onOpenClaimGuide={() => setDetailedOpen(true)}
+          />
+        </div>
 
         <div className="mt-6 space-y-5">
           <section className="space-y-2">
@@ -669,8 +678,12 @@ function CardHeader({
               {insurer.name}
             </h2>
             <p className="mt-2 text-xs font-medium text-[#5B6470]">
-              {verificationStatusLabel(insurer.verificationStatus)}
-              <span className="mx-1.5 text-[#E3DED4]">·</span>
+              {publicContentTrustHint(insurer.verificationStatus) ? (
+                <>
+                  {publicContentTrustHint(insurer.verificationStatus)}
+                  <span className="mx-1.5 text-[#E3DED4]">·</span>
+                </>
+              ) : null}
               최근 확인 {lastVerifiedLabel(insurer.lastVerifiedAt)}
             </p>
           </div>

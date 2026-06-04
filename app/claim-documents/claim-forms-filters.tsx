@@ -5,9 +5,8 @@ import { SearchBar } from "@/components/content-page";
 
 const statusOptions: Array<{ label: string; value: string }> = [
   { label: "전체", value: "all" },
-  { label: "검수 완료", value: VerificationStatus.verified },
-  { label: "검수 필요", value: VerificationStatus.needs_review },
-  { label: "작성 중", value: VerificationStatus.draft },
+  { label: "공식 확인 완료", value: VerificationStatus.verified },
+  { label: "확인 진행 중", value: VerificationStatus.needs_review },
 ];
 
 const natureOptions: Array<{ label: string; value: string }> = [
@@ -113,7 +112,7 @@ export function ClaimFormsFilters({
               value={documentNature}
             />
             <FilterGroup
-              label="검수 상태"
+              label="확인 상태"
               onChange={onStatusChange}
               options={statusOptions}
               value={status}

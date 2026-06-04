@@ -24,6 +24,25 @@ export function verificationStatusLabel(
   return "검수 중";
 }
 
+/** Public surface — avoid admin-style verification labels (PR112). */
+export function publicContentTrustHint(
+  status: PublicInsurer["verificationStatus"],
+): string | null {
+  if (status === "needs_review") {
+    return "공식 확인 진행 중";
+  }
+  return null;
+}
+
+export function publicClaimTrustHint(
+  status: PublicInsurer["verificationStatus"],
+): string | null {
+  if (status === "needs_review") {
+    return "공식 확인 진행 중 · 최종 기준은 보험사 안내를 확인하세요";
+  }
+  return null;
+}
+
 // Normalize a Korean phone-style string into a tel: URL. Returns null when
 // the value is empty or has no dialable characters. The normalization keeps
 // "+" for international prefixes and drops everything else.

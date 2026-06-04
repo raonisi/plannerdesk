@@ -21,9 +21,11 @@ export function InsurerClaimGroup({
   const panelId = `claim-group-panel-${group.key}`;
   const buttonId = `claim-group-button-${group.key}`;
   const officialGuideHref =
-    group.key === COMMON_INSURER_KEY
-      ? "/disclosure-links"
-      : `/directory?search=${encodeURIComponent(group.label)}`;
+    group.directoryInsurerId
+      ? `/directory?insurer=${encodeURIComponent(group.directoryInsurerId)}`
+      : group.key === COMMON_INSURER_KEY
+        ? "/directory"
+        : `/directory?search=${encodeURIComponent(group.label)}`;
 
   async function handleCopyNotice(e: React.MouseEvent) {
     e.stopPropagation();
@@ -86,7 +88,7 @@ export function InsurerClaimGroup({
             className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
             href={officialGuideHref}
           >
-            공식 청구안내
+            청구안내 보기
           </Link>
         </div>
       </div>
