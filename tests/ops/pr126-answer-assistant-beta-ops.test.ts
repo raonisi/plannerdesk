@@ -81,6 +81,7 @@ describe("PR126 Answer Assistant beta observation (static, no database)", () => 
   it("usage audit forbids query draft and PII payload fields", () => {
     for (const field of ["query", "draft", "rawOutput", "phone", "email"]) {
       assert.ok(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         FORBIDDEN_USAGE_AUDIT_FIELDS.includes(field as any),
         field,
       );
