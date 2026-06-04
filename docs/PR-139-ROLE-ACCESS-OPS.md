@@ -39,3 +39,7 @@
 ## Codex
 
 **제한검수 권장** — Auth/RBAC/public visibility/Admin bulk/Answer Assistant 경계 확인. PR139-A는 권한 **변경 없음**이면 문서·테스트 diff 중심 검수.
+
+## 후속
+
+- [PR-140-EXTERNAL-RELEASE-READINESS-OPS.md](./PR-140-EXTERNAL-RELEASE-READINESS-OPS.md) — 외부 공개·유료화 **판단** (실행 없음)

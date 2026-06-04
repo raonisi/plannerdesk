@@ -51,6 +51,8 @@
 
 **PR131** — OPS/FB 월간 기입·High 처리 후 **조건부** 착수.
 
+**PR140** — [PR-140-EXTERNAL-RELEASE-READINESS-OPS.md](./PR-140-EXTERNAL-RELEASE-READINESS-OPS.md) 판단 완료. 제한 베타 **Conditional Go** · 유료화 **No-Go** (코드·문서 기준).
+
 ---
 
 ## 운영 후 backlog 정리

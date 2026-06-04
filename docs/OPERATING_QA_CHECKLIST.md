@@ -56,6 +56,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Role access matrix (PR139, RBAC review only):** [PR-139-ROLE-ACCESS-OPS.md](PR-139-ROLE-ACCESS-OPS.md)
 
+**External release / monetization judgment (PR140, no billing):** [PR-140-EXTERNAL-RELEASE-READINESS-OPS.md](PR-140-EXTERNAL-RELEASE-READINESS-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

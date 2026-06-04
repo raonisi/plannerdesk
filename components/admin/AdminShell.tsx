@@ -6,6 +6,7 @@ import { ADMIN_DASHBOARD_SAFETY_LINES } from "@/lib/admin/dashboard-status";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
 import AdminOperationsReminderPanel from "@/components/admin/AdminOperationsReminderPanel";
 import AdminOperationsReportPanel from "@/components/admin/AdminOperationsReportPanel";
+import AdminExternalReleaseReadinessPanel from "@/components/admin/AdminExternalReleaseReadinessPanel";
 import AdminRoleAccessPanel from "@/components/admin/AdminRoleAccessPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -141,6 +142,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminOperationsReminderPanel dashboard={dashboard} />
 
         <AdminRoleAccessPanel role={session?.user?.role} />
+
+        <AdminExternalReleaseReadinessPanel />
 
         <div className="mb-8">
           <AdminSafetyNotice
