@@ -16,6 +16,7 @@ import { probeKnowledgeArticleTable } from "@/lib/admin/dashboard-status";
 import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
 import { getKnowledgeAdminAccess } from "./access";
 import KnowledgeAdminList, { type KnowledgeListRow } from "./knowledge-admin-list";
+import KnowledgeAdminWorkflowGuide from "@/components/admin/knowledge/KnowledgeAdminWorkflowGuide";
 import {
   ADMIN_KNOWLEDGE_COPY,
   CATEGORY_LABEL,
@@ -228,6 +229,8 @@ export default async function AdminKnowledgePage({
           </p>
         </div>
 
+        <KnowledgeAdminWorkflowGuide />
+
         <form
           className={`${surfaces.card} ${borders.default} ${shadows.card} mb-5 grid gap-3 rounded-lg p-4 lg:grid-cols-[1.4fr_repeat(6,minmax(0,1fr))_auto]`}
         >
@@ -266,7 +269,7 @@ export default async function AdminKnowledgePage({
             name="status"
             defaultValue={resolvedSearchParams.status ?? "all"}
           >
-            <option value="all">상태 전체</option>
+            <option value="all">검수 상태 전체</option>
             {Object.values(KnowledgeArticleStatus).map((value) => (
               <option key={value} value={value}>
                 {STATUS_LABEL[value]}

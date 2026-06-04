@@ -20,10 +20,9 @@ import {
 } from "@/lib/knowledge/archive-filter";
 import {
   PUBLIC_CATEGORY_LABEL,
-  PUBLIC_STATUS_LABEL,
   PUBLIC_TYPE_LABEL,
-  type PublicKnowledgeStatus,
 } from "@/lib/public/knowledge-display";
+import { publicKnowledgeTrustHint } from "@/lib/knowledge/workflow-labels";
 import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 
 const categoryOptions: Array<{
@@ -53,8 +52,8 @@ const reviewOptions: Array<{
   value: KnowledgeArchiveFilterState["review"];
 }> = [
   { label: "전체", value: "all" },
-  { label: PUBLIC_STATUS_LABEL.needs_review, value: "needs_review" },
-  { label: PUBLIC_STATUS_LABEL.verified, value: "verified" },
+  { label: "공식 확인 진행 중", value: "needs_review" },
+  { label: "공식 확인 완료", value: "verified" },
 ];
 
 const riskOptions: Array<{
@@ -78,11 +77,6 @@ const sortOptions: { label: string; value: KnowledgeArchiveSort }[] = [
   { label: "업데이트순", value: "updated" },
   { label: "활용 주의도순", value: "risk" },
 ];
-
-const reviewClasses: Record<PublicKnowledgeStatus, string> = {
-  needs_review: "border-[#c5b08a] bg-[#fff9ed] text-[#6e5127]",
-  verified: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
-};
 
 const riskToneClasses: Record<KnowledgeRiskLevel, string> = {
   [KnowledgeRiskLevel.low]: "border-[#9fb7a4] bg-[#edf4ee] text-[#173f36]",
@@ -145,8 +139,12 @@ export function KnowledgeArchiveList({
       });
     }
     if (filterState.review !== "all") {
+      const reviewLabel =
+        filterState.review === "needs_review"
+          ? "공식 확인 진행 중"
+          : "공식 확인 완료";
       chips.push({
-        label: PUBLIC_STATUS_LABEL[filterState.review],
+        label: reviewLabel,
         href: buildKnowledgeArchiveHref(
           mergeState(filterState, { review: "all" }),
         ),
@@ -173,8 +171,8 @@ export function KnowledgeArchiveList({
   if (isCatalogEmpty) {
     return (
       <EmptyState
-        description="관리자 검수와 공개 설정이 완료된 문서만 표시됩니다."
-        title="현재 공개된 지식 문서가 없습니다."
+        description="관리자 검수와 게시 설정이 완료된 문서만 표시됩니다. 공개 전 검수 중인 항목은 표시되지 않습니다."
+        title="등록된 지식 콘텐츠가 없습니다."
       />
     );
   }
@@ -209,7 +207,7 @@ export function KnowledgeArchiveList({
           <PreserveFiltersExceptQ filterState={filterState} />
           <p className="text-xs leading-5 text-[#5f6670]">
             개인정보·의료정보·계약정보·보험금 지급 판단 관련 검색은 제공하지
-            않습니다.
+            않습니다. 공개 전 검수 중인 항목은 표시되지 않습니다.
           </p>
         </form>
 
@@ -258,7 +256,7 @@ export function KnowledgeArchiveList({
             value={filterState.risk}
           />
           <FilterGroup
-            label="검수 단계"
+            label="확인 단계"
             onSelect={(value) =>
               navigate({ review: value as KnowledgeArchiveFilterState["review"] })
             }
@@ -419,6 +417,7 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
   const dateParts: string[] = [];
   if (item.publishedAt) dateParts.push(`공개 ${item.publishedAt}`);
   if (item.updatedAt) dateParts.push(`업데이트 ${item.updatedAt}`);
+  const trustHint = publicKnowledgeTrustHint(item.status);
 
   return (
     <article className="flex h-full flex-col rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
@@ -444,11 +443,11 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${reviewClasses[item.status]}`}
-        >
-          검수: {item.statusLabel}
-        </span>
+        {trustHint ? (
+          <span className="inline-flex items-center rounded-full border border-[#c5b08a] bg-[#fff9ed] px-2.5 py-1 text-xs font-semibold text-[#6e5127]">
+            {trustHint}
+          </span>
+        ) : null}
         <span
           className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${riskToneClasses[item.riskLevel]}`}
         >

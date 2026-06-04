@@ -7,6 +7,10 @@ import {
 } from "@prisma/client";
 import { ADMIN_CONTENT_SAFETY_COPY } from "@/lib/admin/safety-copy";
 import {
+  ADMIN_KNOWLEDGE_STATUS_LABEL,
+  KNOWLEDGE_REVIEW_CHECKLIST,
+} from "@/lib/knowledge/workflow-labels";
+import {
   isKnowledgeArticlePubliclyVisible,
   PUBLIC_KNOWLEDGE_ARTICLE_STATUSES,
 } from "@/lib/public/knowledge-articles";
@@ -14,11 +18,11 @@ import {
 export const ADMIN_KNOWLEDGE_COPY = {
   ...ADMIN_CONTENT_SAFETY_COPY,
   policySummary:
-    "공개 조건: 게시 중이며, 검수 필요 또는 검수 완료 상태인 지식 문서만 공개 화면에 표시됩니다.",
+    "공개 조건: 게시 중이며 검수 대기 또는 공개 가능 상태인 지식 문서만 공개 화면에 표시됩니다.",
   draftPublishBlocked:
-    "초안·보관·반려 상태의 문서는 공개할 수 없습니다. 검수 필요 또는 검수 완료 상태로 변경한 뒤 공개해 주세요.",
+    "초안·보류·수정 필요 상태의 문서는 공개할 수 없습니다. 검수 대기 또는 공개 가능 상태로 변경한 뒤 게시해 주세요.",
   aiUsableBlocked:
-    "AI 참조 가능은 검수 완료(verified) 상태에서만 설정할 수 있습니다.",
+    "AI 참조 가능은 공개 가능(verified) 상태에서만 설정할 수 있습니다.",
   notFound: "지식 문서 관리 레코드를 찾을 수 없습니다.",
   duplicateSlug: "이미 사용 중인 슬러그입니다. 다른 슬러그를 입력해 주세요.",
   prohibitedPhraseTitle: "사용이 금지된 표현이 포함되어 있습니다.",
@@ -31,13 +35,9 @@ export const ADMIN_KNOWLEDGE_COPY = {
     "AI 참조 가능 문서는 검수 완료 후 별도 기준에 따라 제한적으로 설정합니다. AI API는 아직 연결되지 않았습니다.",
 } as const;
 
-export const STATUS_LABEL: Record<KnowledgeArticleStatus, string> = {
-  [KnowledgeArticleStatus.draft]: "초안",
-  [KnowledgeArticleStatus.needs_review]: "검수 필요",
-  [KnowledgeArticleStatus.verified]: "검수 완료",
-  [KnowledgeArticleStatus.archived]: "보관",
-  [KnowledgeArticleStatus.rejected]: "반려",
-};
+export const STATUS_LABEL = ADMIN_KNOWLEDGE_STATUS_LABEL;
+
+export { KNOWLEDGE_REVIEW_CHECKLIST };
 
 export const CATEGORY_LABEL: Record<KnowledgeArticleCategory, string> = {
   [KnowledgeArticleCategory.claim]: "청구·접수",

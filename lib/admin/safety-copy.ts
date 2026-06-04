@@ -9,7 +9,7 @@ export const ADMIN_CONTENT_SAFETY_COPY = {
   draftRule:
     "작성 중 상태의 데이터는 공개 화면에 노출되지 않습니다.",
   needsReviewRule:
-    "검수 필요 상태의 데이터는 공개되더라도 검수 필요 배지와 함께 표시됩니다.",
+    "검수 대기 상태의 문서는 공개되더라도 공식 확인 진행 중 안내와 함께 표시됩니다.",
   sensitiveNotice:
     "고객 개인정보, 의료자료, 진단서, 처방전, 청구서류 원본은 입력하지 마세요.",
   guidanceNotice:

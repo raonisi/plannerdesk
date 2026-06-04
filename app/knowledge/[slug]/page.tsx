@@ -4,6 +4,8 @@ import { ContentSection, PageFrame } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { getPublicKnowledgeArticleBySlug } from "@/lib/public/knowledge-articles";
+import { PUBLIC_RISK_GUIDANCE_LABEL } from "@/lib/knowledge/archive-filter";
+import { publicKnowledgeTrustHint } from "@/lib/knowledge/workflow-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +47,7 @@ export default async function KnowledgeDetailPage({
   const riskClass =
     riskClasses[document.riskLevel as keyof typeof riskClasses] ??
     riskClasses.medium;
+  const trustHint = publicKnowledgeTrustHint(document.status);
 
   const sourceNoteParts = [
     document.sourceTitle,
@@ -95,45 +98,33 @@ export default async function KnowledgeDetailPage({
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses[document.status]}`}
-              >
-                상태: {document.statusLabel}
-              </span>
+              {trustHint ? (
+                <span
+                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${statusClasses[document.status]}`}
+                >
+                  {trustHint}
+                </span>
+              ) : null}
               <span
                 className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${riskClass}`}
               >
-                위험도: {document.riskLabel}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-[#d9c9a8] bg-white px-2.5 py-1 text-xs font-semibold text-[#303845]">
-                {document.aiUsable ? "AI 참조 가능" : "AI 참조 제외"}
+                {PUBLIC_RISK_GUIDANCE_LABEL[document.riskLevel]}
               </span>
             </div>
           </section>
 
           <aside className="rounded-xl border border-[#d9c9a8] bg-white p-5">
-            <h2 className="text-sm font-semibold text-[#102235]">검수 안내</h2>
+            <h2 className="text-sm font-semibold text-[#102235]">활용 안내</h2>
             <p className="mt-2 break-keep text-sm leading-6 text-[#4f5661]">
-              이 문서는 검수 상태를 기준으로 제공됩니다. 공식 출처 또는 관리자
-              검수 전까지 확정 자료로 사용하지 마세요.
+              이 문서는 공식 출처와 관리자 확인을 기준으로 제공됩니다. 보험금
+              지급 여부·금액은 보험사 심사와 약관에 따라 달라질 수 있습니다.
             </p>
             {document.status === "needs_review" ? (
               <div className="mt-3 rounded-lg border border-[#c5b08a] bg-[#fff9ed] p-3 text-sm font-semibold leading-6 text-[#7a612d]">
-                검수 필요: 공식 출처 또는 관리자 검수 전 자료이므로 확정 자료로
-                사용하지 마세요.
+                공식 확인 진행 중: 확정 자료로 사용하기 전 공식 출처를 함께
+                확인해 주세요.
               </div>
             ) : null}
-            {!document.aiUsable ? (
-              <div className="mt-2 rounded-lg border border-[#d6d8dc] bg-[#f4f5f6] p-3 text-sm font-semibold leading-6 text-[#5f6670]">
-                AI 참조 제외: AI 답변 보조 API는 연결되지 않았으며, 검수 완료
-                전에는 근거 문서로 사용하지 않습니다.
-              </div>
-            ) : (
-              <div className="mt-2 rounded-lg border border-[#d6d8dc] bg-[#f4f5f6] p-3 text-sm leading-6 text-[#5f6670]">
-                AI 참조 가능으로 표시되어 있으나, PlannerDesk는 AI API를
-                제공하지 않습니다.
-              </div>
-            )}
           </aside>
 
           <section className="space-y-6 rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-6">

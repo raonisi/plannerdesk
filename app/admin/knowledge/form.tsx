@@ -18,6 +18,7 @@ import {
   RISK_LABEL,
   SOURCE_TYPE_LABEL,
 } from "./visibility";
+import { KNOWLEDGE_REGISTRATION_STEPS } from "@/lib/knowledge/workflow-labels";
 
 const fieldClass =
   "mt-1 w-full rounded-md border border-[#d9c9a8] bg-white px-3 py-2 text-sm text-[#102235] outline-none transition focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15";
@@ -276,10 +277,19 @@ export default function KnowledgeArticleForm({
 
       <Section
         title="D. 공개·검수 설정"
-        description="공개 화면 DB 연동 전에도 검수·게시 기준을 미리 적용합니다."
+        description="등록 후 검수 대기 → 공개 가능 → 게시 순으로 운영합니다. 미검수·비공개 문서는 public에 노출되지 않습니다."
       >
+        <div className="md:col-span-2 rounded-md border border-[#e7ddc9] bg-[#f7f1e5] px-4 py-3">
+          <p className="text-xs font-semibold text-[#102235]">등록·검수 순서</p>
+          <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs leading-relaxed text-[#4f5661]">
+            {KNOWLEDGE_REGISTRATION_STEPS.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </div>
+
         <label className={labelClass}>
-          상태
+          검수 상태
           <select
             className={fieldClass}
             name="status"
@@ -301,7 +311,7 @@ export default function KnowledgeArticleForm({
               defaultChecked={article?.isPublished ?? false}
               className="h-4 w-4 rounded border-[#d9c9a8]"
             />
-            공개(게시) — verified 또는 needs_review 상태에서만 공개 화면 후보
+            공개(게시) — 검수 대기 또는 공개 가능 상태에서만 공개 화면 후보
           </label>
           <label className="flex items-center gap-2 text-sm text-[#102235]">
             <input
@@ -311,7 +321,7 @@ export default function KnowledgeArticleForm({
               disabled={!isVerified}
               className="h-4 w-4 rounded border-[#d9c9a8] disabled:opacity-50"
             />
-            AI 참조 가능 — 검수 완료(verified) 상태에서만 설정 가능
+            AI 참조 가능 — 공개 가능(verified) 상태에서만 설정 가능
           </label>
           <p className={hintClass}>{ADMIN_KNOWLEDGE_COPY.draftRule}</p>
         </div>

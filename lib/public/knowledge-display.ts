@@ -27,8 +27,8 @@ export const PUBLIC_TYPE_LABEL: Record<KnowledgeArticleType, string> = {
 export type PublicKnowledgeStatus = "needs_review" | "verified";
 
 export const PUBLIC_STATUS_LABEL: Record<PublicKnowledgeStatus, string> = {
-  needs_review: "검수 필요",
-  verified: "검수 완료",
+  needs_review: "공식 확인 진행 중",
+  verified: "공식 확인 완료",
 };
 
 export const PUBLIC_RISK_LABEL: Record<KnowledgeRiskLevel, string> = {

@@ -44,11 +44,11 @@ const badgeBase =
 
 const KNOWLEDGE_CONFIRM_OVERRIDES: Partial<Record<AdminBulkActionId, string>> = {
   markVerified:
-    "선택한 문서를 검수 완료 상태로 변경합니다. 공식 출처와 금지 표현을 확인한 뒤 진행하세요.",
+    "선택한 문서를 공개 가능 상태로 변경합니다. 공식 출처와 금지 표현을 확인한 뒤 진행하세요.",
   setPublishedTrue:
-    "선택한 문서를 public 지식 아카이브에 노출할 수 있습니다. draft, archived, rejected 문서는 공개되지 않습니다. 보험금 판단, 손해사정 오인, 의료자료 입력 문구가 없는지 확인하세요.",
+    "선택한 문서를 public 지식 아카이브에 노출할 수 있습니다. 초안·보류·수정 필요 문서는 공개되지 않습니다. 보험금 판단, 손해사정 오인, 의료자료 입력 문구가 없는지 확인하세요.",
   archive:
-    "선택한 문서를 보관 상태로 변경하고 public 노출을 차단합니다.",
+    "선택한 문서를 보류 상태로 변경하고 public 노출을 차단합니다.",
 };
 
 const STARTER_IMPORT_CONFIRM =
@@ -408,7 +408,7 @@ export default function KnowledgeAdminList({
                                     type="submit"
                                     className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] hover:bg-[#f7f1e5]"
                                   >
-                                    검수 필요
+                                    검수 대기로
                                   </button>
                                 </form>
                               ) : null}
@@ -425,7 +425,7 @@ export default function KnowledgeAdminList({
                                     type="submit"
                                     className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#1f6b55] hover:bg-[#edf7f2]"
                                   >
-                                    검수 완료
+                                    공개 가능으로
                                   </button>
                                 </form>
                               ) : null}
@@ -462,7 +462,7 @@ export default function KnowledgeAdminList({
                                     type="submit"
                                     className="w-full rounded-md border border-[#e8c4c4] px-3 py-1.5 text-xs font-semibold text-[#8b2e2e] hover:bg-[#fdf2f2]"
                                   >
-                                    보관
+                                    보류
                                   </button>
                                 </form>
                               ) : null}
