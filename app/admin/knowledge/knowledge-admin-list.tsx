@@ -10,13 +10,15 @@ import {
 } from "@prisma/client";
 import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import AdminListEmptyState from "@/components/admin/AdminListEmptyState";
 import AdminBulkActionPanel, {
   BulkHeaderCheckbox,
   BulkRowCheckbox,
 } from "@/components/admin/bulk/AdminBulkActionPanel";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
 import type { AdminBulkSelectableItem } from "@/lib/admin/bulk-policies";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import { getAdminPublicSurfaceLabel } from "@/lib/admin/public-surface-label";
+import { borders, shadows, surfaces } from "@/lib/design-system";
 import type {
   StarterImportApplyResult,
   StarterImportPreviewResult,
@@ -32,12 +34,7 @@ import {
 import {
   ADMIN_KNOWLEDGE_COPY,
   CATEGORY_LABEL,
-  PUBLICATION_LABEL,
-  RISK_LABEL,
-  SOURCE_TYPE_LABEL,
   STATUS_LABEL,
-  TYPE_LABEL,
-  VISIBILITY_LABEL,
   isKnowledgeArticlePubliclyVisible,
   wouldPublishBlocked,
 } from "./visibility";
@@ -277,7 +274,7 @@ export default function KnowledgeAdminList({
   const bulkItems = toBulkItems(articles);
 
   const bulkNotice =
-    "선택한 지식 문서의 검수·게시 상태를 일괄 변경합니다. 공개 전 공식 출처와 금지 표현을 확인하세요. aiUsable은 변경하지 않습니다.";
+    "선택한 지식 문서의 검수·게시 상태를 변경합니다. 대상 수를 확인한 뒤 진행하세요. 공개 전 공식 출처와 금지 표현을 확인하세요.";
 
   return (
     <>
@@ -299,14 +296,13 @@ export default function KnowledgeAdminList({
             className={`${surfaces.card} ${borders.default} ${shadows.card} overflow-hidden rounded-lg`}
           >
             {articles.length === 0 ? (
-              <div className="p-8 text-center">
-                <h2 className="text-lg font-semibold text-[#102235]">
-                  조건에 맞는 지식 문서가 없습니다.
-                </h2>
-                <p className={`${textStyles.body} mt-2`}>
-                  새 문서를 작성하거나 필터를 조정해 주세요.
-                </p>
-              </div>
+              <AdminListEmptyState
+                title="조건에 맞는 지식 문서가 없습니다."
+                description="필터를 조정하거나 새 문서를 작성해 주세요."
+                actionHref="/admin/knowledge/new"
+                actionLabel="새 문서 작성"
+                resetHref="/admin/knowledge"
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
@@ -326,6 +322,10 @@ export default function KnowledgeAdminList({
                       const publiclyVisible = isKnowledgeArticlePubliclyVisible({
                         isPublished: article.isPublished,
                         status: article.status,
+                      });
+                      const surface = getAdminPublicSurfaceLabel({
+                        isPublished: article.isPublished,
+                        publiclyVisible,
                       });
                       const togglePublishTarget = !article.isPublished;
                       const publishBlocked = wouldPublishBlocked({
@@ -360,42 +360,29 @@ export default function KnowledgeAdminList({
                               <span className={badgeClass("navy")}>
                                 {CATEGORY_LABEL[article.category]}
                               </span>
-                              <span className={badgeClass("navy")}>
-                                {TYPE_LABEL[article.type]}
-                              </span>
                               <span
                                 className={badgeClass(statusTone(article.status))}
                               >
                                 {STATUS_LABEL[article.status]}
                               </span>
                               <span
-                                className={badgeClass(
-                                  article.isPublished ? "green" : "gray",
-                                )}
+                                className={badgeClass(surface.tone)}
+                                title={surface.title}
                               >
-                                {article.isPublished
-                                  ? PUBLICATION_LABEL.published
-                                  : PUBLICATION_LABEL.unpublished}
-                              </span>
-                              <span
-                                className={badgeClass(
-                                  publiclyVisible ? "green" : "gray",
-                                )}
-                              >
-                                {publiclyVisible
-                                  ? VISIBILITY_LABEL.visible
-                                  : VISIBILITY_LABEL.hidden}
+                                {surface.label}
                               </span>
                               {article.aiUsable ? (
-                                <span className={badgeClass("gold")}>AI 참조</span>
+                                <span
+                                  className={badgeClass("gold")}
+                                  title="AI 참조 가능 설정(일괄 변경 대상 아님)"
+                                >
+                                  AI 참조
+                                </span>
                               ) : null}
-                              <span className={badgeClass("gray")}>
-                                {RISK_LABEL[article.riskLevel]}
-                              </span>
-                              <span className={badgeClass("gray")}>
-                                {SOURCE_TYPE_LABEL[article.sourceType]}
-                              </span>
                             </div>
+                            <p className="mt-2 text-xs text-[#5f6875]">
+                              유형·출처·위험도는 수정 화면에서 확인할 수 있습니다.
+                            </p>
                           </td>
                           <td className="px-4 py-4 text-[#4f5661]">
                             {formatDate(article.updatedAt)}
@@ -459,7 +446,9 @@ export default function KnowledgeAdminList({
                                   }
                                   className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
                                 >
-                                  {article.isPublished ? "비게시" : "공개 전환"}
+                                  {article.isPublished
+                                    ? "비공개로 전환"
+                                    : "공개로 전환"}
                                 </button>
                               </form>
                               {canArchive ? (

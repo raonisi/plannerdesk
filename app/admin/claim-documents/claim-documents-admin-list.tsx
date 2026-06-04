@@ -5,13 +5,15 @@ import {
   ClaimDocumentCategory,
   VerificationStatus,
 } from "@prisma/client";
+import AdminListEmptyState from "@/components/admin/AdminListEmptyState";
 import AdminBulkActionPanel, {
   BulkHeaderCheckbox,
   BulkRowCheckbox,
 } from "@/components/admin/bulk/AdminBulkActionPanel";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
 import type { AdminBulkSelectableItem } from "@/lib/admin/bulk-policies";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import { getAdminPublicSurfaceLabel } from "@/lib/admin/public-surface-label";
+import { borders, shadows, surfaces } from "@/lib/design-system";
 import {
   executeClaimDocumentBulkAction,
   setClaimDocumentPublished,
@@ -19,9 +21,7 @@ import {
 import {
   ADMIN_CLAIM_DOC_COPY,
   CLAIM_DOCUMENT_CATEGORY_LABEL,
-  PUBLICATION_LABEL,
   VERIFICATION_STATUS_LABEL,
-  VISIBILITY_LABEL,
   isClaimDocumentPubliclyVisible,
   wouldPublishDraft,
 } from "./visibility";
@@ -93,7 +93,7 @@ export default function ClaimDocumentsAdminList({
   const bulkItems = toBulkItems(claimDocuments);
 
   const bulkNotice =
-    "선택한 항목의 상태를 일괄 변경합니다. 게시로 전환하면 public 화면(/claim-documents)에 노출될 수 있습니다. 검수 상태와 공개 조건을 반드시 확인하세요.";
+    "선택한 청구서류의 검수·게시 상태를 변경합니다. 대상 수를 확인한 뒤 진행하세요. 공개 화면(/claim-documents) 노출에 영향을 줄 수 있습니다.";
 
   return (
     <AdminBulkActionPanel
@@ -112,14 +112,13 @@ export default function ClaimDocumentsAdminList({
           className={`${surfaces.card} ${borders.default} ${shadows.card} mt-5 overflow-hidden rounded-lg`}
         >
           {claimDocuments.length === 0 ? (
-            <div className="p-8 text-center">
-              <h2 className="text-lg font-semibold text-[#102235]">
-                필터 조건에 맞는 청구서류가 없습니다.
-              </h2>
-              <p className={`${textStyles.body} mt-2`}>
-                초안 청구서류를 등록하거나 필터 조건을 다시 확인해 주세요.
-              </p>
-            </div>
+            <AdminListEmptyState
+              title="조건에 맞는 청구서류가 없습니다."
+              description="필터를 조정하거나, 보험사를 선택한 뒤 새 청구서류를 등록해 주세요."
+              actionHref="/admin/claim-documents/new"
+              actionLabel="새 청구서류 등록"
+              resetHref="/admin/claim-documents"
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
@@ -140,6 +139,10 @@ export default function ClaimDocumentsAdminList({
                     const publiclyVisible = isClaimDocumentPubliclyVisible({
                       isPublished: claimDocument.isPublished,
                       verificationStatus: claimDocument.verificationStatus,
+                    });
+                    const surface = getAdminPublicSurfaceLabel({
+                      isPublished: claimDocument.isPublished,
+                      publiclyVisible,
                     });
                     const togglePublishTarget = !claimDocument.isPublished;
                     const publishWouldBeBlocked = wouldPublishDraft({
@@ -162,7 +165,7 @@ export default function ClaimDocumentsAdminList({
                           <div className="mt-1 text-xs text-[#5f6875]">
                             <span className="font-mono">{claimDocument.slug}</span>
                             {" · "}
-                            {claimDocument.insurerName ?? "일반 청구 안내"}
+                            {claimDocument.insurerName ?? "보험사 미연결"}
                           </div>
                           {claimDocument.summary ? (
                             <p className="mt-2 line-clamp-2 break-words text-xs text-[#4f5661]">
@@ -176,34 +179,15 @@ export default function ClaimDocumentsAdminList({
                               {categoryLabel(claimDocument.category)}
                             </span>
                             <span
-                              className={badgeClass(
-                                statusTone(claimDocument.verificationStatus),
-                              )}
+                              className={badgeClass(statusTone(claimDocument.verificationStatus))}
                             >
                               {statusLabel(claimDocument.verificationStatus)}
                             </span>
                             <span
-                              className={badgeClass(
-                                claimDocument.isPublished ? "green" : "gray",
-                              )}
+                              className={badgeClass(surface.tone)}
+                              title={surface.title}
                             >
-                              {claimDocument.isPublished
-                                ? PUBLICATION_LABEL.published
-                                : PUBLICATION_LABEL.unpublished}
-                            </span>
-                            <span
-                              className={badgeClass(
-                                publiclyVisible ? "green" : "gray",
-                              )}
-                              title={
-                                publiclyVisible
-                                  ? ADMIN_CLAIM_DOC_COPY.policySummary
-                                  : `${ADMIN_CLAIM_DOC_COPY.policySummary} ${ADMIN_CLAIM_DOC_COPY.draftRule}`
-                              }
-                            >
-                              {publiclyVisible
-                                ? VISIBILITY_LABEL.visible
-                                : VISIBILITY_LABEL.hidden}
+                              {surface.label}
                             </span>
                           </div>
                         </td>
@@ -239,7 +223,7 @@ export default function ClaimDocumentsAdminList({
                                 className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] transition hover:bg-[#f7f1e5] disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a] disabled:hover:bg-[#f4f5f6]"
                               >
                                 {claimDocument.isPublished
-                                  ? "비게시로 전환"
+                                  ? "비공개로 전환"
                                   : "공개로 전환"}
                               </button>
                             </form>

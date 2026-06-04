@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 
 const PAGE_TITLE = "청구서류 라이브러리 관리";
 const PAGE_DESCRIPTION =
-  "청구 유형별 필요서류 안내와 공식 출처 링크를 관리합니다. 공개 청구서류 라이브러리 DB 읽기는 PR-39에서 연결됩니다.";
+  "청구 유형별 필요서류 안내와 공식 출처 링크를 관리합니다. 보험사별로 필터해 연결된 청구서류를 확인할 수 있습니다.";
 
 interface SearchParams {
   error?: string;
@@ -32,6 +32,7 @@ interface SearchParams {
   category?: string;
   status?: string;
   published?: string;
+  insurer?: string;
 }
 
 function isValidCategory(value: string): value is ClaimDocumentCategory {
@@ -46,6 +47,10 @@ function buildWhere(
 
   if (query) {
     where.title = { contains: query, mode: "insensitive" };
+  }
+
+  if (searchParams.insurer && searchParams.insurer !== "all") {
+    where.insurerId = searchParams.insurer;
   }
 
   if (searchParams.category && isValidCategory(searchParams.category)) {
@@ -115,19 +120,25 @@ export default async function AdminClaimDocumentsPage({
   }
 
   const resolvedSearchParams = await searchParams;
-  const claimDocuments = await prisma.claimDocument.findMany({
-    where: buildWhere(resolvedSearchParams),
-    orderBy: [
-      { sortOrder: "asc" },
-      { updatedAt: "desc" },
-      { title: "asc" },
-    ],
-    include: {
-      insurer: {
-        select: { id: true, name: true },
+  const [claimDocuments, insurersForFilter] = await Promise.all([
+    prisma.claimDocument.findMany({
+      where: buildWhere(resolvedSearchParams),
+      orderBy: [
+        { sortOrder: "asc" },
+        { updatedAt: "desc" },
+        { title: "asc" },
+      ],
+      include: {
+        insurer: {
+          select: { id: true, name: true },
+        },
       },
-    },
-  });
+    }),
+    prisma.insurer.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
 
   return (
     <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
@@ -161,7 +172,7 @@ export default async function AdminClaimDocumentsPage({
         </div>
 
         <form
-          className={`${surfaces.card} ${borders.default} ${shadows.card} mb-5 grid gap-3 rounded-lg p-4 md:grid-cols-[1.5fr_1fr_1fr_1fr_auto]`}
+          className={`${surfaces.card} ${borders.default} ${shadows.card} mb-5 grid gap-3 rounded-lg p-4 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto]`}
         >
           <input
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
@@ -169,6 +180,19 @@ export default async function AdminClaimDocumentsPage({
             placeholder="제목 검색"
             defaultValue={resolvedSearchParams.q ?? ""}
           />
+          <select
+            className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
+            name="insurer"
+            defaultValue={resolvedSearchParams.insurer ?? "all"}
+            aria-label="보험사 필터"
+          >
+            <option value="all">보험사 전체</option>
+            {insurersForFilter.map((insurer) => (
+              <option key={insurer.id} value={insurer.id}>
+                {insurer.name}
+              </option>
+            ))}
+          </select>
           <select
             className="min-h-11 rounded-md border border-[#d9c9a8] bg-white px-3 text-sm text-[#102235] outline-none focus:border-[#1f6b55] focus:ring-2 focus:ring-[#1f6b55]/15"
             name="category"

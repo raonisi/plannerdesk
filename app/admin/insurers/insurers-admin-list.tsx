@@ -7,19 +7,19 @@ import {
   InsurerCategory,
   VerificationStatus,
 } from "@prisma/client";
+import AdminListEmptyState from "@/components/admin/AdminListEmptyState";
 import AdminBulkActionPanel, {
   BulkHeaderCheckbox,
   BulkRowCheckbox,
 } from "@/components/admin/bulk/AdminBulkActionPanel";
 import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
 import type { AdminBulkSelectableItem } from "@/lib/admin/bulk-policies";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import { getAdminPublicSurfaceLabel } from "@/lib/admin/public-surface-label";
+import { borders, shadows, surfaces } from "@/lib/design-system";
 import { executeInsurerBulkAction, setInsurerPublished } from "./actions";
 import {
   ADMIN_VISIBILITY_COPY,
-  PUBLICATION_LABEL,
   VERIFICATION_STATUS_LABEL,
-  VISIBILITY_LABEL,
   isInsurerPubliclyVisible,
   wouldPublishDraft,
 } from "./visibility";
@@ -156,7 +156,7 @@ export default function InsurersAdminList({
   const bulkItems = toBulkItems(insurers);
 
   const bulkNotice =
-    "선택한 항목의 상태를 일괄 변경합니다. 이 작업은 공개 화면(/directory) 노출 여부에 영향을 줄 수 있습니다. 공식 출처와 최신 기준을 확인한 뒤 진행하세요.";
+    "선택한 항목의 검수·게시 상태를 변경합니다. 대상 수를 확인한 뒤 진행하세요. 공개 화면(/directory) 노출에 영향을 줄 수 있습니다.";
 
   return (
     <AdminBulkActionPanel
@@ -174,14 +174,13 @@ export default function InsurersAdminList({
           className={`${surfaces.card} ${borders.default} ${shadows.card} mt-5 overflow-hidden rounded-lg`}
         >
           {insurers.length === 0 ? (
-            <div className="p-8 text-center">
-              <h2 className="text-lg font-semibold text-[#102235]">
-                필터 조건에 맞는 보험사가 없습니다.
-              </h2>
-              <p className={`${textStyles.body} mt-2`}>
-                초안 보험사를 등록하거나 필터 조건을 다시 확인해 주세요.
-              </p>
-            </div>
+            <AdminListEmptyState
+              title="조건에 맞는 보험사가 없습니다."
+              description="필터를 조정하거나 새 보험사를 등록해 주세요."
+              actionHref="/admin/insurers/new"
+              actionLabel="새 보험사 등록"
+              resetHref="/admin/insurers"
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
@@ -205,6 +204,10 @@ export default function InsurersAdminList({
                     const publiclyVisible = isInsurerPubliclyVisible({
                       isPublished: insurer.isPublished,
                       verificationStatus: insurer.verificationStatus,
+                    });
+                    const surface = getAdminPublicSurfaceLabel({
+                      isPublished: insurer.isPublished,
+                      publiclyVisible,
                     });
                     const togglePublishTarget = !insurer.isPublished;
                     const publishWouldBeBlocked = wouldPublishDraft({
@@ -279,35 +282,23 @@ export default function InsurersAdminList({
                               {categoryLabel(insurer.category)}
                             </span>
                             <span
-                              className={badgeClass(
-                                statusTone(insurer.verificationStatus),
-                              )}
+                              className={badgeClass(statusTone(insurer.verificationStatus))}
                             >
                               {statusLabel(insurer.verificationStatus)}
                             </span>
                             <span
-                              className={badgeClass(
-                                insurer.isPublished ? "green" : "gray",
-                              )}
+                              className={badgeClass(surface.tone)}
+                              title={surface.title}
                             >
-                              {insurer.isPublished
-                                ? PUBLICATION_LABEL.published
-                                : PUBLICATION_LABEL.unpublished}
-                            </span>
-                            <span
-                              className={badgeClass(publiclyVisible ? "green" : "gray")}
-                              title={
-                                publiclyVisible
-                                  ? ADMIN_VISIBILITY_COPY.policySummary
-                                  : `${ADMIN_VISIBILITY_COPY.policySummary} ${ADMIN_VISIBILITY_COPY.draftRule}`
-                              }
-                            >
-                              {publiclyVisible
-                                ? VISIBILITY_LABEL.visible
-                                : VISIBILITY_LABEL.hidden}
+                              {surface.label}
                             </span>
                             {insurer.isFeatured ? (
-                              <span className={badgeClass("green")}>특별 표기</span>
+                              <span
+                                className={badgeClass("green")}
+                                title="디렉터리 목록에서 강조 표시됩니다."
+                              >
+                                목록 강조
+                              </span>
                             ) : null}
                             {needsOperationalUpdate ? (
                               <span
@@ -351,7 +342,7 @@ export default function InsurersAdminList({
                                 className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] transition hover:bg-[#f7f1e5] disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a] disabled:hover:bg-[#f4f5f6]"
                               >
                                 {insurer.isPublished
-                                  ? "비게시로 전환"
+                                  ? "비공개로 전환"
                                   : "공개로 전환"}
                               </button>
                             </form>

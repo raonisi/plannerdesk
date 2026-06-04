@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 const PAGE_TITLE = "보험사 디렉토리 관리";
 const PAGE_DESCRIPTION =
-  "보험사 접속/지원/청구/카드납 운영 정보를 관리합니다. 공개 디렉토리 DB 읽기는 PR-30에서 연결됩니다.";
+  "보험사 전산·연락처·청구·카드납 운영 정보를 관리합니다. 검수·공개 상태를 확인한 뒤 공개 디렉터리에 반영하세요.";
 const SAFETY_NOTICE =
   "공식 링크와 연락처는 공개 전 반드시 보험사 공식 출처 기준으로 검수해 주세요.";
 interface SearchParams {
