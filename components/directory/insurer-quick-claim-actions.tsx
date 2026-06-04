@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { buttons } from "@/lib/design-system";
+import { WORK_LINK_ACTION_LABELS } from "@/lib/directory/work-links";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
 export function InsurerQuickClaimActions({
@@ -23,20 +24,20 @@ export function InsurerQuickClaimActions({
     >
       {insurer.claimPageUrl ? (
         <ExternalTabAnchor
-          aria-label={`${insurer.name} 청구안내 보기`}
+          aria-label={`${insurer.name} ${WORK_LINK_ACTION_LABELS.claimGuide}`}
           className={`${buttons.base} ${buttons.outline} w-full text-sm`}
           href={insurer.claimPageUrl}
         >
-          청구안내 보기 ↗
+          {WORK_LINK_ACTION_LABELS.claimGuide} ↗
         </ExternalTabAnchor>
       ) : (
         <button
           type="button"
-          aria-label={`${insurer.name} 청구안내 펼치기`}
+          aria-label={`${insurer.name} ${WORK_LINK_ACTION_LABELS.claimGuide}`}
           className={`${buttons.base} ${buttons.outline} w-full text-sm`}
           onClick={onOpenClaimGuide}
         >
-          청구안내 보기
+          {WORK_LINK_ACTION_LABELS.claimGuide}
         </button>
       )}
       <Link
@@ -44,8 +45,8 @@ export function InsurerQuickClaimActions({
         className={`${buttons.base} ${buttons.outline} w-full text-sm`}
       >
         {claimItemCount > 0
-          ? `필요서류 확인 (${claimItemCount})`
-          : "필요서류 확인"}
+          ? `${WORK_LINK_ACTION_LABELS.claimDocuments} (${claimItemCount})`
+          : WORK_LINK_ACTION_LABELS.claimDocuments}
       </Link>
     </section>
   );

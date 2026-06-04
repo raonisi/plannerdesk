@@ -13,6 +13,7 @@ import {
 import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
+import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
 import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { getDisclosureLinksForInsurer } from "@/lib/content/disclosure-match";
@@ -27,6 +28,12 @@ import {
   publicContentTrustHint,
   telHref,
 } from "@/lib/directory/formatting";
+import {
+  WORK_LINK_ACTION_LABELS,
+  WORK_LINK_COPY,
+  WORK_LINK_GROUP_LABELS,
+  disclosureLinkStatus,
+} from "@/lib/directory/work-links";
 import { buttons } from "@/lib/design-system";
 
 
@@ -275,10 +282,10 @@ export function InsurerActionCard({
   const [cardPaymentOpen, setCardPaymentOpen] = useState(false);
   const [mailAddressOpen, setMailAddressOpen] = useState(false);
   
-  const accessHref = insurer.systemUrl ?? insurer.plannerPortalUrl;
   const mailAddress = insurer.registeredMailAddress || insurer.mailingAddress;
   const claimFax = claimFaxDisplay(insurer);
   const disclosureLinks = getDisclosureLinksForInsurer(insurer.id);
+  const disclosureState = disclosureLinkStatus(disclosureLinks);
 
   return (
     <article className="group/insurer relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-white shadow-[0_4px_20px_rgba(15,29,46,0.02)] transition-all hover:shadow-[0_10px_30px_rgba(15,29,46,0.06)] hover:-translate-y-0.5">
@@ -296,51 +303,20 @@ export function InsurerActionCard({
           onToggleFavorite={onToggleFavorite}
         />
 
-        <div className="mt-5">
+        <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="mt-5 space-y-2">
+          <CardSectionTitle>{WORK_LINK_GROUP_LABELS.claim}</CardSectionTitle>
           <InsurerQuickClaimActions
             claimItemCount={claimItems.length}
             insurer={insurer}
             onOpenClaimGuide={() => setDetailedOpen(true)}
           />
+        </section>
+
+        <div className="mt-6">
+          <InsurerPrimaryWorkLinks insurer={insurer} />
         </div>
 
         <div className="mt-6 space-y-5">
-          <section className="space-y-2">
-            <CardSectionTitle>전산 업무</CardSectionTitle>
-            {accessHref ? (
-              <ExternalTabAnchor
-                aria-label={`${insurer.name} 전산 접속`}
-                className={`${buttons.base} ${buttons.primary} w-full gap-2`}
-                href={accessHref}
-              >
-                전산 접속 ↗
-              </ExternalTabAnchor>
-            ) : (
-              <span className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-4 text-sm font-semibold text-[#5B6470] break-keep">
-                {DIRECTORY_TEXT.missing}
-              </span>
-            )}
-            {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 ? (
-              <p className="text-center text-[11px] font-medium text-[#5B6470]">
-                ({insurer.supportedBrowsers.map((b) => (b === "chrome" ? "크롬" : "엣지")).join("/")} 권장)
-              </p>
-            ) : null}
-          </section>
-
-          <section className="space-y-2">
-            <CardSectionTitle>상담·문의</CardSectionTitle>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <PhoneActionButton
-                label="고객센터 전화"
-                phone={insurer.customerCenterPhone}
-              />
-              <PhoneActionButton
-                label="헬프데스크 전화"
-                phone={insurer.helpdeskPhone}
-              />
-            </div>
-          </section>
-
           <button
             type="button"
             aria-expanded={detailedOpen}
@@ -368,11 +344,11 @@ export function InsurerActionCard({
               </ul>
             </div>
 
-            {/* 2순위: 상담·문의 */}
+            {/* 지원·문의 상세 */}
             <section className="space-y-3">
               <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
-                상담·문의
+                {WORK_LINK_GROUP_LABELS.support}
               </h4>
               <div className="overflow-hidden rounded-xl border border-[#E3DED4] bg-white text-sm">
                 <div className="grid grid-cols-[100px_1fr] border-b border-[#E3DED4] p-3 items-center">
@@ -423,11 +399,10 @@ export function InsurerActionCard({
               </div>
             </section>
 
-            {/* 3순위: 청구 접수 */}
             <section className="space-y-3">
               <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
-                청구 접수
+                {WORK_LINK_GROUP_LABELS.claim}
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4">
@@ -471,7 +446,7 @@ export function InsurerActionCard({
                     className={`${buttons.base} ${buttons.outline} w-full text-xs`}
                     href={insurer.claimFormUrl}
                   >
-                    청구양식 열기 ↗
+                    {WORK_LINK_ACTION_LABELS.claimForm} ↗
                   </ExternalTabAnchor>
                 ) : (
                   <span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-3 text-xs font-semibold text-[#5B6470] break-keep">
@@ -503,12 +478,16 @@ export function InsurerActionCard({
               </div>
             </section>
 
-            {/* 4순위: 약관·공시 */}
             <section className="space-y-3 border-t border-[#E3DED4] pt-6">
               <h4 className="text-sm font-bold text-[#0F1D2E] flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-[#B9975B]" />
-                약관·공시
+                {WORK_LINK_GROUP_LABELS.official}
               </h4>
+              {disclosureState !== "available" ? (
+                <p className="text-xs leading-5 text-[#5B6470]">
+                  {WORK_LINK_COPY.disclosureUnverified}
+                </p>
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 {insurer.termsUrl ? (
                   <ExternalTabAnchor
@@ -516,7 +495,7 @@ export function InsurerActionCard({
                     className={`${buttons.base} ${buttons.outline} w-full text-sm`}
                     href={insurer.termsUrl}
                   >
-                    약관 확인 ↗
+                    {WORK_LINK_ACTION_LABELS.terms} ↗
                   </ExternalTabAnchor>
                 ) : null}
                 {disclosureLinks.productDisclosure?.sourceUrl ? (
@@ -524,7 +503,7 @@ export function InsurerActionCard({
                     className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] hover:text-[#B9975B]"
                     href={disclosureLinks.productDisclosure.sourceUrl}
                   >
-                    공식 상품공시실 ↗
+                    {WORK_LINK_ACTION_LABELS.productDisclosure} ↗
                   </ExternalTabAnchor>
                 ) : (
                   <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
@@ -537,7 +516,7 @@ export function InsurerActionCard({
                     className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#E3DED4] bg-white text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] hover:text-[#B9975B]"
                     href={disclosureLinks.policyTerms.sourceUrl}
                   >
-                    공식 통합약관실 ↗
+                    {WORK_LINK_ACTION_LABELS.policyTerms} ↗
                   </ExternalTabAnchor>
                 ) : (
                   <span className="inline-flex min-h-12 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-slate-50 text-sm font-semibold text-slate-400">
@@ -550,7 +529,7 @@ export function InsurerActionCard({
                   href="/disclosure-links"
                   className={`${buttons.base} ${buttons.ghost} px-3 text-xs`}
                 >
-                  공시·약관 확인
+                  {WORK_LINK_ACTION_LABELS.disclosureHub}
                 </Link>
                 <Link
                   href="/work-tools"
@@ -623,34 +602,6 @@ function CardSectionTitle({ children }: { children: ReactNode }) {
     <h3 className="text-xs font-bold uppercase tracking-wide text-[#B9975B]">
       {children}
     </h3>
-  );
-}
-
-function PhoneActionButton({
-  label,
-  phone,
-}: {
-  label: string;
-  phone: string | null;
-}) {
-  const href = telHref(phone);
-
-  if (href) {
-    return (
-      <a
-        aria-label={`${label} ${phone}`}
-        className={`${buttons.base} ${buttons.outline} w-full break-all px-3 text-xs`}
-        href={href}
-      >
-        {label}
-      </a>
-    );
-  }
-
-  return (
-    <span className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-3 text-xs font-semibold text-[#5B6470] break-keep">
-      {DIRECTORY_TEXT.missing}
-    </span>
   );
 }
 

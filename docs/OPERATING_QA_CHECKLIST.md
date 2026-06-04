@@ -32,6 +32,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Search and browse UX (PR127):** [PR-127-SEARCH-UX-OPS.md](PR-127-SEARCH-UX-OPS.md)
 
+**Work links and system shortcuts (PR128):** [PR-128-WORK-LINKS-OPS.md](PR-128-WORK-LINKS-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

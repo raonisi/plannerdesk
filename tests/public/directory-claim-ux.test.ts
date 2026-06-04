@@ -25,8 +25,8 @@ describe("Directory / claim documents UX (PR112, static)", () => {
       "utf8",
     );
     assert.match(card, /InsurerQuickClaimActions/);
-    assert.match(quick, /청구안내 보기/);
-    assert.match(quick, /필요서류 확인/);
+    assert.match(quick, /WORK_LINK_ACTION_LABELS\.claimGuide/);
+    assert.match(quick, /WORK_LINK_ACTION_LABELS\.claimDocuments/);
   });
 
   it("claim explorer links back to directory by insurer id", () => {
