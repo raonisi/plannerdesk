@@ -55,3 +55,11 @@
 - [ ] product code 변경이 없는가
 
 **Codex:** 기본 생략. [PR-114-ROLLBACK-AND-CODEX-GATES.md](./PR-114-ROLLBACK-AND-CODEX-GATES.md) 조건 충족 시에만 제한검수 후보.
+
+---
+
+## PR115 (다음 단계)
+
+제한 배포 **직전** 최종 smoke + rollback drill + 판단표:
+
+- [PR-115-LIMITED-RELEASE-FINAL-OPS.md](./PR-115-LIMITED-RELEASE-FINAL-OPS.md)

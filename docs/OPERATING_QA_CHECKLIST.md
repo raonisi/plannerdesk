@@ -8,6 +8,8 @@ database readiness, and safety boundaries.
 [PR-114-LIMITED-RELEASE-OPS.md](PR-114-LIMITED-RELEASE-OPS.md) for pre-deploy
 checklist, release notes template, and rollback/Codex gates.
 
+**Final smoke + rollback drill (PR115):** [PR-115-LIMITED-RELEASE-FINAL-OPS.md](PR-115-LIMITED-RELEASE-FINAL-OPS.md)
+
 ---
 
 ## A. Code And Build Integrity

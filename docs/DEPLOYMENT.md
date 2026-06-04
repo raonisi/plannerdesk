@@ -20,6 +20,10 @@ For **limited releases bundling PR105~PR113** (or equivalent), use the PR-114 op
 - [PR-114-RELEASE-NOTES-TEMPLATE.md](PR-114-RELEASE-NOTES-TEMPLATE.md)
 - [PR-114-ROLLBACK-AND-CODEX-GATES.md](PR-114-ROLLBACK-AND-CODEX-GATES.md)
 
+**Final smoke + rollback drill (PR115):**
+
+- [PR-115-LIMITED-RELEASE-FINAL-OPS.md](PR-115-LIMITED-RELEASE-FINAL-OPS.md)
+
 ## Railway
 
 Railway should detect the app from `package.json`.
