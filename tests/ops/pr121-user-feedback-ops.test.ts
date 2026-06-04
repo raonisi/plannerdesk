@@ -39,6 +39,7 @@ describe("PR121 user feedback ops (static)", () => {
     assert.match(types, /권한 문제/);
     assert.match(types, /Answer Assistant/);
     assert.match(types, /PR124/);
+    assert.match(types, /PR122/);
   });
 
   it("severity defines Critical and High handling", () => {

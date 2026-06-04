@@ -6,8 +6,8 @@
 
 | 우선순위 | 항목 | 이유 | 예상 PR | 위험도 |
 | ---: | --- | --- | --- | --- |
-| 1 | 피드백 기반 UX·문구 | Registry 접수 후 | PR122 | Low~Medium |
-| 2 | 청구서류 `insurerId` 연결 import | 보험사별 탐색 | 데이터 PR | Medium |
+| 1 | 피드백 기반 UX·문구 | Registry 접수 후 | PR123 | Low~Medium |
+| 2 | 청구서류 `insurerId` 연결 import | 보험사별 탐색 | PR124 | Medium |
 | 3 | 보험사 링크·팩스 자동 점검 (read-only) | 최신성 | 자동화 PR | Medium |
 | 4 | 고급 검색/필터 | 편의 | 기능 PR | Low |
 | 5 | 관리자 통계·활동 로그 | 운영 가시성 | 기능 PR | Medium |

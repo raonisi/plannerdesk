@@ -29,6 +29,8 @@
 
 **운영 개선 Cycle (PR121+):** [PR-121-USER-FEEDBACK-OPS.md](./PR-121-USER-FEEDBACK-OPS.md)
 
+**데이터 최신성 루틴 (PR122):** [PR-122-DATA-FRESHNESS-OPS.md](./PR-122-DATA-FRESHNESS-OPS.md)
+
 ---
 
 ## 금지 (재확인)

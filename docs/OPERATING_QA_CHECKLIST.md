@@ -20,6 +20,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **User feedback ops (PR121):** [PR-121-USER-FEEDBACK-OPS.md](PR-121-USER-FEEDBACK-OPS.md)
 
+**Data freshness routine (PR122):** [PR-122-DATA-FRESHNESS-OPS.md](PR-122-DATA-FRESHNESS-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
