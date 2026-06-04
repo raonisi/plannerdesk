@@ -44,6 +44,8 @@ Beta가 **실제로 동작**하려면 아래를 **모두** 만족해야 한다.
 
 `ALLOWLIST_BETA_OPERATOR_CHECKLIST` (`lib/answer-assistant/allowlist-beta.ts`) — PR-99-A-QA sign-off, durable backends, allowlist-only pilot, forbidden-feature absence, monitoring.
 
+**통합 운영 체크리스트 (PR-109):** `docs/PR-109-ANSWER-ASSISTANT-BETA-OPS-CHECKLIST.md` — 접근·rate limit·output safety·audit·retention·rollback·확대 판단을 한 문서로 정리.
+
 ## Rollback triggers (문서화)
 
 - Output Safety / Prompt Injection 차단 급증
