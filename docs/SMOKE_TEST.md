@@ -4,15 +4,22 @@ This document describes the lightweight smoke test for the static PlannerDesk MV
 
 ## Scope
 
-Smoke test these public routes:
+Smoke test these public routes (PR-110 expanded — see `docs/PR-110-PUBLIC-ROUTE-SMOKE.md`):
 
 - `/`
 - `/directory`
 - `/claim-documents`
 - `/disclosure-links`
 - `/message-templates`
+- `/search`
+- `/knowledge`
+- `/community`
+- `/search?q=test` (basic query)
+- `/knowledge/nonexistent-fixture-slug-pr110` (expect 404)
 
-The smoke test must confirm that the MVP remains static and DB-free. It must not add Neon, Prisma, database migrations, auth, file upload, customer medical document processing, AI generation, saved user data, BOA CRM, Aiven, or production secrets.
+Run via `npm run smoke:public` against a running server (`npm run start`). Unit tests without a server: `npx tsx --test tests/public/*.test.ts`.
+
+Runtime smoke may use DB-backed public reads when `DATABASE_URL` is set; it must not use production secrets, migrations, or admin routes.
 
 ## Commands
 

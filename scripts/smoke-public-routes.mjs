@@ -2,12 +2,18 @@ import { exit } from "node:process";
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
+/** PR110: expanded public route smoke (requires running server — `npm run start`). */
 const routes = [
   { path: "/", expectedStatus: 200 },
   { path: "/directory", expectedStatus: 200 },
   { path: "/claim-documents", expectedStatus: 200 },
   { path: "/disclosure-links", expectedStatus: 200 },
   { path: "/message-templates", expectedStatus: 200 },
+  { path: "/search", expectedStatus: 200 },
+  { path: "/knowledge", expectedStatus: 200 },
+  { path: "/community", expectedStatus: 200 },
+  { path: "/search?q=test", expectedStatus: 200 },
+  { path: "/knowledge/nonexistent-fixture-slug-pr110", expectedStatus: 404 },
 ];
 
 console.log(`[plannerdesk] Starting smoke test against BASE_URL: ${BASE_URL}`);
