@@ -12,4 +12,5 @@
 
 ## 후속 PR
 
-- **PR146** Beta Access Request Flow — UI·흐름 설계 (High-risk, 별도)
+- [PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md](./PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md) — 신청 흐름·상태값·PII 금지 (**PR146-A 완료**, 폼 미구현)
+- **PR146-B~G** — 신청 폼·데이터 모델·승인 UI (별도 High/Critical)

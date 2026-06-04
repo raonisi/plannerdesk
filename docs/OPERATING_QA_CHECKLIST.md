@@ -68,6 +68,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Payment feasibility plan (PR145, no PG or billing implementation):** [PR-145-PAYMENT-FEASIBILITY-OPS.md](PR-145-PAYMENT-FEASIBILITY-OPS.md)
 
+**Beta access request flow design (PR146, no signup form or auto-approval):** [PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md](PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

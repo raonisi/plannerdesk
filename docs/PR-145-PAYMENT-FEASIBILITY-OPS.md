@@ -38,6 +38,10 @@ PG·결제 route·webhook·구독 model·가격표·환불 기능·유료 권한
 | 제한 유료 베타 | **No-Go** |
 | 정식 유료화 | **No-Go** |
 
+## 연계 (후속)
+
+- [PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md](./PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md) — 베타 신청 흐름 (결제·가입 확대 없음)
+
 ## Codex
 
 결제·개인정보·약관·환불·권한·유료화 — **제한검수 필수** (본 PR은 문서·admin만이어도 주제 Critical).
