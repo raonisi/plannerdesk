@@ -2,7 +2,7 @@
 
 **목적:** 보험사·청구서류·지식·업무 링크·Answer Assistant 관련 **데이터 정확성·최신성·누락·중복·검수 상태**를 점검하고, 운영자가 안전하게 수정할 **이슈표**를 만든다. **운영 DB 접근·대량 수정 없음.**
 
-**선행:** PR118 (사용자 피드백) → **PR119** → [PR-120-PRE-LAUNCH-DATA-HANDOFF.md](./PR-120-PRE-LAUNCH-DATA-HANDOFF.md)
+**선행:** PR118 (사용자 피드백) → **PR119** → [PR-120-PRE-LAUNCH-FINAL-OPS.md](./PR-120-PRE-LAUNCH-FINAL-OPS.md)
 
 | 문서 | 용도 |
 | --- | --- |

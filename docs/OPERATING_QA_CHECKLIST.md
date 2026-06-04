@@ -16,6 +16,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Operational data quality (PR119):** [PR-119-OPERATIONAL-DATA-QUALITY-OPS.md](PR-119-OPERATIONAL-DATA-QUALITY-OPS.md)
 
+**Pre-launch final (PR120):** [PR-120-PRE-LAUNCH-FINAL-OPS.md](PR-120-PRE-LAUNCH-FINAL-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
