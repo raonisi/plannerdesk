@@ -22,3 +22,8 @@
 ## 관찰 기록
 
 런타임 관찰은 PR126·PR130 양식에 수동 기입. 자동 수치 집계는 **PR136-B** 이후 검토.
+
+## PR137 제한 고도화 연계
+
+- [PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md](./PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md)
+- [PR-137-ROLLBACK-DISABLE.md](./PR-137-ROLLBACK-DISABLE.md)

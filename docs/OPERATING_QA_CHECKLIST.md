@@ -50,6 +50,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Admin operations report (PR136, manual template):** [PR-136-ADMIN-OPS-REPORT-OPS.md](PR-136-ADMIN-OPS-REPORT-OPS.md)
 
+**Answer Assistant restriction hardening (PR137):** [PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md](PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

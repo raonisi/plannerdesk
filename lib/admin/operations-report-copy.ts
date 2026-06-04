@@ -83,7 +83,7 @@ export const ADMIN_OPS_REPORT_DOMAINS: readonly AdminOpsReportDomainRow[] = [
     label: "Answer Assistant 베타",
     purpose: "allowlist·output safety·audit",
     adminHref: "/planner/answer-assistant",
-    docAnchor: "PR-136-ANSWER-ASSISTANT-REPORT.md",
+    docAnchor: "PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md",
   },
   {
     id: "visibility",

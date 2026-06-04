@@ -102,6 +102,38 @@ const CLAIM_JUDGMENT_KEYWORDS = [
   "청구 가능성",
   "지급 가능한가요",
   "보험금 받을 수 있나요",
+  "무조건 지급",
+  "반드시 지급",
+  "보험금 확정",
+  "지급 확정",
+  "보험금은 확정",
+] as const;
+
+const INVESTMENT_ADVICE_KEYWORDS = [
+  "매수하세요",
+  "매도하세요",
+  "지금 매수",
+  "지금 매도",
+  "수익 보장",
+  "수익률 보장",
+  "투자 권유",
+  "주식 매수",
+  "주식 매도",
+  "펀드 매수",
+  "펀드 매도",
+] as const;
+
+const DISCLOSURE_EVASION_KEYWORDS = [
+  "고지를 안 해도",
+  "고지 안 해도",
+  "고지 회피",
+  "고지하지 않아도",
+] as const;
+
+const CUSTOMER_COACHING_KEYWORDS = [
+  "고객을 이렇게 설득",
+  "고객 설득 멘트",
+  "고객을 설득",
 ] as const;
 
 const LOSS_ADJUSTMENT_KEYWORDS = [
@@ -187,7 +219,7 @@ export const ANSWER_ASSIST_BLOCKED_MESSAGES: Record<
   LOSS_ADJUSTMENT:
     "손해사정성 판단이나 지급 여부 단정은 제공하지 않습니다. 공식 약관·보험사 안내 확인이 필요한 항목으로만 다시 요청해 주세요.",
   PRODUCT_SOLICITATION:
-    "특정 상품 추천, 가입 강권, 공포 조장 문구는 생성하지 않습니다. 중립적인 점검 기준 또는 설명 문구로 다시 요청해 주세요.",
+    "특정 상품 추천, 가입 강권, 공포 조장, 투자 매수·매도 권유, 고지 회피, 고객 설득 멘트는 생성하지 않습니다. 중립적인 점검 기준 또는 설명 문구로 다시 요청해 주세요.",
   FEAR_MARKETING:
     "특정 상품 추천, 가입 강권, 공포 조장 문구는 생성하지 않습니다. 중립적인 점검 기준 또는 설명 문구로 다시 요청해 주세요.",
   PROMPT_INJECTION:
@@ -305,6 +337,18 @@ export function classifyBlockedQuestion(
   }
 
   if (containsKeyword(combined, PRODUCT_SOLICITATION_KEYWORDS)) {
+    return "PRODUCT_SOLICITATION";
+  }
+
+  if (containsKeyword(combined, INVESTMENT_ADVICE_KEYWORDS)) {
+    return "PRODUCT_SOLICITATION";
+  }
+
+  if (containsKeyword(combined, DISCLOSURE_EVASION_KEYWORDS)) {
+    return "PRODUCT_SOLICITATION";
+  }
+
+  if (containsKeyword(combined, CUSTOMER_COACHING_KEYWORDS)) {
     return "PRODUCT_SOLICITATION";
   }
 

@@ -22,6 +22,13 @@ const BLOCKED_OUTPUT_PHRASES = [
   "확정 지급",
   "지금 안 하면 손해",
   "해지하면 큰일",
+  "무조건 지급",
+  "반드시 지급",
+  "보험금 확정",
+  "가입하면 해결",
+  "수익 보장",
+  "지금 매수",
+  "고지를 안 해도",
 ] as const;
 
 describe("Answer Assistant output safety", () => {

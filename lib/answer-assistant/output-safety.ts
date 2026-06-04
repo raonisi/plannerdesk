@@ -36,10 +36,23 @@ const OUTPUT_BLOCKED_SOLICITATION = [
   "확정 지급",
   "지금 안 하면 손해",
   "해지하면 큰일",
+  "가입하면 해결",
+  "수익 보장",
+  "지금 매수",
+  "지금 매도",
+  "고지를 안 해도",
+  "고객을 이렇게 설득",
+] as const;
+
+const OUTPUT_BLOCKED_CLAIM_CERTAINTY = [
+  "무조건 지급",
+  "반드시 지급",
+  "보험금 확정",
 ] as const;
 
 export const OUTPUT_BLOCKED_PHRASES = [
   ...OUTPUT_BLOCKED_CLAIM_JUDGMENT,
+  ...OUTPUT_BLOCKED_CLAIM_CERTAINTY,
   ...OUTPUT_BLOCKED_MEDICAL,
   ...OUTPUT_BLOCKED_LOSS_ADJUSTMENT,
   ...OUTPUT_BLOCKED_SOLICITATION,

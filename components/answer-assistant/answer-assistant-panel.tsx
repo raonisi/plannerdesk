@@ -7,6 +7,7 @@ import {
   ANSWER_ASSIST_QUERY_MAX_LENGTH,
   ANSWER_ASSIST_QUERY_MIN_LENGTH,
   VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
+  VERIFIED_ANSWER_ASSIST_RESTRICTION_NOTICE,
 } from "@/lib/answer-assistant/constants";
 import {
   ANSWER_ASSIST_DOMAIN_OPTIONS,
@@ -119,6 +120,15 @@ export function AnswerAssistantPanelShell({
             {variant === "verified" ? "제한 beta" : "제한 공개 준비 중"}
           </p>
           <p className="mt-2">{generationDisabledMessage}</p>
+        </section>
+      ) : null}
+
+      {generationEnabled && variant === "verified" ? (
+        <section
+          className="rounded-lg border border-[#c8d2dc] bg-[#eef3f7] px-4 py-3 text-xs leading-relaxed text-[#4f5661]"
+          role="note"
+        >
+          <p>{VERIFIED_ANSWER_ASSIST_RESTRICTION_NOTICE}</p>
         </section>
       ) : null}
 
