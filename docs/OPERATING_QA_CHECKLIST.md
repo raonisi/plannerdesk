@@ -44,6 +44,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Data change history metadata (PR133):** [PR-133-CHANGE-HISTORY-OPS.md](PR-133-CHANGE-HISTORY-OPS.md)
 
+**Link status manual check (PR134):** [PR-134-LINK-STATUS-OPS.md](PR-134-LINK-STATUS-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

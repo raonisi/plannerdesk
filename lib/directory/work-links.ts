@@ -38,6 +38,8 @@ export const WORK_LINK_COPY = {
     "공식 출처 확인이 진행 중입니다. 최종 기준은 보험사 안내를 확인하세요.",
   disclosureUnverified:
     "공식 공시 경로 확인 후 업데이트됩니다.",
+  /** PR-134 — neutral external link intent (not a freshness guarantee). */
+  externalOpenHint: "공식 안내 페이지로 이동합니다.",
 } as const;
 
 const LOGIN_PATH_PATTERN = /\/login|signin|sign-in|\/auth|sso|#\/login/i;

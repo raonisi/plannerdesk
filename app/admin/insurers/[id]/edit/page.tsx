@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import AdminLinkCheckGuidePanel from "@/components/admin/AdminLinkCheckGuidePanel";
 import AdminChangeHistoryMetadataPanel from "@/components/admin/AdminChangeHistoryMetadataPanel";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
 import { buildInsurerChangeHistoryMetadata } from "@/lib/admin/change-history-metadata";
@@ -72,6 +73,8 @@ export default async function EditInsurerPage({
         <AdminChangeHistoryMetadataPanel
           snapshot={buildInsurerChangeHistoryMetadata(insurer)}
         />
+
+        <AdminLinkCheckGuidePanel insurerName={insurer.name} />
 
         <section className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}>
           <InsurerForm

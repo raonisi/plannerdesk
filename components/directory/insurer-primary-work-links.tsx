@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { buttons } from "@/lib/design-system";
 import { getDisclosureLinksForInsurer } from "@/lib/content/disclosure-match";
+import { PublicLinkCheckNotice } from "@/components/directory/public-link-check-notice";
+import { publicDisclosureCheckHint } from "@/lib/directory/link-check-status";
 import {
   WORK_LINK_ACTION_LABELS,
   WORK_LINK_COPY,
@@ -13,6 +15,7 @@ import {
   plannerSystemAccessNote,
   resolveSystemLinks,
 } from "@/lib/directory/work-links";
+import { publicContentTrustHint } from "@/lib/directory/formatting";
 import { telHref } from "@/lib/directory/formatting";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
@@ -66,8 +69,16 @@ export function InsurerPrimaryWorkLinks({ insurer }: { insurer: PublicInsurer })
   const disclosure = getDisclosureLinksForInsurer(insurer.id);
   const disclosureState = disclosureLinkStatus(disclosure);
 
+  const trustHint = publicContentTrustHint(insurer.verificationStatus);
+  const disclosureHint = publicDisclosureCheckHint(disclosureState);
+
   return (
     <div className="space-y-5">
+      {trustHint ? (
+        <p className="rounded-lg border border-[#E3DED4] bg-[#F7F4EE] px-3 py-2 text-[11px] font-medium leading-5 text-[#5B6470]">
+          {trustHint}
+        </p>
+      ) : null}
       <section className="space-y-2">
         <CardSectionTitle>{WORK_LINK_GROUP_LABELS.system}</CardSectionTitle>
         {primary ? (
@@ -79,6 +90,9 @@ export function InsurerPrimaryWorkLinks({ insurer }: { insurer: PublicInsurer })
             >
               {primaryLabel} ↗
             </ExternalTabAnchor>
+            <p className="text-center text-[10px] font-medium text-[#5B6470]">
+              {WORK_LINK_COPY.externalOpenHint}
+            </p>
             {systemNote ? (
               <p className="text-center text-[11px] font-medium leading-5 text-[#5B6470]">
                 {systemNote}
@@ -144,7 +158,7 @@ export function InsurerPrimaryWorkLinks({ insurer }: { insurer: PublicInsurer })
         </div>
         {disclosureState === "partial" ? (
           <p className="text-[11px] font-medium leading-5 text-[#5B6470]">
-            {WORK_LINK_COPY.disclosureUnverified}
+            {disclosureHint ?? WORK_LINK_COPY.disclosureUnverified}
           </p>
         ) : null}
         <Link
@@ -168,6 +182,8 @@ export function InsurerPrimaryWorkLinks({ insurer }: { insurer: PublicInsurer })
           />
         </div>
       </section>
+
+      <PublicLinkCheckNotice />
     </div>
   );
 }
