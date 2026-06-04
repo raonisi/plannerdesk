@@ -52,6 +52,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Answer Assistant restriction hardening (PR137):** [PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md](PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md)
 
+**Operations reminders (PR138, manual admin only):** [PR-138-OPERATIONS-REMINDER-OPS.md](PR-138-OPERATIONS-REMINDER-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

@@ -38,3 +38,7 @@
 ## Codex
 
 schema·Auth·운영 DB·visibility 변경 없으면 **생략 가능**. PR136-B 착수 시 **제한검수**.
+
+## PR138 리마인더 연계
+
+- [PR-138-OPERATIONS-REMINDER-OPS.md](./PR-138-OPERATIONS-REMINDER-OPS.md) — 수동 확인 주기·심각도 (자동 발송 없음)

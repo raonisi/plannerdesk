@@ -4,6 +4,7 @@ import { roleDisplayLabel } from "@/lib/auth/rbac";
 import type { AdminDashboardSnapshot } from "@/lib/admin/dashboard-status";
 import { ADMIN_DASHBOARD_SAFETY_LINES } from "@/lib/admin/dashboard-status";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import AdminOperationsReminderPanel from "@/components/admin/AdminOperationsReminderPanel";
 import AdminOperationsReportPanel from "@/components/admin/AdminOperationsReportPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -135,6 +136,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminReviewQueuePanel reviewQueue={dashboard.reviewQueue} />
 
         <AdminOperationsReportPanel dashboard={dashboard} />
+
+        <AdminOperationsReminderPanel dashboard={dashboard} />
 
         <div className="mb-8">
           <AdminSafetyNotice
