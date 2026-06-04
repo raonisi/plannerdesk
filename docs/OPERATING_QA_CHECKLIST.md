@@ -38,6 +38,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Monthly operations report and roadmap (PR130):** [PR-130-MONTHLY-OPERATIONS-REPORT-OPS.md](PR-130-MONTHLY-OPERATIONS-REPORT-OPS.md)
 
+**Integrated work dashboard (PR131):** [PR-131-DASHBOARD-OPS.md](PR-131-DASHBOARD-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

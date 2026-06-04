@@ -33,6 +33,12 @@ export type AdminBulkWorkflow = {
   buttonEnabled: boolean;
 };
 
+export type AdminReviewQueueSummary = {
+  correctionNew: number | null;
+  plannerVerificationPending: number | null;
+  adminFeaturesNeedingAttention: number;
+};
+
 export type AdminDashboardSnapshot = {
   features: AdminDashboardFeature[];
   bulkWorkflows: AdminBulkWorkflow[];
@@ -43,9 +49,27 @@ export type AdminDashboardSnapshot = {
     blocked: number;
     comingSoon: number;
   };
+  reviewQueue: AdminReviewQueueSummary;
   knowledgeProbe: KnowledgeTableProbe;
   messageTemplateProbe: MessageTemplateTableProbe;
 };
+
+function buildReviewQueueSummary(
+  correctionProbe: CorrectionRequestTableProbe,
+  plannerVerificationProbe: PlannerVerificationTableProbe,
+  summary: AdminDashboardSnapshot["summary"],
+): AdminReviewQueueSummary {
+  return {
+    correctionNew:
+      correctionProbe.status === "ok" ? correctionProbe.newCount : null,
+    plannerVerificationPending:
+      plannerVerificationProbe.status === "ok"
+        ? plannerVerificationProbe.pendingCount
+        : null,
+    adminFeaturesNeedingAttention:
+      summary.activeWithWarning + summary.setupRequired + summary.blocked,
+  };
+}
 
 export type KnowledgeTableProbe =
   | { status: "ok"; count: number }
@@ -593,10 +617,17 @@ export async function buildAdminDashboardSnapshot(): Promise<AdminDashboardSnaps
     },
   ];
 
+  const summary = countByAvailability(features);
+
   return {
     features,
     bulkWorkflows,
-    summary: countByAvailability(features),
+    summary,
+    reviewQueue: buildReviewQueueSummary(
+      correctionProbe,
+      plannerVerificationProbe,
+      summary,
+    ),
     knowledgeProbe,
     messageTemplateProbe,
   };

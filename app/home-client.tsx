@@ -12,13 +12,24 @@ import {
   Star,
   ArrowRight,
   Clock,
+  Library,
+  Sparkles,
 } from "lucide-react";
+import { HomePublicStatsStrip, type HomePublicStats } from "@/components/dashboard/home-public-stats-strip";
+import { WorkHubNextSteps } from "@/components/dashboard/work-hub-next-steps";
+import {
+  CLAIM_WORK_FLOW_LINKS,
+  PLANNER_ANSWER_ASSISTANT_HUB_NOTE,
+  PUBLIC_WORK_HUB_NO_RESULTS,
+  PUBLIC_WORK_HUB_SEARCH_HINT,
+} from "@/lib/dashboard/work-hub-copy";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
 import { HomeMiniToolCard } from "@/components/launcher/home-mini-tool-card";
 import { HomeQuickLaunchCard } from "@/components/launcher/home-quick-launch-card";
 import { SectionHeader } from "@/components/launcher/section-header";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 import {
   launcherIconTone,
   notices,
@@ -33,6 +44,8 @@ import { uiLabels } from "@/lib/ui-labels";
 interface HomeClientProps {
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
+  knowledgeArticles: PublicKnowledgeArticleListItem[];
+  publicStats: HomePublicStats;
 }
 
 const QUICK_KEYWORDS = [
@@ -42,6 +55,8 @@ const QUICK_KEYWORDS = [
   { label: "보험나이", href: "/work-tools?tool=insurance-age" },
   { label: "상병코드", href: "/work-tools?tool=disease-code" },
   { label: "고객 안내문", href: "/message-templates" },
+  { label: "지식 아카이브", href: "/knowledge" },
+  { label: "통합 검색", href: "/search" },
 ] as const;
 
 const FAVORITE_LABELS: Record<string, string> = {
@@ -55,7 +70,12 @@ const FAVORITE_LABELS: Record<string, string> = {
   "hidden-insurance": "숨은보험금",
 };
 
-export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
+export function HomeClient({
+  insurers,
+  claimDocuments,
+  knowledgeArticles,
+  publicStats,
+}: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -99,7 +119,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
       label: string;
       sub: string;
       href: string;
-      type: "insurer" | "tool" | "doc" | "message";
+      type: "insurer" | "tool" | "doc" | "message" | "knowledge";
     }> = [];
 
     insurers.forEach((ins) => {
@@ -174,6 +194,19 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
       }
     });
 
+    knowledgeArticles.forEach((article) => {
+      const haystack = `${article.title}${article.summary}`.toLowerCase();
+      if (haystack.includes(query)) {
+        items.push({
+          id: article.id,
+          label: article.title,
+          sub: `지식 아카이브 | ${article.categoryLabel}`,
+          href: `/knowledge/${article.slug}`,
+          type: "knowledge",
+        });
+      }
+    });
+
     if (
       "고객안내문".includes(query) ||
       "고객 문구".replace(/\s/g, "").includes(query)
@@ -187,7 +220,17 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
       });
     }
 
-    return items.slice(0, 6);
+    if ("통합검색".includes(query) || "검색".includes(query)) {
+      items.push({
+        id: "search-hub",
+        label: "통합 검색",
+        sub: "보험사·청구서류·지식·공시 통합 탐색",
+        href: `/search?q=${encodeURIComponent(searchQuery.trim())}`,
+        type: "tool",
+      });
+    }
+
+    return items.slice(0, 8);
   })();
 
   const trackRecent = (item: {
@@ -215,8 +258,11 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
             보험설계사의 하루를 빠르게 여는 실무 커맨드센터
           </h1>
           <p className={`mt-4 max-w-2xl break-keep ${textStyles.body}`}>
-            보험사 전산, 청구서류, 업무 도구, 고객 문구, 공시·약관을 한 화면에서
-            빠르게 찾고 실행하세요.
+            보험사 전산, 청구서류, 지식 아카이브, 업무 도구, 고객 문구, 공시·약관을
+            한 화면에서 빠르게 찾고 실행하세요.
+          </p>
+          <p className={`mt-2 max-w-2xl break-keep text-sm text-[#5B6470]`}>
+            {PUBLIC_WORK_HUB_SEARCH_HINT}
           </p>
 
           <div className="relative z-10 mt-8 max-w-2xl">
@@ -228,7 +274,7 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
               <input
                 id="home-unified-search"
                 type="search"
-                placeholder="보험사명, 청구서류, 업무 도구, 고객 문구 검색"
+                placeholder="보험사명, 청구서류, 지식, 업무 도구, 고객 문구 검색"
                 className="ml-3 min-w-0 flex-1 bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470]"
                 value={searchQuery}
                 onChange={(e) => {
@@ -289,9 +335,15 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
                     ))}
                   </div>
                 ) : (
-                  <p className="px-3 py-4 text-center text-sm text-[#5B6470]">
-                    검색 결과가 없습니다. 다른 키워드로 검색해 보세요.
-                  </p>
+                  <div className="px-3 py-4 text-center text-sm text-[#5B6470]">
+                    <p>{PUBLIC_WORK_HUB_NO_RESULTS}</p>
+                    <Link
+                      href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                      className="mt-2 inline-flex min-h-9 items-center font-semibold text-[#0F1D2E] underline decoration-[#B9975B] underline-offset-2"
+                    >
+                      통합 검색에서 더 보기
+                    </Link>
+                  </div>
                 )}
               </div>
             ) : null}
@@ -309,13 +361,13 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
               </Link>
             ))}
           </div>
+          <HomePublicStatsStrip stats={publicStats} />
         </div>
       </section>
 
-      {/* 빠른 실행 */}
       <section className="mt-12">
-        <SectionHeader eyebrow={uiLabels.homeHub} title="오늘의 빠른 실행" />
-        <div className="mt-5 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-5">
+        <SectionHeader eyebrow={uiLabels.homeHub} title="오늘의 업무 시작" />
+        <div className="mt-5 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-3">
           <HomeQuickLaunchCard
             actionLabel="보험사 찾기"
             description="공식 전산·고객센터·팩스"
@@ -350,6 +402,22 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
             title="고객 문구 복사"
           />
           <HomeQuickLaunchCard
+            actionLabel="아카이브 열기"
+            description="상담·청구·계약 실무 기준"
+            href="/knowledge"
+            icon={Library}
+            iconToneClass={launcherIconTone.green}
+            title="지식 아카이브"
+          />
+          <HomeQuickLaunchCard
+            actionLabel="통합 검색"
+            description="도메인별 결과 탐색"
+            href="/search"
+            icon={Search}
+            iconToneClass={launcherIconTone.navy}
+            title="통합 검색"
+          />
+          <HomeQuickLaunchCard
             actionLabel="공식자료 확인"
             description="상품공시·통합 약관"
             href="/disclosure-links"
@@ -357,6 +425,48 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
             iconToneClass={launcherIconTone.gold}
             title="공시·약관 확인"
           />
+        </div>
+        <WorkHubNextSteps />
+      </section>
+
+      <section className="mt-10">
+        <SectionHeader eyebrow="청구 업무" title="청구 흐름 바로가기" />
+        <p className={`mt-2 max-w-2xl ${textStyles.small}`}>
+          청구서류를 보험사별로 확인할 수 있습니다. 제출 전 보험사 공식 안내를 다시
+          확인해 주세요.
+        </p>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {CLAIM_WORK_FLOW_LINKS.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="inline-flex min-h-10 items-center rounded-full border border-[#E3DED4] bg-white px-4 text-xs font-bold text-[#0F1D2E] shadow-sm transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section
+        className={`mt-10 rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 ${shadows.card}`}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <p className={sectionEyebrow}>설계사 베타</p>
+            <h2 className="mt-1 text-lg font-bold text-[#0F1D2E]">답변 보조(베타)</h2>
+            <p className={`mt-2 max-w-xl break-keep ${textStyles.small}`}>
+              {PLANNER_ANSWER_ASSISTANT_HUB_NOTE}
+            </p>
+          </div>
+          <Link
+            href="/planner/answer-assistant"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#0F1D2E] shadow-sm transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+          >
+            <Sparkles aria-hidden className="h-4 w-4 text-[#B9975B]" />
+            베타 화면 열기
+          </Link>
         </div>
       </section>
 
@@ -499,9 +609,11 @@ export function HomeClient({ insurers, claimDocuments }: HomeClientProps) {
                       <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#5B6470]">
                         {rec.type === "insurer"
                           ? "보험사"
-                          : rec.type === "tool"
-                            ? "도구"
-                            : "링크"}
+                          : rec.type === "knowledge"
+                            ? "지식"
+                            : rec.type === "tool"
+                              ? "도구"
+                              : "링크"}
                       </span>
                     </Link>
                   </li>

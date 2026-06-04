@@ -4,6 +4,7 @@ import { roleDisplayLabel } from "@/lib/auth/rbac";
 import type { AdminDashboardSnapshot } from "@/lib/admin/dashboard-status";
 import { ADMIN_DASHBOARD_SAFETY_LINES } from "@/lib/admin/dashboard-status";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
 
 interface AdminShellProps {
@@ -129,6 +130,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
             <SummaryTile label="준비 중" value={summary.comingSoon} tone="gray" />
           </div>
         </section>
+
+        <AdminReviewQueuePanel reviewQueue={dashboard.reviewQueue} />
 
         <div className="mb-8">
           <AdminSafetyNotice

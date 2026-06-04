@@ -37,6 +37,11 @@ function fallbackDashboard(): AdminDashboardSnapshot {
       blocked: 0,
       comingSoon: 0,
     },
+    reviewQueue: {
+      correctionNew: null,
+      plannerVerificationPending: null,
+      adminFeaturesNeedingAttention: 0,
+    },
     knowledgeProbe: { status: "unavailable" },
     messageTemplateProbe: { status: "unavailable" },
   };
