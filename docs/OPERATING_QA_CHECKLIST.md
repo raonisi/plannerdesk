@@ -28,6 +28,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Knowledge quality (PR125):** [PR-125-KNOWLEDGE-QUALITY-OPS.md](PR-125-KNOWLEDGE-QUALITY-OPS.md)
 
+**Answer Assistant beta observation (PR126):** [PR-126-ANSWER-ASSISTANT-BETA-OPS.md](PR-126-ANSWER-ASSISTANT-BETA-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

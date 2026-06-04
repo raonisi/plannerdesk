@@ -4,7 +4,7 @@
 
 **금지 (본 PR):** 실제 allowlist 변경, 운영 DB 조회/수정, gate 자동 ON, 베타 대상 자동 확대, `package.json` 변경.
 
-**관련 코드·문서:** `lib/answer-assistant/*`, `app/planner/answer-assistant/actions.ts`, `tests/answer-assistant/*`, `docs/PR-99B-*`, `docs/PR-103-*`, `docs/PR-104C-*`, `docs/PR-102-*`, `docs/PR-92-*`, `docs/PR-99A-*`.
+**관련 코드·문서:** `lib/answer-assistant/*`, `app/planner/answer-assistant/actions.ts`, `tests/answer-assistant/*`, `docs/PR-99B-*`, `docs/PR-103-*`, `docs/PR-104C-*`, `docs/PR-102-*`, `docs/PR-92-*`, `docs/PR-99A-*`, **[PR-126-ANSWER-ASSISTANT-BETA-OPS.md](./PR-126-ANSWER-ASSISTANT-BETA-OPS.md)** (베타 관찰 리포트).
 
 ---
 

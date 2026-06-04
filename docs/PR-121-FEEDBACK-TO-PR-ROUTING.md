@@ -11,7 +11,7 @@
 | **PR122** | 운영 데이터 **최신성 점검 루틴** (문서) | 데이터 오류/누락 추적 | Medium~High |
 | **PR123** | **관리자 운영 매뉴얼** (등록·검수·공개·bulk) | 운영 절차·실수 방지 | Low (문서) |
 | **PR124** | 운영 데이터 **보완·수정** (승인 후) | 데이터 누락/오류 확정 | Medium~High |
-| **PR126** | Answer Assistant | AA 안전·품질 | High~Critical |
+| **PR126** | Answer Assistant **베타 관찰** | allowlist·safety·audit 관찰 문서 | beta 확대 금지 유지 |
 | **PR127** | UX·문구·검색·빈 상태 | 문구, 검색, 화면 복잡 | Low~Medium |
 | **PR128** | 업무 링크 데이터 | 전산·홈·공시 링크 오류 | Medium~High |
 | **PR119/120 게이트** | smoke·출처·launch | 배포 전 차단 | High |
