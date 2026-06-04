@@ -10,6 +10,8 @@ export function rankSearchResults(
     const title = result.title.normalize("NFKC").toLowerCase();
     const summary = (result.summary ?? "").normalize("NFKC").toLowerCase();
     const category = (result.categoryLabel ?? "").normalize("NFKC").toLowerCase();
+    const linkType = (result.linkTypeLabel ?? "").normalize("NFKC").toLowerCase();
+    const source = (result.sourceLabel ?? "").normalize("NFKC").toLowerCase();
 
     let score = 0;
     if (title === q) score += 100;
@@ -17,6 +19,8 @@ export function rankSearchResults(
     else if (title.includes(q)) score += 70;
     if (category.includes(q)) score += 40;
     if (summary.includes(q)) score += 25;
+    if (linkType.includes(q)) score += 35;
+    if (source.includes(q)) score += 30;
 
     const updated = result.updatedAt ?? result.publishedAt ?? "";
     return { result, score, updated };

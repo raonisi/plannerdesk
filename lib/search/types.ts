@@ -8,14 +8,16 @@ export type PublicSearchDomain =
   | "claim_document"
   | "knowledge_article"
   | "disclosure_link"
-  | "message_template";
+  | "message_template"
+  | "work_link";
 
 export type GlobalSearchResultType =
   | "insurer"
   | "claim_document"
   | "knowledge_article"
   | "disclosure_link"
-  | "message_template";
+  | "message_template"
+  | "work_link";
 
 export interface GlobalSearchResult {
   id: string;
@@ -23,6 +25,9 @@ export interface GlobalSearchResult {
   title: string;
   summary?: string;
   url: string;
+  /** External or tel: target for work-link rows (PR-132). */
+  externalHref?: string;
+  linkTypeLabel?: string;
   categoryLabel?: string;
   sourceLabel?: string;
   updatedAt?: string;
@@ -30,11 +35,11 @@ export interface GlobalSearchResult {
 }
 
 export type AdminSearchResultType =
-  | GlobalSearchResultType
+  | Exclude<GlobalSearchResultType, "work_link">
   | "correction_request";
 
 export type AdminSearchDomain =
-  | PublicSearchDomain
+  | Exclude<PublicSearchDomain, "work_link">
   | "correction_request"
   | "all";
 
@@ -123,4 +128,6 @@ export const SEARCH_VISIBILITY_SOURCES = {
     "lib/public/disclosure-links.ts — PUBLIC_DISCLOSURE_LINK_WHERE",
   message_template:
     "lib/public/message-templates.ts — PUBLIC_MESSAGE_TEMPLATE_WHERE",
+  work_link:
+    "lib/search/work-links-search.ts — published insurers only (PR-132)",
 } as const;

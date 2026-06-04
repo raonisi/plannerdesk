@@ -21,6 +21,7 @@ import {
 } from "./constants";
 import { validatePublicSearchQuery } from "./query-validation";
 import { rankSearchResults } from "./ranking";
+import { searchWorkLinks } from "./work-links-search";
 import {
   SEARCH_DOMAIN_LABEL,
 } from "./labels";
@@ -173,6 +174,7 @@ async function searchKnowledgeArticles(
         { summary: { contains: query, mode: "insensitive" } },
         { content: { contains: query, mode: "insensitive" } },
         { workflowLabel: { contains: query, mode: "insensitive" } },
+        { tags: { has: query } },
       ],
     },
     take: limit,
@@ -183,6 +185,7 @@ async function searchKnowledgeArticles(
       title: true,
       summary: true,
       category: true,
+      tags: true,
       updatedAt: true,
       publishedAt: true,
     },
@@ -192,7 +195,11 @@ async function searchKnowledgeArticles(
     id: row.id,
     type: "knowledge_article",
     title: row.title,
-    summary: truncateSummary(row.summary),
+    summary: truncateSummary(
+      [row.summary, row.tags.length > 0 ? row.tags.join(", ") : ""]
+        .filter(Boolean)
+        .join(" · "),
+    ),
     url: `/knowledge/${encodeURIComponent(row.slug)}`,
     categoryLabel: PUBLIC_CATEGORY_LABEL[row.category],
     updatedAt: toIsoDate(row.updatedAt),
@@ -306,6 +313,7 @@ const DOMAIN_SEARCHERS: Record<
   knowledge_article: searchKnowledgeArticles,
   disclosure_link: searchDisclosureLinks,
   message_template: searchMessageTemplates,
+  work_link: searchWorkLinks,
 };
 
 function shouldSearchDomain(

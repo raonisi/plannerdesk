@@ -40,6 +40,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Integrated work dashboard (PR131):** [PR-131-DASHBOARD-OPS.md](PR-131-DASHBOARD-OPS.md)
 
+**Advanced unified search (PR132):** [PR-132-ADVANCED-SEARCH-OPS.md](PR-132-ADVANCED-SEARCH-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

@@ -35,7 +35,7 @@ describe("PR127 search UX ops (static, no database)", () => {
 
   it("search copy constants follow PR127 empty and error guidance", () => {
     assert.match(SEARCH_EMPTY_MESSAGE, /검색 결과가 없습니다/);
-    assert.match(SEARCH_EMPTY_VISIBILITY_NOTE, /검수 전/);
+    assert.match(SEARCH_EMPTY_VISIBILITY_NOTE, /검수 중인 항목/);
     assert.match(SEARCH_ERROR_MESSAGE, /불러오지 못했습니다/);
     for (const phrase of FORBIDDEN_EMPTY_PHRASES) {
       assert.doesNotMatch(SEARCH_EMPTY_MESSAGE, new RegExp(phrase));
@@ -51,8 +51,8 @@ describe("PR127 search UX ops (static, no database)", () => {
     assert.match(results, /groupSearchResults/);
     assert.match(results, /SEARCH_DOMAIN_DISPLAY_ORDER/);
     assert.match(results, /SEARCH_RESULT_ACTION_LABEL/);
-    assert.match(labels, /청구안내·업무 링크/);
-    assert.match(labels, /서류 확인/);
+    assert.match(labels, /보험사 보기/);
+    assert.match(labels, /필요서류 확인/);
     assert.doesNotMatch(results, />바로가기</);
   });
 

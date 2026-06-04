@@ -7,7 +7,10 @@ import {
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
-import { SEARCH_IDLE_HINT } from "@/lib/search/constants";
+import {
+  SEARCH_EMPTY_WORK_LINK_NOTE,
+  SEARCH_IDLE_HINT,
+} from "@/lib/search/constants";
 import {
   PUBLIC_SEARCH_FILTER_OPTIONS,
   SEARCH_DOMAIN_LABEL,
@@ -16,6 +19,7 @@ import {
   domainToQueryParam,
   parsePublicSearchDomain,
 } from "@/lib/search/query-validation";
+import { buildPublicSearchHref } from "@/lib/search/search-href";
 import { searchPublicContent } from "@/lib/search/public";
 import { SearchResultsList } from "./search-results";
 
@@ -30,14 +34,6 @@ export const metadata = {
 interface SearchParams {
   q?: string;
   domain?: string;
-}
-
-function buildSearchHref(q: string, domainParam: string): string {
-  const params = new URLSearchParams();
-  if (q.trim()) params.set("q", q.trim());
-  if (domainParam !== "all") params.set("domain", domainParam);
-  const qs = params.toString();
-  return qs ? `/search?${qs}` : "/search";
 }
 
 export default async function SearchPage({
@@ -91,7 +87,7 @@ export default async function SearchPage({
                 defaultValue={rawQuery}
                 maxLength={60}
                 name="q"
-                placeholder="보험사명, 청구서류, 약관, 공시, 고객문구, 지식 키워드"
+                placeholder="보험사명, 서류명, 전산·청구·지식 키워드"
                 type="search"
               />
               <input
@@ -115,7 +111,7 @@ export default async function SearchPage({
           {rawQuery ? (
             <div
               aria-label="도메인 필터"
-              className="flex flex-wrap gap-2"
+              className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
               role="group"
             >
               {PUBLIC_SEARCH_FILTER_OPTIONS.map((option) => {
@@ -129,7 +125,7 @@ export default async function SearchPage({
                         ? "border-[#102235] bg-[#102235] text-white"
                         : "border-[#d9c9a8] bg-white text-[#4f5661] hover:bg-[#f7f1e5]"
                     }`}
-                    href={buildSearchHref(rawQuery, option.param)}
+                    href={buildPublicSearchHref(rawQuery, option.domain)}
                     key={option.param}
                   >
                     {option.label}
@@ -149,6 +145,7 @@ export default async function SearchPage({
                   { label: "지식", href: "/knowledge" },
                   { label: "공시·약관", href: "/disclosure-links" },
                   { label: "고객문구", href: "/message-templates" },
+                  { label: "업무 링크", href: "/directory" },
                 ].map((hub) => (
                   <li key={hub.href}>
                     <Link
@@ -160,6 +157,9 @@ export default async function SearchPage({
                   </li>
                 ))}
               </ul>
+              <p className="mt-3 text-xs leading-5 text-[#5f6670]">
+                {SEARCH_EMPTY_WORK_LINK_NOTE}
+              </p>
             </div>
           ) : null}
 
@@ -173,11 +173,19 @@ export default async function SearchPage({
           ) : null}
 
           {showResults && results?.ok ? (
-            <SearchResultsList results={results.results} total={results.total} />
+            <SearchResultsList
+              domainFilter={domain}
+              query={rawQuery}
+              results={results.results}
+              total={results.total}
+            />
           ) : null}
 
           {showEmpty ? (
-            <SearchEmptyPanel domainFilterLabel={emptyDomainLabel} />
+            <SearchEmptyPanel
+              domainFilterLabel={emptyDomainLabel}
+              showWorkLinkNote={domain === "work_link" || domain === "all"}
+            />
           ) : null}
         </div>
       </ContentSection>

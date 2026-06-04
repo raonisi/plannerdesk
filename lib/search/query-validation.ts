@@ -28,6 +28,8 @@ const DOMAIN_PARAM_MAP: Record<string, PublicSearchDomain> = {
   disclosure_link: "disclosure_link",
   messagetemplate: "message_template",
   message_template: "message_template",
+  worklink: "work_link",
+  work_link: "work_link",
 };
 
 function containsExtraSensitiveKeyword(text: string): boolean {
@@ -50,6 +52,7 @@ export function domainToQueryParam(domain: PublicSearchDomain): string {
   if (domain === "knowledge_article") return "knowledgeArticle";
   if (domain === "disclosure_link") return "disclosureLink";
   if (domain === "message_template") return "messageTemplate";
+  if (domain === "work_link") return "workLink";
   return domain;
 }
 
