@@ -74,7 +74,7 @@
 | 운영 데이터 오탈자 | 콘텐츠 품질 | ✅ | diff·출처 |
 | 보험사별 세부 청구 기준 최신성 | 규정 변경 | ✅ | 약관·안내 개정일 |
 
-상세: [PR-119-OPERATIONAL-DATA-QUALITY-QA.md](./PR-119-OPERATIONAL-DATA-QUALITY-QA.md)
+상세: [PR-119-OPERATIONAL-DATA-QUALITY-OPS.md](./PR-119-OPERATIONAL-DATA-QUALITY-OPS.md)
 
 ---
 

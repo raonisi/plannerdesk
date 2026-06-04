@@ -14,7 +14,7 @@ checklist, release notes template, and rollback/Codex gates.
 
 **User 1st feedback (PR118):** [PR-118-USER-FEEDBACK-OPS.md](PR-118-USER-FEEDBACK-OPS.md)
 
-**Operational data quality (PR119):** [PR-119-OPERATIONAL-DATA-QUALITY-QA.md](PR-119-OPERATIONAL-DATA-QUALITY-QA.md)
+**Operational data quality (PR119):** [PR-119-OPERATIONAL-DATA-QUALITY-OPS.md](PR-119-OPERATIONAL-DATA-QUALITY-OPS.md)
 
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 

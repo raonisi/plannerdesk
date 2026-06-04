@@ -1,41 +1,5 @@
-# PR-119 — 운영 데이터 품질 QA (예정)
+# PR-119 — 운영 데이터 품질 QA
 
-**목적:** PR118에서 분리한 **데이터 정확성·최신성·완전성**을 운영 절차로 검증한다. UI 문구·탐색 UX는 PR118, **링크·번호·청구 목록·카테고리·오탈자**는 본 PR.
+이 문서는 [PR-119-OPERATIONAL-DATA-QUALITY-OPS.md](./PR-119-OPERATIONAL-DATA-QUALITY-OPS.md)로 통합되었습니다.
 
-**선행:** [PR-118-FEEDBACK-TRIAGE-AND-PLAN.md](./PR-118-FEEDBACK-TRIAGE-AND-PLAN.md) PR119 이관표
-
----
-
-## 범위 (PR119)
-
-| 항목 | 검증 내용 | PR118 |
-| --- | --- | --- |
-| 보험사 링크 | URL 유효·최신 | 이관 |
-| 팩스·헬프데스크 | 번호 정확 | 이관 |
-| 전산 링크 | 접속·안내 일치 | 이관 |
-| 청구서류 목록 | 누락·중복 | 이관 |
-| 지식 카테고리 | 분류·검색 일관 | 이관 |
-| 오탈자·세부 청구 기준 | 출처 대조 | 이관 |
-
----
-
-## PR119에서 하지 않는 것 (기본)
-
-- Auth/RBAC·allowlist 변경
-- public visibility guard 약화
-- 대량 자동 bulk·무검수 공개
-- secret·운영 DB 직접 쿼리 (별도 승인 전)
-
----
-
-## 상태
-
-**정보 부족** — PR118 사용자 피드백·운영 검증 일정 확정 후 체크리스트·결과표 보강.
-
----
-
-## Antigravity 검수 (PR119 시)
-
-- [ ] 데이터 수정이 승인된 출처·범위 내인지
-- [ ] public 노출 조건(검수·게시) 유지
-- [ ] bulk·migration이 분리 승인되었는지
+**시작:** [PR-119-OPERATIONAL-DATA-QUALITY-OPS.md](./PR-119-OPERATIONAL-DATA-QUALITY-OPS.md)

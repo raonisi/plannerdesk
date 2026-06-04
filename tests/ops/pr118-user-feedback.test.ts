@@ -42,10 +42,10 @@ describe("PR118 user feedback ops (static)", () => {
 
   it("PR119 data quality doc exists and references handoff items", () => {
     const pr119 = readFileSync(
-      join(ROOT, "docs/PR-119-OPERATIONAL-DATA-QUALITY-QA.md"),
+      join(ROOT, "docs/PR-119-OPERATIONAL-DATA-QUALITY-OPS.md"),
       "utf8",
     );
-    assert.match(pr119, /팩스/);
-    assert.match(pr119, /public visibility/);
+    assert.match(pr119, /청구서류/);
+    assert.match(pr119, /public visibility guard/);
   });
 });
