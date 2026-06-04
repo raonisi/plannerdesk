@@ -14,6 +14,8 @@
 | **PR126** | Answer Assistant **베타 관찰** | allowlist·safety·audit 관찰 문서 | beta 확대 금지 유지 |
 | **PR127** | UX·문구·검색·빈 상태 | 문구, 검색, 화면 복잡 | Low~Medium |
 | **PR128** | 업무 링크 데이터 | 전산·홈·공시 링크 오류 | Medium~High |
+| **PR129** | **운영 이슈 리포팅** (`OPS-*`) | 장애·권한·visibility·통합 추적 | Medium~Critical |
+| **PR130** | 월간 운영 리포트 (예정) | 이슈·피드백 요약 | Low (문서) |
 | **PR119/120 게이트** | smoke·출처·launch | 배포 전 차단 | High |
 | **Auth PR** | RBAC·세션 | 권한 문제 | High~Critical |
 | **AA PR** | allowlist·gate·output | Answer Assistant | High~Critical |

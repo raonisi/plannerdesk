@@ -4,6 +4,8 @@
 
 **선행:** PR118 (1차 양식) → PR119 (데이터 QA) → PR120 (운영 전 통합) → **PR121 (체계화)** → [PR123 (관리자 매뉴얼)](./PR-123-ADMIN-OPERATIONS-MANUAL.md)
 
+**운영 이슈(장애·권한·visibility):** High 이상은 [PR-129-OPERATIONAL-ISSUES-OPS.md](./PR-129-OPERATIONAL-ISSUES-OPS.md) `OPS-*` Registry로 승격.
+
 | 문서 | 용도 |
 | --- | --- |
 | [PR-121-FEEDBACK-STRUCTURE-ANALYSIS.md](./PR-121-FEEDBACK-STRUCTURE-ANALYSIS.md) | 기존 구조 분석 |

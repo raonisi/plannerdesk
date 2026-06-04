@@ -34,6 +34,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Work links and system shortcuts (PR128):** [PR-128-WORK-LINKS-OPS.md](PR-128-WORK-LINKS-OPS.md)
 
+**Operational issue reporting (PR129):** [PR-129-OPERATIONAL-ISSUES-OPS.md](PR-129-OPERATIONAL-ISSUES-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
