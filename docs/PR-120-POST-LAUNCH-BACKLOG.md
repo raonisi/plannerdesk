@@ -2,6 +2,8 @@
 
 정식 운영 **이후** 또는 **Low/Medium** 후속. PR120 범위 **외**.
 
+**월간 우선순위:** [PR-130-MONTHLY-OPERATIONS-REPORT-OPS.md](./PR-130-MONTHLY-OPERATIONS-REPORT-OPS.md) · [PR-131-140-ENHANCEMENT-ROADMAP.md](./PR-131-140-ENHANCEMENT-ROADMAP.md)
+
 ---
 
 | 우선순위 | 항목 | 이유 | 예상 PR | 위험도 |

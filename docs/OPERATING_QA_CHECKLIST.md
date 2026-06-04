@@ -36,6 +36,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Operational issue reporting (PR129):** [PR-129-OPERATIONAL-ISSUES-OPS.md](PR-129-OPERATIONAL-ISSUES-OPS.md)
 
+**Monthly operations report and roadmap (PR130):** [PR-130-MONTHLY-OPERATIONS-REPORT-OPS.md](PR-130-MONTHLY-OPERATIONS-REPORT-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
