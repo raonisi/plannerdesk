@@ -1,5 +1,4 @@
 import { signOut } from "@/auth";
-import Link from "next/link";
 import { surfaces, borders, shadows, textStyles } from "@/lib/design-system";
 import { roleDisplayLabel } from "@/lib/auth/rbac";
 import type { AdminDashboardSnapshot } from "@/lib/admin/dashboard-status";

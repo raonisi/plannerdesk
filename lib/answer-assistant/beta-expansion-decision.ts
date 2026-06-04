@@ -11,10 +11,6 @@ import {
   isAnswerAssistantVerifiedGateEnvEnabled,
   isAnswerAssistantVerifiedPreviewEnabled,
 } from "./feature-gate";
-import {
-  getAnswerAssistantRateLimitBackend,
-  getAnswerAssistantUsageAuditBackend,
-} from "./rate-limit-config";
 import { previewAnswerAssistantRetentionCleanup } from "./retention-cleanup";
 import { getUsageAuditOperationalSnapshot } from "./usage-audit-dashboard";
 import { FORBIDDEN_USAGE_AUDIT_FIELDS } from "./usage-log";

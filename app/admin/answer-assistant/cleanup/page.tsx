@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getAdminAccess } from "@/lib/auth/access";
 import { previewAnswerAssistantRetentionCleanup } from "@/lib/answer-assistant/retention-cleanup";
 import { prisma } from "@/lib/prisma";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import { borders, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";

@@ -4,7 +4,7 @@ import { previewAnswerAssistantRetentionCleanup } from "@/lib/answer-assistant/r
 import { loadBetaFeedbackDashboard } from "@/lib/answer-assistant/beta-feedback-dashboard";
 import RetentionStatusPanel from "@/components/admin/answer-assistant/RetentionStatusPanel";
 import type { BetaFeedbackDashboardSearchParams } from "@/lib/answer-assistant/beta-feedback-dashboard";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import { borders, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";

@@ -4,7 +4,7 @@ import { previewAnswerAssistantRetentionCleanup } from "@/lib/answer-assistant/r
 import { loadUsageAuditDashboard } from "@/lib/answer-assistant/usage-audit-dashboard";
 import RetentionStatusPanel from "@/components/admin/answer-assistant/RetentionStatusPanel";
 import type { UsageAuditDashboardSearchParams } from "@/lib/answer-assistant/usage-audit-dashboard";
-import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
+import { borders, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
 import AdminPageStateNotice from "@/components/admin/AdminPageStateNotice";
