@@ -10,6 +10,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Final smoke + rollback drill (PR115):** [PR-115-LIMITED-RELEASE-FINAL-OPS.md](PR-115-LIMITED-RELEASE-FINAL-OPS.md)
 
+**Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
+
 ---
 
 ## A. Code And Build Integrity

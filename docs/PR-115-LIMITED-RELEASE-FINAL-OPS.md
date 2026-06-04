@@ -46,3 +46,9 @@
 - [ ] product code diff 없음
 
 **Codex:** 기본 생략. High/Critical 잔존 시 [PR-115-DEPLOY-DECISION-MATRIX.md](./PR-115-DEPLOY-DECISION-MATRIX.md) 및 PR-114 Codex gates 참조.
+
+---
+
+## PR116 (배포 실행 준비)
+
+- [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](./PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
