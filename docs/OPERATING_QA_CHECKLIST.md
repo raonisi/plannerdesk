@@ -26,6 +26,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Data remediation (PR124):** [PR-124-DATA-REMEDIATION-OPS.md](PR-124-DATA-REMEDIATION-OPS.md)
 
+**Knowledge quality (PR125):** [PR-125-KNOWLEDGE-QUALITY-OPS.md](PR-125-KNOWLEDGE-QUALITY-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

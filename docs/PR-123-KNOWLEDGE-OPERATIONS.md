@@ -53,4 +53,4 @@ FAQ · 실무 기준 · 안내문 샘플 · 체크리스트 · 링크 가이드 
 - [ ] archived/rejected 미 bulk publish
 - [ ] public `PUBLIC_KNOWLEDGE_WHERE` 조건 충족
 
-**연계:** [PR-122-FRESHNESS-CHECK-SCOPE-AND-CADENCE.md](./PR-122-FRESHNESS-CHECK-SCOPE-AND-CADENCE.md) (지식 **월 1회**)
+**연계:** [PR-122-FRESHNESS-CHECK-SCOPE-AND-CADENCE.md](./PR-122-FRESHNESS-CHECK-SCOPE-AND-CADENCE.md) · [PR-125-KNOWLEDGE-QUALITY-OPS.md](./PR-125-KNOWLEDGE-QUALITY-OPS.md)
