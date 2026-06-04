@@ -54,6 +54,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Operations reminders (PR138, manual admin only):** [PR-138-OPERATIONS-REMINDER-OPS.md](PR-138-OPERATIONS-REMINDER-OPS.md)
 
+**Role access matrix (PR139, RBAC review only):** [PR-139-ROLE-ACCESS-OPS.md](PR-139-ROLE-ACCESS-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
