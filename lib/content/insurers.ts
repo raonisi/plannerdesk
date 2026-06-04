@@ -44,7 +44,7 @@ export const insurerDirectoryEntries: InsurerDirectoryEntry[] = [
     category: "non_life",
     officialWebsiteUrl: "https://www.hwgeneralins.com/",
     plannerPortalUrl: null,
-    systemUrl: "http://portal.hwgeneralins.com/",
+    systemUrl: "https://portal.hwgeneralins.com/",
     claimPageUrl: null,
     claimFormUrl:
       "https://www.hwgeneralins.com/fplaza/compensation/receipt01.do",

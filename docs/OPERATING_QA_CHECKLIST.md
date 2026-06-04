@@ -24,6 +24,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Admin operations manual (PR123):** [PR-123-ADMIN-OPERATIONS-MANUAL.md](PR-123-ADMIN-OPERATIONS-MANUAL.md)
 
+**Data remediation (PR124):** [PR-124-DATA-REMEDIATION-OPS.md](PR-124-DATA-REMEDIATION-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

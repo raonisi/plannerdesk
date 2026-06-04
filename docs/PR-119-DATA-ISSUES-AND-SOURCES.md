@@ -10,7 +10,7 @@
 | 2 | 보험사 | fixture `lastVerifiedAt` 전량 null (49/49) | Medium | 정적 점검 | 운영자 검수일 기입 | PR120 |
 | 3 | 보험사 | `sourceNote` 전량 「공식 출처 재검수 필요」 | High | fixture 메타 | 공식 출처 대조 후 검수 완료 | PR120 / 운영자 |
 | 4 | 보험사 | `claimPageUrl` 전량 null | Medium | `claimFormUrl` 대체 가능 | 청구안내 URL 정책 결정 | PR120 |
-| 5 | 보험사 | `systemUrl` 1건 HTTP | Low | `hanwha-general` | HTTPS·공식 URL 확인 | 운영자 |
+| 5 | 보험사 | `systemUrl` 1건 HTTP | Low | `hanwha-general` | HTTPS·공식 URL 확인 | **PR124 반영** (scheme) | PR124 |
 | 6 | 보험사 | 전부 `needs_review`+published | Medium | 정책상 public 허용 | 검수 완료 또는 고지 문구 유지 | PR120 |
 | 7 | 청구서류 | fallback `insurerId` null (35/35) | Medium | import 후보 설계 | 보험사별 연결 import | 별도 데이터 PR |
 | 8 | 청구서류 | 운영 DB 품질 | 정보 부족 | DB 미조회 | 스테이징 QA | PR120 |

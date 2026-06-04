@@ -42,12 +42,14 @@ describe("PR119 operational data quality (fixture static, no database)", () => {
     assert.ok(withClaimForm >= 40, `claimFormUrl present: ${withClaimForm}/49`);
   });
 
-  it("flags non-HTTPS systemUrl in fixture", () => {
+  it("fixture systemUrl uses HTTPS when present (PR124 hanwha-general)", () => {
     const httpEntries = insurerDirectoryEntries.filter((e) =>
       e.systemUrl?.trim().startsWith("http://"),
     );
-    assert.equal(httpEntries.length, 1);
-    assert.equal(httpEntries[0]?.id, "hanwha-general");
+    assert.equal(httpEntries.length, 0, `HTTP systemUrl: ${httpEntries.map((e) => e.id).join(", ")}`);
+
+    const hanwha = insurerDirectoryEntries.find((e) => e.id === "hanwha-general");
+    assert.ok(hanwha?.systemUrl?.startsWith("https://"));
   });
 
   it("published needs_review insurers are publicly visible per guard", () => {
