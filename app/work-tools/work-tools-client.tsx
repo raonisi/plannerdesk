@@ -1073,6 +1073,11 @@ export function WorkToolsClient() {
         : [...current, id];
       if (typeof window !== "undefined") {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        try {
+          window.dispatchEvent(new Event("plannerdesk.workTools.favorites:update"));
+        } catch {
+          // defensive
+        }
       }
       return next;
     });

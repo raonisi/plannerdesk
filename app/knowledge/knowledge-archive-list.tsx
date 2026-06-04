@@ -9,6 +9,10 @@ import {
   KnowledgeRiskLevel,
 } from "@prisma/client";
 import { EmptyState } from "@/components/content-page";
+import { FavoriteButton } from "@/components/launcher/favorite-button";
+import { KnowledgeFavoritesStrip } from "@/components/planner-favorites/knowledge-favorites-strip";
+import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
+import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import {
   buildKnowledgeArchiveHref,
@@ -321,6 +325,8 @@ export function KnowledgeArchiveList({
         </div>
       </section>
 
+      <KnowledgeFavoritesStrip articles={items} />
+
       {blockedMessage ? (
         <div
           className="rounded-md border border-[#d6a36e] bg-[#fff5e1] px-4 py-3 text-sm leading-relaxed text-[#7b4b19]"
@@ -418,6 +424,9 @@ function FilterGroup({
 }
 
 function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
+  const { isFavorite, toggle } = useLocalIdFavorites(
+    PLANNER_FAVORITE_STORAGE_KEYS.knowledgeArticles,
+  );
   const dateParts: string[] = [];
   if (item.publishedAt) dateParts.push(`공개 ${item.publishedAt}`);
   if (item.updatedAt) dateParts.push(`업데이트 ${item.updatedAt}`);
@@ -432,6 +441,11 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
         <span className="rounded-full border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-1 text-xs font-semibold text-[#5f6670]">
           {item.typeLabel}
         </span>
+        <FavoriteButton
+          active={isFavorite(item.id)}
+          label={item.title}
+          onToggle={() => toggle(item.id)}
+        />
       </div>
 
       <h3 className="mt-3 break-words text-lg font-semibold leading-snug text-[#102235] sm:text-xl">

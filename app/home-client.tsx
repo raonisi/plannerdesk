@@ -9,7 +9,6 @@ import {
   FileText,
   MessageSquare,
   BookOpen,
-  Star,
   ArrowRight,
   Clock,
   Library,
@@ -23,6 +22,7 @@ import {
   PUBLIC_WORK_HUB_NO_RESULTS,
   PUBLIC_WORK_HUB_SEARCH_HINT,
 } from "@/lib/dashboard/work-hub-copy";
+import { PlannerWorkFavoritesPanel } from "@/components/dashboard/planner-work-favorites-panel";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
 import { HomeMiniToolCard } from "@/components/launcher/home-mini-tool-card";
 import { HomeQuickLaunchCard } from "@/components/launcher/home-quick-launch-card";
@@ -59,17 +59,6 @@ const QUICK_KEYWORDS = [
   { label: "통합 검색", href: "/search" },
 ] as const;
 
-const FAVORITE_LABELS: Record<string, string> = {
-  "planner-stats": "통계실",
-  "disease-search": "인수예외질환",
-  "surgery-code": "수술분류표",
-  "disease-code": "상병코드",
-  "silbi-calculator": "실손보험금",
-  "insurance-age": "보험나이",
-  "bmi-calculator": "BMI",
-  "hidden-insurance": "숨은보험금",
-};
-
 export function HomeClient({
   insurers,
   claimDocuments,
@@ -78,22 +67,12 @@ export function HomeClient({
 }: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [recents, setRecents] = useState<
     Array<{ id: string; label: string; href: string; type: string }>
   >([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const savedFavs = window.localStorage.getItem("plannerdesk.workTools.favorites");
-    if (savedFavs) {
-      try {
-        const parsed = JSON.parse(savedFavs) as string[];
-        setTimeout(() => setFavorites(parsed), 0);
-      } catch (e) {
-        console.error(e);
-      }
-    }
     const savedRecents = window.localStorage.getItem("plannerdesk.home.recents");
     if (savedRecents) {
       try {
@@ -559,38 +538,11 @@ export function HomeClient({
         </section>
 
         <div className="space-y-6">
-          <section
-            className={`rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 ${shadows.card}`}
-          >
-            <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
-              <Star className="h-3.5 w-3.5 fill-[#B9975B] text-[#B9975B]" />
-              즐겨찾기
-            </h2>
-            {favorites.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {favorites.map((favId) => (
-                  <Link
-                    key={favId}
-                    href={`/work-tools?tool=${favId}`}
-                    className="inline-flex min-h-9 items-center rounded-lg border border-[#E3DED4] bg-white px-3 text-xs font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
-                  >
-                    {FAVORITE_LABELS[favId] || favId}
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-3">
-                <EmptyStatePanel
-                  actions={[
-                    { href: "/directory", label: "보험사 둘러보기", variant: "outline" },
-                    { href: "/work-tools", label: "업무 도구 보기", variant: "primary" },
-                  ]}
-                  description="즐겨찾기한 항목은 이곳에서 빠르게 다시 열 수 있습니다."
-                  title="자주 쓰는 보험사와 도구를 저장해 보세요"
-                />
-              </div>
-            )}
-          </section>
+          <PlannerWorkFavoritesPanel
+            claimDocuments={claimDocuments}
+            insurers={insurers.map((ins) => ({ id: ins.id, name: ins.name }))}
+            knowledgeArticles={knowledgeArticles}
+          />
 
           <section className={`rounded-xl border border-[#E3DED4] bg-white p-5 ${shadows.card}`}>
             <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>

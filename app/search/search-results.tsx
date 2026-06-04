@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SearchResultFavoriteToggle } from "@/components/search/search-result-favorite-toggle";
 import { borders, shadows, surfaces } from "@/lib/design-system";
 import {
   SEARCH_GROUP_MORE_LABEL,
@@ -74,6 +75,11 @@ function SearchResultCard({ result }: { result: GlobalSearchResult }) {
         {result.categoryLabel ? (
           <span className="text-xs text-[#5f6670]">{result.categoryLabel}</span>
         ) : null}
+        <SearchResultFavoriteToggle
+          resultId={result.id}
+          resultType={result.type}
+          title={result.title}
+        />
       </div>
       <h3 className="mt-2 break-keep text-base font-semibold text-[#102235]">
         {external ? (

@@ -46,6 +46,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Link status manual check (PR134):** [PR-134-LINK-STATUS-OPS.md](PR-134-LINK-STATUS-OPS.md)
 
+**Planner work favorites (PR135, client-only):** [PR-135-PLANNER-FAVORITES-OPS.md](PR-135-PLANNER-FAVORITES-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

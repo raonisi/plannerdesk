@@ -3,11 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
+import { FavoriteButton } from "@/components/launcher/favorite-button";
+import { claimLibraryFavoriteId } from "@/lib/planner-favorites/claim-favorite-id";
+import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
+import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
 import { categoryLabels } from "@/lib/claim-documents/category-labels";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { publicClaimTrustHint } from "@/lib/directory/formatting";
 
 export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
+  const favoriteId = claimLibraryFavoriteId(item);
+  const { isFavorite, toggle } = useLocalIdFavorites(
+    PLANNER_FAVORITE_STORAGE_KEYS.claimDocuments,
+  );
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
     "idle",
   );
@@ -86,6 +94,11 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
             <span className="rounded-md border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
               {categoryLabel}
             </span>
+            <FavoriteButton
+              active={isFavorite(favoriteId)}
+              label={title}
+              onToggle={() => toggle(favoriteId)}
+            />
           </div>
           <p className="mt-2 break-keep text-base font-bold leading-6 text-slate-900">
             {title}

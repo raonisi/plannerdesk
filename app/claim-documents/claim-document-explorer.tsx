@@ -13,6 +13,7 @@ import {
   groupFilteredClaimItems,
 } from "@/lib/claim-documents/claim-library";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import { ClaimDocumentFavoritesStrip } from "@/components/planner-favorites/claim-document-favorites-strip";
 import { ClaimFormsFilters } from "./claim-forms-filters";
 import { InsurerClaimGroup } from "./insurer-claim-group";
 
@@ -115,6 +116,7 @@ export function ClaimDocumentExplorer({
 
   return (
     <div className="space-y-6">
+      <ClaimDocumentFavoritesStrip items={allItems} />
       <ClaimFormsFilters
         category={category}
         categoryOptions={categoryOptions}

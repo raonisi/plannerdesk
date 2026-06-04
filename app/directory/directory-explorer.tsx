@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
+import { LOCAL_FAVORITES_DEVICE_NOTICE } from "@/lib/planner-favorites/copy";
 import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
 import {
@@ -233,7 +234,7 @@ export function DirectoryExplorer({
           />
         </label>
         <p className="mt-4 text-sm leading-6 text-[#4f5661]">
-          {filteredInsurers.length}개 보험사가 표시됩니다. 즐겨찾기는 이 기기에만 저장됩니다.
+          {filteredInsurers.length}개 보험사가 표시됩니다. {LOCAL_FAVORITES_DEVICE_NOTICE}
         </p>
       </section>
 
