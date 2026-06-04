@@ -4,6 +4,10 @@ This checklist is used before MVP release merges and Railway production smoke
 tests. It verifies build health, public route behavior, admin route protection,
 database readiness, and safety boundaries.
 
+**Limited release (PR105~PR113 bundle):** use the dedicated operator pack
+[PR-114-LIMITED-RELEASE-OPS.md](PR-114-LIMITED-RELEASE-OPS.md) for pre-deploy
+checklist, release notes template, and rollback/Codex gates.
+
 ---
 
 ## A. Code And Build Integrity
@@ -75,6 +79,11 @@ Run a local, staging, or production instance and verify the public routes return
 - [ ] `/claim-documents`
 - [ ] `/disclosure-links`
 - [ ] `/message-templates`
+- [ ] `/knowledge`
+- [ ] `/search`
+- [ ] `/community` (placeholder)
+
+See [PR-110-PUBLIC-ROUTE-SMOKE.md](PR-110-PUBLIC-ROUTE-SMOKE.md) for extended smoke targets.
 
 You can run the dependency-free smoke script against a running server:
 

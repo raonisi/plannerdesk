@@ -13,6 +13,13 @@ PlannerDesk deploys to Railway as a standard Next.js application.
 
 See [docs/PR-105-BUILD-MIGRATION-SEPARATION.md](PR-105-BUILD-MIGRATION-SEPARATION.md) for build vs migration boundaries.
 
+For **limited releases bundling PR105~PR113** (or equivalent), use the PR-114 operator pack:
+
+- [PR-114-LIMITED-RELEASE-OPS.md](PR-114-LIMITED-RELEASE-OPS.md) — hub
+- [PR-114-LIMITED-RELEASE-PRE-DEPLOY-CHECKLIST.md](PR-114-LIMITED-RELEASE-PRE-DEPLOY-CHECKLIST.md)
+- [PR-114-RELEASE-NOTES-TEMPLATE.md](PR-114-RELEASE-NOTES-TEMPLATE.md)
+- [PR-114-ROLLBACK-AND-CODEX-GATES.md](PR-114-ROLLBACK-AND-CODEX-GATES.md)
+
 ## Railway
 
 Railway should detect the app from `package.json`.
