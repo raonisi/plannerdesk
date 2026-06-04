@@ -38,6 +38,10 @@
 - [PR-115-LIMITED-RELEASE-FINAL-OPS.md](./PR-115-LIMITED-RELEASE-FINAL-OPS.md)
 - [PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md](./PR-137-ANSWER-ASSISTANT-RESTRICTION-OPS.md)
 
+## 연계 (후속)
+
+- [PR-144-PUBLIC-LANDING-SAFETY-OPS.md](./PR-144-PUBLIC-LANDING-SAFETY-OPS.md) — public landing 문구·CTA 검수
+
 ## Codex
 
 public visibility·권한·개인정보·Answer Assistant·rollback — **제한검수 권장** (본 PR은 문서·관리자 안내만).

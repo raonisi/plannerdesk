@@ -1,3 +1,4 @@
+import { PUBLIC_LANDING_FOOTER_LINE } from "@/lib/ops/public-landing-safety";
 import { uiLabels } from "@/lib/ui-labels";
 
 export function Footer() {
@@ -9,7 +10,7 @@ export function Footer() {
           <p className="font-medium">{uiLabels.footerTagline}</p>
           <p className="mt-1 max-w-md break-keep text-xs leading-relaxed">
             보험사 전산·청구·공시·고객 안내 자료를 한곳에서 확인하는 실무 참고 플랫폼입니다.
-            보험금 지급 판단·금액 산정·손해사정 업무는 제공하지 않습니다.
+            {PUBLIC_LANDING_FOOTER_LINE}. 보험금 지급 판단·금액 산정·손해사정 업무는 제공하지 않습니다.
           </p>
         </div>
         <div className="flex flex-col gap-1 md:text-right">

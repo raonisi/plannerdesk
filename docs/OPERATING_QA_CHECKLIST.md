@@ -64,6 +64,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Support & incident playbook (PR143, no ticket form or outbound send):** [PR-143-SUPPORT-INCIDENT-PLAYBOOK-OPS.md](PR-143-SUPPORT-INCIDENT-PLAYBOOK-OPS.md)
 
+**Public landing safety review (PR144, no launch or signup form):** [PR-144-PUBLIC-LANDING-SAFETY-OPS.md](PR-144-PUBLIC-LANDING-SAFETY-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

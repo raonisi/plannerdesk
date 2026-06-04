@@ -1,5 +1,10 @@
 /** PR-131 — public work hub copy (no admin or draft counts). */
 
+export {
+  PUBLIC_LANDING_LIMITED_BETA_NOTICE,
+  PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE,
+} from "@/lib/ops/public-landing-safety";
+
 export const PUBLIC_WORK_HUB_VISIBILITY_NOTICE =
   "검수·공개 기준을 통과한 항목만 이 화면에 표시됩니다. 미검수·비공개 데이터는 공개 화면에 노출되지 않습니다.";
 

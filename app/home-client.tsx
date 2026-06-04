@@ -19,8 +19,11 @@ import { WorkHubNextSteps } from "@/components/dashboard/work-hub-next-steps";
 import {
   CLAIM_WORK_FLOW_LINKS,
   PLANNER_ANSWER_ASSISTANT_HUB_NOTE,
+  PUBLIC_LANDING_LIMITED_BETA_NOTICE,
+  PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE,
   PUBLIC_WORK_HUB_NO_RESULTS,
   PUBLIC_WORK_HUB_SEARCH_HINT,
+  PUBLIC_WORK_HUB_VISIBILITY_NOTICE,
 } from "@/lib/dashboard/work-hub-copy";
 import { PlannerWorkFavoritesPanel } from "@/components/dashboard/planner-work-favorites-panel";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
@@ -243,6 +246,17 @@ export function HomeClient({
           <p className={`mt-2 max-w-2xl break-keep text-sm text-[#5B6470]`}>
             {PUBLIC_WORK_HUB_SEARCH_HINT}
           </p>
+          <div
+            className="mt-4 max-w-2xl space-y-1.5 rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#5B6470]"
+            role="note"
+            aria-label="제한 베타 및 공개 정보 안내"
+          >
+            <p className="break-keep font-medium text-[#0F1D2E]">
+              {PUBLIC_LANDING_LIMITED_BETA_NOTICE}
+            </p>
+            <p className="break-keep text-xs">{PUBLIC_WORK_HUB_VISIBILITY_NOTICE}</p>
+            <p className="break-keep text-xs">{PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE}</p>
+          </div>
 
           <div className="relative z-10 mt-8 max-w-2xl">
             <label className="sr-only" htmlFor="home-unified-search">
@@ -616,6 +630,11 @@ export function HomeClient({
           <li>
             보험금 지급 판단·금액 산정·손해사정 업무는 제공하지 않습니다.
           </li>
+          <li>
+            고객명, 주민번호, 연락처, 계약번호, 병력 등 개인정보와 민감정보는
+            입력하지 마세요.
+          </li>
+          <li>{PLANNER_ANSWER_ASSISTANT_HUB_NOTE}</li>
         </ul>
       </details>
     </div>
