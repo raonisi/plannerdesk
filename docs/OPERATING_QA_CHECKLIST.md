@@ -48,6 +48,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Planner work favorites (PR135, client-only):** [PR-135-PLANNER-FAVORITES-OPS.md](PR-135-PLANNER-FAVORITES-OPS.md)
 
+**Admin operations report (PR136, manual template):** [PR-136-ADMIN-OPS-REPORT-OPS.md](PR-136-ADMIN-OPS-REPORT-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
