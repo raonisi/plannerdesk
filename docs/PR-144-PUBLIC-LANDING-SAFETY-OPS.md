@@ -27,6 +27,10 @@
 
 - 외부 공개 실행 · 신규 마케팅 랜딩 · 베타 신청 폼 · 회원가입 확대 · 결제/PG/구독
 
+## 연계 (후속)
+
+- [PR-145-PAYMENT-FEASIBILITY-OPS.md](./PR-145-PAYMENT-FEASIBILITY-OPS.md) — 결제·유료화 검토 (구현 없음)
+
 ## Codex
 
 public visibility·권한·개인정보·결제·AA·외부 공개 — **제한검수 권장**.

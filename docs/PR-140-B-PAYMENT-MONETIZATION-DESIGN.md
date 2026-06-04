@@ -19,4 +19,4 @@
 
 ## PR140-A 관계
 
-유료화 **No-Go** 판단의 근거 문서. B 착수 전 PR145·142·143·149·Codex **필수**.
+유료화 **No-Go** 판단의 근거 문서. B 착수 전 [PR-145-PAYMENT-FEASIBILITY-OPS.md](./PR-145-PAYMENT-FEASIBILITY-OPS.md)(**PR145-A 완료**)·142·143·149·Codex **필수**.

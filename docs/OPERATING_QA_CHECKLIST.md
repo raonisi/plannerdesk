@@ -66,6 +66,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Public landing safety review (PR144, no launch or signup form):** [PR-144-PUBLIC-LANDING-SAFETY-OPS.md](PR-144-PUBLIC-LANDING-SAFETY-OPS.md)
 
+**Payment feasibility plan (PR145, no PG or billing implementation):** [PR-145-PAYMENT-FEASIBILITY-OPS.md](PR-145-PAYMENT-FEASIBILITY-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
