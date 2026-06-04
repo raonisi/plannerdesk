@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import AdminChangeHistoryMetadataPanel from "@/components/admin/AdminChangeHistoryMetadataPanel";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import { buildClaimDocumentChangeHistoryMetadata } from "@/lib/admin/change-history-metadata";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
@@ -73,6 +75,10 @@ export default async function EditClaimDocumentPage({
         <div className="mb-5">
           <AdminSafetyNotice policySummary={ADMIN_CLAIM_DOC_COPY.policySummary} />
         </div>
+
+        <AdminChangeHistoryMetadataPanel
+          snapshot={buildClaimDocumentChangeHistoryMetadata(claimDocument)}
+        />
 
         <section
           className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}

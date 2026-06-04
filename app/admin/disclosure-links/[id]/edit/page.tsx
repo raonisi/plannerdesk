@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminChangeHistoryMetadataPanel from "@/components/admin/AdminChangeHistoryMetadataPanel";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import { buildDisclosureLinkChangeHistoryMetadata } from "@/lib/admin/change-history-metadata";
 import { getDisclosureLinkAdminAccess } from "../../access";
 import { updateDisclosureLink } from "../../actions";
 import DisclosureLinkForm from "../../form";
@@ -65,6 +67,10 @@ export default async function EditDisclosureLinkPage({
         <div className="mb-5">
           <AdminSafetyNotice policySummary={ADMIN_DISCLOSURE_COPY.policySummary} />
         </div>
+
+        <AdminChangeHistoryMetadataPanel
+          snapshot={buildDisclosureLinkChangeHistoryMetadata(link)}
+        />
 
         <section
           className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}

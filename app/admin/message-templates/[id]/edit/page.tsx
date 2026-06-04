@@ -2,7 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminChangeHistoryMetadataPanel from "@/components/admin/AdminChangeHistoryMetadataPanel";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import { buildMessageTemplateChangeHistoryMetadata } from "@/lib/admin/change-history-metadata";
 import { getMessageTemplateAdminAccess } from "../../access";
 import { updateMessageTemplate } from "../../actions";
 import MessageTemplateForm from "../../form";
@@ -71,6 +73,10 @@ export default async function AdminMessageTemplateEditPage({
             policySummary={ADMIN_MESSAGE_TEMPLATE_COPY.policySummary}
           />
         </div>
+
+        <AdminChangeHistoryMetadataPanel
+          snapshot={buildMessageTemplateChangeHistoryMetadata(template)}
+        />
 
         <section
           className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}

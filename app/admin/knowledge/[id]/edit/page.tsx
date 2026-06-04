@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
+import AdminChangeHistoryMetadataPanel from "@/components/admin/AdminChangeHistoryMetadataPanel";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import { buildKnowledgeChangeHistoryMetadata } from "@/lib/admin/change-history-metadata";
 import { getKnowledgeAdminAccess } from "../../access";
 import { updateKnowledgeArticle } from "../../actions";
 import KnowledgeArticleForm from "../../form";
@@ -60,6 +62,10 @@ export default async function EditKnowledgeArticlePage({
         <div className="mb-5">
           <AdminSafetyNotice policySummary={ADMIN_KNOWLEDGE_COPY.policySummary} />
         </div>
+
+        <AdminChangeHistoryMetadataPanel
+          snapshot={buildKnowledgeChangeHistoryMetadata(article)}
+        />
 
         <section
           className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}

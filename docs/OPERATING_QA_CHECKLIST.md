@@ -42,6 +42,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Advanced unified search (PR132):** [PR-132-ADVANCED-SEARCH-OPS.md](PR-132-ADVANCED-SEARCH-OPS.md)
 
+**Data change history metadata (PR133):** [PR-133-CHANGE-HISTORY-OPS.md](PR-133-CHANGE-HISTORY-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import AdminChangeHistoryMetadataPanel from "@/components/admin/AdminChangeHistoryMetadataPanel";
 import AdminSafetyNotice from "@/components/admin/AdminSafetyNotice";
+import { buildInsurerChangeHistoryMetadata } from "@/lib/admin/change-history-metadata";
 import { borders, shadows, surfaces, textStyles } from "@/lib/design-system";
 import AdminAccessDeniedState from "@/components/admin/AdminAccessDeniedState";
 import AdminLockedState from "@/components/admin/AdminLockedState";
@@ -66,6 +68,10 @@ export default async function EditInsurerPage({
         <div className="mb-5">
           <AdminSafetyNotice policySummary={ADMIN_VISIBILITY_COPY.policySummary} />
         </div>
+
+        <AdminChangeHistoryMetadataPanel
+          snapshot={buildInsurerChangeHistoryMetadata(insurer)}
+        />
 
         <section className={`${surfaces.card} ${borders.default} ${shadows.card} rounded-lg p-5 sm:p-7`}>
           <InsurerForm
