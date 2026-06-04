@@ -31,6 +31,8 @@
 
 **데이터 최신성 루틴 (PR122):** [PR-122-DATA-FRESHNESS-OPS.md](./PR-122-DATA-FRESHNESS-OPS.md)
 
+**관리자 운영 매뉴얼 (PR123):** [PR-123-ADMIN-OPERATIONS-MANUAL.md](./PR-123-ADMIN-OPERATIONS-MANUAL.md)
+
 ---
 
 ## 금지 (재확인)

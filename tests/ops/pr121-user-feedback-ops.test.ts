@@ -39,7 +39,14 @@ describe("PR121 user feedback ops (static)", () => {
     assert.match(types, /권한 문제/);
     assert.match(types, /Answer Assistant/);
     assert.match(types, /PR124/);
-    assert.match(types, /PR122/);
+    assert.match(types, /PR127/);
+
+    const routing = readFileSync(
+      join(ROOT, "docs/PR-121-FEEDBACK-TO-PR-ROUTING.md"),
+      "utf8",
+    );
+    assert.match(routing, /PR123/);
+    assert.match(routing, /관리자 운영 매뉴얼/);
   });
 
   it("severity defines Critical and High handling", () => {

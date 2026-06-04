@@ -22,6 +22,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Data freshness routine (PR122):** [PR-122-DATA-FRESHNESS-OPS.md](PR-122-DATA-FRESHNESS-OPS.md)
 
+**Admin operations manual (PR123):** [PR-123-ADMIN-OPERATIONS-MANUAL.md](PR-123-ADMIN-OPERATIONS-MANUAL.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
