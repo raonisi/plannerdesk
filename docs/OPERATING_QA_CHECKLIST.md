@@ -30,6 +30,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Answer Assistant beta observation (PR126):** [PR-126-ANSWER-ASSISTANT-BETA-OPS.md](PR-126-ANSWER-ASSISTANT-BETA-OPS.md)
 
+**Search and browse UX (PR127):** [PR-127-SEARCH-UX-OPS.md](PR-127-SEARCH-UX-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

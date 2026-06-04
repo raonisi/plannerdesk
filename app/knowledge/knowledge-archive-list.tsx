@@ -9,6 +9,7 @@ import {
   KnowledgeRiskLevel,
 } from "@prisma/client";
 import { EmptyState } from "@/components/content-page";
+import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import {
   buildKnowledgeArchiveHref,
   defaultKnowledgeArchiveFilterState,
@@ -340,10 +341,13 @@ export function KnowledgeArchiveList({
       ) : null}
 
       {!blockedMessage && filteredItems.length === 0 ? (
-        <EmptyState
-          description={KNOWLEDGE_ARCHIVE_EMPTY_MESSAGE}
-          title="조건에 맞는 지식 문서가 없습니다."
-        />
+        <div className="space-y-5">
+          <EmptyState
+            description={KNOWLEDGE_ARCHIVE_EMPTY_MESSAGE}
+            title="조건에 맞는 지식 문서가 없습니다."
+          />
+          <BrowseNextSteps title="다른 공개 정보 찾기" />
+        </div>
       ) : null}
     </div>
   );

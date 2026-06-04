@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
+import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -268,10 +269,13 @@ export function DirectoryExplorer({
           ))}
         </div>
       ) : (
-        <EmptyState
-          title="조건에 맞는 보험사가 없습니다."
-          description="검색어를 줄이거나 필터를 변경해 주세요."
-        />
+        <div className="space-y-5">
+          <EmptyState
+            description="보험사명·초성을 다르게 입력하거나, 통합 검색에서 청구서류·지식을 찾아보세요."
+            title="조건에 맞는 보험사가 없습니다."
+          />
+          <BrowseNextSteps title="다른 메뉴에서 찾기" />
+        </div>
       )}
 
       <section id="feedback-section" className="rounded-2xl border border-[#d9c9a8] bg-white p-5 shadow-[0_18px_40px_rgba(16,34,53,0.04)] sm:p-6">

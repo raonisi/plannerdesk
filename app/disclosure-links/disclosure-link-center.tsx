@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { DisclosureLinkTargetType } from "@prisma/client";
 import { EmptyState, SearchBar } from "@/components/content-page";
+import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { DisclosureCard } from "@/components/disclosure/disclosure-card";
 import {
@@ -214,10 +215,13 @@ export function DisclosureLinkCenter({
           ))}
         </div>
       ) : (
-        <EmptyState
-          description="검색어를 줄이거나 자료 분류·고급 필터를 변경해 주세요."
-          title="조건에 맞는 공식 자료가 없습니다."
-        />
+        <div className="space-y-5">
+          <EmptyState
+            description="제목·보험사명·출처명을 다르게 입력하거나, 보험사 디렉터리에서 전산·청구 링크를 확인해 보세요."
+            title="조건에 맞는 공식 자료가 없습니다."
+          />
+          <BrowseNextSteps title="관련 메뉴" />
+        </div>
       )}
     </div>
   );

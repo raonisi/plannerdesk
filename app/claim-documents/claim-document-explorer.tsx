@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
+import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import {
   buildCategoryFilterOptions,
   buildClaimLibraryItems,
@@ -189,8 +190,8 @@ export function ClaimDocumentExplorer({
           <EmptyState
             description={
               selectedInsurerKey !== "all"
-                ? "다른 보험사를 선택하거나 필터를 초기화해 보세요."
-                : "검색어를 줄이거나 필터를 초기화해 보세요."
+                ? "다른 보험사를 선택하거나 필터를 초기화해 보세요. 보험사 디렉터리에서 청구안내·전산 링크도 확인할 수 있습니다."
+                : "보험사·청구유형·서류명을 다르게 입력하거나 필터를 초기화해 보세요."
             }
             title={
               selectedInsurerKey !== "all"
@@ -198,6 +199,21 @@ export function ClaimDocumentExplorer({
                 : "조건에 맞는 청구서류가 없습니다."
             }
           />
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+              href="/directory"
+            >
+              보험사 디렉터리
+            </Link>
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+              href="/search"
+            >
+              통합 검색
+            </Link>
+          </div>
+          <BrowseNextSteps className="mt-2" title="관련 메뉴" />
           <div className="flex justify-center">
             <button
               aria-label="검색어 및 필터 초기화"

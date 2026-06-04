@@ -21,7 +21,7 @@ export type KnowledgeArchiveFilterState = {
 };
 
 export const KNOWLEDGE_ARCHIVE_EMPTY_MESSAGE =
-  "조건에 맞는 지식 문서가 없습니다. 검색어를 줄이거나 카테고리 필터를 초기화해 다시 확인해 주세요.";
+  "검색어를 줄이거나 카테고리·유형 필터를 변경해 보세요. 검수 전·비공개 문서는 목록에 표시되지 않습니다.";
 
 /** Neutral public copy for risk level (PR-84). */
 export const PUBLIC_RISK_GUIDANCE_LABEL: Record<KnowledgeRiskLevel, string> = {

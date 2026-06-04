@@ -15,7 +15,13 @@ export const SEARCH_VALIDATION_MESSAGES = {
 } as const;
 
 export const SEARCH_EMPTY_MESSAGE =
-  "검색 결과가 없습니다. 보험사명, 청구서류명, 공시, 약관, 고객문구처럼 공개 정보 기준으로 다시 검색해주세요.";
+  "검색 결과가 없습니다. 보험사명·서류명·지식 키워드를 다르게 입력하거나 검색어를 줄여 보세요.";
+
+export const SEARCH_EMPTY_VISIBILITY_NOTE =
+  "검수 전·비공개 항목은 통합 검색에 표시되지 않습니다.";
+
+export const SEARCH_ERROR_MESSAGE =
+  "정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.";
 
 export const SEARCH_IDLE_HINT =
   "보험사, 청구서류, 공시·약관, 고객문구, 지식 아카이브의 공개 정보를 검색할 수 있습니다.";

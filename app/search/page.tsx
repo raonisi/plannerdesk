@@ -6,11 +6,12 @@ import {
 } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
+import { SEARCH_IDLE_HINT } from "@/lib/search/constants";
 import {
-  SEARCH_EMPTY_MESSAGE,
-  SEARCH_IDLE_HINT,
-} from "@/lib/search/constants";
-import { PUBLIC_SEARCH_FILTER_OPTIONS } from "@/lib/search/labels";
+  PUBLIC_SEARCH_FILTER_OPTIONS,
+  SEARCH_DOMAIN_LABEL,
+} from "@/lib/search/labels";
 import {
   domainToQueryParam,
   parsePublicSearchDomain,
@@ -61,6 +62,8 @@ export default async function SearchPage({
   const showResults =
     rawQuery && results?.ok && results.results.length > 0;
   const showEmpty = rawQuery && results?.ok && results.results.length === 0;
+  const emptyDomainLabel =
+    domain !== "all" ? SEARCH_DOMAIN_LABEL[domain] : undefined;
 
   return (
     <PageFrame>
@@ -174,12 +177,7 @@ export default async function SearchPage({
           ) : null}
 
           {showEmpty ? (
-            <p
-              className="rounded-md border border-[#d9c9a8] bg-white px-4 py-3 text-sm text-[#4f5661]"
-              role="status"
-            >
-              {SEARCH_EMPTY_MESSAGE}
-            </p>
+            <SearchEmptyPanel domainFilterLabel={emptyDomainLabel} />
           ) : null}
         </div>
       </ContentSection>
