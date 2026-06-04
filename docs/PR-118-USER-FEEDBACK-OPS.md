@@ -4,10 +4,12 @@
 
 **선행:** PR105~PR117 (배포 준비·smoke) → **(실제 사용·피드백 수집)** → PR118 → PR119 (운영 데이터 품질 QA)
 
+**운영 체계 (PR121):** [PR-121-USER-FEEDBACK-OPS.md](./PR-121-USER-FEEDBACK-OPS.md) — 접수·분류·우선순위·PR 연결 **권장**
+
 | 문서 | 용도 |
 | --- | --- |
-| [PR-118-USER-FEEDBACK-INTAKE.md](./PR-118-USER-FEEDBACK-INTAKE.md) | 피드백 원문·분류표 (운영자 기입) |
-| [PR-118-FEEDBACK-TRIAGE-AND-PLAN.md](./PR-118-FEEDBACK-TRIAGE-AND-PLAN.md) | 우선순위·화면별 검토·구현 계획·PR119 이관 |
+| [PR-118-USER-FEEDBACK-INTAKE.md](./PR-118-USER-FEEDBACK-INTAKE.md) | 1차 양식 (레거시) |
+| [PR-118-FEEDBACK-TRIAGE-AND-PLAN.md](./PR-118-FEEDBACK-TRIAGE-AND-PLAN.md) | 1차 분류·PR119 이관 |
 
 **후속:** [PR-119-OPERATIONAL-DATA-QUALITY-OPS.md](./PR-119-OPERATIONAL-DATA-QUALITY-OPS.md) (데이터 정확성·최신성)
 

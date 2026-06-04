@@ -18,6 +18,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Pre-launch final (PR120):** [PR-120-PRE-LAUNCH-FINAL-OPS.md](PR-120-PRE-LAUNCH-FINAL-OPS.md)
 
+**User feedback ops (PR121):** [PR-121-USER-FEEDBACK-OPS.md](PR-121-USER-FEEDBACK-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

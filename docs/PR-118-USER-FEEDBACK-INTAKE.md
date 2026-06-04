@@ -2,6 +2,8 @@
 
 **허브:** [PR-118-USER-FEEDBACK-OPS.md](./PR-118-USER-FEEDBACK-OPS.md)
 
+**권장 (PR121):** [PR-121-FEEDBACK-INTAKE-REGISTRY.md](./PR-121-FEEDBACK-INTAKE-REGISTRY.md) — 전체 필드·상태·PR 연결
+
 운영자·테스터가 아래 표에 **원문**을 기입한다. 비밀번호·토큰·고객 PII·allowlist 값은 기록하지 않는다.
 
 ---
