@@ -41,3 +41,4 @@
 ## 후속
 
 - [PR-142-TERMS-PRIVACY-PLAN-OPS.md](./PR-142-TERMS-PRIVACY-PLAN-OPS.md) — 약관·개인정보 **준비 계획** (확정·동의 없음)
+- [PR-143-SUPPORT-INCIDENT-PLAYBOOK-OPS.md](./PR-143-SUPPORT-INCIDENT-PLAYBOOK-OPS.md) — 오류 제보·장애 대응 기준 (문의 폼·티켓 DB 없음)

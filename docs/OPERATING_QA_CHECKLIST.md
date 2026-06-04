@@ -62,6 +62,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Terms & privacy drafting plan (PR142, no legal finalization):** [PR-142-TERMS-PRIVACY-PLAN-OPS.md](PR-142-TERMS-PRIVACY-PLAN-OPS.md)
 
+**Support & incident playbook (PR143, no ticket form or outbound send):** [PR-143-SUPPORT-INCIDENT-PLAYBOOK-OPS.md](PR-143-SUPPORT-INCIDENT-PLAYBOOK-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
