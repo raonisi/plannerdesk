@@ -28,6 +28,10 @@ For **limited releases bundling PR105~PR113** (or equivalent), use the PR-114 op
 
 - [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
+**Post-deploy smoke (PR117):**
+
+- [PR-117-POST-LIMITED-RELEASE-SMOKE-OPS.md](PR-117-POST-LIMITED-RELEASE-SMOKE-OPS.md)
+
 ## Railway
 
 Railway should detect the app from `package.json`.

@@ -15,7 +15,8 @@ describe("PR116 limited release execution readiness (static)", () => {
     assert.match(hub, /PR-116-DEPLOY-EXECUTION-READINESS-DECISION/);
     assert.match(hub, /PR-115-LIMITED-RELEASE-FINAL-OPS/);
     assert.match(hub, /실제 배포/);
-    assert.doesNotMatch(hub, /railway up/i);
+    assert.match(hub, /PR-117-POST-LIMITED-RELEASE-SMOKE-OPS/);
+    assert.match(hub, /하지 않는 것[\s\S]*`railway up`/);
   });
 
   it("execution checklist covers A through G without secret values", () => {
