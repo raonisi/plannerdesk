@@ -3,7 +3,7 @@
 | 후보 | 목적 | 위험도 | Codex |
 | --- | --- | --- | --- |
 | PR141 External Beta Readiness | 제한 베타 준비 (**PR141-A 완료**) | Medium~High | 조건부 |
-| PR142 Terms & Privacy Plan | 약관·개인정보 **계획** | High | 권장 |
+| PR142 Terms & Privacy Plan | 약관·개인정보 **계획** (**PR142-A 완료**) | High | 권장 |
 | PR143 Support & Incident | 고객지원·장애 | Medium~High | 조건부 |
 | PR144 Public Landing Safety | 랜딩 문구 검수 | High | 조건부 |
 | PR145 Payment Feasibility | 결제·환불 **검토만** | Critical | **필수** |

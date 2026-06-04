@@ -60,6 +60,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Limited external beta readiness (PR141, manual approval only):** [PR-141-LIMITED-BETA-OPS.md](PR-141-LIMITED-BETA-OPS.md)
 
+**Terms & privacy drafting plan (PR142, no legal finalization):** [PR-142-TERMS-PRIVACY-PLAN-OPS.md](PR-142-TERMS-PRIVACY-PLAN-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

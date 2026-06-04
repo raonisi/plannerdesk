@@ -37,3 +37,7 @@
 ## Codex
 
 외부 공개·권한·PII·AA·visibility — **제한검수 권장** (코드 변경 없으면 문서 diff 중심).
+
+## 후속
+
+- [PR-142-TERMS-PRIVACY-PLAN-OPS.md](./PR-142-TERMS-PRIVACY-PLAN-OPS.md) — 약관·개인정보 **준비 계획** (확정·동의 없음)
