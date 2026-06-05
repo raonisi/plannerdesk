@@ -34,3 +34,7 @@ verified planner + allowlist 제한 베타를 유지한 채, 위험 입력 차�
 ## Codex 제한검수
 
 **권장** — output safety·audit·권한·PII 영향. allowlist/Auth 무변경이어도 High-risk PR 특성상 Antigravity+C restricted review.
+
+## 후속
+
+- [PR-148-AI-LIMITED-BETA-POLICY-OPS.md](./PR-148-AI-LIMITED-BETA-POLICY-OPS.md) — 제한 베타 운영 정책 통합 (**PR148-A 완료**)

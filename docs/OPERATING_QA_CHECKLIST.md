@@ -72,6 +72,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Data responsibility notice (PR147, no bulk data edit or source crawlers):** [PR-147-DATA-RESPONSIBILITY-NOTICE-OPS.md](PR-147-DATA-RESPONSIBILITY-NOTICE-OPS.md)
 
+**AI limited beta policy (PR148, no AA access expansion or allowlist change):** [PR-148-AI-LIMITED-BETA-POLICY-OPS.md](PR-148-AI-LIMITED-BETA-POLICY-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

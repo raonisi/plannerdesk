@@ -11,4 +11,4 @@
 
 PR147은 AA **공개 범위를 확대하지 않는다**. 기존 `VERIFIED_ANSWER_ASSIST_PAGE_NOTICES` 유지.
 
-상세 정책: PR148 (AI Limited Beta Policy) 후보.
+상세 정책: [PR-148-AI-LIMITED-BETA-POLICY-OPS.md](./PR-148-AI-LIMITED-BETA-POLICY-OPS.md) (**PR148-A 완료**).
