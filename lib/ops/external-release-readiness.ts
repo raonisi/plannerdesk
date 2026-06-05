@@ -522,7 +522,14 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR152",
     title: "Beta Operator Checklist",
-    purpose: "운영자 실행 체크리스트",
+    purpose: "운영자 실행 체크리스트 (**PR152-A 완료**, 실행 없음)",
+    risk: "Medium~High",
+    codex: "조건부",
+  },
+  {
+    id: "PR153",
+    title: "Beta User Notice Pack",
+    purpose: "베타 사용자 안내문",
     risk: "Medium~High",
     codex: "조건부",
   },

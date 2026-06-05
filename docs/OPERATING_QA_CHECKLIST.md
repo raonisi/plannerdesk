@@ -80,6 +80,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **External beta dry run (PR151, rehearsal only — no launch or role change):** [PR-151-EXTERNAL-BETA-DRY-RUN-OPS.md](PR-151-EXTERNAL-BETA-DRY-RUN-OPS.md)
 
+**Beta operator checklist (PR152, execution prep only — no launch or role change):** [PR-152-BETA-OPERATOR-CHECKLIST-OPS.md](PR-152-BETA-OPERATOR-CHECKLIST-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

@@ -13,5 +13,6 @@
 | PR149 Security Final Audit | 권한·보안 감사 (**PR149-A 완료**) | Critical | **필수** |
 | PR150 External Release Decision | 최종 공개 판단 (**PR150-A 완료**) | Critical | **필수** |
 | PR151 External Beta Dry Run | 공개 전 dry-run (**PR151-A 완료**) | High | **필수** |
+| PR152 Beta Operator Checklist | 운영자 실행 체크리스트 (**PR152-A 완료**) | Medium~High | 조건부 |
 
 **PR140은 위 PR을 실행하지 않는다.**

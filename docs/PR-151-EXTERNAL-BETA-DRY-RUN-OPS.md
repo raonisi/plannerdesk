@@ -53,6 +53,10 @@ PR150 Conditional Go 전제. **실제 외부 공개·배포 실행 없음.**
 
 Critical(정적) 0 · partial: RBAC bulk·AA hardening · pending: Codex·Antigravity
 
+## 후속
+
+PR152 Beta Operator Checklist: [PR-152-BETA-OPERATOR-CHECKLIST-OPS.md](./PR-152-BETA-OPERATOR-CHECKLIST-OPS.md)
+
 ## Codex
 
 **제한검수 원칙 권장** — dry-run·접근 기대값 검증 PR
