@@ -51,6 +51,10 @@ PR151 dry-run 이후, 운영자가 제한 베타를 실제로 열기 전 확인�
 
 Critical(정적) 0 · pending: PR153 안내문·Codex
 
+## 후속
+
+PR153 Beta User Notice Pack: [PR-153-BETA-USER-NOTICE-PACK-OPS.md](./PR-153-BETA-USER-NOTICE-PACK-OPS.md)
+
 ## Codex
 
 **조건부 제한검수 권장**

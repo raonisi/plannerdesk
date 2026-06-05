@@ -103,7 +103,7 @@ export const PRE_LAUNCH_CHECKLIST: readonly {
   { category: "회원가입", item: "회원가입 확대 없음", criterion: "필수", required: true, status: "ready" },
   { category: "외부 발송", item: "이메일/SMS/카카오/Slack/webhook 없음", criterion: "필수", required: true, status: "ready" },
   { category: "기록", item: "고객정보·secret 없는 metadata 중심", criterion: "필수", required: true, status: "ready" },
-  { category: "안내문", item: "베타 사용자 안내 세트", criterion: "PR153", required: true, status: "pending" },
+  { category: "안내문", item: "베타 사용자 안내 세트", criterion: "PR153", required: true, status: "conditional" },
   { category: "Codex", item: "제한검수(조건부)", criterion: "권장", required: false, status: "pending" },
 ] as const;
 

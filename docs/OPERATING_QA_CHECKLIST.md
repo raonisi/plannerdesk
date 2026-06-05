@@ -82,6 +82,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta operator checklist (PR152, execution prep only — no launch or role change):** [PR-152-BETA-OPERATOR-CHECKLIST-OPS.md](PR-152-BETA-OPERATOR-CHECKLIST-OPS.md)
 
+**Beta user notice pack (PR153, templates only — no email/SMS/send):** [PR-153-BETA-USER-NOTICE-PACK-OPS.md](PR-153-BETA-USER-NOTICE-PACK-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

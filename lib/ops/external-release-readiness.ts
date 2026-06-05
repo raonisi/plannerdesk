@@ -529,8 +529,15 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR153",
     title: "Beta User Notice Pack",
-    purpose: "베타 사용자 안내문",
+    purpose: "베타 사용자 안내문 (**PR153-A 완료**, 발송 없음)",
     risk: "Medium~High",
+    codex: "조건부",
+  },
+  {
+    id: "PR154",
+    title: "Public Smoke Expansion",
+    purpose: "public route smoke",
+    risk: "High",
     codex: "조건부",
   },
 ] as const;
