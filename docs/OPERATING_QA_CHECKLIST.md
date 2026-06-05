@@ -70,6 +70,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta access request flow design (PR146, no signup form or auto-approval):** [PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md](PR-146-BETA-ACCESS-REQUEST-FLOW-OPS.md)
 
+**Data responsibility notice (PR147, no bulk data edit or source crawlers):** [PR-147-DATA-RESPONSIBILITY-NOTICE-OPS.md](PR-147-DATA-RESPONSIBILITY-NOTICE-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

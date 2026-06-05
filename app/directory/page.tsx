@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import {
   ContentSection,
   EmptyState,
@@ -61,6 +62,8 @@ export default async function DirectoryPage() {
           <p className="break-keep text-sm leading-6 text-[#5f6670]">
             {t.subcopy}
           </p>
+
+          <DataResponsibilityInlineNotice variant="directory" />
 
           {result.status === "error" ? (
             <EmptyState

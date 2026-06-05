@@ -7,6 +7,7 @@ import {
   parseKnowledgeArchiveParams,
 } from "@/lib/knowledge/archive-filter";
 import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
+import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { KnowledgeArchiveList } from "./knowledge-archive-list";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,8 @@ export default async function KnowledgeArchivePage({
       <ContentSection>
         <div className="space-y-8">
           <p className="break-keep text-sm leading-6 text-[#5f6670]">{t.subcopy}</p>
+
+          <DataResponsibilityInlineNotice variant="knowledge" />
 
           <aside
             className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5 sm:p-6"

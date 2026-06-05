@@ -21,6 +21,7 @@ import {
 } from "@/lib/search/query-validation";
 import { buildPublicSearchHref } from "@/lib/search/search-href";
 import { searchPublicContent } from "@/lib/search/public";
+import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { SearchResultsList } from "./search-results";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +73,8 @@ export default async function SearchPage({
 
       <ContentSection>
         <div className="mx-auto max-w-3xl space-y-6">
+          <DataResponsibilityInlineNotice variant="search" />
+
           <form
             action="/search"
             className="rounded-xl border border-[#d9c9a8] bg-white p-4 shadow-sm"

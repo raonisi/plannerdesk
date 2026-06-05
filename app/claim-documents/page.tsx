@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import {
   ContentSection,
   EmptyState,
@@ -35,6 +36,8 @@ export default async function ClaimDocumentsPage() {
       />
       <ContentSection>
         <div className="space-y-6">
+          <DataResponsibilityInlineNotice variant="claim" />
+
           {dbError ? (
             <EmptyState
               description="잠시 후 다시 확인해 주세요."

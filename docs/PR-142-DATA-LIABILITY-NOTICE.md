@@ -11,4 +11,4 @@
 | Answer Assistant | 보조·판단 아님 |
 | 운영 | 수정·중단 가능 |
 
-과장 금지 — PR147에서 사용자-facing 고지 정리 가능.
+과장 금지 — [PR-147-DATA-RESPONSIBILITY-NOTICE-OPS.md](./PR-147-DATA-RESPONSIBILITY-NOTICE-OPS.md) (**PR147-A 완료**)에서 사용자-facing 고지·체크리스트 정리.

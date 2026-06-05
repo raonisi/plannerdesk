@@ -3,6 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { ContentSection, EmptyState, PageHero } from "@/components/content-page";
 import { getPublicDisclosureLinks } from "@/lib/public/disclosure-links";
 import { getPublicInsurers } from "@/lib/public/insurers";
+import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { DisclosureLinksClient } from "./disclosure-links-client";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,9 @@ export default async function DisclosureLinksPage() {
     <AppShell>
       <PageHero description={t.description} eyebrow={t.eyebrow} title={t.title} />
       <ContentSection>
+        <div className="mb-6">
+          <DataResponsibilityInlineNotice variant="disclosure" />
+        </div>
         {dbError ? (
           <EmptyState
             description="잠시 후 다시 확인해 주세요."
