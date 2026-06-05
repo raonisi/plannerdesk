@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+
+import {
+  PUBLIC_FORBIDDEN_PHRASES,
+  PUBLIC_PHRASE_SCAN_FILES,
+  REQUIRED_INLINE_NOTICE_VARIANTS,
+} from "@/lib/ops/public-smoke-expansion";
+import { PUBLIC_INLINE_NOTICE } from "@/lib/ops/data-responsibility-notice";
 
 const ROOT = process.cwd();
 
@@ -108,5 +115,85 @@ describe("Public route smoke (PR110, static)", () => {
 
   it("knowledge detail route exists for slug pages", () => {
     readFileSync(join(ROOT, "app/knowledge/[slug]/page.tsx"), "utf8");
+  });
+});
+
+describe("PR154 public smoke expansion (static, no DB)", () => {
+  it("public pages include data responsibility inline notices", () => {
+    for (const file of [
+      "app/directory/page.tsx",
+      "app/claim-documents/page.tsx",
+      "app/disclosure-links/page.tsx",
+      "app/knowledge/page.tsx",
+      "app/search/page.tsx",
+    ]) {
+      const src = readFileSync(join(ROOT, file), "utf8");
+      assert.match(src, /DataResponsibilityInlineNotice/);
+    }
+    for (const variant of REQUIRED_INLINE_NOTICE_VARIANTS) {
+      assert.ok(PUBLIC_INLINE_NOTICE[variant], `notice variant ${variant}`);
+    }
+  });
+
+  it("claim and landing copy deny payout confirmation", () => {
+    const notice = readFileSync(
+      join(ROOT, "lib/ops/data-responsibility-notice.ts"),
+      "utf8",
+    );
+    const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
+    assert.match(notice, /claim[\s\S]*확정하지 않|보험금 지급 여부는 확정하지 않/);
+    assert.match(home, /제한 베타|공식/);
+    assert.doesNotMatch(home, /보험금 지급 확정|무조건 지급/);
+  });
+
+  it("public phrase scan files exclude forbidden expressions", () => {
+    const combined = PUBLIC_PHRASE_SCAN_FILES.map((rel) =>
+      readFileSync(join(ROOT, rel), "utf8"),
+    ).join("\n");
+    for (const phrase of PUBLIC_FORBIDDEN_PHRASES) {
+      assert.doesNotMatch(
+        combined,
+        new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+        `forbidden in public UI: ${phrase}`,
+      );
+    }
+  });
+
+  it("admin and planner AA routes are not public smoke targets", () => {
+    const script = readFileSync(
+      join(ROOT, "scripts/smoke-public-routes.mjs"),
+      "utf8",
+    );
+    assert.doesNotMatch(script, /\/admin/);
+    assert.doesNotMatch(script, /\/planner/);
+    assert.equal(existsSync(join(ROOT, "app/answer-assistant")), false);
+    assert.equal(existsSync(join(ROOT, "app/planner/answer-assistant")), true);
+  });
+
+  it("admin layout enforces access gate", () => {
+    const layout = readFileSync(join(ROOT, "app/admin/layout.tsx"), "utf8");
+    assert.match(layout, /getAdminAccess/);
+    assert.match(layout, /AdminAccessDeniedState/);
+  });
+
+  it("planner answer assistant uses verified access gate", () => {
+    const page = readFileSync(
+      join(ROOT, "app/planner/answer-assistant/page.tsx"),
+      "utf8",
+    );
+    assert.match(page, /getVerifiedAnswerAssistantAccess/);
+  });
+
+  it("no payment or checkout public routes", () => {
+    assert.equal(existsSync(join(ROOT, "app/payment")), false);
+    assert.equal(existsSync(join(ROOT, "app/checkout")), false);
+    assert.equal(existsSync(join(ROOT, "app/billing")), false);
+  });
+
+  it("landing includes limited beta and official source notices", () => {
+    const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
+    assert.match(home, /PUBLIC_LANDING_LIMITED_BETA_NOTICE/);
+    assert.match(home, /PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE/);
+    assert.match(home, /개인정보/);
   });
 });

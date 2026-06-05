@@ -47,6 +47,10 @@
 
 Critical(정적) 0 · 약관(P142) 법무 미확정
 
+## 후속
+
+PR154 Public Smoke Expansion: [PR-154-PUBLIC-SMOKE-EXPANSION-OPS.md](./PR-154-PUBLIC-SMOKE-EXPANSION-OPS.md)
+
 ## Codex
 
 **조건부 제한검수 권장** — 사용자 전달 문구

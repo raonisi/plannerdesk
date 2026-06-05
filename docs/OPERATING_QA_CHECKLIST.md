@@ -84,6 +84,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta user notice pack (PR153, templates only — no email/SMS/send):** [PR-153-BETA-USER-NOTICE-PACK-OPS.md](PR-153-BETA-USER-NOTICE-PACK-OPS.md)
 
+**Public smoke expansion (PR154, static smoke — no launch or new deps):** [PR-154-PUBLIC-SMOKE-EXPANSION-OPS.md](PR-154-PUBLIC-SMOKE-EXPANSION-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

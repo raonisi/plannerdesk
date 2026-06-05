@@ -20,6 +20,7 @@ import AdminExternalReleaseDecisionPanel from "@/components/admin/AdminExternalR
 import AdminExternalBetaDryRunPanel from "@/components/admin/AdminExternalBetaDryRunPanel";
 import AdminBetaOperatorChecklistPanel from "@/components/admin/AdminBetaOperatorChecklistPanel";
 import AdminBetaUserNoticePackPanel from "@/components/admin/AdminBetaUserNoticePackPanel";
+import AdminPublicSmokeExpansionPanel from "@/components/admin/AdminPublicSmokeExpansionPanel";
 import AdminRoleAccessPanel from "@/components/admin/AdminRoleAccessPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -183,6 +184,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminBetaOperatorChecklistPanel />
 
         <AdminBetaUserNoticePackPanel />
+
+        <AdminPublicSmokeExpansionPanel />
 
         <div className="mb-8">
           <AdminSafetyNotice

@@ -15,5 +15,6 @@
 | PR151 External Beta Dry Run | 공개 전 dry-run (**PR151-A 완료**) | High | **필수** |
 | PR152 Beta Operator Checklist | 운영자 실행 체크리스트 (**PR152-A 완료**) | Medium~High | 조건부 |
 | PR153 Beta User Notice Pack | 베타 사용자 안내문 (**PR153-A 완료**) | Medium~High | 조건부 |
+| PR154 Public Smoke Expansion | public smoke 확장 (**PR154-A 완료**) | High | 조건부 |
 
 **PR140은 위 PR을 실행하지 않는다.**

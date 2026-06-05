@@ -536,9 +536,16 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR154",
     title: "Public Smoke Expansion",
-    purpose: "public route smoke",
+    purpose: "public route smoke (**PR154-A 완료**, 정적 확장)",
     risk: "High",
     codex: "조건부",
+  },
+  {
+    id: "PR155",
+    title: "Admin Access Regression",
+    purpose: "admin 접근 회귀",
+    risk: "Critical",
+    codex: "필수",
   },
 ] as const;
 
