@@ -16,6 +16,7 @@ import AdminBetaAccessRequestFlowPanel from "@/components/admin/AdminBetaAccessR
 import AdminDataResponsibilityNoticePanel from "@/components/admin/AdminDataResponsibilityNoticePanel";
 import AdminAiLimitedBetaPolicyPanel from "@/components/admin/AdminAiLimitedBetaPolicyPanel";
 import AdminSecurityFinalAuditPanel from "@/components/admin/AdminSecurityFinalAuditPanel";
+import AdminExternalReleaseDecisionPanel from "@/components/admin/AdminExternalReleaseDecisionPanel";
 import AdminRoleAccessPanel from "@/components/admin/AdminRoleAccessPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -171,6 +172,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminAiLimitedBetaPolicyPanel />
 
         <AdminSecurityFinalAuditPanel />
+
+        <AdminExternalReleaseDecisionPanel />
 
         <div className="mb-8">
           <AdminSafetyNotice

@@ -508,8 +508,15 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR150",
     title: "External Release Decision",
-    purpose: "최종 공개 여부 운영자 확정",
+    purpose: "최종 공개 여부 (**PR150-A 완료**, 실행 없음)",
     risk: "Critical",
+    codex: "필수",
+  },
+  {
+    id: "PR151",
+    title: "External Beta Dry Run",
+    purpose: "공개 전 dry-run",
+    risk: "High",
     codex: "필수",
   },
 ] as const;

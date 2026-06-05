@@ -76,6 +76,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Security & access final audit (PR149, no Auth/RBAC or allowlist changes):** [PR-149-SECURITY-FINAL-AUDIT-OPS.md](PR-149-SECURITY-FINAL-AUDIT-OPS.md)
 
+**External release decision (PR150, synthesis only — no launch):** [PR-150-EXTERNAL-RELEASE-DECISION-OPS.md](PR-150-EXTERNAL-RELEASE-DECISION-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

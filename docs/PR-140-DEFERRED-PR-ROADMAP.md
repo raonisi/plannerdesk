@@ -11,6 +11,6 @@
 | PR147 Data Responsibility | 데이터 책임 고지 (**PR147-A 완료**) | High | 조건부 |
 | PR148 AI Limited Beta Policy | AA 제한 베타 정책 (**PR148-A 완료**) | Critical | **필수** |
 | PR149 Security Final Audit | 권한·보안 감사 (**PR149-A 완료**) | Critical | **필수** |
-| PR150 External Release Decision | 운영자 최종 확정 | Critical | **필수** |
+| PR150 External Release Decision | 최종 공개 판단 (**PR150-A 완료**) | Critical | **필수** |
 
 **PR140은 위 PR을 실행하지 않는다.**
