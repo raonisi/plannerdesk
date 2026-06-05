@@ -36,6 +36,10 @@
 - [PR-138-OPERATIONS-REMINDER-OPS.md](./PR-138-OPERATIONS-REMINDER-OPS.md)
 - [PR-123-ADMIN-ROLES.md](./PR-123-ADMIN-ROLES.md)
 
+## 후속
+
+- [PR-149-SECURITY-FINAL-AUDIT-OPS.md](./PR-149-SECURITY-FINAL-AUDIT-OPS.md) — 권한·보안 최종 감사 (**PR149-A 완료**)
+
 ## Codex
 
 **제한검수 권장** — Auth/RBAC/public visibility/Admin bulk/Answer Assistant 경계 확인. PR139-A는 권한 **변경 없음**이면 문서·테스트 diff 중심 검수.
