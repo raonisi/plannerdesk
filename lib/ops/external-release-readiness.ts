@@ -543,7 +543,14 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR155",
     title: "Admin Access Regression",
-    purpose: "admin 접근 회귀",
+    purpose: "admin 접근 회귀 (**PR155-A 완료**, 정적 regression)",
+    risk: "Critical",
+    codex: "필수",
+  },
+  {
+    id: "PR156",
+    title: "AA Red-Team Test",
+    purpose: "AI safety regression",
     risk: "Critical",
     codex: "필수",
   },

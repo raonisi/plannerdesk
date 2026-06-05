@@ -86,6 +86,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Public smoke expansion (PR154, static smoke — no launch or new deps):** [PR-154-PUBLIC-SMOKE-EXPANSION-OPS.md](PR-154-PUBLIC-SMOKE-EXPANSION-OPS.md)
 
+**Admin access regression (PR155, static regression — no role or DB changes):** [PR-155-ADMIN-ACCESS-REGRESSION-OPS.md](PR-155-ADMIN-ACCESS-REGRESSION-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
