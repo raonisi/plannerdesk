@@ -1,5 +1,5 @@
 # PR-155 — PR156+
 
-PR156 AA Red-Team → PR157 Beta Launch Decision.
+PR156 AA Red-Team (**PR156-A 완료**) → PR157 Beta Launch Decision.
 
-런타임 admin E2E는 test:e2e 도입 시 별도 PR.
+live provider red-team은 PR148-B/C와 연계.

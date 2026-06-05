@@ -550,7 +550,14 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR156",
     title: "AA Red-Team Test",
-    purpose: "AI safety regression",
+    purpose: "AI safety red-team (**PR156-A 완료**, mock/fixture)",
+    risk: "Critical",
+    codex: "필수",
+  },
+  {
+    id: "PR157",
+    title: "Beta Launch Decision",
+    purpose: "실행 여부 판단",
     risk: "Critical",
     codex: "필수",
   },

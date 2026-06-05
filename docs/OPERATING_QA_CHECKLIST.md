@@ -88,6 +88,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Admin access regression (PR155, static regression — no role or DB changes):** [PR-155-ADMIN-ACCESS-REGRESSION-OPS.md](PR-155-ADMIN-ACCESS-REGRESSION-OPS.md)
 
+**Answer Assistant red-team (PR156, mock/fixture — no provider or allowlist changes):** [PR-156-ANSWER-ASSISTANT-RED-TEAM-OPS.md](PR-156-ANSWER-ASSISTANT-RED-TEAM-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
