@@ -51,6 +51,10 @@ Critical(정적) 0 · High 잔존: PR142·PR148-B~H·bulk·데이터 운영
 
 PR140~PR149 종합 결과만 반영한다. **실제 외부 공개·배포 실행 없음.**
 
+## 후속
+
+PR151 External Beta Dry Run: [PR-151-EXTERNAL-BETA-DRY-RUN-OPS.md](./PR-151-EXTERNAL-BETA-DRY-RUN-OPS.md)
+
 ## Codex
 
 **제한검수 원칙 권장** — 최종 판단 PR

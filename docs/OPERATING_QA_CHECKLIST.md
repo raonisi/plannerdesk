@@ -78,6 +78,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **External release decision (PR150, synthesis only — no launch):** [PR-150-EXTERNAL-RELEASE-DECISION-OPS.md](PR-150-EXTERNAL-RELEASE-DECISION-OPS.md)
 
+**External beta dry run (PR151, rehearsal only — no launch or role change):** [PR-151-EXTERNAL-BETA-DRY-RUN-OPS.md](PR-151-EXTERNAL-BETA-DRY-RUN-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

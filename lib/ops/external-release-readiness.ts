@@ -515,9 +515,16 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR151",
     title: "External Beta Dry Run",
-    purpose: "공개 전 dry-run",
+    purpose: "공개 전 dry-run (**PR151-A 완료**, 실행 없음)",
     risk: "High",
     codex: "필수",
+  },
+  {
+    id: "PR152",
+    title: "Beta Operator Checklist",
+    purpose: "운영자 실행 체크리스트",
+    risk: "Medium~High",
+    codex: "조건부",
   },
 ] as const;
 
