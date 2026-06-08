@@ -277,6 +277,7 @@ export const TERMS_PRIVACY_DRAFT_CHECKLIST: readonly {
   { id: "no-pii-struct", item: "PII 수집 구조 추가", criterion: "없음", status: "met" },
   { id: "legal-final", item: "법무 검토 완료", criterion: "별도 PR174", status: "gap" },
   { id: "live-terms", item: "live 약관 게시", criterion: "후속 PR만", status: "pending" },
+  { id: "pr170", item: "PR170 연결", criterion: "결제 구조 계획", status: "met" },
 ] as const;
 
 export const PR169_DRAFT_VERDICTS = {

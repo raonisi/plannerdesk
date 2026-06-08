@@ -645,6 +645,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Critical",
     codex: "필수",
   },
+  {
+    id: "PR170",
+    title: "Payment Architecture Plan",
+    purpose: "결제 구조 계획 (**PR170-A 완료**, no PG/checkout/schema)",
+    risk: "Critical",
+    codex: "필수",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

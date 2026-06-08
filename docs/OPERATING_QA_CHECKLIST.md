@@ -118,6 +118,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Terms & privacy draft plan (PR169, draft scope/legal review items only — no terms finalization, billing, or PII collection expansion):** [PR-169-TERMS-PRIVACY-DRAFT-PLAN-OPS.md](PR-169-TERMS-PRIVACY-DRAFT-PLAN-OPS.md)
 
+**Payment architecture plan (PR170, design/review docs only — no PG, checkout, billing, webhook, or schema):** [PR-170-PAYMENT-ARCHITECTURE-PLAN-OPS.md](PR-170-PAYMENT-ARCHITECTURE-PLAN-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

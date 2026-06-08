@@ -31,5 +31,6 @@
 | PR167 Beta Metrics Review | 베타 운영 지표 검토 (**PR167-A 완료**) | High | 조건부 |
 | PR168 Data Correction Workflow | 데이터 수정 접수·검수 workflow (**PR168-A 완료**) | High | 조건부 |
 | PR169 Terms & Privacy Draft Plan | 약관·개인정보 초안 계획 (**PR169-A 완료**) | Critical | **필수** |
+| PR170 Payment Architecture Plan | 결제 구조 설계 계획 (**PR170-A 완료**) | Critical | **필수** |
 
 **PR140은 위 PR을 실행하지 않는다.**
