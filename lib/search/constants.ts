@@ -18,7 +18,7 @@ export const SEARCH_VALIDATION_MESSAGES = {
 } as const;
 
 export const SEARCH_EMPTY_MESSAGE =
-  "검색 결과가 없습니다. 보험사명, 서류명, 키워드를 다르게 입력해 보세요.";
+  "조건에 맞는 공개 정보가 없습니다. 검색어를 줄이거나 보험사명, 서류명, 업무 키워드로 다시 확인해 주세요.";
 
 export const SEARCH_EMPTY_FILTER_HINT =
   "검색어를 줄이거나 필터를 변경해 다시 확인해 주세요.";

@@ -34,7 +34,7 @@ describe("PR127 search UX ops (static, no database)", () => {
   });
 
   it("search copy constants follow PR127 empty and error guidance", () => {
-    assert.match(SEARCH_EMPTY_MESSAGE, /검색 결과가 없습니다/);
+    assert.match(SEARCH_EMPTY_MESSAGE, /공개 정보가 없습니다/);
     assert.match(SEARCH_EMPTY_VISIBILITY_NOTE, /검수 중인 항목/);
     assert.match(SEARCH_ERROR_MESSAGE, /불러오지 못했습니다/);
     for (const phrase of FORBIDDEN_EMPTY_PHRASES) {

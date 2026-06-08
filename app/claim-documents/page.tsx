@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { ExplorerLoadingPanel } from "@/components/content/explorer-loading-panel";
+import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import {
   ContentSection,
@@ -49,12 +51,14 @@ export default async function ClaimDocumentsPage() {
               title="공개된 청구서류 안내가 아직 없습니다."
             />
           ) : (
-            <Suspense fallback={null}>
+            <Suspense fallback={<ExplorerLoadingPanel />}>
               <ClaimDocumentExplorer documents={visibleDocuments} />
             </Suspense>
           )}
 
           <ClaimPracticeNotice />
+
+          <PublicErrorReportNotice />
 
           <div className="mt-8 rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-5 sm:p-6">
             <h3 className="text-base font-bold text-[#0F1D2E]">관련 업무 바로가기</h3>

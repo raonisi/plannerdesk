@@ -8,7 +8,9 @@ import {
 } from "@/lib/knowledge/archive-filter";
 import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
+import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
 import { KnowledgeArchiveList } from "./knowledge-archive-list";
+import { PUBLIC_UX_KNOWLEDGE_SAFETY_TITLE } from "@/lib/public/public-ux-copy";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,7 @@ const t = {
     "보험설계사가 반복해서 확인하는 청구, 고지, 해지, 약관, 고객응대 기준을 검수 상태와 함께 정리합니다.",
   subcopy:
     "현재 자료는 설계사 실무 참고용입니다. 보험금 지급 여부와 지급 금액은 보험사 심사 후 결정됩니다.",
-  safetyTitle: "안전 안내 박스",
+  safetyTitle: PUBLIC_UX_KNOWLEDGE_SAFETY_TITLE,
   safetyBody:
     "PlannerDesk는 보험금 지급 여부를 판단하지 않습니다.\nPlannerDesk는 보험금 지급 금액을 산정하지 않습니다.\nPlannerDesk는 손해사정 업무를 수행하지 않습니다.\nPlannerDesk는 의료 진단을 해석하지 않습니다.\n고객 개인정보, 의료자료, 진단서, 청구서류 원본은 입력하거나 업로드하지 마세요.",
 };
@@ -71,10 +73,17 @@ export default async function KnowledgeArchivePage({
             className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5 sm:p-6"
             role="note"
           >
-            <h2 className="text-sm font-semibold text-[#102235]">{t.safetyTitle}</h2>
-            <p className="mt-3 break-keep whitespace-pre-line text-sm leading-6 text-[#5f6670]">
-              {t.safetyBody}
-            </p>
+            <details className="group">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 [&::-webkit-details-marker]:hidden">
+                <h2 className="text-sm font-semibold text-[#102235]">{t.safetyTitle}</h2>
+                <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
+                  펼치기
+                </span>
+              </summary>
+              <p className="mt-3 break-keep whitespace-pre-line text-sm leading-6 text-[#5f6670]">
+                {t.safetyBody}
+              </p>
+            </details>
           </aside>
 
           <KnowledgeWorkflows />
@@ -86,6 +95,8 @@ export default async function KnowledgeArchivePage({
             isCatalogEmpty={isCatalogEmpty}
             items={articles}
           />
+
+          <PublicErrorReportNotice />
         </div>
       </ContentSection>
       <Footer />

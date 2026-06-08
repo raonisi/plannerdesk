@@ -246,17 +246,22 @@ export function HomeClient({
           <p className={`mt-2 max-w-2xl break-keep text-sm text-[#5B6470]`}>
             {PUBLIC_WORK_HUB_SEARCH_HINT}
           </p>
-          <div
-            className="mt-4 max-w-2xl space-y-1.5 rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#5B6470]"
+          <details
+            className="mt-4 max-w-2xl rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#5B6470] group"
             role="note"
-            aria-label="제한 베타 및 공개 정보 안내"
           >
-            <p className="break-keep font-medium text-[#0F1D2E]">
-              {PUBLIC_LANDING_LIMITED_BETA_NOTICE}
-            </p>
-            <p className="break-keep text-xs">{PUBLIC_WORK_HUB_VISIBILITY_NOTICE}</p>
-            <p className="break-keep text-xs">{PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE}</p>
-          </div>
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 break-keep font-medium text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 [&::-webkit-details-marker]:hidden">
+              제한 베타·공개 정보 안내
+              <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
+                펼치기
+              </span>
+            </summary>
+            <div className="mt-2 space-y-1.5 border-t border-[#E3DED4]/60 pt-3 text-xs">
+              <p className="break-keep">{PUBLIC_LANDING_LIMITED_BETA_NOTICE}</p>
+              <p className="break-keep">{PUBLIC_WORK_HUB_VISIBILITY_NOTICE}</p>
+              <p className="break-keep">{PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE}</p>
+            </div>
+          </details>
 
           <div className="relative z-10 mt-8 max-w-2xl">
             <label className="sr-only" htmlFor="home-unified-search">

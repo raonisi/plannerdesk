@@ -24,5 +24,6 @@
 | PR160 Beta Expansion Decision | 베타 확대 여부 판단 (**PR160-A 완료**) | Critical | 필수 |
 | PR161 Data Freshness Review | 데이터 최신성 점검 (**PR161-A 완료**) | High | 조건부 |
 | PR162 User Support Inbox Plan | 오류 제보 운영 (**PR162-A 완료**) | High | 조건부 |
+| PR163 Public UX Polish | 제한 베타 화면 사용성 (**PR163-A 완료**) | Medium | 불필요 |
 
 **PR140은 위 PR을 실행하지 않는다.**

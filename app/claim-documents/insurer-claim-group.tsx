@@ -56,7 +56,7 @@ export function InsurerClaimGroup({
                 {group.label}
               </span>
               <span className="mt-1 block text-sm font-semibold text-[#5B6470]">
-                등록 서류 {group.items.length}건
+                공개·검수된 서류 {group.items.length}건 · 공식 안내 확인 필요
               </span>
             </span>
             <span

@@ -52,11 +52,11 @@ export default async function DisclosureLinksPage() {
           <DisclosureLinksClient entries={entries} insurers={insurers} />
         )}
 
-        <div className="mt-8 rounded-xl border border-[#E3DED4] bg-slate-50 p-5 text-center">
-          <p className="text-sm font-semibold text-slate-900">
+        <div className="mt-8 rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-5 text-center">
+          <p className="text-sm font-semibold text-[#0F1D2E]">
             약관 안내문이 필요하신가요?
           </p>
-          <p className="mt-1 break-keep text-xs text-slate-500">
+          <p className="mt-1 break-keep text-xs text-[#5B6470]">
             고객에게 약관 확인을 안내하거나 판단 유보를 안내하는 실무 문구를 확인해
             보세요.
           </p>

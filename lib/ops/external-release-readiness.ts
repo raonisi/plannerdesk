@@ -596,6 +596,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR163",
+    title: "Public UX Polish",
+    purpose: "제한 베타 UX (**PR163-A 완료**, guards unchanged)",
+    risk: "Medium",
+    codex: "불필요",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

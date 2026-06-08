@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AnswerAssistantPanelShell } from "@/components/answer-assistant/answer-assistant-panel";
+import { AccessRestrictedPanel } from "@/components/content/access-restricted-panel";
 import {
   VERIFIED_ANSWER_ASSIST_BLOCKED_MESSAGES,
   VERIFIED_ANSWER_ASSIST_PAGE_NOTICES,
@@ -29,17 +30,18 @@ export default async function PlannerAnswerAssistantPage() {
 
   if (access.status === "locked") {
     return (
-      <main className={`mx-auto max-w-3xl px-6 py-10 ${textStyles.body}`}>
-        <p>로그인 후 이용할 수 있습니다.</p>
-      </main>
+      <AccessRestrictedPanel
+        description="로그인 후 이용할 수 있는 기능입니다. 공개 페이지는 로그인 없이 이용할 수 있습니다."
+        title="로그인이 필요합니다"
+      />
     );
   }
 
   if (access.status === "denied") {
     return (
-      <main className={`mx-auto max-w-3xl px-6 py-10 ${textStyles.body}`}>
-        <p>{access.denyReason}</p>
-      </main>
+      <AccessRestrictedPanel
+        description={access.denyReason}
+      />
     );
   }
 

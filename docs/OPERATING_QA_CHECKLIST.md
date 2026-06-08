@@ -104,6 +104,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **User support inbox plan (PR162, ops plan only — no inbox, form, DB, or alerts):** [PR-162-USER-SUPPORT-INBOX-PLAN-OPS.md](PR-162-USER-SUPPORT-INBOX-PLAN-OPS.md)
 
+**Public UX polish (PR163, UI copy/layout only — guards unchanged):** [PR-163-PUBLIC-UX-POLISH-OPS.md](PR-163-PUBLIC-UX-POLISH-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

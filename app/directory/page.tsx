@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import {
   ContentSection,
@@ -134,6 +135,8 @@ export default async function DirectoryPage() {
               고객 개인정보와 의료자료는 PlannerDesk에 입력하지 마세요.
             </p>
           </aside>
+
+          <PublicErrorReportNotice />
         </div>
       </ContentSection>
     </AppShell>

@@ -22,6 +22,7 @@ import {
 import { buildPublicSearchHref } from "@/lib/search/search-href";
 import { searchPublicContent } from "@/lib/search/public";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
+import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
 import { SearchResultsList } from "./search-results";
 
 export const dynamic = "force-dynamic";
@@ -190,6 +191,8 @@ export default async function SearchPage({
               showWorkLinkNote={domain === "work_link" || domain === "all"}
             />
           ) : null}
+
+          <PublicErrorReportNotice />
         </div>
       </ContentSection>
       <Footer />
