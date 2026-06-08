@@ -100,6 +100,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta expansion decision (PR160, synthesis only — no expansion, beta user, or role change):** [PR-160-BETA-EXPANSION-DECISION-OPS.md](PR-160-BETA-EXPANSION-DECISION-OPS.md)
 
+**Data freshness review (PR161, checklist/docs only — no DB edit, crawl, or sync):** [PR-161-DATA-FRESHNESS-REVIEW-OPS.md](PR-161-DATA-FRESHNESS-REVIEW-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

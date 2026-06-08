@@ -582,6 +582,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Critical",
     codex: "필수",
   },
+  {
+    id: "PR161",
+    title: "Data Freshness Review",
+    purpose: "데이터 최신성 점검 (**PR161-A 완료**, no DB/crawl/sync)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {
