@@ -631,6 +631,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR168",
+    title: "Data Correction Workflow",
+    purpose: "데이터 수정 workflow (**PR168-A 완료**, no DB/crawl/bulk)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

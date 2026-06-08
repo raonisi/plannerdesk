@@ -252,7 +252,7 @@ export const METRICS_REVIEW_CHECKLIST: readonly {
   { id: "no-db", item: "지표 DB/schema", criterion: "변경 없음", status: "met" },
   { id: "no-dash", item: "대시보드", criterion: "미구현", status: "met" },
   { id: "live-data", item: "live 운영 지표 집계", criterion: "별도 PR·DB 금지", status: "pending" },
-  { id: "pr168", item: "PR168 연결", criterion: "데이터 correction", status: "pending" },
+  { id: "pr168", item: "PR168 연결", criterion: "데이터 correction", status: "met" },
 ] as const;
 
 export const PR167_METRICS_VERDICTS = {

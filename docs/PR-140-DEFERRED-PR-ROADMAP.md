@@ -29,5 +29,6 @@
 | PR165 Payment Legal Readiness | 유료화 법무·결제 준비도 (**PR165-A 완료**) | Critical | 필수 |
 | PR166 Beta Cohort Control | 베타 대상군 관리 계획 (**PR166-A 완료**) | High | 조건부 |
 | PR167 Beta Metrics Review | 베타 운영 지표 검토 (**PR167-A 완료**) | High | 조건부 |
+| PR168 Data Correction Workflow | 데이터 수정 접수·검수 workflow (**PR168-A 완료**) | High | 조건부 |
 
 **PR140은 위 PR을 실행하지 않는다.**
