@@ -124,6 +124,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta review summary (PR172, PR157~PR171 synthesis only — no public beta, users, role/allowlist, or DB):** [PR-172-BETA-REVIEW-SUMMARY-OPS.md](PR-172-BETA-REVIEW-SUMMARY-OPS.md)
 
+**Terms legal review prep (PR174, legal handoff draft candidates only — no terms/privacy/refund/payment finalization, billing, or PII collection expansion):** [PR-174-TERMS-LEGAL-REVIEW-PREP.md](PR-174-TERMS-LEGAL-REVIEW-PREP.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

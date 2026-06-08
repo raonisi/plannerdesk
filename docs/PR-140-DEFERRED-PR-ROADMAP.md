@@ -34,5 +34,9 @@
 | PR170 Payment Architecture Plan | 결제 구조 설계 계획 (**PR170-A 완료**) | Critical | **필수** |
 | PR171 Refund & Support Policy Plan | 환불·고객지원 정책 계획 (**PR171-A 완료**) | Critical | **필수** |
 | PR172 Beta Review Summary | PR157~171 종합 보고 (**PR172-A 완료**) | High | 조건부 |
+| PR173 Public Release Readiness | work-tools·보안·테스트 게이트 (**PR173-A~D 완료**) | Critical | 필수 |
+| PR174 Terms Legal Review Prep | 법무 검토 전달용 초안 (**PR174-A 완료**) | Critical | **필수** |
+| PR175 Payment Provider Comparison | PG 후보 비교 문서 | High | 조건부 |
+| PR178 Public Beta Gate Checklist | 공개 베타 실행 전 gate | Critical | **필수** |
 
 **PR140은 위 PR을 실행하지 않는다.**
