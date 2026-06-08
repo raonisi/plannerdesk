@@ -90,6 +90,12 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Answer Assistant red-team (PR156, mock/fixture — no provider or allowlist changes):** [PR-156-ANSWER-ASSISTANT-RED-TEAM-OPS.md](PR-156-ANSWER-ASSISTANT-RED-TEAM-OPS.md)
 
+**Beta launch decision (PR157, synthesis only — no launch, deploy, or role change):** [PR-157-BETA-LAUNCH-DECISION-OPS.md](PR-157-BETA-LAUNCH-DECISION-OPS.md)
+
+**Beta launch decision (PR157, synthesis only — no launch, deploy, or role change):** [PR-157-BETA-LAUNCH-DECISION-OPS.md](PR-157-BETA-LAUNCH-DECISION-OPS.md)
+
+**Beta feedback loop (PR158, ops standards only — no form, send, or DB):** [PR-158-BETA-FEEDBACK-LOOP-OPS.md](PR-158-BETA-FEEDBACK-LOOP-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

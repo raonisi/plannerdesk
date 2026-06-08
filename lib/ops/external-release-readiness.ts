@@ -557,9 +557,16 @@ export const DEFERRED_RELEASE_PRS: readonly {
   {
     id: "PR157",
     title: "Beta Launch Decision",
-    purpose: "실행 여부 판단",
+    purpose: "제한 베타 실행 여부 판단 (**PR157-A 완료**, Conditional Launch)",
     risk: "Critical",
     codex: "필수",
+  },
+  {
+    id: "PR158",
+    title: "Beta Feedback Loop",
+    purpose: "베타 피드백 운영 (**PR158-A 완료**, metadata-only)",
+    risk: "High",
+    codex: "조건부",
   },
 ] as const;
 
