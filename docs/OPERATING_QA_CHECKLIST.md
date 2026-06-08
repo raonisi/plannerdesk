@@ -116,6 +116,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Data correction workflow (PR168, intake/triage/docs only — no DB edit, crawl, bulk, or sync):** [PR-168-DATA-CORRECTION-WORKFLOW-OPS.md](PR-168-DATA-CORRECTION-WORKFLOW-OPS.md)
 
+**Terms & privacy draft plan (PR169, draft scope/legal review items only — no terms finalization, billing, or PII collection expansion):** [PR-169-TERMS-PRIVACY-DRAFT-PLAN-OPS.md](PR-169-TERMS-PRIVACY-DRAFT-PLAN-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

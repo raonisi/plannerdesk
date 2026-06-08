@@ -638,6 +638,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR169",
+    title: "Terms & Privacy Draft Plan",
+    purpose: "약관·개인정보 초안 계획 (**PR169-A 완료**, no finalization/billing/PII)",
+    risk: "Critical",
+    codex: "필수",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

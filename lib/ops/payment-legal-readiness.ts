@@ -258,7 +258,8 @@ export const PAYMENT_LEGAL_READINESS_CHECKLIST: readonly {
   { id: "terms-final", item: "약관 확정", criterion: "법무", status: "gap" },
   { id: "refund-final", item: "환불 확정", criterion: "법무", status: "gap" },
   { id: "codex", item: "Codex 검수", criterion: "PR165 후", status: "pending" },
-  { id: "paid-launch", item: "실제 유료화 실행", criterion: "PR169~ 이후", status: "pending" },
+  { id: "pr169-draft", item: "PR169 Draft Plan", criterion: "약관 초안 계획", status: "met" },
+  { id: "paid-launch", item: "실제 유료화 실행", criterion: "PR170~ 이후", status: "pending" },
 ] as const;
 
 export const PR165_READINESS_VERDICTS = {
