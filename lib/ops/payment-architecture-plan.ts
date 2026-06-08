@@ -236,6 +236,7 @@ export const PAYMENT_ARCHITECTURE_CHECKLIST: readonly {
   { id: "no-schema", item: "schema 변경", criterion: "없음", status: "met" },
   { id: "live-billing", item: "live 결제", criterion: "후속 PR만", status: "pending" },
   { id: "pg-select", item: "PG 후보 확정", criterion: "PR175", status: "gap" },
+  { id: "pr171", item: "PR171 연결", criterion: "환불·지원 정책", status: "met" },
 ] as const;
 
 export const PR170_ARCHITECTURE_VERDICTS = {

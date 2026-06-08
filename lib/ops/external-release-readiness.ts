@@ -652,6 +652,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Critical",
     codex: "필수",
   },
+  {
+    id: "PR171",
+    title: "Refund & Support Policy Plan",
+    purpose: "환불·지원 정책 (**PR171-A 완료**, no refund/inbox/billing)",
+    risk: "Critical",
+    codex: "필수",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

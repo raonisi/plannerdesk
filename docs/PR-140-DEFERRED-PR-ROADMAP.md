@@ -32,5 +32,6 @@
 | PR168 Data Correction Workflow | 데이터 수정 접수·검수 workflow (**PR168-A 완료**) | High | 조건부 |
 | PR169 Terms & Privacy Draft Plan | 약관·개인정보 초안 계획 (**PR169-A 완료**) | Critical | **필수** |
 | PR170 Payment Architecture Plan | 결제 구조 설계 계획 (**PR170-A 완료**) | Critical | **필수** |
+| PR171 Refund & Support Policy Plan | 환불·고객지원 정책 계획 (**PR171-A 완료**) | Critical | **필수** |
 
 **PR140은 위 PR을 실행하지 않는다.**

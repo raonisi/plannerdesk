@@ -120,6 +120,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Payment architecture plan (PR170, design/review docs only — no PG, checkout, billing, webhook, or schema):** [PR-170-PAYMENT-ARCHITECTURE-PLAN-OPS.md](PR-170-PAYMENT-ARCHITECTURE-PLAN-OPS.md)
 
+**Refund & support policy plan (PR171, policy/review docs only — no refund, inbox, billing, or notifications):** [PR-171-REFUND-SUPPORT-POLICY-PLAN-OPS.md](PR-171-REFUND-SUPPORT-POLICY-PLAN-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
