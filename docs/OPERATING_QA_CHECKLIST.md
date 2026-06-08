@@ -157,6 +157,14 @@ Run these checks from the repository root before every release merge:
   ```
   Expected: ESLint exits with no errors.
 
+- [ ] **Regression test gate** (PR173-D — public, admin, ops, work-tools; no DB)
+  ```bash
+  npm run test
+  ```
+  Expected: `test:answer-assistant` plus `test:regression` (public, admin,
+  ops gate, work-tools guards, manifest) all pass. Scoped runs:
+  `npm run test:public`, `test:admin`, `test:ops:gate`, `test:work-tools`.
+
 - [ ] **Production build** (no migration deploy)
   ```bash
   npm run build
