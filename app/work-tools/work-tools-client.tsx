@@ -21,6 +21,14 @@ import {
   matchesWorkToolCategory,
 } from "@/lib/tool-display";
 import { EmptyState, SearchBar } from "@/components/content-page";
+import {
+  SILBI_CALC_DESCRIPTION,
+  SILBI_CALC_TITLE,
+  SILBI_GEN_TIPS,
+  SILBI_REFERENCE_BALANCE_LABEL,
+  SILBI_RESULT_SECTION_TITLE,
+  WORK_TOOLS_CLAIM_BOUNDARY_NOTICE,
+} from "@/lib/work-tools/claim-boundary-copy";
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder" | "internal";
 
@@ -133,7 +141,7 @@ const toolGroups: ToolGroup[] = [
     tools: [
       {
         id: "silbi-calculator",
-        label: "실손보험금",
+        label: "실손 자기부담 참고",
         description: "총 진료비, 급여·비급여, 공제액을 입력해 참고 금액을 계산합니다.",
         kind: "calculator",
       },
@@ -703,26 +711,26 @@ const silbiDeductible: Record<SilbiFacility, number> = { clinic: 10_000, general
 function calcSilbi(gen: SilbiGen, treatType: SilbiType, facility: SilbiFacility, costs: { benefit: number; nonBenefit: number; nonBenefitHeavy: number; nonBenefitLight: number; pharmaBenefit: number; pharmaNonBenefit: number }) {
   const { benefit, nonBenefit, nonBenefitHeavy, nonBenefitLight, pharmaBenefit, pharmaNonBenefit } = costs;
   const ded = silbiDeductible[facility];
-  const rows: { label: string; selfPay: number; refund: number; memo: string }[] = [];
+  const rows: { label: string; selfPay: number; referenceBalance: number; memo: string }[] = [];
   
   if (gen === '5') {
     const benefitSelf = treatType === 'outpatient' ? Math.min(benefit, Math.max(ded, benefit * 0.2)) : benefit * 0.2;
     const nbHeavySelf = nonBenefitHeavy * 0.3;
     const nbLightSelf = nonBenefitLight * 0.5;
     
-    rows.push({ label: '급여 진료비', selfPay: benefitSelf, refund: benefit - benefitSelf, memo: '자기부담 20%' });
-    if (nonBenefitHeavy > 0) rows.push({ label: '중증 비급여', selfPay: nbHeavySelf, refund: nonBenefitHeavy - nbHeavySelf, memo: '자기부담 30%' });
-    if (nonBenefitLight > 0) rows.push({ label: '비중증 비급여 (도수/주사 등)', selfPay: nbLightSelf, refund: nonBenefitLight - nbLightSelf, memo: '자기부담 50%' });
+    rows.push({ label: '급여 진료비', selfPay: benefitSelf, referenceBalance: benefit - benefitSelf, memo: '자기부담 20%' });
+    if (nonBenefitHeavy > 0) rows.push({ label: '중증 비급여', selfPay: nbHeavySelf, referenceBalance: nonBenefitHeavy - nbHeavySelf, memo: '자기부담 30%' });
+    if (nonBenefitLight > 0) rows.push({ label: '비중증 비급여 (도수/주사 등)', selfPay: nbLightSelf, referenceBalance: nonBenefitLight - nbLightSelf, memo: '자기부담 50%' });
     
     let selfPharma = 0;
     if (treatType === 'outpatient' && pharmaBenefit > 0) {
       selfPharma = Math.min(pharmaBenefit, Math.max(8_000, pharmaBenefit * 0.2));
-      rows.push({ label: '급여 약제비', selfPay: selfPharma, refund: pharmaBenefit - selfPharma, memo: '자기부담 20%' });
+      rows.push({ label: '급여 약제비', selfPay: selfPharma, referenceBalance: pharmaBenefit - selfPharma, memo: '자기부담 20%' });
     }
     
     const totalPaid = benefit + nonBenefitHeavy + nonBenefitLight + pharmaBenefit;
     const selfPayTotal = Math.round(benefitSelf + nbHeavySelf + nbLightSelf + selfPharma);
-    return { totalPaid, selfPay: selfPayTotal, refund: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
+    return { totalPaid, selfPay: selfPayTotal, referenceBalance: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
   }
 
   let selfMedical = 0;
@@ -732,13 +740,13 @@ function calcSilbi(gen: SilbiGen, treatType: SilbiType, facility: SilbiFacility,
     else if (gen === '3') { const tot = benefit + nonBenefit; selfMedical = Math.min(tot, Math.max(ded, tot * 0.2)); memoMedical = '급여 10~20%, 비급여 20%'; }
     else if (gen === '2') { const tot = benefit + nonBenefit; selfMedical = tot <= ded ? tot : ded + (tot - ded) * 0.1; memoMedical = '10% 공제'; }
     else { selfMedical = 0; memoMedical = '자기부담금 없음'; }
-    rows.push({ label: '통원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical, memo: memoMedical });
+    rows.push({ label: '통원 진료비', selfPay: selfMedical, referenceBalance: benefit + nonBenefit - selfMedical, memo: memoMedical });
   } else {
     if (gen === '4') { selfMedical = benefit * 0.2 + nonBenefit * 0.3; memoMedical = '급여 20%, 비급여 30%'; }
     else if (gen === '3') { selfMedical = (benefit + nonBenefit) * 0.2; memoMedical = '합산 20%'; }
     else if (gen === '2') { selfMedical = (benefit + nonBenefit) * 0.1; memoMedical = '합산 10%'; }
     else { selfMedical = 0; memoMedical = '자기부담금 없음'; }
-    rows.push({ label: '입원 진료비', selfPay: selfMedical, refund: benefit + nonBenefit - selfMedical, memo: memoMedical });
+    rows.push({ label: '입원 진료비', selfPay: selfMedical, referenceBalance: benefit + nonBenefit - selfMedical, memo: memoMedical });
   }
 
   let selfPharma = 0;
@@ -748,12 +756,12 @@ function calcSilbi(gen: SilbiGen, treatType: SilbiType, facility: SilbiFacility,
     else if (gen === '3') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = Math.min(tot, Math.max(8_000, tot * 0.2)); memoPharma = '합산 20%'; }
     else if (gen === '2') { const tot = pharmaBenefit + pharmaNonBenefit; selfPharma = tot <= 8_000 ? tot : 8_000 + (tot - 8_000) * 0.1; memoPharma = '10% 공제'; }
     else { selfPharma = 0; memoPharma = '자기부담금 없음'; }
-    rows.push({ label: '약제비', selfPay: selfPharma, refund: pharmaBenefit + pharmaNonBenefit - selfPharma, memo: memoPharma });
+    rows.push({ label: '약제비', selfPay: selfPharma, referenceBalance: pharmaBenefit + pharmaNonBenefit - selfPharma, memo: memoPharma });
   }
 
   const totalPaid = benefit + nonBenefit + pharmaBenefit + pharmaNonBenefit;
   const selfPayTotal = Math.round(selfMedical + selfPharma);
-  return { totalPaid, selfPay: selfPayTotal, refund: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
+  return { totalPaid, selfPay: selfPayTotal, referenceBalance: Math.max(0, totalPaid - selfPayTotal), breakdown: rows };
 }
 
 // ── 상속세 (Inheritance Tax) ──
@@ -1163,7 +1171,7 @@ export function WorkToolsClient() {
             id="work-tools-search"
             onChange={setSearchQuery}
             onClear={() => setSearchQuery("")}
-            placeholder="보험나이, 실손보험금, 상병코드, 정부24 검색"
+            placeholder="보험나이, 실손 자기부담, 상병코드, 정부24 검색"
             value={searchQuery}
           />
         </label>
@@ -2790,7 +2798,7 @@ function InsuranceAgeCalc() {
       </div>
       {result && result.daysToNext <= 30 && (
         <TipBox title="보험나이 변경 임박">
-          보험나이가 {result.daysToNext}일 이내에 변경됩니다. 보험 가입/갱신을 서두르면 보험료를 절약할 수 있습니다.
+          보험나이가 {result.daysToNext}일 이내에 변경될 수 있습니다. 상품·약관별 적용 시점은 보험사 공식 자료로 확인하세요.
         </TipBox>
       )}
     </PanelShell>
@@ -2837,7 +2845,7 @@ function SilbiCalc() {
   };
 
   return (
-    <PanelShell description="세대별(1~5세대) 실손의료보험 자기부담금 비율과 예상 환급금을 가장 정확하게 계산합니다." id="silbi-calculator" title="프리미엄 실손의료비 분석기">
+    <PanelShell description={SILBI_CALC_DESCRIPTION} id="silbi-calculator" title={SILBI_CALC_TITLE}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         <div className="col-span-full lg:col-span-1">
           <span className="text-sm font-bold text-[#1e293b]">실손 가입 세대</span>
@@ -2893,7 +2901,7 @@ function SilbiCalc() {
       </div>
 
       <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/40 p-5">
-        <p className="text-xs font-bold text-blue-800 mb-4">자기부담금 분석 결과</p>
+        <p className="text-xs font-bold text-blue-800 mb-4">{SILBI_RESULT_SECTION_TITLE}</p>
         {result ? (
           <div className="space-y-1.5 text-sm">
             <ResultRow label="총 진료비+약제비 결제액" value={money(result.totalPaid)} />
@@ -2910,19 +2918,16 @@ function SilbiCalc() {
             <div className="my-2 border-t border-blue-200"></div>
             <ResultRow label="고객 최종 자기부담금" value={money(result.selfPay)} bold />
             <div className="mt-3 p-3 bg-white rounded-lg border border-blue-100 flex justify-between items-center">
-               <span className="font-bold text-blue-900">최종 보험금 예상 환급액</span>
-               <span className="text-xl font-black text-blue-600">{money(result.refund)}</span>
+               <span className="font-bold text-blue-900">{SILBI_REFERENCE_BALANCE_LABEL}</span>
+               <span className="text-xl font-black text-blue-600">{money(result.referenceBalance)}</span>
             </div>
+            <p className="mt-3 text-xs leading-relaxed text-slate-600 break-keep">{WORK_TOOLS_CLAIM_BOUNDARY_NOTICE}</p>
           </div>
         ) : <p className="mt-2 text-sm text-slate-400 font-semibold text-center py-4">영수증에 적힌 급여/비급여 금액을 입력하세요.</p>}
       </div>
       
-      <TipBox title="세대별 실손보험 컨설팅 팁">
-        {gen === '5' ? '5세대 실손은 과잉진료 차단을 위해 비중증 비급여(도수, 주사 등)의 자기부담률이 50%로 대폭 상향되었습니다. 병원 이용 패턴을 정확히 파악하여 전환 시 유불리를 꼼꼼하게 안내하세요.' : 
-         gen === '4' ? '4세대 실손은 급여 20%, 비급여 30%의 차등 자기부담이 적용되며 비급여 사용량에 따라 할증이 붙습니다. 의료쇼핑을 하지 않는 건강한 고객이라면 5세대 전환도 고려해볼 만합니다.' : 
-         gen === '3' ? '3세대 실손(착한실손)은 3대 비급여가 분리되어 있습니다. 현 시점 가성비가 가장 좋으므로 함부로 4/5세대로 전환하지 않도록 유지 관리를 권장합니다.' : 
-         gen === '2' ? '2세대 실손은 급여/비급여 구분 없이 10%의 낮은 공제율을 자랑하지만 갱신 보험료 폭탄의 위험이 있습니다. 갱신 시점 인상률을 분석하여 신계약 전환을 제시하세요.' : 
-         '1세대 구실손은 100% 보장이라는 엄청난 메리트가 있지만 갱신 보험료 상승폭이 가장 큽니다. 보험료 부담을 느끼는 고객에게 4/5세대 전환 후 남는 차액으로 다른 건강보험 가입을 권유하세요.'}
+      <TipBox title="세대별 실손 참고 안내">
+        {SILBI_GEN_TIPS[gen]}
       </TipBox>
     </PanelShell>
   );
@@ -3286,16 +3291,15 @@ function InheritanceTaxCalc() {
             </div>
           ) : (
              <div className="h-full min-h-[300px] rounded-xl border border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center p-8 text-center">
-               <p className="text-sm font-semibold text-slate-400">상속재산과 부채를 입력하여<br/>예상 상속세를 확인하세요.</p>
+               <p className="text-sm font-semibold text-slate-400">상속재산과 부채를 입력하여<br/>내부 참고용 상속세 산출을 확인하세요.</p>
              </div>
           )}
         </div>
       </div>
-      <TipBox title="종신보험 세테크 플랜 제안">
-        {result && result.finalNetTax > 0 ? 
-          `예상 상속세가 ${krw(result.finalNetTax)} 발생합니다. 현금 유동성이 부족할 경우, 유가족이 알짜 부동산을 급매하여 손실을 볼 수 있습니다. 부모님 피보험자, 자녀 계약자/수익자 구조의 종신보험으로 상속세 재원을 미리 준비하세요.` :
-          "종신보험 사망보험금은 상속재산에 포함되지만, 상속세 납부 재원으로 활용할 수 있습니다. 상속세 납부 대비 종신보험 설계 시 이 계산기를 활용하세요."
-        }
+      <TipBox title="상속세 참고 안내">
+        {result && result.finalNetTax > 0
+          ? `내부 참고용 산출 상속세는 ${krw(result.finalNetTax)}입니다. 실제 세액·공제·신고는 세무 전문가·관할 기관 기준으로 확인하세요. 특정 상품 가입·해지를 권유하지 마세요.`
+          : "이 계산기는 내부 참고용이며, 실제 상속세·재원 마련 방안은 세무·법무 전문가와 공식 자료로 확인하세요."}
       </TipBox>
     </PanelShell>
   );
@@ -3381,7 +3385,7 @@ function CardDeductionCalc() {
                   {result.guideMessage}
                 </p>
                 <div className="mt-4 p-3 bg-white rounded-lg text-center shadow-sm">
-                   <span className="text-xs font-semibold text-slate-500 block mb-1">연말정산 예상 세금 환급액</span>
+                   <span className="text-xs font-semibold text-slate-500 block mb-1">연말정산 세금 참고 차액</span>
                    <span className="text-2xl font-black text-blue-600">{krw(result.refund)}</span>
                 </div>
              </div>

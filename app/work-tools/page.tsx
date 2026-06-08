@@ -42,7 +42,7 @@ export default async function WorkToolsPage() {
       <PageHero
         eyebrow="업무 도구"
         title="업무 도구"
-        description="보험나이, 실손보험금, 상병코드, 수술분류표 등 반복 업무를 빠르게 실행하세요."
+        description="보험나이, 실손 자기부담 참고, 상병코드, 수술분류표 등 설계사 업무 보조 도구입니다."
       />
       <ContentSection>
         <WorkToolsClient />
