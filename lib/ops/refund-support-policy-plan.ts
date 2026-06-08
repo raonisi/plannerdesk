@@ -274,6 +274,7 @@ export const REFUND_SUPPORT_POLICY_CHECKLIST: readonly {
   { id: "no-pan", item: "결제정보 저장", criterion: "비저장 원칙", status: "met" },
   { id: "legal-final", item: "법무 확정", criterion: "별도 PR174", status: "gap" },
   { id: "live-refund", item: "live 환불 실행", criterion: "후속 PR만", status: "pending" },
+  { id: "pr172", item: "PR172 Beta Review", criterion: "종합 보고", status: "met" },
 ] as const;
 
 export const PR171_POLICY_VERDICTS = {

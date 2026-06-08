@@ -659,6 +659,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Critical",
     codex: "필수",
   },
+  {
+    id: "PR172",
+    title: "Beta Review Summary",
+    purpose: "PR157~171 종합 보고 (**PR172-A 완료**, no public beta/users/DB)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

@@ -38,6 +38,7 @@ import AdminDataCorrectionWorkflowPanel from "@/components/admin/AdminDataCorrec
 import AdminTermsPrivacyDraftPlanPanel from "@/components/admin/AdminTermsPrivacyDraftPlanPanel";
 import AdminPaymentArchitecturePlanPanel from "@/components/admin/AdminPaymentArchitecturePlanPanel";
 import AdminRefundSupportPolicyPlanPanel from "@/components/admin/AdminRefundSupportPolicyPlanPanel";
+import AdminBetaReviewSummaryPanel from "@/components/admin/AdminBetaReviewSummaryPanel";
 import AdminRoleAccessPanel from "@/components/admin/AdminRoleAccessPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -237,6 +238,7 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminPaymentArchitecturePlanPanel />
 
         <AdminRefundSupportPolicyPlanPanel />
+        <AdminBetaReviewSummaryPanel />
 
         <div className="mb-8">
           <AdminSafetyNotice

@@ -122,6 +122,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Refund & support policy plan (PR171, policy/review docs only — no refund, inbox, billing, or notifications):** [PR-171-REFUND-SUPPORT-POLICY-PLAN-OPS.md](PR-171-REFUND-SUPPORT-POLICY-PLAN-OPS.md)
 
+**Beta review summary (PR172, PR157~PR171 synthesis only — no public beta, users, role/allowlist, or DB):** [PR-172-BETA-REVIEW-SUMMARY-OPS.md](PR-172-BETA-REVIEW-SUMMARY-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
