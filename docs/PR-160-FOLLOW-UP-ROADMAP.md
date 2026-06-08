@@ -1,6 +1,4 @@
-# PR-159 — PR160 이후
-
-PR160 Beta Expansion Decision (**PR160-A 완료**, Conditional Expansion · 즉시 Maintain) → PR161 Data Freshness.
+# PR-160 — PR161 이후
 
 | PR | 목적 | 위험 | Codex |
 | --- | --- | --- | --- |
@@ -9,3 +7,5 @@ PR160 Beta Expansion Decision (**PR160-A 완료**, Conditional Expansion · 즉�
 | PR163 | Public UX Polish | Medium | 불필요 |
 | PR164 | AI Safety Hardening | Critical | 필수 |
 | PR165 | Payment Legal Readiness | Critical | 필수 |
+| PR166 | Beta Cohort Control | High | 조건부 |
+| PR167 | Beta Metrics Review | High | 조건부 |

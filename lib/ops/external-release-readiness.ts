@@ -575,6 +575,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR160",
+    title: "Beta Expansion Decision",
+    purpose: "베타 확대 여부 판단 (**PR160-A 완료**, Conditional Expansion)",
+    risk: "Critical",
+    codex: "필수",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

@@ -21,5 +21,6 @@
 | PR157 Beta Launch Decision | 제한 베타 실행 여부 판단 (**PR157-A 완료**) | Critical | 필수 |
 | PR158 Beta Feedback Loop | 베타 피드백 운영 (**PR158-A 완료**) | High | 조건부 |
 | PR159 Beta Incident Drill | 장애 대응 리허설 (**PR159-A 완료**) | High | 조건부 |
+| PR160 Beta Expansion Decision | 베타 확대 여부 판단 (**PR160-A 완료**) | Critical | 필수 |
 
 **PR140은 위 PR을 실행하지 않는다.**

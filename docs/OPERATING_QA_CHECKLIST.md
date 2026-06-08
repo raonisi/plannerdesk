@@ -98,6 +98,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta incident drill (PR159, rehearsal standards only — no rollback, send, or DB):** [PR-159-BETA-INCIDENT-DRILL-OPS.md](PR-159-BETA-INCIDENT-DRILL-OPS.md)
 
+**Beta expansion decision (PR160, synthesis only — no expansion, beta user, or role change):** [PR-160-BETA-EXPANSION-DECISION-OPS.md](PR-160-BETA-EXPANSION-DECISION-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
