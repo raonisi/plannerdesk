@@ -112,6 +112,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta cohort control (PR166, cohort ops plan only — no beta user, role, or allowlist changes):** [PR-166-BETA-COHORT-CONTROL-OPS.md](PR-166-BETA-COHORT-CONTROL-OPS.md)
 
+**Beta metrics review (PR167, metric definitions/docs only — no analytics SDK, dashboard, or metric DB):** [PR-167-BETA-METRICS-REVIEW-OPS.md](PR-167-BETA-METRICS-REVIEW-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

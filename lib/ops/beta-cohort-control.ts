@@ -268,7 +268,7 @@ export const COHORT_CONTROL_CHECKLIST: readonly {
   { id: "no-user-add", item: "beta user 추가", criterion: "PR166 미구현", status: "met" },
   { id: "no-allowlist", item: "allowlist 변경", criterion: "PR166 미변경", status: "met" },
   { id: "no-rbac", item: "Auth/RBAC 변경", criterion: "없음", status: "met" },
-  { id: "metrics", item: "PR167 지표 연결", criterion: "확대 판단 입력", status: "pending" },
+  { id: "metrics", item: "PR167 지표 연결", criterion: "확대 판단 입력", status: "met" },
   { id: "live-cohort", item: "live cohort 운영", criterion: "수동·별도 PR", status: "pending" },
 ] as const;
 

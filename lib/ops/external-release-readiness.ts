@@ -624,6 +624,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR167",
+    title: "Beta Metrics Review",
+    purpose: "베타 지표 정의 (**PR167-A 완료**, no analytics/DB/dashboard)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {
