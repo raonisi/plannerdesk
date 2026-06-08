@@ -31,6 +31,7 @@ import AdminDataFreshnessReviewPanel from "@/components/admin/AdminDataFreshness
 import AdminUserSupportInboxPlanPanel from "@/components/admin/AdminUserSupportInboxPlanPanel";
 import AdminPublicUxPolishPanel from "@/components/admin/AdminPublicUxPolishPanel";
 import AdminAiSafetyHardeningPanel from "@/components/admin/AdminAiSafetyHardeningPanel";
+import AdminPaymentLegalReadinessPanel from "@/components/admin/AdminPaymentLegalReadinessPanel";
 import AdminRoleAccessPanel from "@/components/admin/AdminRoleAccessPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -216,6 +217,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminPublicUxPolishPanel />
 
         <AdminAiSafetyHardeningPanel />
+
+        <AdminPaymentLegalReadinessPanel />
 
         <div className="mb-8">
           <AdminSafetyNotice

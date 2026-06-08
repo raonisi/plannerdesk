@@ -610,6 +610,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Critical",
     codex: "필수",
   },
+  {
+    id: "PR165",
+    title: "Payment Legal Readiness",
+    purpose: "유료화 법무 준비 (**PR165-A 완료**, no billing/PG/pricing)",
+    risk: "Critical",
+    codex: "필수",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

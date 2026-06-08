@@ -108,6 +108,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **AI safety hardening (PR164, AA output/input rules only — no access expansion, provider, or raw storage):** [PR-164-AI-SAFETY-HARDENING-OPS.md](PR-164-AI-SAFETY-HARDENING-OPS.md)
 
+**Payment legal readiness (PR165, monetization review/docs only — no billing, PG, or pricing finalization):** [PR-165-PAYMENT-LEGAL-READINESS-OPS.md](PR-165-PAYMENT-LEGAL-READINESS-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
