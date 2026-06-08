@@ -531,12 +531,6 @@ export function InsurerActionCard({
                 >
                   {WORK_LINK_ACTION_LABELS.disclosureHub}
                 </Link>
-                <Link
-                  href="/work-tools"
-                  className={`${buttons.base} ${buttons.ghost} px-3 text-xs`}
-                >
-                  업무 도구로 이동
-                </Link>
               </div>
             </section>
 

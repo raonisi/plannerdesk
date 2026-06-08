@@ -150,10 +150,7 @@ function KnowledgeWorkflows() {
     {
       title: "6. 운영 안전 기준",
       description: "개인정보, 의료자료, 보험금 판단, 손해사정 오인 위험을 차단하기 위한 기준입니다.\nPlannerDesk 안에는 주민등록번호, 진단서, 처방전, 검사결과지, 청구서류 원본을 입력하지 않습니다.",
-      links: [
-        { href: "/knowledge", label: "안전 기준 보기" },
-        { href: "/work-tools", label: "업무 도구로 이동" }
-      ]
+      links: [{ href: "/knowledge", label: "안전 기준 보기" }]
     }
   ];
 

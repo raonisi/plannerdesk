@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { ExplorerLoadingPanel } from "@/components/content/explorer-loading-panel";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
+import { WorkToolsPlannerNoticeCard } from "@/components/content/work-tools-planner-notice";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import {
   ContentSection,
@@ -85,13 +86,7 @@ export default async function ClaimDocumentsPage() {
                 <span className="text-sm font-bold text-[#0F1D2E]">공시·약관 확인</span>
                 <span className="mt-1 text-xs text-[#5B6470]">공식 약관 원문 연결</span>
               </Link>
-              <Link
-                href="/work-tools"
-                className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
-              >
-                <span className="text-sm font-bold text-[#0F1D2E]">전체 실무 도구</span>
-                <span className="mt-1 text-xs text-[#5B6470]">기타 계산기 및 도구</span>
-              </Link>
+              <WorkToolsPlannerNoticeCard />
             </div>
           </div>
         </div>

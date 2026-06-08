@@ -9,7 +9,6 @@ import { uiLabels } from "@/lib/ui-labels";
 const navItems = [
   { label: "통합 검색", shortLabel: "검색", href: "/search" },
   { label: "보험사 바로가기", shortLabel: "보험사", href: "/directory" },
-  { label: uiLabels.workTools, shortLabel: uiLabels.workTools, href: "/work-tools" },
   { label: "청구서류", shortLabel: "청구서류", href: "/claim-documents" },
   { label: uiLabels.disclosure, shortLabel: uiLabels.disclosure, href: "/disclosure-links" },
   { label: uiLabels.customerMessages, shortLabel: "고객 문구", href: "/message-templates" },

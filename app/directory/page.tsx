@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
+import { WorkToolsPlannerNoticeCard } from "@/components/content/work-tools-planner-notice";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import {
   ContentSection,
@@ -119,15 +120,7 @@ export default async function DirectoryPage() {
                   상황별 안내 문구 복사
                 </span>
               </Link>
-              <Link
-                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
-                href="/work-tools"
-              >
-                <span className="text-sm font-bold text-[#0F1D2E]">업무 도구로 이동</span>
-                <span className="mt-1 text-xs text-[#5B6470] break-keep">
-                  계산기·검색 도구 실행
-                </span>
-              </Link>
+              <WorkToolsPlannerNoticeCard />
             </div>
             <p className="mt-4 break-keep text-xs leading-relaxed text-[#5B6470]">
               보험사별 링크와 연락처는 공식 출처 기준으로 확인 후 사용하세요.

@@ -67,12 +67,6 @@ export default async function KnowledgeDetailPage({
             >
               지식 아카이브로 돌아가기
             </Link>
-            <Link
-              className="inline-flex min-h-10 items-center rounded-full border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#303845] transition hover:border-[#aa8137] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
-              href="/work-tools"
-            >
-              업무 도구로 이동
-            </Link>
           </div>
 
           <section className="rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-6 shadow-[0_18px_40px_rgba(16,34,53,0.05)]">

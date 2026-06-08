@@ -134,6 +134,17 @@ export function canManageUsers(userOrSession: UserSessionLike | null | undefined
   return role === ROLE_SUPER_ADMIN;
 }
 
+/**
+ * Work tools (/work-tools, /api/work-tools/*): verified_planner or admin roles only.
+ */
+export function canAccessWorkTools(
+  userOrSession: UserSessionLike | null | undefined,
+): boolean {
+  const role = extractRole(userOrSession);
+  if (isAdminRole(role)) return true;
+  return role === ROLE_VERIFIED_PLANNER;
+}
+
 /** Human-readable Korean label for admin UI and access-denied copy. */
 export function roleDisplayLabel(role: string | null | undefined): string {
   const normalized = normalizeRole(role);

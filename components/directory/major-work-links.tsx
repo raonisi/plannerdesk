@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { WorkToolsPlannerNotice } from "@/components/content/work-tools-planner-notice";
 import { textStyles } from "@/lib/design-system";
 
 const featuredMiniLinks = [
   { href: "/directory", label: "보험사 전산" },
-  { href: "/work-tools", label: "업무 도구" },
   { href: "/claim-documents", label: "청구서류" },
   { href: "/disclosure-links", label: "공시·약관" },
   { href: "/message-templates", label: "고객 안내문" },
@@ -15,12 +15,6 @@ const coreWorkLinks = [
     title: "보험사 전산",
     description:
       "보험사 전산 접속, 고객센터, 헬프데스크, 청구 팩스, 카드납 정보를 한곳에서 확인합니다.",
-  },
-  {
-    href: "/work-tools",
-    title: "업무 도구",
-    description:
-      "숨은보험금찾기, 인수·청구 검색, 보험·금융 계산기, 자동차·화재·공문서 링크를 확인합니다.",
   },
   {
     href: "/claim-documents",
@@ -281,12 +275,7 @@ export function MajorWorkLinks() {
               업무를 한 화면에서 사용할 수 있게 구성했습니다.
             </p>
             <div className="pt-4">
-              <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-bold !text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
-                href="/work-tools"
-              >
-                업무 도구 열기
-              </Link>
+              <WorkToolsPlannerNotice />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -300,13 +289,12 @@ export function MajorWorkLinks() {
                 </h4>
                 <div className="mt-4 flex flex-wrap gap-2.5">
                   {group.items.map((item) => (
-                    <Link
-                      className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-                      href={`/work-tools#${item.id}`}
+                    <span
+                      className="inline-flex min-h-9 items-center rounded-full border border-dashed border-slate-200 bg-white px-4 text-xs font-semibold text-slate-500"
                       key={item.id}
                     >
                       {item.label}
-                    </Link>
+                    </span>
                   ))}
                 </div>
               </section>

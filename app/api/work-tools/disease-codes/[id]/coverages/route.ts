@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await workToolsRouteGuard();
+  if (denied) return denied;
+
   const { id } = await params;
   try {
     const res = await fetch(

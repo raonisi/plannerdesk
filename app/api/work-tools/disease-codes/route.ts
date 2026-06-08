@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
 
 export async function GET(request: NextRequest) {
+  const denied = await workToolsRouteGuard();
+  if (denied) return denied;
+
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q") || "";
   const page = searchParams.get("page") || "1";

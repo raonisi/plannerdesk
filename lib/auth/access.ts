@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import type { Session } from "next-auth";
 import {
   canAccessAdmin,
+  canAccessWorkTools,
   canManageContent,
   canManageUsers,
   canPublishContent,
@@ -91,3 +92,44 @@ export function getSessionUserId(session: AdminSession): string | null {
 
 /** Alias for content_admin and super_admin content CRUD guards. */
 export const requireContentAdmin = requireContentManagerAccess;
+
+export type WorkToolsAccessState =
+  | { status: "authenticated"; session: AdminSession }
+  | { status: "locked" }
+  | { status: "denied"; session: AdminSession };
+
+/**
+ * Resolves /work-tools and /api/work-tools/* access.
+ * - locked: no session
+ * - denied: session without verified_planner or admin role
+ * - authenticated: verified_planner or admin
+ */
+export async function getWorkToolsAccess(): Promise<WorkToolsAccessState> {
+  const session = await auth();
+
+  if (!session) {
+    return { status: "locked" };
+  }
+
+  const workSession = session as AdminSession;
+
+  if (!canAccessWorkTools(workSession)) {
+    return { status: "denied", session: workSession };
+  }
+
+  return { status: "authenticated", session: workSession };
+}
+
+export async function requireWorkToolsAccess(): Promise<AdminSession> {
+  const access = await getWorkToolsAccess();
+
+  if (access.status === "locked") {
+    throw new Error("WORK_TOOLS_AUTH_REQUIRED");
+  }
+
+  if (access.status === "denied") {
+    throw new Error("WORK_TOOLS_ACCESS_DENIED");
+  }
+
+  return access.session;
+}

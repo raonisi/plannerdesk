@@ -9,7 +9,7 @@ export const PUBLIC_WORK_HUB_VISIBILITY_NOTICE =
   "검수·공개 기준을 통과한 항목만 이 화면에 표시됩니다. 미검수·비공개 데이터는 공개 화면에 노출되지 않습니다.";
 
 export const PUBLIC_WORK_HUB_SEARCH_HINT =
-  "보험사를 먼저 검색해 보세요. 청구서류·지식·업무 도구·고객 문구도 같은 검색창에서 찾을 수 있습니다.";
+  "보험사를 먼저 검색해 보세요. 청구서류·지식·고객 문구도 같은 검색창에서 찾을 수 있습니다.";
 
 export const PUBLIC_WORK_HUB_EMPTY_SEARCH =
   "검색어를 입력해 필요한 정보를 찾아보세요.";
@@ -34,7 +34,6 @@ export const WORK_HUB_LINKS = [
   { label: "청구서류", href: "/claim-documents", description: "보험사별 필요서류" },
   { label: "지식 아카이브", href: "/knowledge", description: "상담·청구·계약 실무 기준" },
   { label: "통합 검색", href: "/search", description: "도메인별 통합 탐색" },
-  { label: "업무 도구", href: "/work-tools", description: "계산·코드·통계 참고" },
   { label: "공시·약관", href: "/disclosure-links", description: "공식 공시·약관 링크" },
 ] as const;
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
 
 interface SupabaseFile {
   name: string;
@@ -10,6 +11,9 @@ interface SupabaseFile {
 }
 
 export async function GET(request: NextRequest) {
+  const denied = await workToolsRouteGuard();
+  if (denied) return denied;
+
   const { searchParams } = new URL(request.url);
   const bucket = searchParams.get("bucket");
   const prefix = searchParams.get("prefix") || "";

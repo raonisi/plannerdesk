@@ -42,6 +42,7 @@ import {
   surfaces,
   textStyles,
 } from "@/lib/design-system";
+import { WorkToolsPlannerNotice } from "@/components/content/work-tools-planner-notice";
 import { uiLabels } from "@/lib/ui-labels";
 
 interface HomeClientProps {
@@ -55,8 +56,6 @@ const QUICK_KEYWORDS = [
   { label: "삼성화재", href: "/directory?search=삼성화재" },
   { label: "현대해상", href: "/directory?search=현대해상" },
   { label: "실손 청구", href: "/claim-documents?search=실손" },
-  { label: "보험나이", href: "/work-tools?tool=insurance-age" },
-  { label: "상병코드", href: "/work-tools?tool=disease-code" },
   { label: "고객 안내문", href: "/message-templates" },
   { label: "지식 아카이브", href: "/knowledge" },
   { label: "통합 검색", href: "/search" },
@@ -112,54 +111,6 @@ export function HomeClient({
           sub: `${ins.category === "life" ? "생명보험" : "손해보험"} | 전산 및 청구 정보`,
           href: `/directory?search=${encodeURIComponent(ins.name)}`,
           type: "insurer",
-        });
-      }
-    });
-
-    const staticTools = [
-      {
-        id: "insurance-age",
-        label: "보험나이",
-        sub: "만 나이·보험나이 산출",
-        href: "/work-tools?tool=insurance-age",
-      },
-      {
-        id: "silbi-calculator",
-        label: "실손보험금",
-        sub: "비례보상 참고 계산",
-        href: "/work-tools?tool=silbi-calculator",
-      },
-      {
-        id: "disease-code",
-        label: "상병코드",
-        sub: "KCD 질병분류 검색",
-        href: "/work-tools?tool=disease-code",
-      },
-      {
-        id: "surgery-code",
-        label: "수술분류표",
-        sub: "종 수술 분류 검색",
-        href: "/work-tools?tool=surgery-code",
-      },
-      {
-        id: "hidden-insurance",
-        label: "숨은보험금찾기",
-        sub: "내보험찾아줌 공식 채널",
-        href: "/work-tools?tool=hidden-insurance",
-      },
-    ];
-
-    staticTools.forEach((tool) => {
-      if (
-        tool.label.toLowerCase().includes(query) ||
-        tool.sub.toLowerCase().includes(query)
-      ) {
-        items.push({
-          id: tool.id,
-          label: tool.label,
-          sub: `업무 도구 | ${tool.sub}`,
-          href: tool.href,
-          type: "tool",
         });
       }
     });
@@ -383,14 +334,17 @@ export function HomeClient({
             iconToneClass={launcherIconTone.navy}
             title="청구서류 찾기"
           />
-          <HomeQuickLaunchCard
-            actionLabel="도구 열기"
-            description="계산기·상병·수술 검색"
-            href="/work-tools"
-            icon={Wrench}
-            iconToneClass={launcherIconTone.navy}
-            title="업무 도구 열기"
-          />
+          <div className="flex min-h-[8.5rem] flex-col justify-between rounded-xl border border-dashed border-[#E3DED4] bg-[#F8F7F3] p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#E8EEF4] text-[#0F1D2E]">
+                <Wrench aria-hidden className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[#0F1D2E]">업무 도구</p>
+                <WorkToolsPlannerNotice className="mt-1" compact />
+              </div>
+            </div>
+          </div>
           <HomeQuickLaunchCard
             actionLabel="문구 복사"
             description="상황별 카톡 안내 멘트"
@@ -475,58 +429,6 @@ export function HomeClient({
             title="자주 쓰는 업무"
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <HomeMiniToolCard
-              description="만 나이·보험나이 즉시 산출"
-              href="/work-tools?tool=insurance-age"
-              onNavigate={() =>
-                trackRecent({
-                  id: "insurance-age",
-                  label: "보험나이",
-                  href: "/work-tools?tool=insurance-age",
-                  type: "tool",
-                })
-              }
-              title="보험나이"
-            />
-            <HomeMiniToolCard
-              description="의료비 비례보상 참고 계산"
-              href="/work-tools?tool=silbi-calculator"
-              onNavigate={() =>
-                trackRecent({
-                  id: "silbi-calculator",
-                  label: "실손보험금",
-                  href: "/work-tools?tool=silbi-calculator",
-                  type: "tool",
-                })
-              }
-              title="실손보험금"
-            />
-            <HomeMiniToolCard
-              description="KCD 질병분류기호 검색"
-              href="/work-tools?tool=disease-code"
-              onNavigate={() =>
-                trackRecent({
-                  id: "disease-code",
-                  label: "상병코드",
-                  href: "/work-tools?tool=disease-code",
-                  type: "tool",
-                })
-              }
-              title="상병코드"
-            />
-            <HomeMiniToolCard
-              description="종 수술 분류 기준 검색"
-              href="/work-tools?tool=surgery-code"
-              onNavigate={() =>
-                trackRecent({
-                  id: "surgery-code",
-                  label: "수술분류표",
-                  href: "/work-tools?tool=surgery-code",
-                  type: "tool",
-                })
-              }
-              title="수술분류표"
-            />
             <HomeMiniToolCard
               description="보험사별 팩스·우편 접수처"
               href="/directory"

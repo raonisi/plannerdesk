@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
 
 export async function GET() {
+  const denied = await workToolsRouteGuard();
+  if (denied) return denied;
+
   try {
     const res = await fetch("https://bohumschool-archive.onrender.com/api/v1/disease-codes/meta");
     if (!res.ok) {
