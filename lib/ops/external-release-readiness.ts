@@ -603,6 +603,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Medium",
     codex: "불필요",
   },
+  {
+    id: "PR164",
+    title: "AI Safety Hardening",
+    purpose: "AA safety rules (**PR164-A 완료**, no access/provider/raw storage)",
+    risk: "Critical",
+    codex: "필수",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

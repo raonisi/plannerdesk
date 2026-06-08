@@ -106,6 +106,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Public UX polish (PR163, UI copy/layout only — guards unchanged):** [PR-163-PUBLIC-UX-POLISH-OPS.md](PR-163-PUBLIC-UX-POLISH-OPS.md)
 
+**AI safety hardening (PR164, AA output/input rules only — no access expansion, provider, or raw storage):** [PR-164-AI-SAFETY-HARDENING-OPS.md](PR-164-AI-SAFETY-HARDENING-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

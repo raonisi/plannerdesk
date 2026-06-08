@@ -167,6 +167,32 @@ const FEAR_MARKETING_KEYWORDS = [
   "지금 안 하면 손해",
   "해지하면 큰일",
   "해지하면 큰 일",
+  "이대로 두면 큰일",
+  "무조건 해지하세요",
+  "반드시 해지",
+] as const;
+
+const CLAIM_DOCUMENT_ONLY_KEYWORDS = [
+  "이 서류만 내면",
+  "이 서류만 제출",
+  "이 서류만 내면 됩니다",
+] as const;
+
+const PROFESSIONAL_CERTAINTY_KEYWORDS = [
+  "법률적으로 확정",
+  "승소 확정",
+  "민원 넣으면 이깁니다",
+  "세무 확정",
+  "세금은 이렇게 처리",
+  "의료적으로 확정",
+] as const;
+
+const CHAT_TRANSCRIPT_KEYWORDS = [
+  "카카오톡 원문",
+  "카카오톡 대화 원문",
+  "상담 원문 전체",
+  "녹취 원문",
+  "상담 녹취",
 ] as const;
 
 const PROMPT_INJECTION_KEYWORDS = [
@@ -200,6 +226,20 @@ const PROMPT_INJECTION_KEYWORDS = [
   "프롬프트 보여",
   "출처 없이 단정",
   "삭제된 글",
+  "api key",
+  "apikey",
+  "auth_secret",
+  "secret key",
+  "process.env",
+  "환경변수",
+  "bearer token",
+  "토큰 값",
+  "hidden instruction",
+  "내부 정책",
+  "usage audit",
+  "사용 기록 원문",
+  "감사 로그 원문",
+  "audit 원문",
 ] as const;
 
 export const ANSWER_ASSIST_BLOCKED_MESSAGES: Record<
@@ -330,6 +370,18 @@ export function classifyBlockedQuestion(
 
   if (containsKeyword(combined, CLAIM_JUDGMENT_KEYWORDS)) {
     return "CLAIM_JUDGMENT";
+  }
+
+  if (containsKeyword(combined, CLAIM_DOCUMENT_ONLY_KEYWORDS)) {
+    return "CLAIM_JUDGMENT";
+  }
+
+  if (containsKeyword(combined, CHAT_TRANSCRIPT_KEYWORDS)) {
+    return "PERSONAL_INFO";
+  }
+
+  if (containsKeyword(combined, PROFESSIONAL_CERTAINTY_KEYWORDS)) {
+    return "LOSS_ADJUSTMENT";
   }
 
   if (containsKeyword(combined, FEAR_MARKETING_KEYWORDS)) {

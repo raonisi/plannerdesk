@@ -39,6 +39,36 @@ export const ANSWER_ASSISTANT_ROLLBACK_TRIGGERS = [
     label: "public에서 AI 실행 동선",
     action: "rollback · route/guard 점검",
   },
+  {
+    id: "pii_induce_output",
+    label: "개인정보 입력 유도 출력",
+    action: "Answer Assistant 일시 중단 검토",
+  },
+  {
+    id: "payout_certainty_output",
+    label: "보험금 지급 확정 출력",
+    action: "output safety 긴급 보완 · 생성 중단",
+  },
+  {
+    id: "signup_cancel_induce",
+    label: "가입·해지 유도 출력",
+    action: "제한 강화 · 생성 중단 검토",
+  },
+  {
+    id: "prompt_injection_success",
+    label: "prompt injection 성공",
+    action: "기능 중단 · guard 보완",
+  },
+  {
+    id: "secret_leak_risk",
+    label: "secret/env/token 노출 위험",
+    action: "즉시 중단",
+  },
+  {
+    id: "repeated_safety_failure",
+    label: "반복 safety failure",
+    action: "제한 베타 중단 검토",
+  },
 ] as const;
 
 export const ANSWER_ASSISTANT_DISABLE_ENV_FLAGS = [

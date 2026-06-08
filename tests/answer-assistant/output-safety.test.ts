@@ -29,6 +29,17 @@ const BLOCKED_OUTPUT_PHRASES = [
   "수익 보장",
   "지금 매수",
   "고지를 안 해도",
+  "이 서류만 내면",
+  "무조건 부지급",
+  "절대 못 받",
+  "무조건 해지하세요",
+  "이대로 두면 큰일",
+  "승소 확정",
+  "세무 확정",
+  "지금 파세요",
+  "지금 사세요",
+  "api key",
+  "system prompt",
 ] as const;
 
 describe("Answer Assistant output safety", () => {
