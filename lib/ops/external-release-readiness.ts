@@ -589,6 +589,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR162",
+    title: "User Support Inbox Plan",
+    purpose: "오류 제보 운영 (**PR162-A 완료**, no inbox/form/DB/alerts)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

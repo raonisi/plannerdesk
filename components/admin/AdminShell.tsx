@@ -28,6 +28,7 @@ import AdminBetaFeedbackLoopPanel from "@/components/admin/AdminBetaFeedbackLoop
 import AdminBetaIncidentDrillPanel from "@/components/admin/AdminBetaIncidentDrillPanel";
 import AdminBetaExpansionDecisionPanel from "@/components/admin/AdminBetaExpansionDecisionPanel";
 import AdminDataFreshnessReviewPanel from "@/components/admin/AdminDataFreshnessReviewPanel";
+import AdminUserSupportInboxPlanPanel from "@/components/admin/AdminUserSupportInboxPlanPanel";
 import AdminRoleAccessPanel from "@/components/admin/AdminRoleAccessPanel";
 import AdminReviewQueuePanel from "@/components/admin/AdminReviewQueuePanel";
 import AdminFeatureCard, { AdminWorkflowCard } from "@/components/admin/AdminFeatureCard";
@@ -207,6 +208,8 @@ export default function AdminShell({ session, dashboard }: AdminShellProps) {
         <AdminBetaExpansionDecisionPanel />
 
         <AdminDataFreshnessReviewPanel />
+
+        <AdminUserSupportInboxPlanPanel />
 
         <div className="mb-8">
           <AdminSafetyNotice
