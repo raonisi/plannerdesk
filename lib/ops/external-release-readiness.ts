@@ -617,6 +617,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "Critical",
     codex: "필수",
   },
+  {
+    id: "PR166",
+    title: "Beta Cohort Control",
+    purpose: "베타 대상군 계획 (**PR166-A 완료**, no user/role/allowlist)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

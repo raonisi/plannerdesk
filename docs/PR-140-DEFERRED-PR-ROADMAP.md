@@ -27,5 +27,6 @@
 | PR163 Public UX Polish | 제한 베타 화면 사용성 (**PR163-A 완료**) | Medium | 불필요 |
 | PR164 AI Safety Hardening | Answer Assistant safety rule 보강 (**PR164-A 완료**) | Critical | 필수 |
 | PR165 Payment Legal Readiness | 유료화 법무·결제 준비도 (**PR165-A 완료**) | Critical | 필수 |
+| PR166 Beta Cohort Control | 베타 대상군 관리 계획 (**PR166-A 완료**) | High | 조건부 |
 
 **PR140은 위 PR을 실행하지 않는다.**

@@ -110,6 +110,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Payment legal readiness (PR165, monetization review/docs only — no billing, PG, or pricing finalization):** [PR-165-PAYMENT-LEGAL-READINESS-OPS.md](PR-165-PAYMENT-LEGAL-READINESS-OPS.md)
 
+**Beta cohort control (PR166, cohort ops plan only — no beta user, role, or allowlist changes):** [PR-166-BETA-COHORT-CONTROL-OPS.md](PR-166-BETA-COHORT-CONTROL-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---
