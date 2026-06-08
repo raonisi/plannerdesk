@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
+import {
+  buildWorkToolsStorageListUrl,
+  buildWorkToolsStoragePublicUrl,
+  getWorkToolsSupabaseConfig,
+  WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR,
+} from "@/lib/api/work-tools-storage-config";
 
-interface SupabaseFile {
+interface StorageListFile {
   name: string;
   id: string;
   updated_at: string | null;
@@ -14,6 +20,14 @@ export async function GET(request: NextRequest) {
   const denied = await workToolsRouteGuard();
   if (denied) return denied;
 
+  const config = getWorkToolsSupabaseConfig();
+  if (!config) {
+    return NextResponse.json(
+      { ok: false, error: WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR },
+      { status: 503 },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const bucket = searchParams.get("bucket");
   const prefix = searchParams.get("prefix") || "";
@@ -22,16 +36,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Bucket name is required" }, { status: 400 });
   }
 
-  const url = `https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/list/${bucket}`;
-  const apiKey = "sb_publishable_D6HiIqwm-zYE2fpf5DQCGQ_VpBXasHm";
+  const listUrl = buildWorkToolsStorageListUrl(config.url, bucket);
 
   try {
-    const res = await fetch(url, {
+    const res = await fetch(listUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": apiKey,
-        "Authorization": `Bearer ${apiKey}`,
+        apikey: config.anonKey,
+        Authorization: `Bearer ${config.anonKey}`,
       },
       body: JSON.stringify({
         prefix,
@@ -41,27 +54,27 @@ export async function GET(request: NextRequest) {
     });
 
     if (!res.ok) {
-      return NextResponse.json(
-        { error: "Failed to list files from Supabase" },
-        { status: res.status }
-      );
+      return NextResponse.json({ error: "Failed to list storage files" }, { status: res.status });
     }
 
-    const data = (await res.json()) as SupabaseFile[];
+    const data = (await res.json()) as StorageListFile[];
     const formatted = (data || [])
       .filter((file) => file.name && !file.name.endsWith("/") && file.id)
       .map((file) => ({
         name: file.name,
         size: file.metadata?.size ?? null,
         updated_at: file.updated_at ?? null,
-        public_url: `https://oomhivvzfyckwfubxveb.supabase.co/storage/v1/object/public/${bucket}/${
-          prefix ? `${prefix}/` : ""
-        }${encodeURIComponent(file.name)}`,
+        public_url: buildWorkToolsStoragePublicUrl(
+          config.url,
+          bucket,
+          prefix,
+          file.name,
+        ),
       }));
 
     return NextResponse.json(formatted);
-  } catch (error) {
-    console.error("Error in storage proxy:", error);
+  } catch {
+    console.error("Error in storage proxy");
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

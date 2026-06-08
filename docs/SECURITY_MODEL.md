@@ -42,6 +42,7 @@ Prohibited For MVP:
 - BOA CRM customer data
 - Aiven database credentials
 - Hardcoded production credentials
+- Hardcoded third-party API keys in application source (including Supabase publishable keys)
 
 ## Environment And Secrets
 
@@ -49,6 +50,7 @@ Prohibited For MVP:
 - `.env`, `.env.local`, and environment-specific secret files must not be committed.
 - `DATABASE_URL` and `DIRECT_URL` are required at runtime to access Neon PostgreSQL.
 - Railway and Neon credentials must be configured only in their respective service dashboards.
+- Work-tools storage proxy (`/api/work-tools/storage`) reads `WORK_TOOLS_SUPABASE_URL` and `WORK_TOOLS_SUPABASE_ANON_KEY` from environment variables only. When unset, the route returns `503` with `{ ok: false, error: "storage_not_configured" }` and does not call the provider. Key rotation is an operator action outside the repository; this document does not store or rotate live keys.
 
 ## Future Controls
 
