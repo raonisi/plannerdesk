@@ -568,6 +568,13 @@ export const DEFERRED_RELEASE_PRS: readonly {
     risk: "High",
     codex: "조건부",
   },
+  {
+    id: "PR159",
+    title: "Beta Incident Drill",
+    purpose: "장애 대응 리허설 (**PR159-A 완료**, no rollback/send)",
+    risk: "High",
+    codex: "조건부",
+  },
 ] as const;
 
 export const OVERALL_VERDICTS = {

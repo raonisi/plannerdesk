@@ -96,6 +96,8 @@ checklist, release notes template, and rollback/Codex gates.
 
 **Beta feedback loop (PR158, ops standards only — no form, send, or DB):** [PR-158-BETA-FEEDBACK-LOOP-OPS.md](PR-158-BETA-FEEDBACK-LOOP-OPS.md)
 
+**Beta incident drill (PR159, rehearsal standards only — no rollback, send, or DB):** [PR-159-BETA-INCIDENT-DRILL-OPS.md](PR-159-BETA-INCIDENT-DRILL-OPS.md)
+
 **Deploy execution readiness (PR116):** [PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md](PR-116-LIMITED-RELEASE-EXECUTION-READINESS.md)
 
 ---

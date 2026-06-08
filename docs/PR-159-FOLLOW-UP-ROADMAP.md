@@ -1,6 +1,4 @@
-# PR-158 — PR159 이후
-
-PR159 Beta Incident Drill (**PR159-A 완료**, Conditional Ready) → PR160 Expansion Decision.
+# PR-159 — PR160 이후
 
 | PR | 목적 | 위험 | Codex |
 | --- | --- | --- | --- |
