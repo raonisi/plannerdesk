@@ -116,7 +116,7 @@ export const insurerDirectoryEntries: InsurerDirectoryEntry[] = [
     officialWebsiteUrl: "https://www.meritzfire.com/",
     plannerPortalUrl: null,
     systemUrl:
-      "https://nsso.meritzfire.com/LoginServer/loginFormPageMulti.jsp?InitechEamNoCacheNonce=Pcyi2WeYFLhxlmHSXVAMLA%3D%3D",
+      "https://nsso.meritzfire.com/LoginServer/loginFormPageMulti.jsp?InitechEamNoCacheNonce=B1F12BPyX1eGbk0rs8fDtA%3D%3D",
     claimPageUrl: null,
     claimFormUrl:
       "https://www.meritzfire.com/compensation/longterm-insurance/request-document.do#!/",
