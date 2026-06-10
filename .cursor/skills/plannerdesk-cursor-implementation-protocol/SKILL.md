@@ -6,7 +6,7 @@ description: >-
   claim-documents, knowledge, answer-assistant). Cursor implements; Antigravity
   reviews; Codex is limited-review only for high-risk changes. Follow plan →
   implement → validate → report. Also use when the user pastes the Cursor 구현
-  요청서 or asks for LazyCodex-style plan/verify flow without Codex as default QA.
+  요청서 or asks for a structured plan/verify flow without Codex as default QA.
 ---
 
 # PlannerDesk 토큰 절약형 구현 프로토콜
