@@ -234,8 +234,10 @@ async function searchDisclosureLinks(
       description: true,
       category: true,
       sourceName: true,
+      url: true,
       updatedAt: true,
       publishedAt: true,
+      lastVerifiedAt: true,
       insurer: { select: { name: true } },
     },
   });
@@ -250,6 +252,8 @@ async function searchDisclosureLinks(
     sourceLabel: row.sourceName ?? row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.publishedAt),
+    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
+    officialSourceUrl: row.url ?? undefined,
   }));
 }
 

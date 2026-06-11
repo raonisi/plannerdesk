@@ -105,6 +105,8 @@ function buildWorkLinkResult(
     sourceLabel: row.name,
     updatedAt: row.updatedAt.toISOString().slice(0, 10),
     publishedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
+    lastVerifiedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
+    officialSourceUrl: href.startsWith("http") ? href : undefined,
   };
 }
 

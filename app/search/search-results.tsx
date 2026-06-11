@@ -8,6 +8,7 @@ import {
 } from "@/lib/search/constants";
 import { buildPublicSearchHref } from "@/lib/search/search-href";
 import {
+  SEARCH_DOMAIN_BADGE_CLASS,
   SEARCH_DOMAIN_DISPLAY_ORDER,
   SEARCH_DOMAIN_LABEL,
   SEARCH_RESULT_ACTION_LABEL,
@@ -53,6 +54,13 @@ function isExternalResult(result: GlobalSearchResult): boolean {
   );
 }
 
+const FRESHNESS_RESULT_TYPES = new Set<GlobalSearchResultType>([
+  "insurer",
+  "claim_document",
+  "disclosure_link",
+  "work_link",
+]);
+
 function SearchResultCard({ result }: { result: GlobalSearchResult }) {
   const primaryHref = resultPrimaryHref(result);
   const external = isExternalResult(result);
@@ -64,7 +72,7 @@ function SearchResultCard({ result }: { result: GlobalSearchResult }) {
     >
       <div className="flex flex-wrap items-center gap-2">
         <span
-          className={`${badgeBase} border-[#c8d2dc] bg-[#eef3f7] text-[#102235]`}
+          className={`${badgeBase} ${SEARCH_DOMAIN_BADGE_CLASS[result.type]}`}
         >
           {SEARCH_DOMAIN_LABEL[result.type]}
         </span>
@@ -104,7 +112,7 @@ function SearchResultCard({ result }: { result: GlobalSearchResult }) {
         </p>
       ) : null}
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        {result.type === "insurer" || result.type === "claim_document" ? (
+        {FRESHNESS_RESULT_TYPES.has(result.type) ? (
           <DataFreshnessMeta
             compact
             lastVerifiedAt={result.lastVerifiedAt}
@@ -176,7 +184,8 @@ export function SearchResultsList({
         검색 결과 {total}건
       </h2>
       <p className="mt-1 text-xs text-[#5f6670]">
-        영역별로 구분해 표시합니다. 공개·검수 기준을 통과한 항목만 포함됩니다.
+        영역별로 구분해 표시합니다. 공개·검수 기준을 통과한 항목만 포함되며, 업무
+        도구·Answer Assistant는 검색 대상이 아닙니다.
       </p>
 
       {groups ? (

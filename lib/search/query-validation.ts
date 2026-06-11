@@ -114,3 +114,8 @@ export function validatePublicSearchQuery(
 
   return { ok: true, query };
 }
+
+/** Trim and collapse whitespace for public search input (PR-BS-03). */
+export function normalizePublicSearchQuery(raw: string): string {
+  return sanitizeCorrectionPlainText(raw).text.replace(/\s+/g, " ").trim();
+}

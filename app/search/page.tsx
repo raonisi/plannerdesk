@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ContentSection,
   PageFrame,
@@ -6,20 +5,19 @@ import {
 } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { SearchDomainFilter } from "@/components/search/search-domain-filter";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
+import { SearchIdlePanel } from "@/components/search/search-idle-panel";
 import {
-  SEARCH_EMPTY_WORK_LINK_NOTE,
-  SEARCH_IDLE_HINT,
+  SEARCH_IDLE_PII_NOTICE,
 } from "@/lib/search/constants";
 import {
-  PUBLIC_SEARCH_FILTER_OPTIONS,
   SEARCH_DOMAIN_LABEL,
 } from "@/lib/search/labels";
 import {
   domainToQueryParam,
   parsePublicSearchDomain,
 } from "@/lib/search/query-validation";
-import { buildPublicSearchHref } from "@/lib/search/search-href";
 import { searchPublicContent } from "@/lib/search/public";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
@@ -91,7 +89,7 @@ export default async function SearchPage({
                 defaultValue={rawQuery}
                 maxLength={60}
                 name="q"
-                placeholder="보험사명, 서류명, 전산·청구·지식 키워드"
+                placeholder="보험사명, 청구서류, 공시자료, 업무 키워드"
                 type="search"
               />
               <input
@@ -107,65 +105,14 @@ export default async function SearchPage({
               </button>
             </div>
             <p className="mt-2 text-xs leading-5 text-[#5f6670]">
-              개인정보·의료정보·계약번호·보험금 지급 판단 관련 검색은 제공하지
-              않습니다.
+              {SEARCH_IDLE_PII_NOTICE} 개인정보·의료정보·계약번호·보험금 지급 판단
+              관련 검색은 제공하지 않습니다.
             </p>
           </form>
 
-          {rawQuery ? (
-            <div
-              aria-label="도메인 필터"
-              className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible"
-              role="group"
-            >
-              {PUBLIC_SEARCH_FILTER_OPTIONS.map((option) => {
-                const isActive =
-                  domain === option.domain ||
-                  (option.domain === "all" && domain === "all");
-                return (
-                  <Link
-                    className={`min-h-9 rounded-full border px-3 text-xs font-semibold transition ${
-                      isActive
-                        ? "border-[#102235] bg-[#102235] text-white"
-                        : "border-[#d9c9a8] bg-white text-[#4f5661] hover:bg-[#f7f1e5]"
-                    }`}
-                    href={buildPublicSearchHref(rawQuery, option.domain)}
-                    key={option.param}
-                  >
-                    {option.label}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
+          <SearchDomainFilter activeDomain={domain} query={rawQuery} />
 
-          {!rawQuery ? (
-            <div className="rounded-md border border-[#d9c9a8] bg-[#fbf7ee] px-4 py-4 text-sm leading-6 text-[#4f5661]">
-              <p>{SEARCH_IDLE_HINT}</p>
-              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                {[
-                  { label: "보험사", href: "/directory" },
-                  { label: "청구서류", href: "/claim-documents" },
-                  { label: "지식", href: "/knowledge" },
-                  { label: "공시·약관", href: "/disclosure-links" },
-                  { label: "고객문구", href: "/message-templates" },
-                  { label: "업무 링크", href: "/directory" },
-                ].map((hub) => (
-                  <li key={hub.href}>
-                    <Link
-                      className="font-semibold text-[#102235] underline"
-                      href={hub.href}
-                    >
-                      {hub.label} 허브
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-xs leading-5 text-[#5f6670]">
-                {SEARCH_EMPTY_WORK_LINK_NOTE}
-              </p>
-            </div>
-          ) : null}
+          {!rawQuery ? <SearchIdlePanel /> : null}
 
           {blockedMessage ? (
             <div
