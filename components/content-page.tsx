@@ -1,5 +1,8 @@
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import {
+  formatVerifiedDate as formatVerifiedDateValue,
+} from "@/lib/public/data-freshness";
 import type { VerificationStatus } from "@/lib/content";
 import {
   externalLinkAriaLabel,
@@ -199,12 +202,7 @@ export function LastVerifiedText({ value }: { value: string | null }) {
 }
 
 export function formatVerifiedDate(value: string | null | undefined) {
-  if (!value) {
-    return uiText.missing;
-  }
-
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  return match ? `${match[1]}.${match[2]}.${match[3]}` : value;
+  return formatVerifiedDateValue(value);
 }
 
 export function EmptyValue({ label = uiText.missing }: { label?: string }) {

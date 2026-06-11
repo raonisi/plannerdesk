@@ -1,4 +1,5 @@
 import type { PublicInsurer } from "@/lib/public/insurers";
+import { lastVerifiedLabel as formatLastVerifiedLabel } from "@/lib/public/data-freshness";
 
 // Centralized fallback copy for the public /directory UI. Keep these strings
 // in sync with docs/INSURER_ACTION_FIELD_EXPANSION_PLAN.md Section F (data
@@ -121,7 +122,5 @@ export function claimFaxDisplay(insurer: PublicInsurer): ClaimFaxDisplay {
 }
 
 export function lastVerifiedLabel(value: string | null): string {
-  if (!value) return DIRECTORY_TEXT.missing;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  return match ? `${match[1]}.${match[2]}.${match[3]}` : value;
+  return formatLastVerifiedLabel(value);
 }

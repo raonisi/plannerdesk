@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
 import { SearchResultFavoriteToggle } from "@/components/search/search-result-favorite-toggle";
 import { borders, shadows, surfaces } from "@/lib/design-system";
 import {
@@ -103,16 +104,22 @@ function SearchResultCard({ result }: { result: GlobalSearchResult }) {
         </p>
       ) : null}
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <span className="text-xs text-[#5f6670]">
-          {result.sourceLabel && result.type !== "insurer"
-            ? `${result.sourceLabel} · `
-            : ""}
-          {result.updatedAt
-            ? `업데이트 ${result.updatedAt}`
-            : result.publishedAt
-              ? `기준일 ${result.publishedAt}`
-              : ""}
-        </span>
+        {result.type === "insurer" || result.type === "claim_document" ? (
+          <DataFreshnessMeta
+            compact
+            lastVerifiedAt={result.lastVerifiedAt}
+            officialSourceUrl={result.officialSourceUrl}
+          />
+        ) : (
+          <span className="text-xs text-[#5f6670]">
+            {result.sourceLabel ? `${result.sourceLabel} · ` : ""}
+            {result.updatedAt
+              ? `업데이트 ${result.updatedAt}`
+              : result.publishedAt
+                ? `기준일 ${result.publishedAt}`
+                : ""}
+          </span>
+        )}
         <div className="flex flex-wrap gap-2">
           {secondaryLabel && result.type === "insurer" ? (
             <Link

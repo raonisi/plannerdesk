@@ -100,6 +100,7 @@ async function searchInsurers(
       category: true,
       updatedAt: true,
       lastVerifiedAt: true,
+      officialWebsiteUrl: true,
     },
   });
 
@@ -111,7 +112,8 @@ async function searchInsurers(
     url: `/directory?search=${encodeURIComponent(row.name)}`,
     categoryLabel: insurerCategoryLabels[row.category],
     updatedAt: toIsoDate(row.updatedAt),
-    publishedAt: toIsoDate(row.lastVerifiedAt),
+    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
+    officialSourceUrl: row.officialWebsiteUrl ?? undefined,
   }));
 }
 
@@ -143,6 +145,8 @@ async function searchClaimDocuments(
       category: true,
       updatedAt: true,
       lastVerifiedAt: true,
+      claimFormUrl: true,
+      officialSourceUrl: true,
       insurer: { select: { name: true } },
     },
   });
@@ -158,7 +162,8 @@ async function searchClaimDocuments(
     categoryLabel: claimCategoryLabels[row.category],
     sourceLabel: row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
-    publishedAt: toIsoDate(row.lastVerifiedAt),
+    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
+    officialSourceUrl: row.officialSourceUrl ?? row.claimFormUrl ?? undefined,
   }));
 }
 

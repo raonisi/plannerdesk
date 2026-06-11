@@ -12,6 +12,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
+import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
 import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
 import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
 import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
@@ -24,7 +25,6 @@ import {
   cardPaymentLegLabel,
   cardPaymentStatusLabel,
   claimFaxDisplay,
-  lastVerifiedLabel,
   publicContentTrustHint,
   telHref,
 } from "@/lib/directory/formatting";
@@ -622,15 +622,22 @@ function CardHeader({
             <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
               {insurer.name}
             </h2>
-            <p className="mt-2 text-xs font-medium text-[#5B6470]">
+            <div className="mt-2 space-y-1">
               {publicContentTrustHint(insurer.verificationStatus) ? (
-                <>
+                <p className="text-xs font-medium text-[#5B6470]">
                   {publicContentTrustHint(insurer.verificationStatus)}
-                  <span className="mx-1.5 text-[#E3DED4]">·</span>
-                </>
+                </p>
               ) : null}
-              최근 확인 {lastVerifiedLabel(insurer.lastVerifiedAt)}
-            </p>
+              <DataFreshnessMeta
+                lastVerifiedAt={insurer.lastVerifiedAt}
+                officialSourceUrl={insurer.officialWebsiteUrl}
+                sourceUrl={
+                  insurer.claimPageUrl ??
+                  insurer.claimFormUrl ??
+                  insurer.termsUrl
+                }
+              />
+            </div>
           </div>
         </div>
 

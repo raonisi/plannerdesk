@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
+import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
 import { FavoriteButton } from "@/components/launcher/favorite-button";
 import { claimLibraryFavoriteId } from "@/lib/planner-favorites/claim-favorite-id";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
@@ -111,6 +112,13 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
           {trustHint ? (
             <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
           ) : null}
+          <DataFreshnessMeta
+            className="mt-2"
+            lastVerifiedAt={doc.lastVerifiedAt}
+            officialSourceUrl={doc.officialSourceUrl}
+            showClaimNotice
+            sourceUrl={doc.claimFormUrl}
+          />
         </div>
         <div className="grid gap-2 sm:flex lg:justify-end">
           {primaryHref ? (
