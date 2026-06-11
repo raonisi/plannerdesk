@@ -6,6 +6,7 @@ import {
   WORK_TOOLS_ACCESS_DENIED_BODY,
   WORK_TOOLS_PLANNER_ACCESS_NOTICE,
 } from "@/lib/public/public-ux-copy";
+import { HomeScreenInstallNotice } from "@/components/pwa/home-screen-install-notice";
 import { WorkToolsClient } from "./work-tools-client";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,10 @@ export default async function WorkToolsPage() {
         description="보험나이, 실손 자기부담 참고, 상병코드, 수술분류표 등 설계사 업무 보조 도구입니다."
       />
       <ContentSection>
-        <WorkToolsClient />
+        <div className="space-y-6">
+          <WorkToolsClient />
+          <HomeScreenInstallNotice variant="planner" />
+        </div>
       </ContentSection>
     </AppShell>
   );

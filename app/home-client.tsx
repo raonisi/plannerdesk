@@ -26,6 +26,7 @@ import {
   PUBLIC_WORK_HUB_VISIBILITY_NOTICE,
 } from "@/lib/dashboard/work-hub-copy";
 import { PlannerWorkFavoritesPanel } from "@/components/dashboard/planner-work-favorites-panel";
+import { HomeScreenInstallNotice } from "@/components/pwa/home-screen-install-notice";
 import { PlannerFavoritesLoginPrompt } from "@/components/planner-favorites/planner-favorites-login-prompt";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
@@ -508,8 +509,13 @@ export function HomeClient({
         </div>
       </div>
 
+      <HomeScreenInstallNotice
+        className={`mt-12 ${shadows.card}`}
+        variant={plannerFavoritesEnabled ? "planner" : "public"}
+      />
+
       <details
-        className={`group mt-12 ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
+        className={`group mt-6 ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
       >
         <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 rounded-lg">
           <div className="flex items-start justify-between gap-4">
