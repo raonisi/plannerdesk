@@ -9,6 +9,7 @@ import { uiLabels } from "@/lib/ui-labels";
 const navItems = [
   { label: "통합 검색", shortLabel: "검색", href: "/search" },
   { label: "보험사 바로가기", shortLabel: "보험사", href: "/directory" },
+  { label: uiLabels.workTools, shortLabel: uiLabels.workTools, href: "/work-tools" },
   { label: "청구서류", shortLabel: "청구서류", href: "/claim-documents" },
   { label: uiLabels.disclosure, shortLabel: uiLabels.disclosure, href: "/disclosure-links" },
   { label: uiLabels.customerMessages, shortLabel: "고객 문구", href: "/message-templates" },
@@ -60,7 +61,11 @@ export function MainNavigation({ pathname }: { pathname: string }) {
       className="hidden items-center gap-1.5 text-sm font-bold lg:flex"
     >
       {navItems.map((item) => (
-        <NavLink href={item.href} isActive={pathname === item.href} key={item.href}>
+        <NavLink
+          href={item.href}
+          isActive={isNavItemActive(pathname, item.href)}
+          key={item.href}
+        >
           {item.label}
         </NavLink>
       ))}
@@ -80,7 +85,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
       {navItems.map((item) => (
         <MobileNavLink
           href={item.href}
-          isActive={pathname === item.href}
+          isActive={isNavItemActive(pathname, item.href)}
           key={item.href}
         >
           {item.shortLabel}
@@ -88,6 +93,12 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
       ))}
     </nav>
   );
+}
+
+function isNavItemActive(pathname: string, href: string): boolean {
+  if (pathname === href) return true;
+  if (href !== "/" && pathname.startsWith(`${href}/`)) return true;
+  return false;
 }
 
 function NavLink({

@@ -59,9 +59,12 @@ describe("PR173-A work-tools public exposure closure (static)", () => {
     assert.equal(canAccessAdmin({ role: "verified_planner" }), false);
   });
 
-  it("public header does not link to work-tools", () => {
+  it("public header links to work-tools while page remains planner gated", () => {
     const header = readFileSync(join(ROOT, "components/header.tsx"), "utf8");
-    assert.doesNotMatch(header, /href:\s*"\/work-tools"/);
+    assert.match(header, /href:\s*"\/work-tools"/);
+    assert.match(header, /uiLabels\.workTools/);
+    const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
+    assert.match(page, /getWorkToolsAccess/);
   });
 
   it("public home does not expose work-tools quick links", () => {
