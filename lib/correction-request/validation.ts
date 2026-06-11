@@ -137,6 +137,28 @@ const FILE_UPLOAD_KEYWORDS = [
   "사진을 첨부",
 ] as const;
 
+const SECRET_KEYWORDS = [
+  "api key",
+  "apikey",
+  "api_key",
+  "bearer ",
+  "auth_secret",
+  "secret key",
+  "private key",
+  ".env",
+  "process.env",
+] as const;
+
+const CONSULTATION_KEYWORDS = [
+  "상담원문",
+  "상담 원문",
+  "상담내용",
+  "상담 내용 전체",
+  "카카오톡 대화",
+] as const;
+
+const CARD_KEYWORDS = ["카드번호", "카드 번호", "cvc", "cvv"] as const;
+
 const RESIDENT_ID_PATTERN = /\b\d{6}-\d{7}\b/;
 const PHONE_PATTERN = /\b01[016789][-\s]?\d{3,4}[-\s]?\d{4}\b/;
 const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
@@ -203,6 +225,13 @@ function scanSensitivePatterns(title: string, message: string): CorrectionSubmit
   }
   if (containsKeyword(combined, FILE_UPLOAD_KEYWORDS)) {
     return "file_upload";
+  }
+  if (
+    containsKeyword(combined, SECRET_KEYWORDS) ||
+    containsKeyword(combined, CARD_KEYWORDS) ||
+    containsKeyword(combined, CONSULTATION_KEYWORDS)
+  ) {
+    return "personal_info";
   }
   return null;
 }
@@ -382,6 +411,10 @@ export function hasClientSensitiveSignal(text: string): boolean {
     CONTRACT_CONTEXT_PATTERN.test(combined) ||
     containsKeyword(combined, PERSONAL_INFO_KEYWORDS) ||
     containsKeyword(combined, MEDICAL_INFO_KEYWORDS) ||
-    containsKeyword(combined, PAYOUT_JUDGMENT_KEYWORDS)
+    containsKeyword(combined, PAYOUT_JUDGMENT_KEYWORDS) ||
+    containsKeyword(combined, FILE_UPLOAD_KEYWORDS) ||
+    containsKeyword(combined, SECRET_KEYWORDS) ||
+    containsKeyword(combined, CARD_KEYWORDS) ||
+    containsKeyword(combined, CONSULTATION_KEYWORDS)
   );
 }

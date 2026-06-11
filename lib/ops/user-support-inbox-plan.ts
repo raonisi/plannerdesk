@@ -201,6 +201,7 @@ export const USER_REPORT_NOTICE = {
     "어떤 행동 후 발생했는지",
     "기대한 결과",
     "실제 발생한 문제",
+    "공식 출처 URL(확인 가능한 경우)",
     "고객정보를 제거한 비식별 요약",
   ] as const,
   excludeHeading: "제보 시 포함하면 안 되는 정보",

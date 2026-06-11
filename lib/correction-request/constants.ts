@@ -92,9 +92,11 @@ export const CORRECTION_SUBMIT_COPY = {
     "잘못된 링크, 연락처, 안내 문구를 발견했다면 제보해주세요. 접수된 내용은 관리자 검수 후 반영 여부가 결정됩니다.",
   sensitiveWarningTitle: "입력 전 확인해주세요",
   sensitiveWarningBody:
-    "개인정보, 병명, 진단명, 계약번호, 청구서류 이미지는 입력하지 마세요.",
+    "고객 개인정보, 주민번호, 연락처, 계약번호, 병력, 진단명, 상담 원문은 입력하지 마세요.",
+  officialSourceReminder:
+    "공식 출처 URL이 있다면 함께 남겨 주세요.",
   reviewNoticeBody:
-    "이 기능은 정보 오류 제보용이며, 보험금 지급 가능 여부를 판단하지 않습니다.",
+    "제보된 내용은 관리자가 확인한 뒤 반영 여부를 검토합니다. 보험금 지급 여부나 청구 가능 여부를 확정하는 기능이 아닙니다.",
   noAutoApplyNotice:
     "제보 내용은 즉시 public 화면에 반영되지 않습니다.",
   insurerLabel: "대상 보험사",
@@ -108,13 +110,16 @@ export const CORRECTION_SUBMIT_COPY = {
     "예: 해당 링크 접속 시 404 화면이 표시됩니다. 고객 개인정보, 의료자료, 계약번호, 청구서류 원본은 입력하지 마세요.",
   sourceUrlLabel: "공식 자료 링크 (선택)",
   sourceUrlPlaceholder: "https://",
-  sourceUrlHint: "공식 출처 URL만 입력해 주세요. 파일·이미지는 첨부할 수 없습니다.",
+  sourceUrlHint:
+    "공식 출처 URL만 입력해 주세요. 파일·이미지는 첨부할 수 없습니다.",
+  piiBlockedMessage:
+    "개인정보 또는 민감정보로 보일 수 있는 내용이 포함되어 있습니다. 해당 내용을 제외하고 다시 작성해 주세요.",
   submitAction: "제보 접수",
   cancelAction: "닫기",
   submitSuccess:
     "제보가 접수되었습니다. 관리자 검수 전에는 공개 정보에 반영되지 않습니다.",
   declarationLabel:
-    "고객 개인정보, 의료자료, 보험금 지급 판단 요청을 포함하지 않았습니다.",
+    "고객 개인정보·민감정보·상담 원문·보험금 지급 판단 요청을 포함하지 않았습니다.",
   declarationRequired: "안전 확인 체크 후 제보를 접수할 수 있습니다.",
   validationRequired: "필수 항목입니다.",
   validationTitleRange: `제목은 ${TITLE_MIN_LENGTH}자 이상 ${TITLE_MAX_LENGTH}자 이하로 입력해 주세요.`,

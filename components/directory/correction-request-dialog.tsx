@@ -21,6 +21,10 @@ import {
   TITLE_MIN_LENGTH,
 } from "@/lib/correction-request/constants";
 import { hasClientSensitiveSignal } from "@/lib/correction-request/validation";
+import {
+  CORRECTION_ALLOWED_REPORT_TOPICS,
+  CORRECTION_PROHIBITED_INPUT_TOPICS,
+} from "@/lib/correction-request/pii-guard";
 
 export interface CorrectionRequestDialogProps {
   open: boolean;
@@ -55,50 +59,6 @@ const initialFormState: FormState = {
   sourceUrl: "",
   honeypot: "",
 };
-
-const ALLOWED_ITEMS = [
-  "보험사 전산 링크 오류",
-  "고객센터 번호 오류",
-  "전산 헬프데스크 번호 오류",
-  "인콜/모니터링 번호 오류",
-  "청구 팩스 번호 오류",
-  "등기우편 주소 오류",
-  "약관 링크 오류",
-  "청구양식 링크 오류",
-  "공시/약관 링크 오류",
-  "청구서류 명칭 또는 분류 오류",
-  "카드납 가능 여부 오류",
-  "지원 브라우저 정보 오류",
-  "오탈자 또는 UI 표시 오류",
-  "공식 출처 변경 제보",
-] as const;
-
-const PROHIBITED_ITEMS = [
-  "고객 이름",
-  "주민등록번호",
-  "휴대폰 번호",
-  "주소",
-  "이메일",
-  "계약번호",
-  "증권번호",
-  "계좌번호",
-  "병명",
-  "진단명",
-  "진단서",
-  "처방전",
-  "진료기록",
-  "검사결과지",
-  "입퇴원확인서 원본",
-  "수술확인서 원본",
-  "보험금 청구서 원본",
-  "고객 의료자료",
-  "고객 개인정보가 포함된 사진 또는 파일",
-  "보험금 지급 가능 여부 판단 요청",
-  "보험금 지급 금액 산정 요청",
-  "손해사정 판단 요청",
-  "의료 진단 해석 요청",
-  "특정 고객의 청구 가능성 판단 요청",
-] as const;
 
 export function CorrectionRequestDialog({
   open,
@@ -194,7 +154,7 @@ function CorrectionRequestForm({
   const [resultMessage, setResultMessage] = useState("");
   const [safetyConfirmed, setSafetyConfirmed] = useState(false);
 
-  const combinedText = `${form.title}\n${form.message}`;
+  const combinedText = `${form.title}\n${form.message}\n${form.sourceUrl}`;
   const containsSensitiveSignal = useMemo(
     () => hasClientSensitiveSignal(combinedText),
     [combinedText],
@@ -315,6 +275,9 @@ function CorrectionRequestForm({
           </p>
           <p className="mt-1">{CORRECTION_SUBMIT_COPY.sensitiveWarningBody}</p>
           <p className="mt-2 text-[#4f5661]">
+            {CORRECTION_SUBMIT_COPY.officialSourceReminder}
+          </p>
+          <p className="mt-2 text-[#4f5661]">
             {CORRECTION_SUBMIT_COPY.reviewNoticeBody}
           </p>
           <p className="mt-2 text-[#4f5661]">
@@ -325,7 +288,7 @@ function CorrectionRequestForm({
         <section className="rounded-md border border-[#d9c9a8] bg-white px-4 py-3">
           <h3 className="text-sm font-semibold text-[#102235]">제보 가능 항목</h3>
           <ul className="mt-2 grid gap-1 text-xs leading-5 text-[#4f5661] sm:grid-cols-2">
-            {ALLOWED_ITEMS.map((item) => (
+            {CORRECTION_ALLOWED_REPORT_TOPICS.map((item) => (
               <li key={item}>- {item}</li>
             ))}
           </ul>
@@ -334,7 +297,7 @@ function CorrectionRequestForm({
         <section className="rounded-md border border-[#d9c9a8] bg-[#fbf7ee] px-4 py-3">
           <h3 className="text-sm font-semibold text-[#102235]">제보 금지 항목</h3>
           <ul className="mt-2 grid gap-1 text-xs leading-5 text-[#5f6670] sm:grid-cols-2">
-            {PROHIBITED_ITEMS.map((item) => (
+            {CORRECTION_PROHIBITED_INPUT_TOPICS.map((item) => (
               <li key={item}>- {item}</li>
             ))}
           </ul>
@@ -473,8 +436,7 @@ function CorrectionRequestForm({
             className="rounded-md border border-[#d9c9a8] bg-[#fff7e6] px-3 py-2 text-sm text-[#7a612d]"
             role="alert"
           >
-            개인정보 또는 민감정보로 보일 수 있는 내용이 포함되어 있습니다. 해당
-            내용을 제외하고 다시 작성해주세요.
+            {CORRECTION_SUBMIT_COPY.piiBlockedMessage}
           </p>
         ) : null}
 
