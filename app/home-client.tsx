@@ -42,7 +42,7 @@ import {
   surfaces,
   textStyles,
 } from "@/lib/design-system";
-import { WorkToolsPlannerNotice } from "@/components/content/work-tools-planner-notice";
+import { WORK_TOOLS_PLANNER_ACCESS_NOTICE } from "@/lib/public/public-ux-copy";
 import { uiLabels } from "@/lib/ui-labels";
 
 interface HomeClientProps {
@@ -334,17 +334,14 @@ export function HomeClient({
             iconToneClass={launcherIconTone.navy}
             title="청구서류 찾기"
           />
-          <div className="flex min-h-[8.5rem] flex-col justify-between rounded-xl border border-dashed border-[#E3DED4] bg-[#F8F7F3] p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#E8EEF4] text-[#0F1D2E]">
-                <Wrench aria-hidden className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-[#0F1D2E]">업무 도구</p>
-                <WorkToolsPlannerNotice className="mt-1" compact />
-              </div>
-            </div>
-          </div>
+          <HomeQuickLaunchCard
+            actionLabel="도구함 열기"
+            description={WORK_TOOLS_PLANNER_ACCESS_NOTICE}
+            href="/work-tools"
+            icon={Wrench}
+            iconToneClass={launcherIconTone.navy}
+            title="업무 도구"
+          />
           <HomeQuickLaunchCard
             actionLabel="문구 복사"
             description="상황별 카톡 안내 멘트"

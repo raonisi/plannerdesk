@@ -67,10 +67,10 @@ describe("PR173-A work-tools public exposure closure (static)", () => {
     assert.match(page, /getWorkToolsAccess/);
   });
 
-  it("public home does not expose work-tools quick links", () => {
+  it("public home links to work-tools while page remains planner gated", () => {
     const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
-    assert.doesNotMatch(home, /href="\/work-tools/);
-    assert.match(home, /WorkToolsPlannerNotice/);
+    assert.match(home, /href="\/work-tools"/);
+    assert.match(home, /WORK_TOOLS_PLANNER_ACCESS_NOTICE/);
   });
 
   it("public route smoke targets exclude work-tools", () => {
