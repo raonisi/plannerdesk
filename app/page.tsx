@@ -1,3 +1,5 @@
+import { getWorkToolsAccess } from "@/lib/auth/access";
+import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
@@ -8,11 +10,14 @@ import { HomeClient } from "./home-client";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [insurerResult, claimResult, knowledgeResult] = await Promise.all([
-    getPublicInsurers(),
-    getPublicClaimDocuments(),
-    getPublicKnowledgeArticles(),
-  ]);
+  const [insurerResult, claimResult, knowledgeResult, workToolsAccess] =
+    await Promise.all([
+      getPublicInsurers(),
+      getPublicClaimDocuments(),
+      getPublicKnowledgeArticles(),
+      getWorkToolsAccess(),
+    ]);
+  const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
 
   const insurers = insurerResult.status === "ok" ? insurerResult.insurers : [];
   const claimDocuments = claimResult.status === "ok" ? claimResult.data : [];
@@ -28,9 +33,10 @@ export default async function Home() {
   return (
     <AppShell>
       <HomeClient
-        insurers={insurers}
         claimDocuments={claimDocuments}
+        insurers={insurers}
         knowledgeArticles={knowledgeArticles}
+        plannerFavoritesEnabled={plannerFavoritesEnabled}
         publicStats={publicStats}
       />
     </AppShell>

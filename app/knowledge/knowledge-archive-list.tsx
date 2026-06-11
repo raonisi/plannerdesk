@@ -9,8 +9,9 @@ import {
   KnowledgeRiskLevel,
 } from "@prisma/client";
 import { EmptyState } from "@/components/content-page";
-import { FavoriteButton } from "@/components/launcher/favorite-button";
+import { GatedFavoriteButton } from "@/components/planner-favorites/gated-favorite-button";
 import { KnowledgeFavoritesStrip } from "@/components/planner-favorites/knowledge-favorites-strip";
+import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
 import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
@@ -96,6 +97,7 @@ interface KnowledgeArchiveListProps {
   filterState: KnowledgeArchiveFilterState;
   blockedMessage: string | null;
   isCatalogEmpty: boolean;
+  plannerFavoritesEnabled?: boolean;
 }
 
 function mergeState(
@@ -111,6 +113,7 @@ export function KnowledgeArchiveList({
   filterState,
   blockedMessage,
   isCatalogEmpty,
+  plannerFavoritesEnabled = false,
 }: KnowledgeArchiveListProps) {
   const router = useRouter();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -183,6 +186,7 @@ export function KnowledgeArchiveList({
   }
 
   return (
+    <PlannerFavoritesScope enabled={plannerFavoritesEnabled}>
     <div className="space-y-6">
       <section
         aria-label="지식 아카이브 검색 및 필터"
@@ -325,7 +329,7 @@ export function KnowledgeArchiveList({
         </div>
       </section>
 
-      <KnowledgeFavoritesStrip articles={items} />
+      {plannerFavoritesEnabled ? <KnowledgeFavoritesStrip articles={items} /> : null}
 
       {blockedMessage ? (
         <div
@@ -356,6 +360,7 @@ export function KnowledgeArchiveList({
         </div>
       ) : null}
     </div>
+    </PlannerFavoritesScope>
   );
 }
 
@@ -441,8 +446,9 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
         <span className="rounded-full border border-[#d9c9a8] bg-[#f7f1e5] px-3 py-1 text-xs font-semibold text-[#5f6670]">
           {item.typeLabel}
         </span>
-        <FavoriteButton
+        <GatedFavoriteButton
           active={isFavorite(item.id)}
+          callbackPath="/knowledge"
           label={item.title}
           onToggle={() => toggle(item.id)}
         />

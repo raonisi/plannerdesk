@@ -10,6 +10,7 @@ import {
   HOME_FAVORITES_EMPTY_TITLE,
   LOCAL_FAVORITES_DEVICE_NOTICE,
   LOCAL_FAVORITES_PUBLISHED_NOTICE,
+  PLANNER_FAVORITES_PII_NOTICE,
 } from "@/lib/planner-favorites/copy";
 import {
   buildAllowedIdSet,
@@ -221,6 +222,9 @@ export function PlannerWorkFavoritesPanel({
       </h2>
       <p className={`mt-2 break-keep ${textStyles.small}`}>
         {LOCAL_FAVORITES_PUBLISHED_NOTICE}
+      </p>
+      <p className={`mt-2 break-keep ${textStyles.small}`}>
+        {PLANNER_FAVORITES_PII_NOTICE}
       </p>
 
       {chips.length > 0 ? (

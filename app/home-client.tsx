@@ -26,6 +26,8 @@ import {
   PUBLIC_WORK_HUB_VISIBILITY_NOTICE,
 } from "@/lib/dashboard/work-hub-copy";
 import { PlannerWorkFavoritesPanel } from "@/components/dashboard/planner-work-favorites-panel";
+import { PlannerFavoritesLoginPrompt } from "@/components/planner-favorites/planner-favorites-login-prompt";
+import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
 import { HomeMiniToolCard } from "@/components/launcher/home-mini-tool-card";
 import { HomeQuickLaunchCard } from "@/components/launcher/home-quick-launch-card";
@@ -42,6 +44,13 @@ import {
   surfaces,
   textStyles,
 } from "@/lib/design-system";
+import { RECENT_WORK_PII_NOTICE } from "@/lib/planner-favorites/copy";
+import {
+  pushRecentWorkItem,
+  readRecentWorkFromStorage,
+  recentWorkStorageKey,
+  type RecentWorkItem,
+} from "@/lib/planner-favorites/recent-work";
 import { WORK_TOOLS_PLANNER_ACCESS_NOTICE } from "@/lib/public/public-ux-copy";
 import { uiLabels } from "@/lib/ui-labels";
 
@@ -50,6 +59,7 @@ interface HomeClientProps {
   claimDocuments: PublicClaimDocument[];
   knowledgeArticles: PublicKnowledgeArticleListItem[];
   publicStats: HomePublicStats;
+  plannerFavoritesEnabled: boolean;
 }
 
 const QUICK_KEYWORDS = [
@@ -66,30 +76,17 @@ export function HomeClient({
   claimDocuments,
   knowledgeArticles,
   publicStats,
+  plannerFavoritesEnabled,
 }: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [recents, setRecents] = useState<
-    Array<{ id: string; label: string; href: string; type: string }>
-  >([]);
+  const [recents, setRecents] = useState<RecentWorkItem[]>([]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const savedRecents = window.localStorage.getItem("plannerdesk.home.recents");
-    if (savedRecents) {
-      try {
-        const parsed = JSON.parse(savedRecents) as Array<{
-          id: string;
-          label: string;
-          href: string;
-          type: string;
-        }>;
-        setTimeout(() => setRecents(parsed), 0);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
+    if (typeof window === "undefined" || !plannerFavoritesEnabled) return;
+    const savedRecents = window.localStorage.getItem(recentWorkStorageKey());
+    setTimeout(() => setRecents(readRecentWorkFromStorage(savedRecents)), 0);
+  }, [plannerFavoritesEnabled]);
 
   const searchResults = (() => {
     if (!searchQuery.trim()) return [];
@@ -166,15 +163,14 @@ export function HomeClient({
     return items.slice(0, 8);
   })();
 
-  const trackRecent = (item: {
-    id: string;
-    label: string;
-    href: string;
-    type: string;
-  }) => {
-    const updated = [item, ...recents.filter((r) => r.id !== item.id)].slice(0, 4);
+  const trackRecent = (item: RecentWorkItem) => {
+    if (!plannerFavoritesEnabled || typeof window === "undefined") return;
+    const updated = pushRecentWorkItem(recents, item);
     setRecents(updated);
-    window.localStorage.setItem("plannerdesk.home.recents", JSON.stringify(updated));
+    window.localStorage.setItem(
+      recentWorkStorageKey(),
+      JSON.stringify(updated),
+    );
   };
 
   return (
@@ -456,17 +452,27 @@ export function HomeClient({
         </section>
 
         <div className="space-y-6">
-          <PlannerWorkFavoritesPanel
-            claimDocuments={claimDocuments}
-            insurers={insurers.map((ins) => ({ id: ins.id, name: ins.name }))}
-            knowledgeArticles={knowledgeArticles}
-          />
+          {plannerFavoritesEnabled ? (
+            <PlannerFavoritesScope enabled>
+              <PlannerWorkFavoritesPanel
+                claimDocuments={claimDocuments}
+                insurers={insurers.map((ins) => ({ id: ins.id, name: ins.name }))}
+                knowledgeArticles={knowledgeArticles}
+              />
+            </PlannerFavoritesScope>
+          ) : (
+            <PlannerFavoritesLoginPrompt callbackPath="/" />
+          )}
 
+          {plannerFavoritesEnabled ? (
           <section className={`rounded-xl border border-[#E3DED4] bg-white p-5 ${shadows.card}`}>
             <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
               <Clock className="h-3.5 w-3.5 text-[#B9975B]" />
               최근 사용
             </h2>
+            <p className={`mt-2 break-keep ${textStyles.small}`}>
+              {RECENT_WORK_PII_NOTICE}
+            </p>
             {recents.length > 0 ? (
               <ul className="mt-3 space-y-2">
                 {recents.map((rec) => (
@@ -498,6 +504,7 @@ export function HomeClient({
               </div>
             )}
           </section>
+          ) : null}
         </div>
       </div>
 

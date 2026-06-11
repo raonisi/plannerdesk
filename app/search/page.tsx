@@ -18,6 +18,8 @@ import {
   domainToQueryParam,
   parsePublicSearchDomain,
 } from "@/lib/search/query-validation";
+import { getWorkToolsAccess } from "@/lib/auth/access";
+import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { searchPublicContent } from "@/lib/search/public";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
@@ -44,6 +46,8 @@ export default async function SearchPage({
   const resolved = await searchParams;
   const rawQuery = resolved.q?.trim() ?? "";
   const domain = parsePublicSearchDomain(resolved.domain);
+  const workToolsAccess = await getWorkToolsAccess();
+  const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
 
   let blockedMessage: string | null = null;
   let results: Awaited<ReturnType<typeof searchPublicContent>> | null = null;
@@ -126,6 +130,7 @@ export default async function SearchPage({
           {showResults && results?.ok ? (
             <SearchResultsList
               domainFilter={domain}
+              plannerFavoritesEnabled={plannerFavoritesEnabled}
               query={rawQuery}
               results={results.results}
               total={results.total}

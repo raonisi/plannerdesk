@@ -14,13 +14,16 @@ import {
 } from "@/lib/claim-documents/claim-library";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import { ClaimDocumentFavoritesStrip } from "@/components/planner-favorites/claim-document-favorites-strip";
+import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { ClaimFormsFilters } from "./claim-forms-filters";
 import { InsurerClaimGroup } from "./insurer-claim-group";
 
 export function ClaimDocumentExplorer({
   documents,
+  plannerFavoritesEnabled = false,
 }: {
   documents: PublicClaimDocument[];
+  plannerFavoritesEnabled?: boolean;
 }) {
   const searchParams = useSearchParams();
   const insurerFromQuery = searchParams.get("insurer");
@@ -115,8 +118,11 @@ export function ClaimDocumentExplorer({
   }, []);
 
   return (
+    <PlannerFavoritesScope enabled={plannerFavoritesEnabled}>
     <div className="space-y-6">
-      <ClaimDocumentFavoritesStrip items={allItems} />
+      {plannerFavoritesEnabled ? (
+        <ClaimDocumentFavoritesStrip items={allItems} />
+      ) : null}
       <ClaimFormsFilters
         category={category}
         categoryOptions={categoryOptions}
@@ -229,5 +235,6 @@ export function ClaimDocumentExplorer({
         </div>
       )}
     </div>
+    </PlannerFavoritesScope>
   );
 }

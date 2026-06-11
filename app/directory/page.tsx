@@ -8,7 +8,9 @@ import {
   EmptyState,
   PageHero,
 } from "@/components/content-page";
+import { getWorkToolsAccess } from "@/lib/auth/access";
 import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
+import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { DirectoryExplorer } from "./directory-explorer";
@@ -42,10 +44,12 @@ const t = {
 };
 
 export default async function DirectoryPage() {
-  const [result, claimResult] = await Promise.all([
+  const [result, claimResult, workToolsAccess] = await Promise.all([
     getPublicInsurers(),
     getPublicClaimDocuments(),
+    getWorkToolsAccess(),
   ]);
+  const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
   const claimDocuments =
     claimResult.status === "ok" && claimResult.data.length > 0
       ? claimResult.data
@@ -81,6 +85,7 @@ export default async function DirectoryPage() {
             <DirectoryExplorer
               claimDocuments={claimDocuments}
               insurers={result.insurers}
+              plannerFavoritesEnabled={plannerFavoritesEnabled}
             />
           )}
 

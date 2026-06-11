@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
+import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { LOCAL_FAVORITES_DEVICE_NOTICE } from "@/lib/planner-favorites/copy";
 import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
@@ -92,9 +93,11 @@ function toChosung(value: string) {
 export function DirectoryExplorer({
   insurers,
   claimDocuments,
+  plannerFavoritesEnabled = false,
 }: {
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
+  plannerFavoritesEnabled?: boolean;
 }) {
   const searchParams = useSearchParams();
   const searchFromQuery = searchParams.get("search");
@@ -108,6 +111,9 @@ export function DirectoryExplorer({
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const { isFavorite, toggle, count: favoriteCount } = useFavorites();
+  const visibleTabs = plannerFavoritesEnabled
+    ? tabOptions
+    : tabOptions.filter((tab) => tab.value !== "favorites");
 
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [correctionPreselectedId, setCorrectionPreselectedId] = useState<
@@ -168,6 +174,7 @@ export function DirectoryExplorer({
     activeTab === "favorites" && filteredInsurers.length === 0;
 
   return (
+    <PlannerFavoritesScope enabled={plannerFavoritesEnabled}>
     <div className="space-y-6">
       {insurerFromQueryMatch ? (
         <section
@@ -196,7 +203,7 @@ export function DirectoryExplorer({
       {/* 탭 영역 */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          {tabOptions.map((tab) => (
+          {visibleTabs.map((tab) => (
             <ViewTab
               active={activeTab === tab.value}
               key={tab.value}
@@ -262,9 +269,9 @@ export function DirectoryExplorer({
               <InsurerActionCard
                 claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
                 insurer={insurer}
-                isFavorite={isFavorite(insurer.id)}
+                isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
                 onRequestCorrection={openCorrectionRequest}
-                onToggleFavorite={toggle}
+                onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
               />
             </div>
           ))}
@@ -309,6 +316,7 @@ export function DirectoryExplorer({
         preselectedInsurerId={correctionPreselectedId}
       />
     </div>
+    </PlannerFavoritesScope>
   );
 }
 

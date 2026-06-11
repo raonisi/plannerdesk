@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
-import { FavoriteButton } from "@/components/launcher/favorite-button";
+import { GatedFavoriteButton } from "@/components/planner-favorites/gated-favorite-button";
 import { claimLibraryFavoriteId } from "@/lib/planner-favorites/claim-favorite-id";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
 import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
@@ -95,8 +95,9 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
             <span className="rounded-md border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
               {categoryLabel}
             </span>
-            <FavoriteButton
+            <GatedFavoriteButton
               active={isFavorite(favoriteId)}
+              callbackPath="/claim-documents"
               label={title}
               onToggle={() => toggle(favoriteId)}
             />

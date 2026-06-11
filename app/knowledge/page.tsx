@@ -2,10 +2,12 @@ import Link from "next/link";
 import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { getWorkToolsAccess } from "@/lib/auth/access";
 import {
   filterAndSortKnowledgeArchive,
   parseKnowledgeArchiveParams,
 } from "@/lib/knowledge/archive-filter";
+import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
@@ -45,7 +47,11 @@ export default async function KnowledgeArchivePage({
     resolved as Record<string, string | string[] | undefined>,
   );
 
-  const result = await getPublicKnowledgeArticles();
+  const [result, workToolsAccess] = await Promise.all([
+    getPublicKnowledgeArticles(),
+    getWorkToolsAccess(),
+  ]);
+  const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
   const articles = result.status === "ok" ? result.articles : [];
   const isCatalogEmpty = articles.length === 0;
 
@@ -94,6 +100,7 @@ export default async function KnowledgeArchivePage({
             filteredItems={filteredItems}
             isCatalogEmpty={isCatalogEmpty}
             items={articles}
+            plannerFavoritesEnabled={plannerFavoritesEnabled}
           />
 
           <PublicErrorReportNotice />

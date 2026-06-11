@@ -61,7 +61,13 @@ const FRESHNESS_RESULT_TYPES = new Set<GlobalSearchResultType>([
   "work_link",
 ]);
 
-function SearchResultCard({ result }: { result: GlobalSearchResult }) {
+function SearchResultCard({
+  result,
+  plannerFavoritesEnabled,
+}: {
+  result: GlobalSearchResult;
+  plannerFavoritesEnabled: boolean;
+}) {
   const primaryHref = resultPrimaryHref(result);
   const external = isExternalResult(result);
   const secondaryLabel = SEARCH_RESULT_SECONDARY_ACTION[result.type];
@@ -85,6 +91,7 @@ function SearchResultCard({ result }: { result: GlobalSearchResult }) {
           <span className="text-xs text-[#5f6670]">{result.categoryLabel}</span>
         ) : null}
         <SearchResultFavoriteToggle
+          plannerFavoritesEnabled={plannerFavoritesEnabled}
           resultId={result.id}
           resultType={result.type}
           title={result.title}
@@ -165,11 +172,13 @@ export function SearchResultsList({
   total,
   query,
   domainFilter = "all",
+  plannerFavoritesEnabled = false,
 }: {
   results: GlobalSearchResult[];
   total: number;
   query: string;
   domainFilter?: PublicSearchDomain;
+  plannerFavoritesEnabled?: boolean;
 }) {
   const groups = groupSearchResults(results);
   const previewLimit =
@@ -215,7 +224,10 @@ export function SearchResultsList({
                 <ul className="mt-3 space-y-3">
                   {visible.map((result) => (
                     <li key={`${result.type}:${result.id}`}>
-                      <SearchResultCard result={result} />
+                      <SearchResultCard
+                        plannerFavoritesEnabled={plannerFavoritesEnabled}
+                        result={result}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -227,7 +239,10 @@ export function SearchResultsList({
         <ul className="mt-4 space-y-3">
           {results.map((result) => (
             <li key={`${result.type}:${result.id}`}>
-              <SearchResultCard result={result} />
+              <SearchResultCard
+                plannerFavoritesEnabled={plannerFavoritesEnabled}
+                result={result}
+              />
             </li>
           ))}
         </ul>

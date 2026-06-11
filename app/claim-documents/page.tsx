@@ -10,7 +10,9 @@ import {
   EmptyState,
   PageHero,
 } from "@/components/content-page";
+import { getWorkToolsAccess } from "@/lib/auth/access";
 import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
+import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { ClaimDocumentExplorer } from "./claim-document-explorer";
 
@@ -23,7 +25,11 @@ const t = {
 };
 
 export default async function ClaimDocumentsPage() {
-  const result = await getPublicClaimDocuments();
+  const [result, workToolsAccess] = await Promise.all([
+    getPublicClaimDocuments(),
+    getWorkToolsAccess(),
+  ]);
+  const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
   const documents = result.status === "ok" ? result.data : [];
   const visibleDocuments =
     documents.length > 0 ? documents : claimDocumentCandidateFallback;
@@ -53,7 +59,10 @@ export default async function ClaimDocumentsPage() {
             />
           ) : (
             <Suspense fallback={<ExplorerLoadingPanel />}>
-              <ClaimDocumentExplorer documents={visibleDocuments} />
+              <ClaimDocumentExplorer
+                documents={visibleDocuments}
+                plannerFavoritesEnabled={plannerFavoritesEnabled}
+              />
             </Suspense>
           )}
 
