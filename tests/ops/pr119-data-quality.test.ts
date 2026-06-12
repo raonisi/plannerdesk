@@ -72,20 +72,8 @@ describe("PR119 operational data quality (fixture static, no database)", () => {
     }
   });
 
-  it("claim document candidates have unique slugs and no insurer link", () => {
-    assert.equal(claimDocumentCandidateFallback.length, 35);
-    const slugs = new Set(
-      claimDocumentCandidateFallback.map((row) => row.slug),
-    );
-    assert.equal(slugs.size, 35);
-    assert.ok(
-      claimDocumentCandidateFallback.every((row) => row.insurerId === null),
-    );
-    assert.ok(
-      claimDocumentCandidateFallback.every((row) =>
-        row.cautionNote?.includes("보험금 지급"),
-      ),
-    );
+  it("claim document fallback does not expose external archive candidates", () => {
+    assert.equal(claimDocumentCandidateFallback.length, 0);
   });
 
   it("knowledge seed items are needs_review only", () => {

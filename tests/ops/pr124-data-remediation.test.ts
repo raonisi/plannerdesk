@@ -75,15 +75,7 @@ describe("PR124 data remediation (fixture static, no database)", () => {
     }
   });
 
-  it("claim candidates remain common reference rows without insurer link", () => {
-    assert.equal(claimDocumentCandidateFallback.length, 35);
-    assert.ok(
-      claimDocumentCandidateFallback.every((row) => row.insurerId === null),
-    );
-    assert.ok(
-      claimDocumentCandidateFallback.every((row) =>
-        row.cautionNote?.includes("보험금 지급"),
-      ),
-    );
+  it("claim candidates remain disabled until official-source review", () => {
+    assert.equal(claimDocumentCandidateFallback.length, 0);
   });
 });
