@@ -518,6 +518,10 @@ export function HomeClient({
               mode="planner"
             />
           ) : null}
+
+          {plannerFavoritesEnabled ? (
+            <HomeScreenInstallNotice compact variant="planner" />
+          ) : null}
         </div>
       </div>
 

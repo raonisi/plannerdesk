@@ -23,6 +23,7 @@ describe("PR-BS-07 PWA copy safety", () => {
     assert.match(PWA_INSTALL_AUTH_NOTICE, /권한/);
     assert.match(PWA_INSTALL_PII_NOTICE, /고객/);
     assert.match(PWA_INSTALL_PII_NOTICE, /상담 원문/);
+    assert.match(PWA_INSTALL_PII_NOTICE, /계약번호/);
   });
 
   it("forbidden phrases are absent from install UX surfaces", () => {

@@ -94,3 +94,7 @@
 ## 12. 최종 결론
 
 PlannerDesk는 **아직 PWA manifest·service worker가 없다**. PR-BS-07은 **안내형 홈화면 추가 UX**와 **No-Go·후속 조건 문서화**로 반복 방문 UX를 안전하게 개선한다. 실제 PWA shell은 icon asset과 manifest 전용 후속 PR로 분리한다.
+
+## 12. 후속: PR-BS-16
+
+[PR-BS-16 PWA Install Guide UX](./PR-BS-16-PWA-INSTALL-GUIDE-UX.md) — public/planner copy·compact 사이드 안내 보강.
