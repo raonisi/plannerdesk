@@ -105,7 +105,7 @@ function createStore(storageKey: string) {
   };
 
   const toggle = (id: string): void => {
-    if (!id) return;
+    if (!id || /[\s\n]/.test(id)) return;
     const current = getClientSnapshot();
     const next = new Set(current);
     if (next.has(id)) {

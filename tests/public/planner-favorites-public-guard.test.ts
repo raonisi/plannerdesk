@@ -61,3 +61,22 @@ describe("PR-BS-06 planner favorites public guard", () => {
     assert.match(results, /plannerFavoritesEnabled/);
   });
 });
+
+describe("PR-BS-13 planner favorites public visibility", () => {
+  it("public pages do not render favorites list without planner session", () => {
+    const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
+    assert.match(home, /plannerFavoritesEnabled\s*\?/);
+    assert.match(home, /PlannerWorkFavoritesPanel/);
+    assert.match(home, /PlannerFavoritesLoginPrompt/);
+  });
+
+  it("favorite-safety module exists for href and label guards", () => {
+    const safety = readFileSync(
+      join(ROOT, "lib/planner-favorites/favorite-safety.ts"),
+      "utf8",
+    );
+    assert.match(safety, /isUnsafeFavoriteHref/);
+    assert.match(safety, /isPlannerFavoriteAllowed/);
+    assert.match(safety, /PLANNER_FAVORITES_FORBIDDEN_STORAGE_FIELDS/);
+  });
+});

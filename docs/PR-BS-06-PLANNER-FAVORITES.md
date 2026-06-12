@@ -86,3 +86,7 @@
 ## 13. 최종 결론
 
 PR-BS-06은 **기존 client-only 즐겨찾기를 planner 세션 뒤로 제한**하고, **PII·public 노출 가드**를 코드·문서·테스트로 고정한다. 서버 저장·동기화는 후속 PR로 분리한다.
+
+## 14. 후속: PR-BS-13
+
+[PR-BS-13 Planner Favorites Limited Implementation](./PR-BS-13-PLANNER-FAVORITES.md) — href/label safety helper, UX copy, 추가 테스트.

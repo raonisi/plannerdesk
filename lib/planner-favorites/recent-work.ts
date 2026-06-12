@@ -1,3 +1,4 @@
+import { isUnsafeFavoriteHref } from "./favorite-safety";
 import { containsProhibitedFavoriteText, isProhibitedFavoriteType } from "./pii-guard";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "./storage-keys";
 
@@ -23,10 +24,8 @@ export const ALLOWED_RECENT_WORK_TYPES = new Set([
 const INTERNAL_HREF_PATTERN = /^\/(directory|claim-documents|knowledge|work-tools|search|message-templates|disclosure-links)(\/|$|\?)/;
 
 function isSafeRecentHref(href: string): boolean {
-  const trimmed = href.trim();
-  if (!trimmed.startsWith("/")) return false;
-  if (trimmed.startsWith("//")) return false;
-  return INTERNAL_HREF_PATTERN.test(trimmed);
+  if (isUnsafeFavoriteHref(href)) return false;
+  return INTERNAL_HREF_PATTERN.test(href.trim());
 }
 
 export function isAllowedRecentWorkItem(item: RecentWorkItem): boolean {

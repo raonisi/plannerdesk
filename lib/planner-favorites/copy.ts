@@ -9,9 +9,9 @@ export const LOCAL_FAVORITES_PUBLISHED_NOTICE =
 export const FAVORITE_TOGGLE_ADD_LABEL = "자주 쓰는 항목으로 저장";
 export const FAVORITE_TOGGLE_REMOVE_LABEL = "즐겨찾기 해제";
 
-export const HOME_FAVORITES_EMPTY_TITLE = "자주 쓰는 업무 항목을 모아 보세요";
+export const HOME_FAVORITES_EMPTY_TITLE = "아직 즐겨찾기가 없습니다.";
 export const HOME_FAVORITES_EMPTY_DESCRIPTION =
-  "보험사·청구서류·지식·업무 도구에서 별 아이콘을 누르면 업무 시작 화면에서 빠르게 다시 열 수 있습니다.";
+  "자주 쓰는 보험사, 청구서류, 업무 링크를 추가해두면 빠르게 다시 열 수 있습니다. 고객정보가 포함된 화면은 저장하지 마세요.";
 
 export const CLAIM_FAVORITES_SECTION_TITLE = "자주 보는 청구서류";
 export const KNOWLEDGE_FAVORITES_SECTION_TITLE = "자주 보는 지식";

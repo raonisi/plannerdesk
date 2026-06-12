@@ -1,13 +1,17 @@
 /**
- * PR-BS-06: Planner favorites / recent-work PII guard (static rules only; no input logging).
+ * PR-BS-06 / PR-BS-13: Planner favorites / recent-work PII guard (static rules only; no input logging).
  */
 
 export const PLANNER_FAVORITES_PII_NOTICE =
-  "즐겨찾기는 설계사 업무 바로가기 용도입니다. 고객명, 주민번호, 계약번호, 병력, 상담 원문 등 고객정보는 저장하지 마세요. 공식 출처와 최신성은 각 정보 화면에서 다시 확인하세요.";
+  "자주 쓰는 업무를 즐겨찾기에 추가해 빠르게 다시 열 수 있습니다. 고객정보, 상담 원문, 계약번호는 즐겨찾기에 저장하지 않습니다.";
 
 export const PLANNER_FAVORITES_FORBIDDEN_UI_PHRASES = [
   "고객별로 즐겨찾기하세요",
+  "고객별 상담을 저장하세요",
   "상담 내용을 저장하세요",
+  "상담 내용을 즐겨찾기에 보관하세요",
+  "Answer Assistant 답변을 저장하세요",
+  "계약번호로 빠르게 다시 조회하세요",
   "고객 정보를 저장하면 더 정확합니다",
   "보험금 지급 여부를 저장하세요",
   "청구 가능 여부를 저장하세요",

@@ -77,7 +77,7 @@ describe("PR-BS-06 planner favorites PII guard", () => {
   });
 
   it("copy includes required PII notice and forbids risky UI phrases", () => {
-    assert.match(PLANNER_FAVORITES_PII_NOTICE, /고객명/);
+    assert.match(PLANNER_FAVORITES_PII_NOTICE, /고객정보/);
     assert.match(PLANNER_FAVORITES_PII_NOTICE, /상담 원문/);
     assert.match(SEARCH_QUERY_FAVORITES_DEFERRED_REASON, /검색어/);
 
