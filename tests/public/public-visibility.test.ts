@@ -151,14 +151,14 @@ describe("Public visibility guards (PR110, no database)", () => {
         assert.ok(
           result.data.some(
             (entry) =>
-              entry.title === "삼성화재 상품공시실" &&
+              entry.id === "disclosure-product-samsung-fire" &&
               entry.url === "https://www.samsungfire.com/page/VH.REIF0011.do",
           ),
         );
         assert.ok(
           result.data.some(
             (entry) =>
-              entry.title === "캐롯손해보험 약관 조회" &&
+              entry.id === "disclosure-terms-carrot-digital" &&
               entry.url ===
                 "https://www.carrotins.com/desktop/disclosure/sale/?afcDtFlgcd",
           ),
