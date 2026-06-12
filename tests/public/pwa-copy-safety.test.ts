@@ -52,13 +52,10 @@ describe("PR-BS-07 PWA copy safety", () => {
     assert.doesNotMatch(noticeBlock, /로그인 없이 설계사/i);
   });
 
-  it("work-tools install notice only renders behind planner access guard", () => {
+  it("work-tools install notice uses public variant on open page", () => {
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(page, /getWorkToolsAccess/);
-    assert.match(
-      page,
-      /getWorkToolsAccess[\s\S]*"locked"[\s\S]*AccessRestrictedPanel[\s\S]*"denied"[\s\S]*AccessRestrictedPanel[\s\S]*<HomeScreenInstallNotice/,
-    );
+    assert.doesNotMatch(page, /getWorkToolsAccess/);
+    assert.match(page, /<HomeScreenInstallNotice variant="public"/);
     const jsxUsages = page.match(/<HomeScreenInstallNotice/g) ?? [];
     assert.equal(jsxUsages.length, 1);
   });

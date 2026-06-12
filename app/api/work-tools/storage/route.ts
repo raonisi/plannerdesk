@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
+import { workToolsPublicReadRouteGuard } from "@/lib/api/work-tools-route-guard";
 import {
   buildWorkToolsStorageListUrl,
   buildWorkToolsStoragePublicUrl,
@@ -17,7 +17,7 @@ interface StorageListFile {
 }
 
 export async function GET(request: NextRequest) {
-  const denied = await workToolsRouteGuard();
+  const denied = await workToolsPublicReadRouteGuard();
   if (denied) return denied;
 
   const config = getWorkToolsSupabaseConfig();

@@ -29,6 +29,10 @@ import {
   SILBI_RESULT_SECTION_TITLE,
   WORK_TOOLS_CLAIM_BOUNDARY_NOTICE,
 } from "@/lib/work-tools/claim-boundary-copy";
+import {
+  filterPublicWorkToolGroups,
+  isWorkToolIdPublicVisible,
+} from "@/lib/work-tools/work-tools-registry";
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder" | "internal";
 
@@ -626,7 +630,7 @@ const toolGroups: ToolGroup[] = [
   }
 ];
 
-
+const visibleToolGroups = filterPublicWorkToolGroups(toolGroups);
 
 const statsCards = [
   {
@@ -955,7 +959,7 @@ function krw(n: number) {
 }
 
 function allTools() {
-  return toolGroups.flatMap((group) => group.tools);
+  return visibleToolGroups.flatMap((group) => group.tools);
 }
 
 function getToolCopy(id: ToolId) {
@@ -1135,7 +1139,9 @@ export function WorkToolsClient() {
     if (selectedCategory === "favorites") {
       return allTools().filter((t) => favorites.includes(t.id));
     }
-    return allTools().filter((t) => PINNED_TOOL_IDS.includes(t.id));
+    return allTools().filter(
+      (t) => PINNED_TOOL_IDS.includes(t.id) && isWorkToolIdPublicVisible(t.id),
+    );
   }, [favorites, selectedCategory]);
 
   const gridTools = useMemo(() => {
@@ -1247,7 +1253,7 @@ export function WorkToolsClient() {
       </section>
 
       {/* 5. 실행 중인 기능 화면 (Active tool view) */}
-      {activeTool && (
+      {activeTool && isWorkToolIdPublicVisible(activeTool) && (
         <section
           id="active-tool-panel"
           className="rounded-2xl border-2 border-[#B9975B] bg-white p-6 shadow-md transition-all scroll-mt-24"

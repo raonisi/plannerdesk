@@ -33,7 +33,7 @@ describe("PR-BS-07 PWA install UX (static)", () => {
 
     const workTools = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
     assert.match(workTools, /HomeScreenInstallNotice/);
-    assert.match(workTools, /getWorkToolsAccess/);
+    assert.match(workTools, /variant="public"/);
   });
 
   it("install notice component does not auto-trigger install prompt", () => {

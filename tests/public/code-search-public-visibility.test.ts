@@ -71,7 +71,7 @@ describe("PR-BS-18 code search public visibility", () => {
     assert.doesNotMatch(directory, /DiseaseCodeSearchTool/);
   });
 
-  it("policy helper denies public code search", () => {
-    assert.equal(isCodeSearchPublicAllowed(), false);
+  it("policy helper allows public code search on work-tools when complete", () => {
+    assert.equal(isCodeSearchPublicAllowed(), true);
   });
 });

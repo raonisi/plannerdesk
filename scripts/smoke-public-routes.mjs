@@ -9,6 +9,7 @@ const routes = [
   { path: "/claim-documents", expectedStatus: 200 },
   { path: "/disclosure-links", expectedStatus: 200 },
   { path: "/message-templates", expectedStatus: 200 },
+  { path: "/work-tools", expectedStatus: 200 },
   { path: "/search", expectedStatus: 200 },
   { path: "/knowledge", expectedStatus: 200 },
   { path: "/community", expectedStatus: 200 },

@@ -30,9 +30,9 @@ describe("PR-BS-13 planner favorites storage boundaries", () => {
     assert.match(recent, /sanitizeRecentWorkItems/);
   });
 
-  it("work-tools favorites stay behind planner gate", () => {
+  it("work-tools favorites use local storage on public page", () => {
     const workToolsPage = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(workToolsPage, /getWorkToolsAccess/);
+    assert.doesNotMatch(workToolsPage, /getWorkToolsAccess/);
 
     const workToolsClient = readFileSync(
       join(ROOT, "app/work-tools/work-tools-client.tsx"),

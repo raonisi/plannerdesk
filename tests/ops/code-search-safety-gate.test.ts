@@ -36,8 +36,8 @@ describe("PR-BS-18 code search safety gate", () => {
     assert.equal(isCodeSearchHighRiskType("insurer"), false);
   });
 
-  it("blocks code search from public allowance", () => {
-    assert.equal(isCodeSearchPublicAllowed(), false);
+  it("allows code search when registry marks tools complete (PR-BS-19C)", () => {
+    assert.equal(isCodeSearchPublicAllowed(), true);
   });
 
   it("maps work-tools tool ids for code search panels", () => {
@@ -47,17 +47,19 @@ describe("PR-BS-18 code search safety gate", () => {
     assert.equal(isCodeSearchWorkToolsToolId("bmi-calculator"), false);
   });
 
-  it("keeps work-tools page and API guards", () => {
+  it("keeps public read guard on code APIs and protected planner guard available", () => {
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(page, /getWorkToolsAccess/);
+    assert.doesNotMatch(page, /getWorkToolsAccess/);
     for (const route of CODE_API_ROUTES) {
       const src = readFileSync(join(ROOT, route), "utf8");
-      assert.match(src, /workToolsRouteGuard/, route);
+      assert.match(src, /workToolsPublicReadRouteGuard/, route);
     }
     const guard = readFileSync(
       join(ROOT, "lib/api/work-tools-route-guard.ts"),
       "utf8",
     );
+    assert.match(guard, /workToolsPublicReadRouteGuard/);
+    assert.match(guard, /workToolsRouteGuard/);
     assert.match(guard, /getWorkToolsAccess/);
     assert.match(guard, /401/);
     assert.match(guard, /403/);

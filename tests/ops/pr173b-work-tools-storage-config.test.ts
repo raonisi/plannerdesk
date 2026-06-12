@@ -26,7 +26,7 @@ describe("PR173-B work-tools storage hardcoded key removal (static)", () => {
     assert.doesNotMatch(route, HARDCODED_SUPABASE_HOST);
     assert.match(route, /getWorkToolsSupabaseConfig/);
     assert.match(route, /WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR/);
-    assert.match(route, /workToolsRouteGuard/);
+    assert.match(route, /workToolsPublicReadRouteGuard/);
   });
 
   it("storage route does not log secrets or provider details", () => {

@@ -36,6 +36,9 @@ describe("PR-BS-06 planner favorites access", () => {
   });
 
   it("directory and claim pages pass planner favorites flag", () => {
+    const workTools = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
+    assert.doesNotMatch(workTools, /getWorkToolsAccess/);
+
     for (const rel of [
       "app/directory/page.tsx",
       "app/claim-documents/page.tsx",

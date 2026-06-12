@@ -54,7 +54,7 @@ import {
   recentWorkStorageKey,
   type RecentWorkItem,
 } from "@/lib/planner-favorites/recent-work";
-import { WORK_TOOLS_PLANNER_ACCESS_NOTICE } from "@/lib/public/public-ux-copy";
+import { WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION } from "@/lib/work-tools/work-tools-public-copy";
 import { uiLabels } from "@/lib/ui-labels";
 
 interface HomeClientProps {
@@ -337,7 +337,7 @@ export function HomeClient({
           />
           <HomeQuickLaunchCard
             actionLabel="도구함 열기"
-            description={WORK_TOOLS_PLANNER_ACCESS_NOTICE}
+            description={WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION}
             href="/work-tools"
             icon={Wrench}
             iconToneClass={launcherIconTone.navy}

@@ -18,6 +18,7 @@ import {
   PUBLIC_KNOWLEDGE_WHERE,
 } from "@/lib/public/knowledge-articles";
 import {
+  getPublicDisclosureLinks,
   isDisclosureLinkPubliclyVisible,
   PUBLIC_DISCLOSURE_LINK_WHERE,
 } from "@/lib/public/disclosure-links";
@@ -137,6 +138,38 @@ describe("Public visibility guards (PR110, no database)", () => {
         }),
         false,
       );
+    });
+
+    it("falls back to static insurer disclosure links without database access", async () => {
+      const previousDatabaseUrl = process.env.DATABASE_URL;
+      delete process.env.DATABASE_URL;
+
+      try {
+        const result = await getPublicDisclosureLinks();
+        assert.equal(result.status, "ok");
+        assert.equal(result.data.length, 86);
+        assert.ok(
+          result.data.some(
+            (entry) =>
+              entry.title === "삼성화재 상품공시실" &&
+              entry.url === "https://www.samsungfire.com/page/VH.REIF0011.do",
+          ),
+        );
+        assert.ok(
+          result.data.some(
+            (entry) =>
+              entry.title === "캐롯손해보험 약관 조회" &&
+              entry.url ===
+                "https://www.carrotins.com/desktop/disclosure/sale/?afcDtFlgcd",
+          ),
+        );
+      } finally {
+        if (previousDatabaseUrl === undefined) {
+          delete process.env.DATABASE_URL;
+        } else {
+          process.env.DATABASE_URL = previousDatabaseUrl;
+        }
+      }
     });
   });
 

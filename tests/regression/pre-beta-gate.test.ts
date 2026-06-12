@@ -59,15 +59,15 @@ describe("PR173-D pre-beta regression gate manifest (static, no DB)", () => {
     assert.equal(canAccessWorkTools({ role: "anonymous_public" }), false);
   });
 
-  it("work-tools page and api routes use planner guard", () => {
+  it("work-tools page is public and read apis use public read guard", () => {
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(page, /getWorkToolsAccess/);
+    assert.doesNotMatch(page, /getWorkToolsAccess/);
     for (const route of [
       "app/api/work-tools/diseases/route.ts",
       "app/api/work-tools/storage/route.ts",
     ]) {
       const src = readFileSync(join(ROOT, route), "utf8");
-      assert.match(src, /workToolsRouteGuard/);
+      assert.match(src, /workToolsPublicReadRouteGuard/);
     }
   });
 

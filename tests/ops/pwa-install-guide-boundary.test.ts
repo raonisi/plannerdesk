@@ -33,10 +33,10 @@ describe("PR-BS-16 PWA install guide boundary", () => {
     assert.match(notice, /PWA_INSTALL_NO_OFFLINE_NOTICE/);
   });
 
-  it("work-tools page unchanged for install guard wiring", () => {
+  it("work-tools page uses public install notice without service worker", () => {
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(page, /getWorkToolsAccess/);
-    assert.match(page, /HomeScreenInstallNotice/);
+    assert.doesNotMatch(page, /getWorkToolsAccess/);
+    assert.match(page, /HomeScreenInstallNotice variant="public"/);
     assert.doesNotMatch(page, /serviceWorker/i);
   });
 });

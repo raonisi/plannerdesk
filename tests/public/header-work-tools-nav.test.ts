@@ -28,9 +28,9 @@ describe("Header work-tools nav entry (PR-UI-NAV-01)", () => {
     }
   });
 
-  it("work-tools route keeps server-side access guard", () => {
+  it("work-tools route is public with safety notice", () => {
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(page, /getWorkToolsAccess/);
-    assert.match(page, /AccessRestrictedPanel/);
+    assert.doesNotMatch(page, /getWorkToolsAccess/);
+    assert.match(page, /WorkToolsPublicNotice/);
   });
 });

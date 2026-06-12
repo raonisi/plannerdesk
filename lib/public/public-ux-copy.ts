@@ -19,6 +19,7 @@ export const PUBLIC_UX_ACCESS_RESTRICTED_TITLE = "이 화면은 권한이 필요
 export const PUBLIC_UX_ACCESS_RESTRICTED_BODY =
   "접근 권한이 필요한 경우 운영 기준에 따라 확인이 필요합니다. 권한 우회 방법은 안내하지 않습니다.";
 
+/** @deprecated PR-BS-19C — use WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION for public home card. */
 export const WORK_TOOLS_PLANNER_ACCESS_NOTICE =
   "업무 도구는 검증 완료된 설계사 권한으로 이용할 수 있습니다.";
 

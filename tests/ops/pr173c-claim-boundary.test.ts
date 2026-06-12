@@ -55,10 +55,11 @@ describe("PR173-C work-tools claim boundary (static)", () => {
     assert.doesNotMatch(client, /예상 환급금을 가장 정확하게/);
   });
 
-  it("work-tools page is planner gated", () => {
+  it("work-tools page is public with reference notice", () => {
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(page, /getWorkToolsAccess/);
-    assert.match(page, /index:\s*false/);
+    assert.doesNotMatch(page, /getWorkToolsAccess/);
+    assert.match(page, /WorkToolsPublicNotice/);
+    assert.match(page, /index:\s*true/);
   });
 
   it("boundary notice denies payout confirmation", () => {
@@ -68,11 +69,11 @@ describe("PR173-C work-tools claim boundary (static)", () => {
     assert.doesNotMatch(SILBI_REFERENCE_BALANCE_LABEL, /보험금|환급/);
   });
 
-  it("pr173a guard remains on storage api", () => {
+  it("storage api uses public read guard (PR-BS-19C)", () => {
     const storage = readFileSync(
       join(ROOT, "app/api/work-tools/storage/route.ts"),
       "utf8",
     );
-    assert.match(storage, /workToolsRouteGuard/);
+    assert.match(storage, /workToolsPublicReadRouteGuard/);
   });
 });

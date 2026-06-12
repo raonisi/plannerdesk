@@ -4,6 +4,7 @@ import {
   DisclosureLinkTargetType,
   type Prisma,
 } from "@prisma/client";
+import { disclosureLinkEntries } from "@/lib/content/disclosure-links";
 import { prisma } from "@/lib/prisma";
 import { isValidAdminUrl } from "@/lib/validators/disclosure-link";
 
@@ -92,9 +93,43 @@ function sanitizePublicUrl(url: string): string | null {
   return isValidAdminUrl(url) ? url.trim() : null;
 }
 
+function staticDisclosureToPublicLink(
+  entry: (typeof disclosureLinkEntries)[number],
+): PublicDisclosureLink {
+  const insurerName = entry.title
+    .replace(/\s*(상품공시실|약관 조회)$/, "")
+    .trim();
+
+  return {
+    id: entry.id,
+    title: entry.title,
+    description: entry.description,
+    url: entry.sourceUrl ? sanitizePublicUrl(entry.sourceUrl) : null,
+    category: entry.category as DisclosureLinkCategory,
+    targetType: DisclosureLinkTargetType.insurer,
+    sourceName: insurerName || "보험사 공식 채널",
+    isOfficialSource: true,
+    lastVerifiedAt: entry.lastVerifiedAt,
+    publishedAt: entry.lastVerifiedAt,
+    sortOrder: 100,
+    insurerId: entry.id.replace(/^disclosure-(product|terms)-/, "").trim(),
+    insurerName: insurerName || null,
+  };
+}
+
+function getStaticDisclosureFallback(): PublicDisclosureLink[] {
+  return disclosureLinkEntries
+    .filter(
+      (entry) =>
+        entry.verificationStatus === "verified" ||
+        entry.verificationStatus === "needs_review",
+    )
+    .map(staticDisclosureToPublicLink);
+}
+
 export async function getPublicDisclosureLinks(): Promise<PublicDisclosureLinksResult> {
   if (!process.env.DATABASE_URL?.trim()) {
-    return { status: "error" };
+    return { status: "ok", data: getStaticDisclosureFallback() };
   }
 
   try {
@@ -120,9 +155,14 @@ export async function getPublicDisclosureLinks(): Promise<PublicDisclosureLinksR
       };
     });
 
-    return { status: "ok", data };
+    const seen = new Set(data.map((entry) => entry.id));
+    const fallback = getStaticDisclosureFallback().filter(
+      (entry) => !seen.has(entry.id),
+    );
+
+    return { status: "ok", data: [...data, ...fallback] };
   } catch {
     console.warn("[plannerdesk] getPublicDisclosureLinks failed.");
-    return { status: "error" };
+    return { status: "ok", data: getStaticDisclosureFallback() };
   }
 }

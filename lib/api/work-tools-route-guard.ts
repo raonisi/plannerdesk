@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { getWorkToolsAccess } from "@/lib/auth/access";
 
-/** Server-side guard for /api/work-tools/* — returns 401/403 without internal details. */
+/** PR-BS-19C: read-only public work-tools APIs — no session required. */
+export async function workToolsPublicReadRouteGuard(): Promise<NextResponse | null> {
+  return null;
+}
+
+/** Planner/admin guard for protected /api/work-tools/* write or sensitive routes. */
 export async function workToolsRouteGuard(): Promise<NextResponse | null> {
   const access = await getWorkToolsAccess();
 

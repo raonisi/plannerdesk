@@ -1,9 +1,12 @@
 /**
- * PR-BS-18: Disease / surgery / KCD code search safety gate (planner-only Work Tools).
+ * PR-BS-18 / PR-BS-19C: Disease / surgery / KCD code search safety gate.
  *
- * - Not public search, not Answer Assistant retrieval, not payout/claim judgment.
+ * - Public on /work-tools when marked complete in registry; not site-wide public search.
+ * - Not Answer Assistant retrieval, not payout/claim judgment.
  * - External BohumSchool archive proxy is an investigation aid — not an official source.
  */
+
+import { isWorkToolIdPublicVisible } from "@/lib/work-tools/work-tools-registry";
 
 export const CODE_SEARCH_HIGH_RISK_TYPES = [
   "diseaseCode",
@@ -64,11 +67,10 @@ export const CODE_SEARCH_FORBIDDEN_INPUT_HINTS = [
 ] as const;
 
 export const CODE_SEARCH_ALLOWED_NOTICES = [
-  "코드 검색은 설계사 업무 참고용입니다.",
-  "보험금 지급 여부를 확정하지 않습니다.",
-  "청구 가능 여부는 약관, 진단 내용, 보험사 심사 기준에 따라 달라질 수 있습니다.",
-  "고객 안내 전 공식 약관과 보험사 기준을 확인하세요.",
-  "진단서, 병력, 상담 원문, 고객정보는 입력하지 마세요.",
+  "참고용 정보입니다.",
+  "보험금 지급 여부는 약관, 가입 내용, 진단 내용, 보험사 심사 기준에 따라 달라질 수 있습니다.",
+  "청구 가능 여부는 보험사 공식 안내와 약관을 함께 확인해야 합니다.",
+  "고객정보, 주민번호, 계약번호, 진단서, 상담 원문은 입력하지 마세요.",
 ] as const;
 
 /** External archive used as planner-only proxy — not official KCD/약관 source (PR-BS-09 / BS-18). */
@@ -99,9 +101,9 @@ export function isCodeSearchHighRiskType(type: string): boolean {
   return (CODE_SEARCH_HIGH_RISK_TYPES as readonly string[]).includes(type);
 }
 
-/** Code search is never a public surface candidate (PR-BS-18 default). */
+/** True when all code-search Work Tools panels are complete and public (PR-BS-19C). */
 export function isCodeSearchPublicAllowed(): boolean {
-  return false;
+  return CODE_SEARCH_WORK_TOOLS_TOOL_IDS.every((id) => isWorkToolIdPublicVisible(id));
 }
 
 export function isCodeSearchWorkToolsToolId(toolId: string): boolean {

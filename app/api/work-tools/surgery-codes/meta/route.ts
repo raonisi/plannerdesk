@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { workToolsRouteGuard } from "@/lib/api/work-tools-route-guard";
+import { workToolsPublicReadRouteGuard } from "@/lib/api/work-tools-route-guard";
 
 export async function GET() {
-  const denied = await workToolsRouteGuard();
+  const denied = await workToolsPublicReadRouteGuard();
   if (denied) return denied;
 
   try {

@@ -24,13 +24,13 @@ describe("PR-BS-14 work link admin fields public guard", () => {
 
   it("work-tools guard files are unchanged by work-link review module", () => {
     const workToolsPage = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
-    assert.match(workToolsPage, /getWorkToolsAccess/);
     assert.doesNotMatch(workToolsPage, /work-links\/review/);
 
     const guard = readFileSync(
       join(ROOT, "lib/api/work-tools-route-guard.ts"),
       "utf8",
     );
+    assert.match(guard, /workToolsPublicReadRouteGuard/);
     assert.match(guard, /workToolsRouteGuard/);
     assert.doesNotMatch(guard, /work-links\/review/);
   });
