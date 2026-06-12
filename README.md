@@ -111,8 +111,6 @@ See [docs/PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md](docs/PR-BS-08-CARD-PAYMENT
 
 See [docs/PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md](docs/PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md) for diagnosis/surgery code search boundary review (planner-only; no payout judgment).
 
-See [docs/PR-BS-19-PUBLIC-BETA-READINESS-REVIEW.md](docs/PR-BS-19-PUBLIC-BETA-READINESS-REVIEW.md) for the PR-BS-10~18 public beta readiness synthesis and PR-BS-19A claim-form asset remediation note; this does not start public beta.
-
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:
