@@ -71,6 +71,8 @@
 | copy | `lib/search/constants.ts`, `lib/search/labels.ts` |
 | 테스트 | `tests/public/search-filter.test.ts` |
 
+구현 완료·문구 보강: [PR-BS-11 Public Search Filter UI](./PR-BS-11-PUBLIC-SEARCH-FILTER-UI.md)
+
 ---
 
 ## 7. 후속 PR 후보

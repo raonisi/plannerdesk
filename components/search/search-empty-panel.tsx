@@ -3,6 +3,7 @@ import {
   SEARCH_EMPTY_CORRECTION_HINT,
   SEARCH_EMPTY_FILTER_HINT,
   SEARCH_EMPTY_MESSAGE,
+  SEARCH_EMPTY_PII_NOTICE,
   SEARCH_EMPTY_TIPS,
   SEARCH_EMPTY_VISIBILITY_NOTE,
   SEARCH_EMPTY_WORK_LINK_NOTE,
@@ -34,6 +35,7 @@ export function SearchEmptyPanel({
           <li key={tip}>{tip}</li>
         ))}
       </ul>
+      <p className="mt-2 text-xs leading-5 text-[#5f6670]">{SEARCH_EMPTY_PII_NOTICE}</p>
       <p className="mt-3 text-xs leading-5 text-[#5f6670]">
         {SEARCH_EMPTY_FILTER_HINT}
       </p>

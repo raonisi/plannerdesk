@@ -9,6 +9,8 @@ import { SearchDomainFilter } from "@/components/search/search-domain-filter";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
 import { SearchIdlePanel } from "@/components/search/search-idle-panel";
 import {
+  SEARCH_FORM_FRESHNESS_NOTICE,
+  SEARCH_FORM_PLACEHOLDER,
   SEARCH_IDLE_PII_NOTICE,
 } from "@/lib/search/constants";
 import {
@@ -93,7 +95,7 @@ export default async function SearchPage({
                 defaultValue={rawQuery}
                 maxLength={60}
                 name="q"
-                placeholder="보험사명, 청구서류, 공시자료, 업무 키워드"
+                placeholder={SEARCH_FORM_PLACEHOLDER}
                 type="search"
               />
               <input
@@ -109,8 +111,8 @@ export default async function SearchPage({
               </button>
             </div>
             <p className="mt-2 text-xs leading-5 text-[#5f6670]">
-              {SEARCH_IDLE_PII_NOTICE} 개인정보·의료정보·계약번호·보험금 지급 판단
-              관련 검색은 제공하지 않습니다.
+              {SEARCH_IDLE_PII_NOTICE} {SEARCH_FORM_FRESHNESS_NOTICE}{" "}
+              보험금 지급·청구 가능 여부 판단 검색은 제공하지 않습니다.
             </p>
           </form>
 

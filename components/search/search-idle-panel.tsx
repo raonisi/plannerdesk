@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   SEARCH_EMPTY_WORK_LINK_NOTE,
   SEARCH_IDLE_EXAMPLES,
+  SEARCH_IDLE_FRESHNESS_NOTICE,
   SEARCH_IDLE_HINT,
   SEARCH_IDLE_PII_NOTICE,
 } from "@/lib/search/constants";
@@ -21,6 +22,9 @@ export function SearchIdlePanel() {
     <div className="rounded-md border border-[#d9c9a8] bg-[#fbf7ee] px-4 py-4 text-sm leading-6 text-[#4f5661]">
       <p className="font-semibold text-[#102235]">{SEARCH_IDLE_HINT}</p>
       <p className="mt-2 text-xs leading-5 text-[#5f6670]">{SEARCH_IDLE_PII_NOTICE}</p>
+      <p className="mt-1 text-xs leading-5 text-[#5f6670]">
+        {SEARCH_IDLE_FRESHNESS_NOTICE}
+      </p>
       <p className="mt-3 text-xs font-semibold text-[#102235]">검색 예시</p>
       <ul className="mt-2 flex flex-wrap gap-2">
         {SEARCH_IDLE_EXAMPLES.map((example) => (

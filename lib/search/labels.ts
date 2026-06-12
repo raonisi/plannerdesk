@@ -34,7 +34,7 @@ export const SEARCH_DOMAIN_DISPLAY_ORDER: GlobalSearchResultType[] = [
   "work_link",
 ];
 
-/** Distinct badge styles per public search domain (PR-BS-03). */
+/** Distinct badge styles per public search domain (PR-BS-03 / PR-BS-11). */
 export const SEARCH_DOMAIN_BADGE_CLASS: Record<GlobalSearchResultType, string> = {
   insurer: "border-[#c8d2dc] bg-[#eef3f7] text-[#102235]",
   claim_document: "border-indigo-100 bg-indigo-50 text-indigo-800",
