@@ -45,6 +45,8 @@
 | 검색 | `app/search/search-results.tsx`, `lib/search/public.ts` |
 | 테스트 | `tests/public/data-freshness.test.ts` |
 
+구현 완료: [PR-BS-10 Data Freshness UI](./PR-BS-10-DATA-FRESHNESS-UI.md)
+
 ---
 
 ## 4. Public 노출 금지

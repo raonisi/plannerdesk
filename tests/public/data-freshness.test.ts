@@ -7,6 +7,7 @@ import {
   DATA_FRESHNESS_COPY,
   DATA_FRESHNESS_FORBIDDEN_PHRASES,
   formatVerifiedDate,
+  formatVerifiedDateShort,
   getFreshnessDateLabel,
   getOfficialSourceLabel,
   resolveOfficialSourceUrl,
@@ -14,7 +15,7 @@ import {
 
 const ROOT = process.cwd();
 
-describe("PR-BS-02 data freshness UX (static, no DB)", () => {
+describe("PR-BS-10 data freshness UI (static, no DB)", () => {
   it("formats verified dates without fabricating missing values", () => {
     assert.equal(formatVerifiedDate("2024-03-15"), "2024.03.15");
     assert.equal(formatVerifiedDate(null), DATA_FRESHNESS_COPY.missingDate);
@@ -23,23 +24,38 @@ describe("PR-BS-02 data freshness UX (static, no DB)", () => {
     assert.match(getFreshnessDateLabel("2024-01-02").label, /2024\.01\.02/);
   });
 
+  it("treats invalid dates as missing without broken UI text", () => {
+    assert.equal(formatVerifiedDateShort("not-a-date"), null);
+    assert.equal(formatVerifiedDate("not-a-date"), DATA_FRESHNESS_COPY.missingDate);
+    assert.equal(getFreshnessDateLabel("not-a-date").hasDate, false);
+    assert.equal(getFreshnessDateLabel("not-a-date").label, DATA_FRESHNESS_COPY.missingDate);
+  });
+
   it("prefers lastVerifiedAt over reviewedAt", () => {
     const label = getFreshnessDateLabel("2024-05-01", "2024-06-01");
     assert.match(label.label, /2024\.05\.01/);
   });
 
-  it("shows official source link only when URL exists", () => {
+  it("shows official source link only when officialSourceUrl exists", () => {
     const withUrl = getOfficialSourceLabel("https://example.com/official");
     assert.equal(withUrl.kind, "link");
     assert.equal(withUrl.label, DATA_FRESHNESS_COPY.officialSourceConfirm);
 
-    const missing = getOfficialSourceLabel(null, "  ");
-    assert.equal(missing.kind, "missing");
-    assert.equal(missing.label, DATA_FRESHNESS_COPY.missingSource);
+    const missingOfficial = getOfficialSourceLabel(null);
+    assert.equal(missingOfficial.kind, "missing");
+    assert.equal(missingOfficial.label, DATA_FRESHNESS_COPY.missingSource);
 
-    assert.equal(
-      resolveOfficialSourceUrl(null, "https://fallback.example"),
-      "https://fallback.example",
+    assert.equal(resolveOfficialSourceUrl("https://example.com/official"), "https://example.com/official");
+    assert.equal(resolveOfficialSourceUrl(null), null);
+    assert.equal(resolveOfficialSourceUrl("  "), null);
+  });
+
+  it("does not treat non-official URLs as official source confirmation", () => {
+    const label = getOfficialSourceLabel(undefined);
+    assert.equal(label.kind, "missing");
+    assert.doesNotMatch(
+      readFileSync(join(ROOT, "lib/public/data-freshness.ts"), "utf8"),
+      /sourceUrl\?\./,
     );
   });
 
@@ -72,7 +88,7 @@ describe("PR-BS-02 data freshness UX (static, no DB)", () => {
     assert.doesNotMatch(meta, /verificationStatus|reviewStatus/);
   });
 
-  it("public directory and claim list integrate freshness meta", () => {
+  it("public directory, claim list, and search integrate freshness meta", () => {
     const card = readFileSync(
       join(ROOT, "components/directory/insurer-action-card.tsx"),
       "utf8",
@@ -86,6 +102,7 @@ describe("PR-BS-02 data freshness UX (static, no DB)", () => {
     assert.match(item, /DataFreshnessMeta/);
     assert.match(search, /DataFreshnessMeta/);
     assert.doesNotMatch(item, /StatusBadge/);
+    assert.match(item, /kind === "pdf"[\s\S]*DataFreshnessMeta/);
   });
 
   it("public fetch visibility guards remain unchanged", () => {
@@ -100,10 +117,11 @@ describe("PR-BS-02 data freshness UX (static, no DB)", () => {
     assert.match(claims, /PUBLIC_VERIFICATION_STATUSES/);
   });
 
-  it("search maps existing freshness fields without schema change", () => {
+  it("search maps officialSourceUrl without claimFormUrl fallback", () => {
     const search = readFileSync(join(ROOT, "lib/search/public.ts"), "utf8");
     assert.match(search, /lastVerifiedAt/);
     assert.match(search, /officialSourceUrl/);
+    assert.doesNotMatch(search, /officialSourceUrl:\s*row\.officialSourceUrl \?\? row\.claimFormUrl/);
     assert.doesNotMatch(search, /prisma\.\$executeRaw|migrate|createMany/i);
   });
 });

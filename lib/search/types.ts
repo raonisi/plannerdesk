@@ -32,7 +32,7 @@ export interface GlobalSearchResult {
   sourceLabel?: string;
   updatedAt?: string;
   publishedAt?: string;
-  /** PR-BS-02: public-safe freshness metadata from existing fields. */
+  /** PR-BS-10: public-safe freshness metadata from existing fields. */
   lastVerifiedAt?: string;
   officialSourceUrl?: string;
 }

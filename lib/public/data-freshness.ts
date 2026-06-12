@@ -1,6 +1,7 @@
 /**
- * Public data freshness labels (PR-BS-02).
+ * Public data freshness labels (PR-BS-02 / PR-BS-10).
  * Uses existing metadata only — never fabricates dates or source URLs.
+ * Official source links render only when `officialSourceUrl` is set.
  */
 
 export const DATA_FRESHNESS_FORBIDDEN_PHRASES = [
@@ -34,7 +35,7 @@ function toIsoDateString(value: string | Date): string | null {
   if (!trimmed) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
   const parsed = new Date(trimmed);
-  if (Number.isNaN(parsed.getTime())) return trimmed;
+  if (Number.isNaN(parsed.getTime())) return null;
   return parsed.toISOString().slice(0, 10);
 }
 
@@ -46,7 +47,7 @@ export function formatVerifiedDateShort(
   const iso = toIsoDateString(value);
   if (!iso) return null;
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  return match ? `${match[1]}.${match[2]}.${match[3]}` : iso;
+  return match ? `${match[1]}.${match[2]}.${match[3]}` : null;
 }
 
 /** Date-only label for legacy surfaces (e.g. disclosure cards). */
@@ -58,12 +59,9 @@ export function formatVerifiedDate(
 
 export function resolveOfficialSourceUrl(
   officialSourceUrl?: string | null,
-  sourceUrl?: string | null,
 ): string | null {
   const primary = officialSourceUrl?.trim();
-  if (primary) return primary;
-  const fallback = sourceUrl?.trim();
-  return fallback || null;
+  return primary || null;
 }
 
 export type FreshnessDateLabel = {
@@ -95,9 +93,8 @@ export type OfficialSourceLabel =
 
 export function getOfficialSourceLabel(
   officialSourceUrl?: string | null,
-  sourceUrl?: string | null,
 ): OfficialSourceLabel {
-  const href = resolveOfficialSourceUrl(officialSourceUrl, sourceUrl);
+  const href = resolveOfficialSourceUrl(officialSourceUrl);
   if (href) {
     return {
       kind: "link",

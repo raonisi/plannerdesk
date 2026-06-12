@@ -60,6 +60,7 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
             {trustHint ? (
               <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
             ) : null}
+            <DataFreshnessMeta className="mt-2" showClaimNotice />
           </div>
           <div className="grid gap-2 sm:flex lg:justify-end">
             <ExternalTabAnchor
@@ -118,7 +119,6 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
             lastVerifiedAt={doc.lastVerifiedAt}
             officialSourceUrl={doc.officialSourceUrl}
             showClaimNotice
-            sourceUrl={doc.claimFormUrl}
           />
         </div>
         <div className="grid gap-2 sm:flex lg:justify-end">

@@ -163,7 +163,7 @@ async function searchClaimDocuments(
     sourceLabel: row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
     lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
-    officialSourceUrl: row.officialSourceUrl ?? row.claimFormUrl ?? undefined,
+    officialSourceUrl: row.officialSourceUrl ?? undefined,
   }));
 }
 

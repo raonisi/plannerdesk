@@ -9,7 +9,6 @@ export type DataFreshnessMetaProps = {
   lastVerifiedAt?: string | Date | null;
   reviewedAt?: string | Date | null;
   officialSourceUrl?: string | null;
-  sourceUrl?: string | null;
   /** When true, shows claim-specific guidance (non-compact only). */
   showClaimNotice?: boolean;
   compact?: boolean;
@@ -25,13 +24,12 @@ export function DataFreshnessMeta({
   lastVerifiedAt,
   reviewedAt,
   officialSourceUrl,
-  sourceUrl,
   showClaimNotice = false,
   compact = false,
   className = "",
 }: DataFreshnessMetaProps) {
   const date = getFreshnessDateLabel(lastVerifiedAt, reviewedAt);
-  const source = getOfficialSourceLabel(officialSourceUrl, sourceUrl);
+  const source = getOfficialSourceLabel(officialSourceUrl);
 
   if (compact) {
     return (

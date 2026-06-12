@@ -631,11 +631,6 @@ function CardHeader({
               <DataFreshnessMeta
                 lastVerifiedAt={insurer.lastVerifiedAt}
                 officialSourceUrl={insurer.officialWebsiteUrl}
-                sourceUrl={
-                  insurer.claimPageUrl ??
-                  insurer.claimFormUrl ??
-                  insurer.termsUrl
-                }
               />
             </div>
           </div>
