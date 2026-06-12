@@ -22,6 +22,7 @@ import {
 } from "./constants";
 import { validatePublicSearchQuery } from "./query-validation";
 import { rankSearchResults } from "./ranking";
+import { searchWorkLinks } from "./work-links-search";
 import {
   SEARCH_DOMAIN_LABEL,
 } from "./labels";
@@ -315,6 +316,7 @@ const DOMAIN_SEARCHERS: Record<
   knowledge_article: searchKnowledgeArticles,
   disclosure_link: searchDisclosureLinks,
   message_template: searchMessageTemplates,
+  work_link: searchWorkLinks,
 };
 
 function shouldSearchDomain(
