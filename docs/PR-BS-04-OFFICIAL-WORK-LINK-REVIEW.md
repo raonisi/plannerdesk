@@ -305,7 +305,7 @@ PR-177은 **고객지원 운영 설계** 후속(조건부)이다. PR-BS-04 workf
 | 4 | PR-BS-04D Verified Work Link Public UX | 검수 완료 링크만 public/planner 표시 | Medium |
 | 5 | PR-BS-05 Correction Flow Hardening | 오류 제보·PII 차단 강화 | Medium |
 
-로드맵 연계: PR-BS-08 Card Payment Info Model Review, PR-177 Support Operations Design (조건부).
+로드맵 연계: [PR-BS-08 Card Payment Info Model Review](./PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md), PR-177 Support Operations Design (조건부).
 
 ---
 

@@ -107,6 +107,8 @@ See `docs/CLAIM_DOCUMENT_IMPORT_CANDIDATES.md` for the safe dry-run and draft-on
 See `docs/KNOWLEDGE_ARCHIVE_IA.md` for the IA foundation of the planned knowledge archive feature.
 See `docs/KNOWLEDGE_CONTENT_POLICY.md` for the operating policy governing drafting, review, and publishing of knowledge archive content.
 
+See [docs/PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md](docs/PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md) for the card payment and premium payment reference info model review (not PlannerDesk PG billing).
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:
