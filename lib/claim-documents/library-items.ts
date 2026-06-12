@@ -1,6 +1,10 @@
 import { VerificationStatus, type ClaimDocumentCategory } from "@prisma/client";
 import type { ClaimFormFile } from "@/lib/content/claim-form-files";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import {
+  enrichStoredClaimPdfMetadata,
+  type StoredClaimPdfMetadata,
+} from "./claim-pdf-governance";
 
 export type ClaimLibraryPdfItem = {
   kind: "pdf";
@@ -12,8 +16,7 @@ export type ClaimLibraryPdfItem = {
   categoryLabel: string;
   href: string;
   verificationStatus: typeof VerificationStatus.verified;
-};
-
+} & StoredClaimPdfMetadata;
 export type ClaimLibraryGuideItem = {
   kind: "guide";
   document: PublicClaimDocument;
@@ -32,19 +35,19 @@ export function insurerGroupLabel(key: string): string {
 }
 
 export function claimFormToLibraryItem(form: ClaimFormFile): ClaimLibraryPdfItem {
+  const metadata = enrichStoredClaimPdfMetadata(form);
   return {
     kind: "pdf",
     id: form.id,
     insurerSlug: form.insurerSlug,
-    insurerName: form.insurerName,
     title: form.label,
     category: form.category,
     categoryLabel: form.categoryLabel,
     href: form.href,
     verificationStatus: VerificationStatus.verified,
+    ...metadata,
   };
 }
-
 export function documentToLibraryItem(
   document: PublicClaimDocument,
 ): ClaimLibraryGuideItem {

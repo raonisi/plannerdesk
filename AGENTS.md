@@ -1,6 +1,6 @@
 # PlannerDesk Agent Operating System
 
-PlannerDesk (플래너데스크) is a public B2B SaaS platform for Korean insurance planners. It is **completely separate from BOA CRM** and must not reuse BOA CRM infrastructure, databases, customer data, or product assumptions.
+PlannerDesk (?�래?�데?�크) is a public B2B SaaS platform for Korean insurance planners. It is **completely separate from BOA CRM** and must not reuse BOA CRM infrastructure, databases, customer data, or product assumptions.
 
 This file is the **single source of truth** for human and AI agents working in this repository. When instructions conflict, **safety rules and product boundaries in this file win**.
 
@@ -12,7 +12,7 @@ Every agent must optimize for **verified product safety**, not speed or apparent
 
 Before meaningful work:
 
-- Confirm the repository root is `C:\work\plannerdesk\plannerdesk-main` or explicitly report a mismatch.
+- Confirm the repository root is `C:\work\plannerdesk` or explicitly report a mismatch.
 - Check the current branch and dirty state before editing. Treat existing changes as user-owned unless proven otherwise.
 - Read the nearest relevant files before proposing architecture or implementation.
 - Distinguish `confirmed`, `not checked`, and `information unavailable`; do not fill gaps with guesses.
@@ -69,14 +69,14 @@ Rules:
 
 | Stage | Owner | Role |
 | --- | --- | --- |
-| Plan → implement → validate | **Cursor** | Primary implementer |
+| Plan ??implement ??validate | **Cursor** | Primary implementer |
 | Review before merge/release | **Antigravity** | QA / regression / UX review |
-| Limited audit | **Codex** | High-risk paths only — **not default QA** |
+| Limited audit | **Codex** | High-risk paths only ??**not default QA** |
 
 Read before non-trivial work:
 
-- `.cursor/skills/plannerdesk-cursor-implementation-protocol/SKILL.md` — plan → implement → validate → report
-- `.cursor/skills/plannerdesk-agents/SKILL.md` — specialist agent lenses (38 roles)
+- `.cursor/skills/plannerdesk-cursor-implementation-protocol/SKILL.md` ??plan ??implement ??validate ??report
+- `.cursor/skills/plannerdesk-agents/SKILL.md` ??specialist agent lenses (38 roles)
 
 ### Agent responsibility split
 
@@ -126,7 +126,7 @@ Stop and flag Codex review when **any** of these apply:
 | --- | --- | --- |
 | Public | `/`, `/directory`, `/claim-documents`, `/disclosure-links`, `/message-templates`, `/knowledge`, `/search` | `lib/public/*`, `isPublishedContentPubliclyVisible` |
 | Planner | `/planner/answer-assistant` | `getVerifiedAnswerAssistantAccess` |
-| Work tools | `/work-tools`, `/api/work-tools/*` | `getWorkToolsAccess` / `workToolsRouteGuard` — **verified planner + admin only** |
+| Work tools | `/work-tools`, `/api/work-tools/*` | `getWorkToolsAccess` / `workToolsRouteGuard` ??**verified planner + admin only** |
 | Admin | `/admin/**` | `getAdminAccess` in `app/admin/layout.tsx` |
 | Future / gated | `/community/**` | Placeholder; do not expand without reviewed PR |
 
@@ -140,7 +140,7 @@ Any new route must be classified as `public`, `planner`, `admin`, or `blocked/fu
 | `components/` | UI; `components/admin/` for ops panels |
 | `lib/auth/` | RBAC (`rbac.ts`), access guards (`access.ts`) |
 | `lib/public/` | Public-safe projections and visibility |
-| `lib/ops/` | Ops SSOT modules (PR157–174 standards) |
+| `lib/ops/` | Ops SSOT modules (PR157??74 standards) |
 | `lib/answer-assistant/` | Verified AA feature gate, usage audit (metadata-only) |
 | `lib/work-tools/` | Planner work-tools copy and boundaries |
 | `tests/public`, `tests/admin`, `tests/ops`, `tests/regression` | Regression gates |
@@ -193,17 +193,17 @@ When touching auth:
 
 Never ship user-facing text that:
 
-- Confirms insurance payout (`보험금이 지급됩니다`, `예상 보험금`, `환급 예상`)
-- Simplifies claims (`이 서류만 내면 됩니다`, `무조건 지급/부지급`)
-- Urges purchase or cancellation or fear (`반드시 가입`, `해지하는 게 맞`, `지금 안 하면 손해`)
-- Presents AI as final authority (`AI가 최종 판단`)
+- Confirms insurance payout (`보험금이 지급됩?�다`, `?�상 보험�?, `?�급 ?�상`)
+- Simplifies claims (`???�류�??�면 ?�니??, `무조�?지�?부지�?)
+- Urges purchase or cancellation or fear (`반드??가??, `?��??�는 �?�?, `지�????�면 ?�해`)
+- Presents AI as final authority (`AI가 최종 ?�단`)
 
 Use official insurer sources; label internal references as non-final. See `lib/work-tools/claim-boundary-copy.ts` and `docs/PR-174-TERMS-LEGAL-REVIEW-PREP.md`.
 
 Allowed tone:
 
-- "확인 필요", "보험사/약관 기준으로 최종 확인", "참고용", "검토 대상"
-- "지급/부지급 판단이 아닙니다", "손해사정 또는 법률 판단을 대체하지 않습니다"
+- "?�인 ?�요", "보험???��? 기�??�로 최종 ?�인", "참고??, "검???�??
+- "지�?부지�??�단???�닙?�다", "?�해?�정 ?�는 법률 ?�단???�체하지 ?�습?�다"
 
 Blocked implementation pattern:
 
@@ -240,7 +240,7 @@ Sensitive-data handling:
 - TypeScript for application code; avoid `any` without justification.
 - Prefer simple App Router structure until complexity warrants layers.
 - Match existing naming, imports, and patterns in surrounding files.
-- Minimize diff scope — do not refactor unrelated code in the same PR.
+- Minimize diff scope ??do not refactor unrelated code in the same PR.
 - Comments only for non-obvious business or security logic.
 - Keep server-only logic out of client components.
 - Prefer shared policy helpers for public visibility, route guards, copy boundaries, and ops verdicts.
@@ -258,7 +258,7 @@ Sensitive-data handling:
 ### Database and migrations
 
 - Prisma schema exists; **migrations are high-risk**.
-- `npm run build` = `prisma generate && next build` — **does not** run `migrate deploy`.
+- `npm run build` = `prisma generate && next build` ??**does not** run `migrate deploy`.
 - Operator-only: `npm run release:migrate` against intended environment after reviewed migration PR.
 - CI must not run migrate deploy or seed against production.
 - Do not add migrations, seeds, or bulk data scripts in the same PR as unrelated UI changes.
@@ -366,7 +366,7 @@ For PR-scoped tasks unless the user says otherwise:
 5. PR body: Summary, Changed files, Tests, Risk level, Security/privacy impact, User-facing changes, Admin-facing changes, Follow-up.
 
 **Low-risk** PRs: may merge after checks pass.  
-**High-risk** PRs: do **not** merge — stop and report Risk, Required decision, Safer alternative, Next step.
+**High-risk** PRs: do **not** merge ??stop and report Risk, Required decision, Safer alternative, Next step.
 
 If the user asks for a review or audit:
 
@@ -405,7 +405,7 @@ If the user asks for a review or audit:
 
 ## 10. Ops Documentation Index
 
-Recent critical ops hubs (documentation only — not execution approval):
+Recent critical ops hubs (documentation only ??not execution approval):
 
 | PR | Topic | Hub |
 | --- | --- | --- |

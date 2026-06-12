@@ -12,6 +12,7 @@ import {
   filterClaimLibraryItems,
   groupFilteredClaimItems,
 } from "@/lib/claim-documents/claim-library";
+import { CLAIM_PDF_GOVERNANCE_NOTICE } from "@/lib/claim-documents/claim-pdf-governance";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import { ClaimDocumentFavoritesStrip } from "@/components/planner-favorites/claim-document-favorites-strip";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
@@ -119,122 +120,121 @@ export function ClaimDocumentExplorer({
 
   return (
     <PlannerFavoritesScope enabled={plannerFavoritesEnabled}>
-    <div className="space-y-6">
-      {plannerFavoritesEnabled ? (
-        <ClaimDocumentFavoritesStrip items={allItems} />
-      ) : null}
-      <ClaimFormsFilters
-        category={category}
-        categoryOptions={categoryOptions}
-        documentNature={documentNature}
-        insurerOptions={insurerOptions}
-        onCategoryChange={setCategory}
-        onDocumentNatureChange={setDocumentNature}
-        onInsurerChange={setSelectedInsurerKey}
-        onQueryChange={setQuery}
-        onReset={resetFilters}
-        onStatusChange={setStatus}
-        query={query}
-        selectedInsurerKey={selectedInsurerKey}
-        status={status}
-      />
+      <div className="space-y-6">
+        {plannerFavoritesEnabled ? (
+          <ClaimDocumentFavoritesStrip items={allItems} />
+        ) : null}
+        <ClaimFormsFilters
+          category={category}
+          categoryOptions={categoryOptions}
+          documentNature={documentNature}
+          insurerOptions={insurerOptions}
+          onCategoryChange={setCategory}
+          onDocumentNatureChange={setDocumentNature}
+          onInsurerChange={setSelectedInsurerKey}
+          onQueryChange={setQuery}
+          onReset={resetFilters}
+          onStatusChange={setStatus}
+          query={query}
+          selectedInsurerKey={selectedInsurerKey}
+          status={status}
+        />
 
-      <p className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm font-semibold leading-6 text-[#5B6470] break-keep">
-        본 자료는 설계사 실무 참고용입니다. 최종 기준은 보험사 공식 안내와
-        약관을 확인해 주세요. 공개 전 검수 중인 항목은 표시되지 않습니다.
-      </p>
+        <p className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm font-semibold leading-6 text-[#5B6470] break-keep">
+          {CLAIM_PDF_GOVERNANCE_NOTICE} 공개 전 검수 중인 항목은 표시되지 않습니다.
+        </p>
 
-      {selectedInsurerLabel && selectedInsurerKey !== "all" ? (
-        <section
-          aria-label="선택한 보험사 안내"
-          className="rounded-xl border border-[#d9c9a8] bg-[#fff9ed] px-4 py-3 text-sm leading-6 text-[#4f5661]"
-        >
-          <p>
-            <span className="font-bold text-[#102235]">{selectedInsurerLabel}</span>
-            {" "}기준으로 청구서류를 표시합니다.{" "}
-            {selectedInsurerKey !== "common" ? (
+        {selectedInsurerLabel && selectedInsurerKey !== "all" ? (
+          <section
+            aria-label="선택한 보험사 안내"
+            className="rounded-xl border border-[#d9c9a8] bg-[#fff9ed] px-4 py-3 text-sm leading-6 text-[#4f5661]"
+          >
+            <p>
+              <span className="font-bold text-[#102235]">{selectedInsurerLabel}</span>
+              {" "}기준으로 청구서류를 표시합니다.{" "}
+              {selectedInsurerKey !== "common" ? (
+                <Link
+                  className="font-semibold text-[#7a612d] underline underline-offset-2"
+                  href={`/directory?insurer=${encodeURIComponent(selectedInsurerKey)}`}
+                >
+                  청구안내·팩스/전산 정보 보기
+                </Link>
+              ) : (
+                <Link
+                  className="font-semibold text-[#7a612d] underline underline-offset-2"
+                  href="/directory"
+                >
+                  보험사 디렉터리로 이동
+                </Link>
+              )}
+            </p>
+          </section>
+        ) : null}
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <h2 className="text-lg font-bold text-[#0F1D2E]">보험사별 청구서류</h2>
+          <p
+            aria-live="polite"
+            className="text-sm font-semibold text-[#5f6670]"
+            role="status"
+          >
+            총 {allItems.length}개 중 {totalItemCount}개 서류를 표시 중입니다.
+          </p>
+        </div>
+
+        {insurerGroups.length > 0 ? (
+          <div className="space-y-3">
+            {insurerGroups.map((group) => (
+              <InsurerClaimGroup
+                group={group}
+                isExpanded={isGroupExpanded(group.key)}
+                key={group.key}
+                onToggle={() => toggleGroup(group.key)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <EmptyState
+              description={
+                selectedInsurerKey !== "all"
+                  ? "다른 보험사를 선택하거나 필터를 초기화해 보세요. 보험사 디렉터리에서 청구안내·전산 링크도 확인할 수 있습니다."
+                  : "보험사·청구유형·서류명을 다르게 입력하거나 필터를 초기화해 보세요."
+              }
+              title={
+                selectedInsurerKey !== "all"
+                  ? "등록된 청구서류가 없습니다."
+                  : "조건에 맞는 청구서류가 없습니다."
+              }
+            />
+            <div className="flex flex-wrap justify-center gap-3">
               <Link
-                className="font-semibold text-[#7a612d] underline underline-offset-2"
-                href={`/directory?insurer=${encodeURIComponent(selectedInsurerKey)}`}
-              >
-                청구안내·팩스/전산 정보 보기
-              </Link>
-            ) : (
-              <Link
-                className="font-semibold text-[#7a612d] underline underline-offset-2"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
                 href="/directory"
               >
-                보험사 디렉터리로 이동
+                보험사 디렉터리
               </Link>
-            )}
-          </p>
-        </section>
-      ) : null}
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <h2 className="text-lg font-bold text-[#0F1D2E]">보험사별 청구서류</h2>
-        <p
-          aria-live="polite"
-          className="text-sm font-semibold text-[#5f6670]"
-          role="status"
-        >
-          총 {allItems.length}개 중 {totalItemCount}개 서류를 표시 중입니다.
-        </p>
+              <Link
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+                href="/search"
+              >
+                통합 검색
+              </Link>
+            </div>
+            <BrowseNextSteps className="mt-2" title="관련 메뉴" />
+            <div className="flex justify-center">
+              <button
+                aria-label="검색어 및 필터 초기화"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
+                onClick={resetFilters}
+                type="button"
+              >
+                필터 초기화
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-
-      {insurerGroups.length > 0 ? (
-        <div className="space-y-3">
-          {insurerGroups.map((group) => (
-            <InsurerClaimGroup
-              group={group}
-              isExpanded={isGroupExpanded(group.key)}
-              key={group.key}
-              onToggle={() => toggleGroup(group.key)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-5">
-          <EmptyState
-            description={
-              selectedInsurerKey !== "all"
-                ? "다른 보험사를 선택하거나 필터를 초기화해 보세요. 보험사 디렉터리에서 청구안내·전산 링크도 확인할 수 있습니다."
-                : "보험사·청구유형·서류명을 다르게 입력하거나 필터를 초기화해 보세요."
-            }
-            title={
-              selectedInsurerKey !== "all"
-                ? "등록된 청구서류가 없습니다."
-                : "조건에 맞는 청구서류가 없습니다."
-            }
-          />
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
-              href="/directory"
-            >
-              보험사 디렉터리
-            </Link>
-            <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
-              href="/search"
-            >
-              통합 검색
-            </Link>
-          </div>
-          <BrowseNextSteps className="mt-2" title="관련 메뉴" />
-          <div className="flex justify-center">
-            <button
-              aria-label="검색어 및 필터 초기화"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
-              onClick={resetFilters}
-              type="button"
-            >
-              필터 초기화
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
     </PlannerFavoritesScope>
   );
 }

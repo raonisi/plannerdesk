@@ -10,6 +10,10 @@ export interface ClaimFormFile {
   href: string;
   sourceUrl: string;
   displayOrder: number;
+  /** Optional governance fields (PR-BS-20). Omitted entries use enrich defaults. */
+  lastVerifiedAt?: string | null;
+  reviewStatus?: "verified" | "needs_review" | "draft";
+  cautionText?: string;
 }
 
 export const claimFormFiles = [

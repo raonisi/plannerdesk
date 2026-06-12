@@ -12,6 +12,12 @@ import { categoryLabels } from "@/lib/claim-documents/category-labels";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { publicClaimTrustHint } from "@/lib/directory/formatting";
 
+const primaryButtonClass =
+  "inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25";
+
+const secondaryButtonClass =
+  "inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-[#B9975B] hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25";
+
 export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
   const favoriteId = claimLibraryFavoriteId(item);
   const { isFavorite, toggle } = useLocalIdFavorites(
@@ -20,6 +26,9 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
     "idle",
   );
+  const [linkCopyState, setLinkCopyState] = useState<
+    "idle" | "copied" | "failed"
+  >("idle");
   const title = item.kind === "pdf" ? item.title : item.document.title;
   const insurerName =
     item.kind === "pdf" ? item.insurerName : (item.document.insurerName ?? "공통 기준");
@@ -44,6 +53,16 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
     window.setTimeout(() => setCopyState("idle"), 2000);
   }
 
+  async function handleCopyPdfLink(href: string) {
+    const absolute =
+      typeof window !== "undefined"
+        ? new URL(href, window.location.origin).toString()
+        : href;
+    await copyTextToClipboard(absolute);
+    setLinkCopyState("copied");
+    window.setTimeout(() => setLinkCopyState("idle"), 2000);
+  }
+
   if (item.kind === "pdf") {
     return (
       <li className="border-t border-slate-200 first:border-t-0">
@@ -53,26 +72,63 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
               <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500">
                 {categoryLabel}
               </span>
+              <span className="rounded-md border border-[#e3ded4] bg-[#f8f7f3] px-2.5 py-1 text-[11px] font-semibold text-[#5B6470]">
+                PDF
+              </span>
             </div>
             <p className="mt-2 break-keep text-base font-bold leading-6 text-slate-900">
               {title}
             </p>
+            <p className="mt-1 break-all text-xs text-[#5B6470]">{item.fileName}</p>
             {trustHint ? (
               <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
             ) : null}
-            <DataFreshnessMeta className="mt-2" showClaimNotice />
+            <DataFreshnessMeta
+              className="mt-2"
+              lastVerifiedAt={item.lastVerifiedAt}
+              officialSourceUrl={item.officialSourceUrl}
+              showClaimNotice
+            />
+            <p className="mt-2 break-keep text-xs leading-5 text-[#5B6470]">
+              {item.cautionText}
+            </p>
           </div>
-          <div className="grid gap-2 sm:flex lg:justify-end">
-            <ExternalTabAnchor
-              aria-label={`${title} PDF 열기`}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-stretch xl:grid-cols-2">
+            <a
+              aria-label={`${title} PDF 다운로드`}
+              className={primaryButtonClass}
+              download={item.fileName}
               href={item.href}
             >
-              PDF 열기
+              PDF 다운로드
+            </a>
+            <ExternalTabAnchor
+              aria-label={`${title} PDF 바로 열기`}
+              className={secondaryButtonClass}
+              href={item.href}
+            >
+              PDF 바로 열기
             </ExternalTabAnchor>
+            {item.officialSourceUrl ? (
+              <ExternalTabAnchor
+                aria-label={`${insurerName} 보험사 공식 안내 확인`}
+                className={`${secondaryButtonClass} sm:col-span-2 lg:col-span-1 xl:col-span-2`}
+                href={item.officialSourceUrl}
+              >
+                보험사 공식 안내 확인
+              </ExternalTabAnchor>
+            ) : null}
+            <button
+              aria-label={`${title} PDF 링크 복사`}
+              className={secondaryButtonClass}
+              onClick={() => handleCopyPdfLink(item.href)}
+              type="button"
+            >
+              {getLinkCopyButtonLabel(linkCopyState)}
+            </button>
             <button
               aria-label={`${title} 고객 요청 문구 복사`}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-[#B9975B] hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+              className={secondaryButtonClass}
               onClick={handleCopyRequest}
               type="button"
             >
@@ -125,7 +181,7 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
           {primaryHref ? (
             <ExternalTabAnchor
               aria-label={`${title} ${primaryLabel}`}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+              className={primaryButtonClass}
               href={primaryHref}
             >
               {primaryLabel}
@@ -140,7 +196,7 @@ export function ClaimFormListItem({ item }: { item: ClaimLibraryItem }) {
           )}
           <button
             aria-label={`${title} 고객 요청 문구 복사`}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-[#B9975B] hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+            className={secondaryButtonClass}
             onClick={handleCopyRequest}
             type="button"
           >
@@ -156,6 +212,12 @@ function getCopyButtonLabel(state: "idle" | "copied" | "failed"): string {
   if (state === "copied") return "복사되었습니다";
   if (state === "failed") return "복사 실패";
   return "안내문 복사";
+}
+
+function getLinkCopyButtonLabel(state: "idle" | "copied" | "failed"): string {
+  if (state === "copied") return "링크 복사됨";
+  if (state === "failed") return "복사 실패";
+  return "PDF 링크 복사";
 }
 
 async function copyTextToClipboard(text: string): Promise<void> {
