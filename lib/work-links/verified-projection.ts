@@ -8,6 +8,11 @@ import type {
 import { WORK_LINK_ADMIN_ONLY_FIELDS } from "./review-types";
 import { isHighRiskInfoType } from "./review-rules";
 import {
+  buildPaymentInfoDisplayNotice,
+  isPaymentInfoHighRiskType,
+  isPaymentInfoPlannerCandidate,
+} from "@/lib/payment-info/payment-info-policy";
+import {
   VERIFIED_WORK_LINK_HIGH_RISK_NOTICE,
   VERIFIED_WORK_LINK_PLANNER_NOTICE,
   VERIFIED_WORK_LINK_PLANNER_PII_NOTICE,
@@ -28,7 +33,7 @@ const PLANNER_READY_STATUSES: ReadonlySet<WorkLinkReviewStatus> = new Set([
   "published",
 ]);
 
-/** Public display blocked even when published (PR-BS-15 §6). */
+/** Public display blocked even when published (PR-BS-15 §6, PR-BS-17 payment gate). */
 export const PUBLIC_BLOCKED_INFO_TYPES: ReadonlySet<WorkLinkInfoType> = new Set([
   "paymentInfo",
   "insurerSystem",
@@ -63,6 +68,7 @@ function isBaseEligible(candidate: WorkLinkReviewCandidate): boolean {
 }
 
 export function isWorkLinkPublicVisible(candidate: WorkLinkReviewCandidate): boolean {
+  if (isPaymentInfoHighRiskType(candidate.infoType)) return false;
   if (!isBaseEligible(candidate)) return false;
   if (candidate.reviewStatus !== "published") return false;
   if (candidate.visibilityScope !== "public") return false;
@@ -71,6 +77,9 @@ export function isWorkLinkPublicVisible(candidate: WorkLinkReviewCandidate): boo
 }
 
 export function isWorkLinkPlannerVisible(candidate: WorkLinkReviewCandidate): boolean {
+  if (isPaymentInfoHighRiskType(candidate.infoType)) {
+    return isPaymentInfoPlannerCandidate(candidate);
+  }
   if (!isBaseEligible(candidate)) return false;
   if (!PLANNER_READY_STATUSES.has(candidate.reviewStatus)) return false;
   if (candidate.visibilityScope !== "planner" && candidate.visibilityScope !== "public") {
@@ -80,6 +89,9 @@ export function isWorkLinkPlannerVisible(candidate: WorkLinkReviewCandidate): bo
 }
 
 function buildDisplayNotice(candidate: WorkLinkReviewCandidate): string {
+  if (isPaymentInfoHighRiskType(candidate.infoType)) {
+    return buildPaymentInfoDisplayNotice();
+  }
   const parts = [VERIFIED_WORK_LINK_PUBLIC_NOTICE];
   if (isHighRiskInfoType(candidate.infoType)) {
     parts.push(VERIFIED_WORK_LINK_HIGH_RISK_NOTICE);
