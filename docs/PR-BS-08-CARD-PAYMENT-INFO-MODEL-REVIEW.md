@@ -294,7 +294,7 @@ PlannerDesk는 **고객 대신 보험료를 결제하지 않는다.** 납입은 
 | 3 | PR-BS-08C Payment Info Data Model Review | Insurer 확장 vs 별도 모델·schema 필요성 | **High** |
 | 4 | PR-BS-08D Planner-only Payment Info UX | 검수 완료 정보 planner-only 표시 | Medium~High |
 | 5 | PR-BS-08E Public Payment Info Boundary | public 노출 가능 범위·copy 재검토 | **High** |
-| 6 | PR-BS-09 Code Search Boundary Review | (BS-01 로드맵) 상병/수술 코드 planner-only | High |
+| 6 | PR-BS-09 Code Search Boundary Review | (BS-01 로드맵) 상병/수술 코드 planner-only | High | → [PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md](./PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md) |
 | — | PR175 Payment Provider Comparison | PlannerDesk **PG** 후보 (본 PR과 별도) | High |
 
 ---

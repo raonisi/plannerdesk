@@ -125,7 +125,7 @@ BohumSchool Archive 공개 사이트는 PlannerDesk의 기능 구조 설계를 �
 | 5 | PR-BS-06 Planner Favorites | 설계사 전용 즐겨찾기/최근 사용 업무 | Medium |
 | 6 | PR-BS-07 PWA Install UX Review | 홈화면 추가/반복 사용 UX 검토 | Low |
 | 7 | PR-BS-08 Card Payment Info Model Review | 카드/납입 정보 모델 필요성 검토 | High |
-| 8 | PR-BS-09 Code Search Boundary Review | 상병/수술 코드 planner-only 경계 검토 | High |
+| 8 | PR-BS-09 Code Search Boundary Review | 상병/수술 코드 planner-only 경계 검토 | High | → [PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md](./PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md) |
 
 ## 12. 다음 1순위 개발 후보
 

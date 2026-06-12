@@ -109,6 +109,8 @@ See `docs/KNOWLEDGE_CONTENT_POLICY.md` for the operating policy governing drafti
 
 See [docs/PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md](docs/PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md) for the card payment and premium payment reference info model review (not PlannerDesk PG billing).
 
+See [docs/PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md](docs/PR-BS-09-CODE-SEARCH-BOUNDARY-REVIEW.md) for diagnosis/surgery code search boundary review (planner-only; no payout judgment).
+
 ## Product Boundary
 
 The MVP is limited to a public landing page and placeholders for:
