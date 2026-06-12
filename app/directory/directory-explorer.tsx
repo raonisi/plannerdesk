@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
@@ -134,10 +134,10 @@ export function DirectoryExplorer({
     });
   }, [insurerFromQueryMatch]);
 
-  const openCorrectionRequest = useCallback((insurerId?: string) => {
+  const openCorrectionRequest = (insurerId?: string) => {
     setCorrectionPreselectedId(insurerId ?? null);
     setCorrectionOpen(true);
-  }, []);
+  };
 
   const filteredInsurers = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");

@@ -2112,7 +2112,7 @@ function DiseaseCodeSearchTool() {
 
   return (
     <PanelShell
-      description="상병기호(KCD-10)와 질환명을 검색하여 표준 담보 연동성 및 질환 설명을 확인합니다."
+      description="상병기호(KCD-10)와 질환명을 검색하여 관련 담보 참고 및 질환 설명을 확인합니다. 보험금 지급·청구 가능 여부는 확정하지 않습니다."
       id="disease-code"
       title="상병코드(KCD) 검색"
     >
@@ -2138,7 +2138,7 @@ function DiseaseCodeSearchTool() {
           {meta?.last_updated_at && (
             <span>마지막 업데이트: {formatDate(meta.last_updated_at)}</span>
           )}
-          <span>※ HIRA(건강보험심사평가원) 공식 상병마스터 기반. 보험사/상품별 세부 지급 기준과 다를 수 있습니다.</span>
+          <span>※ HIRA(건강보험심사평가원) 공식 상병마스터 기반 참고입니다. 보험사·상품별 약관과 심사 기준 확인이 필요합니다.</span>
         </div>
 
         {isLoading ? (
@@ -2223,8 +2223,11 @@ function DiseaseCodeSearchTool() {
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                   />
                                 </svg>
-                                청구 가능 표준 담보 ({coverageData.coverages?.length || 0})
+                                관련 표준 담보 참고 ({coverageData.coverages?.length || 0})
                               </h5>
+                              <p className="text-[10px] leading-relaxed text-slate-500">
+                                아래 담보는 코드 검색 참고용입니다. 보험금 지급·청구 가능 여부는 공식 약관과 보험사 심사 기준 확인이 필요합니다.
+                              </p>
                               {(!coverageData.coverages || coverageData.coverages.length === 0) ? (
                                 <div className="p-3.5 text-xs border border-slate-200 bg-white rounded-lg text-slate-500 flex items-start gap-2">
                                   <svg

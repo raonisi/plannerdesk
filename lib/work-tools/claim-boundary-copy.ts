@@ -27,6 +27,16 @@ export const SILBI_GEN_TIPS: Record<"1" | "2" | "3" | "4" | "5", string> = {
     "1세대(구실손)는 세대별 규칙이 다릅니다. 보험료·보장 범위는 상품·약관·공시 기준으로 확인하고, 특정 상품 전환을 권유하지 마세요.",
 };
 
+/** Phrases that must not appear in code-search UI copy (PR-BS-09 / SAFETY-FIX-01). */
+export const WORK_TOOLS_CODE_SEARCH_FORBIDDEN_PHRASES: readonly string[] = [
+  "청구 가능 표준 담보",
+  "청구 가능합니다",
+  "청구 가능 확정",
+  "이 코드는 보장됩니다",
+  "이 수술은 보장됩니다",
+  "이 질병은 지급 대상입니다",
+];
+
 /** Phrases that must not appear in work-tools client copy (public beta boundary). */
 export const WORK_TOOLS_FORBIDDEN_PAYOUT_PHRASES: readonly string[] = [
   "예상 보험금",

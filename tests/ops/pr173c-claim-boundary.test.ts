@@ -6,6 +6,7 @@ import { describe, it } from "node:test";
 import {
   SILBI_REFERENCE_BALANCE_LABEL,
   WORK_TOOLS_CLAIM_BOUNDARY_NOTICE,
+  WORK_TOOLS_CODE_SEARCH_FORBIDDEN_PHRASES,
   WORK_TOOLS_FORBIDDEN_PAYOUT_PHRASES,
 } from "@/lib/work-tools/claim-boundary-copy";
 
@@ -24,6 +25,22 @@ describe("PR173-C work-tools claim boundary (static)", () => {
         `forbidden phrase: ${phrase}`,
       );
     }
+  });
+
+  it("disease code search UI has no claim-eligibility confirmation phrases", () => {
+    const client = readFileSync(
+      join(ROOT, "app/work-tools/work-tools-client.tsx"),
+      "utf8",
+    );
+    for (const phrase of WORK_TOOLS_CODE_SEARCH_FORBIDDEN_PHRASES) {
+      assert.doesNotMatch(
+        client,
+        new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+        `forbidden code-search phrase: ${phrase}`,
+      );
+    }
+    assert.match(client, /관련 표준 담보 참고/);
+    assert.match(client, /공식 약관과 보험사 심사 기준/);
   });
 
   it("silbi calculator uses reference labels and boundary notice", () => {
