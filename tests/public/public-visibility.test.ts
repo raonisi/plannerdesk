@@ -147,18 +147,19 @@ describe("Public visibility guards (PR110, no database)", () => {
       try {
         const result = await getPublicDisclosureLinks();
         assert.equal(result.status, "ok");
-        assert.equal(result.data.length, 86);
+        assert.equal(result.data.length, 43);
         assert.ok(
           result.data.some(
             (entry) =>
-              entry.id === "disclosure-product-samsung-fire" &&
+              entry.id === "disclosure-room-samsung-fire" &&
+              entry.title === "삼성화재 공시실" &&
               entry.url === "https://www.samsungfire.com/page/VH.REIF0011.do",
           ),
         );
         assert.ok(
           result.data.some(
             (entry) =>
-              entry.id === "disclosure-terms-carrot-digital" &&
+              entry.id === "disclosure-room-carrot-digital" &&
               entry.url ===
                 "https://www.carrotins.com/desktop/disclosure/sale/?afcDtFlgcd",
           ),

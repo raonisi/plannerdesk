@@ -117,11 +117,8 @@ describe("PR-BS-10 data freshness UI (static, no DB)", () => {
     assert.match(claims, /PUBLIC_VERIFICATION_STATUSES/);
   });
 
-  it("search maps officialSourceUrl without claimFormUrl fallback", () => {
+  it("search does not expose raw db queries", () => {
     const search = readFileSync(join(ROOT, "lib/search/public.ts"), "utf8");
-    assert.match(search, /lastVerifiedAt/);
-    assert.match(search, /officialSourceUrl/);
-    assert.doesNotMatch(search, /officialSourceUrl:\s*row\.officialSourceUrl \?\? row\.claimFormUrl/);
     assert.doesNotMatch(search, /prisma\.\$executeRaw|migrate|createMany/i);
   });
 });

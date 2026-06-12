@@ -7,8 +7,8 @@ export const publicDisclosureCategoryLabels: Record<
   DisclosureLinkCategory,
   string
 > = {
-  [DisclosureLinkCategory.product_disclosure]: "상품공시",
-  [DisclosureLinkCategory.policy_terms]: "약관",
+  [DisclosureLinkCategory.product_disclosure]: "공시실",
+  [DisclosureLinkCategory.policy_terms]: "공시실",
   [DisclosureLinkCategory.claim_disclosure]: "청구 공시",
   [DisclosureLinkCategory.insurer_notice]: "보험사 안내",
   [DisclosureLinkCategory.insurer_official_materials]: "보험사 공식자료",
@@ -22,7 +22,6 @@ export const publicDisclosureCategoryLabels: Record<
 
 export const publicDisclosureCategoryOrder: DisclosureLinkCategory[] = [
   DisclosureLinkCategory.product_disclosure,
-  DisclosureLinkCategory.policy_terms,
   DisclosureLinkCategory.claim_disclosure,
   DisclosureLinkCategory.insurer_notice,
   DisclosureLinkCategory.insurer_official_materials,
@@ -36,8 +35,7 @@ export const publicDisclosureCategoryOrder: DisclosureLinkCategory[] = [
 
 export const publicDisclosureFilterTabs = [
   { id: "all", label: "전체" },
-  { id: "product_disclosure", label: "상품공시" },
-  { id: "policy_terms", label: "약관" },
+  { id: "disclosure_room", label: "공시실" },
   { id: "insurance_association", label: "협회 자료" },
   { id: "insurer_official_materials", label: "보험사 공식자료" },
   { id: "regulator", label: "감독기관" },
@@ -65,6 +63,12 @@ export function matchesPublicDisclosureCategory(
   filterId: PublicDisclosureFilterTabId,
 ): boolean {
   if (filterId === "all") return true;
+  if (filterId === "disclosure_room") {
+    return (
+      category === DisclosureLinkCategory.product_disclosure ||
+      category === DisclosureLinkCategory.policy_terms
+    );
+  }
   if (filterId === "other") {
     return (
       category === DisclosureLinkCategory.claim_compensation_reference ||

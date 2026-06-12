@@ -29,7 +29,9 @@ const ID_TO_SLUG: Record<string, string> = {
 };
 
 function extractInsurerSlug(entryId: string): string | null {
-  // Only match `disclosure-product-*` and `disclosure-terms-*` patterns
+  const roomMatch = entryId.match(/^disclosure-room-(.+)$/);
+  if (roomMatch) return roomMatch[1];
+
   const productMatch = entryId.match(/^disclosure-product-(.+)$/);
   if (productMatch) return productMatch[1];
 
@@ -68,11 +70,13 @@ export function getDisclosureLinksForInsurer(
 
     if (entry.category === "product_disclosure" && !productDisclosure) {
       productDisclosure = entry;
-    } else if (entry.category === "policy_terms" && !policyTerms) {
+      policyTerms = entry;
+    } else if (entry.category === "policy_terms" && !productDisclosure) {
+      productDisclosure = entry;
       policyTerms = entry;
     }
 
-    if (productDisclosure && policyTerms) break;
+    if (productDisclosure) break;
   }
 
   return { productDisclosure, policyTerms };
@@ -104,7 +108,9 @@ export function buildDisclosureLinkIndex(): Map<string, InsurerDisclosureLinks> 
 
     if (entry.category === "product_disclosure" && !links.productDisclosure) {
       links.productDisclosure = entry;
-    } else if (entry.category === "policy_terms" && !links.policyTerms) {
+      links.policyTerms = entry;
+    } else if (entry.category === "policy_terms" && !links.productDisclosure) {
+      links.productDisclosure = entry;
       links.policyTerms = entry;
     }
   }

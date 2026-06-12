@@ -3,6 +3,7 @@
 import { PUBLIC_VERIFICATION_STATUSES } from "@/lib/public/insurers";
 import { PUBLIC_KNOWLEDGE_WHERE } from "@/lib/public/knowledge-articles";
 import { PUBLIC_DISCLOSURE_LINK_WHERE } from "@/lib/public/disclosure-links";
+import { DISCLOSURE_ROOM_SEARCH_ALIASES } from "@/lib/content/disclosure-room";
 import { PUBLIC_MESSAGE_TEMPLATE_WHERE } from "@/lib/public/message-templates";
 import { PUBLIC_CATEGORY_LABEL } from "@/lib/public/knowledge-display";
 import { publicDisclosureCategoryLabels } from "@/lib/public/disclosure-display";
@@ -21,7 +22,6 @@ import {
 } from "./constants";
 import { validatePublicSearchQuery } from "./query-validation";
 import { rankSearchResults } from "./ranking";
-import { searchWorkLinks } from "./work-links-search";
 import {
   SEARCH_DOMAIN_LABEL,
 } from "./labels";
@@ -100,7 +100,6 @@ async function searchInsurers(
       category: true,
       updatedAt: true,
       lastVerifiedAt: true,
-      officialWebsiteUrl: true,
     },
   });
 
@@ -112,8 +111,7 @@ async function searchInsurers(
     url: `/directory?search=${encodeURIComponent(row.name)}`,
     categoryLabel: insurerCategoryLabels[row.category],
     updatedAt: toIsoDate(row.updatedAt),
-    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
-    officialSourceUrl: row.officialWebsiteUrl ?? undefined,
+    publishedAt: toIsoDate(row.lastVerifiedAt),
   }));
 }
 
@@ -145,8 +143,6 @@ async function searchClaimDocuments(
       category: true,
       updatedAt: true,
       lastVerifiedAt: true,
-      claimFormUrl: true,
-      officialSourceUrl: true,
       insurer: { select: { name: true } },
     },
   });
@@ -162,8 +158,7 @@ async function searchClaimDocuments(
     categoryLabel: claimCategoryLabels[row.category],
     sourceLabel: row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
-    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
-    officialSourceUrl: row.officialSourceUrl ?? undefined,
+    publishedAt: toIsoDate(row.lastVerifiedAt),
   }));
 }
 
@@ -179,7 +174,6 @@ async function searchKnowledgeArticles(
         { summary: { contains: query, mode: "insensitive" } },
         { content: { contains: query, mode: "insensitive" } },
         { workflowLabel: { contains: query, mode: "insensitive" } },
-        { tags: { has: query } },
       ],
     },
     take: limit,
@@ -190,7 +184,6 @@ async function searchKnowledgeArticles(
       title: true,
       summary: true,
       category: true,
-      tags: true,
       updatedAt: true,
       publishedAt: true,
     },
@@ -200,11 +193,7 @@ async function searchKnowledgeArticles(
     id: row.id,
     type: "knowledge_article",
     title: row.title,
-    summary: truncateSummary(
-      [row.summary, row.tags.length > 0 ? row.tags.join(", ") : ""]
-        .filter(Boolean)
-        .join(" · "),
-    ),
+    summary: truncateSummary(row.summary),
     url: `/knowledge/${encodeURIComponent(row.slug)}`,
     categoryLabel: PUBLIC_CATEGORY_LABEL[row.category],
     updatedAt: toIsoDate(row.updatedAt),
@@ -216,15 +205,23 @@ async function searchDisclosureLinks(
   query: string,
   limit: number,
 ): Promise<GlobalSearchResult[]> {
+  const normalizedQuery = query.trim().toLocaleLowerCase("ko-KR");
+  const aliasMatchesRoom = DISCLOSURE_ROOM_SEARCH_ALIASES.some((alias) =>
+    normalizedQuery.includes(alias.toLocaleLowerCase("ko-KR")),
+  );
+  const searchTerms = aliasMatchesRoom
+    ? Array.from(new Set([query, "공시실", "공시"]))
+    : [query];
+
   const records = await prisma.disclosureLink.findMany({
     where: {
       ...PUBLIC_DISCLOSURE_LINK_WHERE,
-      OR: [
-        { title: { contains: query, mode: "insensitive" } },
-        { description: { contains: query, mode: "insensitive" } },
-        { sourceName: { contains: query, mode: "insensitive" } },
-        { insurer: { name: { contains: query, mode: "insensitive" } } },
-      ],
+      OR: searchTerms.flatMap((term) => [
+        { title: { contains: term, mode: "insensitive" as const } },
+        { description: { contains: term, mode: "insensitive" as const } },
+        { sourceName: { contains: term, mode: "insensitive" as const } },
+        { insurer: { name: { contains: term, mode: "insensitive" as const } } },
+      ]),
     },
     take: limit,
     orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
@@ -234,10 +231,8 @@ async function searchDisclosureLinks(
       description: true,
       category: true,
       sourceName: true,
-      url: true,
       updatedAt: true,
       publishedAt: true,
-      lastVerifiedAt: true,
       insurer: { select: { name: true } },
     },
   });
@@ -252,8 +247,6 @@ async function searchDisclosureLinks(
     sourceLabel: row.sourceName ?? row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.publishedAt),
-    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
-    officialSourceUrl: row.url ?? undefined,
   }));
 }
 
@@ -322,7 +315,6 @@ const DOMAIN_SEARCHERS: Record<
   knowledge_article: searchKnowledgeArticles,
   disclosure_link: searchDisclosureLinks,
   message_template: searchMessageTemplates,
-  work_link: searchWorkLinks,
 };
 
 function shouldSearchDomain(

@@ -1,9 +1,10 @@
 import type { DisclosureLinkEntry } from "./types";
+import { unifyStaticDisclosureRoomEntries } from "./disclosure-room";
 
 // Insurance company disclosure and policy-terms links sourced from
 // https://bohumschool-archive.pages.dev/desk on 2026-06-12.
 // Links point to insurer-operated official pages; verify changes with each insurer.
-export const disclosureLinkEntries = [
+const rawDisclosureLinkEntries = [
   {
     id: "disclosure-product-samsung-fire",
     title: "삼성화재 ?????",
@@ -865,3 +866,8 @@ export const disclosureLinkEntries = [
     verificationStatus: "verified",
   },
 ] satisfies DisclosureLinkEntry[];
+
+/** Public-facing insurer disclosure rooms (product_disclosure + policy_terms merged). */
+export const disclosureLinkEntries = unifyStaticDisclosureRoomEntries(
+  rawDisclosureLinkEntries,
+);

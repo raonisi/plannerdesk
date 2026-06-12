@@ -3,6 +3,13 @@ export { contentSafetyRules } from "./safety-rules";
 export { customerMessageTemplates } from "./message-templates";
 export { disclosureLinkEntries } from "./disclosure-links";
 export {
+  buildDisclosureRoomCopy,
+  DISCLOSURE_ROOM_CATEGORY_LABEL,
+  DISCLOSURE_ROOM_SEARCH_ALIASES,
+  hasMojibakeText,
+  unifyStaticDisclosureRoomEntries,
+} from "./disclosure-room";
+export {
   getDisclosureLinksForInsurer,
   buildDisclosureLinkIndex,
   type InsurerDisclosureLinks,

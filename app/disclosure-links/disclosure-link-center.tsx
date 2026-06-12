@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { DisclosureLinkTargetType } from "@prisma/client";
 import { EmptyState, SearchBar } from "@/components/content-page";
-import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { DisclosureCard } from "@/components/disclosure/disclosure-card";
 import {
@@ -21,6 +20,10 @@ import {
 } from "@/lib/public/disclosure-display";
 import type { PublicDisclosureLink } from "@/lib/public/disclosure-links";
 import { sectionEyebrow } from "@/lib/design-system";
+import {
+  isInsurerDisclosureRoomCategory,
+  matchesDisclosureRoomSearchQuery,
+} from "@/lib/content/disclosure-room";
 
 const targetTypeFilterOptions: Array<{ id: PublicTargetTypeFilter; label: string }> =
   [
@@ -73,8 +76,22 @@ export function DisclosureLinkCenter({
         .join(" ")
         .toLocaleLowerCase("ko-KR");
 
+      const searchFields = [
+        entry.title,
+        entry.description,
+        entry.sourceName ?? "",
+        entry.insurerName ?? "",
+      ];
+
       const matchesQuery =
-        normalizedQuery.length === 0 || searchTarget.includes(normalizedQuery);
+        normalizedQuery.length === 0 ||
+        searchTarget.includes(normalizedQuery) ||
+        (isInsurerDisclosureRoomCategory(entry.category) &&
+          matchesDisclosureRoomSearchQuery(
+            normalizedQuery,
+            entry.insurerName ?? entry.title,
+            searchFields,
+          ));
       const matchesCategoryFilter = matchesPublicDisclosureCategory(
         entry.category,
         category,
@@ -215,13 +232,10 @@ export function DisclosureLinkCenter({
           ))}
         </div>
       ) : (
-        <div className="space-y-5">
-          <EmptyState
-            description="제목·보험사명·출처명을 다르게 입력하거나, 보험사 디렉터리에서 전산·청구 링크를 확인해 보세요."
-            title="조건에 맞는 공식 자료가 없습니다."
-          />
-          <BrowseNextSteps title="관련 메뉴" />
-        </div>
+        <EmptyState
+          description="검색어를 줄이거나 자료 분류·고급 필터를 변경해 주세요."
+          title="조건에 맞는 공식 자료가 없습니다."
+        />
       )}
     </div>
   );
