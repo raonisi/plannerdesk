@@ -1,4 +1,8 @@
 import {
+  resolveInsurerMarketSegmentForGroup,
+  type InsurerMarketSegment,
+} from "./insurer-category";
+import {
   COMMON_INSURER_KEY,
   getItemInsurerName,
   insurerGroupKey,
@@ -12,6 +16,7 @@ export type InsurerClaimGroup = {
   items: ClaimLibraryItem[];
   /** Public directory deep-link when a guide row carries insurerId. */
   directoryInsurerId: string | null;
+  marketSegment: InsurerMarketSegment;
 };
 
 export function groupClaimItemsByInsurer(
@@ -30,12 +35,20 @@ export function groupClaimItemsByInsurer(
   }
 
   return Array.from(groups.entries())
-    .map(([key, groupItems]) => ({
-      key,
-      label: insurerGroupLabel(key),
-      items: groupItems.sort((a, b) => compareItems(a, b)),
-      directoryInsurerId: resolveDirectoryInsurerId(groupItems),
-    }))
+    .map(([key, groupItems]) => {
+      const directoryInsurerId = resolveDirectoryInsurerId(groupItems);
+      return {
+        key,
+        label: insurerGroupLabel(key),
+        items: groupItems.sort((a, b) => compareItems(a, b)),
+        directoryInsurerId,
+        marketSegment: resolveInsurerMarketSegmentForGroup({
+          key,
+          items: groupItems,
+          directoryInsurerId,
+        }),
+      };
+    })
     .sort((a, b) => compareGroupKeys(a.key, b.key));
 }
 

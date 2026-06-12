@@ -18,6 +18,9 @@ import {
   matchesInsurerClaimItem,
 } from "./insurer-matching";
 import { groupClaimItemsByInsurer } from "./group-by-insurer";
+import {
+  resolveInsurerMarketSegmentForItem,
+} from "./insurer-category";
 
 export type ClaimLibraryFilters = {
   query: string;
@@ -25,6 +28,7 @@ export type ClaimLibraryFilters = {
   status: string;
   documentNature: string;
   selectedInsurerKey: string;
+  marketSegment: string;
 };
 
 export function buildClaimLibraryItems(
@@ -68,13 +72,17 @@ export function filterClaimLibraryItems(
       (filters.selectedInsurerKey === "common" &&
         itemInsurerKey === COMMON_INSURER_KEY) ||
       matchesInsurerFilterKey(item, filters.selectedInsurerKey);
+    const matchesMarketSegment =
+      filters.marketSegment === "all" ||
+      resolveInsurerMarketSegmentForItem(item) === filters.marketSegment;
 
     return (
       matchesQuery &&
       matchesCategory &&
       matchesStatus &&
       matchesNature &&
-      matchesInsurer
+      matchesInsurer &&
+      matchesMarketSegment
     );
   });
 }
@@ -94,16 +102,6 @@ function matchesDocumentNature(
   return true;
 }
 
-export function buildCategoryFilterOptions(items: ClaimLibraryItem[]) {
-  const present = new Set(items.map((item) => getItemCategory(item)));
-  return [
-    { label: "전체", value: "all" },
-    ...categoryOrder
-      .filter((cat) => present.has(cat))
-      .map((cat) => ({ label: categoryLabels[cat], value: cat })),
-  ];
-}
-
 function matchesInsurerFilterKey(
   item: ClaimLibraryItem,
   selectedKey: string,
@@ -115,6 +113,30 @@ function matchesInsurerFilterKey(
   if (item.insurerSlug === selectedKey) return true;
 
   return getClaimSlugsForInsurerId(selectedKey).includes(item.insurerSlug);
+}
+
+export function groupMatchesInsurerFilterKey(
+  group: {
+    key: string;
+    items: ClaimLibraryItem[];
+    directoryInsurerId: string | null;
+  },
+  selectedKey: string,
+): boolean {
+  if (selectedKey === "all") return false;
+  if (selectedKey === "common") return group.key === COMMON_INSURER_KEY;
+  if (group.directoryInsurerId === selectedKey) return true;
+  return group.items.some((item) => matchesInsurerFilterKey(item, selectedKey));
+}
+
+export function buildCategoryFilterOptions(items: ClaimLibraryItem[]) {
+  const present = new Set(items.map((item) => getItemCategory(item)));
+  return [
+    { label: "전체", value: "all" },
+    ...categoryOrder
+      .filter((cat) => present.has(cat))
+      .map((cat) => ({ label: categoryLabels[cat], value: cat })),
+  ];
 }
 
 export function buildInsurerFilterOptions(items: ClaimLibraryItem[]) {

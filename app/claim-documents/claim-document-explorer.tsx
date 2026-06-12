@@ -11,13 +11,18 @@ import {
   buildInsurerFilterOptions,
   filterClaimLibraryItems,
   groupFilteredClaimItems,
+  groupMatchesInsurerFilterKey,
 } from "@/lib/claim-documents/claim-library";
-import { CLAIM_PDF_GOVERNANCE_NOTICE } from "@/lib/claim-documents/claim-pdf-governance";
+import { CLAIM_PDF_ACCORDION_NOTICE } from "@/lib/claim-documents/claim-pdf-governance";
+import type { InsurerClaimGroup } from "@/lib/claim-documents/group-by-insurer";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import { ClaimDocumentFavoritesStrip } from "@/components/planner-favorites/claim-document-favorites-strip";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { ClaimFormsFilters } from "./claim-forms-filters";
-import { InsurerClaimGroup } from "./insurer-claim-group";
+import { InsurerClaimGroup as InsurerClaimGroupPanel } from "./insurer-claim-group";
+
+const EMPTY_SEARCH_MESSAGE =
+  "검색 결과가 없습니다. 보험사명 또는 서류명을 다시 확인해 주세요.";
 
 export function ClaimDocumentExplorer({
   documents,
@@ -34,6 +39,7 @@ export function ClaimDocumentExplorer({
   const [category, setCategory] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
   const [documentNature, setDocumentNature] = useState<string>("all");
+  const [marketSegment, setMarketSegment] = useState<string>("all");
   const [selectedInsurerKey, setSelectedInsurerKey] = useState(
     () => insurerFromQuery ?? "all",
   );
@@ -59,6 +65,7 @@ export function ClaimDocumentExplorer({
     category !== "all" ||
     status !== "all" ||
     documentNature !== "all" ||
+    marketSegment !== "all" ||
     selectedInsurerKey !== "all";
 
   const filteredItems = useMemo(
@@ -69,8 +76,17 @@ export function ClaimDocumentExplorer({
         status,
         documentNature,
         selectedInsurerKey,
+        marketSegment,
       }),
-    [allItems, category, documentNature, query, selectedInsurerKey, status],
+    [
+      allItems,
+      category,
+      documentNature,
+      marketSegment,
+      query,
+      selectedInsurerKey,
+      status,
+    ],
   );
 
   const insurerGroups = useMemo(
@@ -89,12 +105,22 @@ export function ClaimDocumentExplorer({
 
   const totalItemCount = filteredItems.length;
 
-  const isGroupExpanded = useCallback(
-    (groupKey: string) => {
+  const shouldAutoExpandGroup = useCallback(
+    (group: InsurerClaimGroup) => {
       if (hasActiveFilters) return true;
-      return expandedKeys.has(groupKey);
+      if (insurerGroups.length === 1) return true;
+      if (groupMatchesInsurerFilterKey(group, selectedInsurerKey)) return true;
+      return false;
     },
-    [expandedKeys, hasActiveFilters],
+    [hasActiveFilters, insurerGroups.length, selectedInsurerKey],
+  );
+
+  const isGroupExpanded = useCallback(
+    (group: InsurerClaimGroup) => {
+      if (expandedKeys.has(group.key)) return true;
+      return shouldAutoExpandGroup(group);
+    },
+    [expandedKeys, shouldAutoExpandGroup],
   );
 
   const toggleGroup = useCallback((groupKey: string) => {
@@ -114,6 +140,7 @@ export function ClaimDocumentExplorer({
     setCategory("all");
     setStatus("all");
     setDocumentNature("all");
+    setMarketSegment("all");
     setSelectedInsurerKey("all");
     setExpandedKeys(new Set());
   }, []);
@@ -129,9 +156,11 @@ export function ClaimDocumentExplorer({
           categoryOptions={categoryOptions}
           documentNature={documentNature}
           insurerOptions={insurerOptions}
+          marketSegment={marketSegment}
           onCategoryChange={setCategory}
           onDocumentNatureChange={setDocumentNature}
           onInsurerChange={setSelectedInsurerKey}
+          onMarketSegmentChange={setMarketSegment}
           onQueryChange={setQuery}
           onReset={resetFilters}
           onStatusChange={setStatus}
@@ -141,7 +170,7 @@ export function ClaimDocumentExplorer({
         />
 
         <p className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm font-semibold leading-6 text-[#5B6470] break-keep">
-          {CLAIM_PDF_GOVERNANCE_NOTICE} 공개 전 검수 중인 항목은 표시되지 않습니다.
+          {CLAIM_PDF_ACCORDION_NOTICE}
         </p>
 
         {selectedInsurerLabel && selectedInsurerKey !== "all" ? (
@@ -178,16 +207,16 @@ export function ClaimDocumentExplorer({
             className="text-sm font-semibold text-[#5f6670]"
             role="status"
           >
-            총 {allItems.length}개 중 {totalItemCount}개 서류를 표시 중입니다.
+            총 {allItems.length}개 중 {totalItemCount}개 서류 · {insurerGroups.length}개 보험사
           </p>
         </div>
 
         {insurerGroups.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {insurerGroups.map((group) => (
-              <InsurerClaimGroup
+              <InsurerClaimGroupPanel
                 group={group}
-                isExpanded={isGroupExpanded(group.key)}
+                isExpanded={isGroupExpanded(group)}
                 key={group.key}
                 onToggle={() => toggleGroup(group.key)}
               />
@@ -196,16 +225,8 @@ export function ClaimDocumentExplorer({
         ) : (
           <div className="space-y-5">
             <EmptyState
-              description={
-                selectedInsurerKey !== "all"
-                  ? "다른 보험사를 선택하거나 필터를 초기화해 보세요. 보험사 디렉터리에서 청구안내·전산 링크도 확인할 수 있습니다."
-                  : "보험사·청구유형·서류명을 다르게 입력하거나 필터를 초기화해 보세요."
-              }
-              title={
-                selectedInsurerKey !== "all"
-                  ? "등록된 청구서류가 없습니다."
-                  : "조건에 맞는 청구서류가 없습니다."
-              }
+              description={EMPTY_SEARCH_MESSAGE}
+              title="조건에 맞는 청구서류가 없습니다."
             />
             <div className="flex flex-wrap justify-center gap-3">
               <Link

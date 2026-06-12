@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ClaimFormListItem } from "@/components/claim-documents/claim-form-list-item";
+import { CLAIM_PDF_CAUTION_TEXT } from "@/lib/claim-documents/claim-pdf-governance";
+import { insurerMarketSegmentLabel } from "@/lib/claim-documents/insurer-category";
 import { COMMON_INSURER_KEY } from "@/lib/claim-documents/library-items";
 import type { InsurerClaimGroup } from "@/lib/claim-documents/group-by-insurer";
 
@@ -26,6 +28,10 @@ export function InsurerClaimGroup({
       : group.key === COMMON_INSURER_KEY
         ? "/directory"
         : `/directory?search=${encodeURIComponent(group.label)}`;
+  const segmentLabel =
+    group.key === COMMON_INSURER_KEY
+      ? null
+      : insurerMarketSegmentLabel(group.marketSegment);
 
   async function handleCopyNotice(e: React.MouseEvent) {
     e.stopPropagation();
@@ -33,7 +39,7 @@ export function InsurerClaimGroup({
       .map((item, idx) => `${idx + 1}. ${item.kind === "pdf" ? item.title : item.document.title}`)
       .join("\n");
     const noticeText = `안녕하세요 고객님. [${group.label}] 보험금 청구에 필요한 서류 목록을 안내드립니다.\n\n${docList}\n\n서류 기준은 보험사 심사와 공식 안내에 따라 달라질 수 있습니다. 준비 전 해당 보험사 공식 안내를 함께 확인해 주세요. 보험금 지급 여부나 금액은 보험사 심사 후 결정됩니다.`;
-    
+
     await copyTextToClipboard(noticeText);
     setCopyState("copied");
     window.setTimeout(() => setCopyState("idle"), 2000);
@@ -56,7 +62,8 @@ export function InsurerClaimGroup({
                 {group.label}
               </span>
               <span className="mt-1 block text-sm font-semibold text-[#5B6470]">
-                공개·검수된 서류 {group.items.length}건 · 공식 안내 확인 필요
+                청구서류 {group.items.length}건
+                {segmentLabel ? ` · ${segmentLabel}` : ""}
               </span>
             </span>
             <span
@@ -73,8 +80,8 @@ export function InsurerClaimGroup({
         <div className="grid gap-2 sm:flex sm:justify-end">
           <button
             aria-label={`${group.label} 고객 안내문 복사`}
-            onClick={handleCopyNotice}
             className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#16382C] bg-[#16382C] px-4 text-sm font-bold text-white transition hover:bg-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+            onClick={handleCopyNotice}
             title="고객에게 보낼 서류 목록 텍스트를 복사합니다"
             type="button"
           >
@@ -101,9 +108,16 @@ export function InsurerClaimGroup({
       >
         <ul className="border-t border-[#E3DED4] px-4 sm:px-5">
           {group.items.map((item) => (
-            <ClaimFormListItem item={item} key={getItemKey(item)} />
+            <ClaimFormListItem
+              item={item}
+              key={getItemKey(item)}
+              variant="accordion"
+            />
           ))}
         </ul>
+        <p className="border-t border-[#E3DED4] px-4 py-3 text-xs leading-5 text-[#5B6470] break-keep sm:px-5">
+          {CLAIM_PDF_CAUTION_TEXT}
+        </p>
       </div>
     </section>
   );

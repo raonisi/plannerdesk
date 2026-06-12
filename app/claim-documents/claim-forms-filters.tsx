@@ -2,6 +2,7 @@
 
 import { VerificationStatus } from "@prisma/client";
 import { SearchBar } from "@/components/content-page";
+import { INSURER_MARKET_SEGMENT_OPTIONS } from "@/lib/claim-documents/insurer-category";
 
 const statusOptions: Array<{ label: string; value: string }> = [
   { label: "전체", value: "all" },
@@ -20,6 +21,7 @@ export function ClaimFormsFilters({
   category,
   status,
   documentNature,
+  marketSegment,
   selectedInsurerKey,
   insurerOptions,
   categoryOptions,
@@ -27,6 +29,7 @@ export function ClaimFormsFilters({
   onCategoryChange,
   onStatusChange,
   onDocumentNatureChange,
+  onMarketSegmentChange,
   onInsurerChange,
   onReset,
 }: {
@@ -34,6 +37,7 @@ export function ClaimFormsFilters({
   category: string;
   status: string;
   documentNature: string;
+  marketSegment: string;
   selectedInsurerKey: string;
   insurerOptions: Array<{ key: string; label: string }>;
   categoryOptions: Array<{ label: string; value: string }>;
@@ -41,6 +45,7 @@ export function ClaimFormsFilters({
   onCategoryChange: (value: string) => void;
   onStatusChange: (value: string) => void;
   onDocumentNatureChange: (value: string) => void;
+  onMarketSegmentChange: (value: string) => void;
   onInsurerChange: (value: string) => void;
   onReset: () => void;
 }) {
@@ -53,14 +58,14 @@ export function ClaimFormsFilters({
     >
       <div className="grid min-w-0 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <label className="block min-w-0" htmlFor="claim-documents-search">
-          <span className="text-sm font-bold text-[#0F1D2E]">통합 검색</span>
+          <span className="text-sm font-bold text-[#0F1D2E]">보험사·서류 검색</span>
           <div className="mt-2">
             <SearchBar
-              ariaLabel="보험사, 청구유형, 서류명 검색"
+              ariaLabel="보험사명, 서류명 검색"
               id="claim-documents-search"
               onChange={onQueryChange}
               onClear={() => onQueryChange("")}
-              placeholder="보험사, 청구유형, 서류명을 검색하세요"
+              placeholder="보험사명 또는 서류명을 검색하세요"
               value={query}
             />
           </div>
@@ -85,7 +90,13 @@ export function ClaimFormsFilters({
         </label>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 space-y-5">
+        <FilterGroup
+          label="보험사 분류"
+          onChange={onMarketSegmentChange}
+          options={[...INSURER_MARKET_SEGMENT_OPTIONS]}
+          value={marketSegment}
+        />
         <FilterGroup
           label="청구 유형"
           onChange={onCategoryChange}

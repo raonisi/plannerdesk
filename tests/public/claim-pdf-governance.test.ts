@@ -77,7 +77,7 @@ describe("PR-BS-20 claim PDF governance", () => {
       join(ROOT, "app/claim-documents/claim-document-explorer.tsx"),
       "utf8",
     );
-    assert.match(source, /CLAIM_PDF_GOVERNANCE_NOTICE/);
+    assert.match(source, /CLAIM_PDF_(GOVERNANCE|ACCORDION)_NOTICE/);
   });
 
   it("AGENTS.md uses git root C:\\work\\plannerdesk", () => {

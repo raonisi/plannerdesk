@@ -23,6 +23,9 @@ export const CLAIM_PDF_CAUTION_TEXT =
 export const CLAIM_PDF_GOVERNANCE_NOTICE =
   "이 자료는 설계사 업무 편의를 위한 청구서류 모음입니다. 보험사별 양식은 수시로 변경될 수 있으므로 실제 제출 전에는 보험사 공식 안내를 함께 확인해 주세요.";
 
+export const CLAIM_PDF_ACCORDION_NOTICE =
+  "청구서류 양식은 보험사 기준에 따라 변경될 수 있습니다. 업무 편의를 위해 PDF 다운로드를 제공하되, 실제 제출 전에는 보험사 공식 안내를 함께 확인해 주세요.";
+
 const insurerById = new Map(
   insurerDirectoryEntries.map((entry) => [entry.id, entry]),
 );
