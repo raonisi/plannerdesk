@@ -11,7 +11,7 @@
 - **planner-only(Work Tools) 후보** 범위와 Answer Assistant 연결 No-Go를 정리한다.
 - **실제 코드 데이터 추가·검색 UI 신규 구현·schema 변경은 하지 않는다.**
 
-선행·관련: [PR-BS-01 Feature Benchmark Report](./PR-BS-01-FEATURE-BENCHMARK-REPORT.md), [PR-BS-08 Card Payment Info Model Review](./PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md), `lib/work-tools/claim-boundary-copy.ts` (PR-173-C), `lib/answer-assistant/output-safety.ts`.
+선행·관련: [PR-BS-01 Feature Benchmark Report](./PR-BS-01-FEATURE-BENCHMARK-REPORT.md), [PR-BS-08 Card Payment Info Model Review](./PR-BS-08-CARD-PAYMENT-INFO-MODEL-REVIEW.md), `lib/work-tools/claim-boundary-copy.ts` (PR-173-C), `lib/answer-assistant/output-safety.ts`. 후속 구현: [PR-BS-18 Code Search Safety Gate](./PR-BS-18-CODE-SEARCH-SAFETY-GATE.md).
 
 ---
 
