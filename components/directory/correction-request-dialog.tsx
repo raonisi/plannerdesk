@@ -23,6 +23,7 @@ import {
 import { hasClientSensitiveSignal } from "@/lib/correction-request/validation";
 import {
   CORRECTION_ALLOWED_REPORT_TOPICS,
+  CORRECTION_COMPACT_PII_NOTICE,
   CORRECTION_PROHIBITED_INPUT_TOPICS,
 } from "@/lib/correction-request/pii-guard";
 
@@ -252,6 +253,9 @@ function CorrectionRequestForm({
           </h2>
           <p className="mt-1 text-sm text-[#4f5661]" id={descriptionId}>
             {CORRECTION_SUBMIT_COPY.dialogDescription}
+          </p>
+          <p className="mt-2 text-xs leading-5 text-[#5f6670]">
+            {CORRECTION_COMPACT_PII_NOTICE}
           </p>
         </div>
         <button

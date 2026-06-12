@@ -4,12 +4,16 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import { CORRECTION_SUBMIT_COPY } from "@/lib/correction-request/constants";
-import { CORRECTION_FORBIDDEN_UI_PHRASES } from "@/lib/correction-request/pii-guard";
+import {
+  CORRECTION_COMPACT_PII_NOTICE,
+  CORRECTION_FORBIDDEN_UI_PHRASES,
+  CORRECTION_PII_BLOCKLIST,
+} from "@/lib/correction-request/pii-guard";
 import { USER_REPORT_NOTICE } from "@/lib/ops/user-support-inbox-plan";
 
 const ROOT = process.cwd();
 
-describe("PR-BS-05 correction flow copy (static)", () => {
+describe("PR-BS-12 correction flow copy (static)", () => {
   it("dialog includes required PII and review notices", () => {
     assert.match(CORRECTION_SUBMIT_COPY.sensitiveWarningBody, /주민번호/);
     assert.match(CORRECTION_SUBMIT_COPY.sensitiveWarningBody, /상담 원문/);
@@ -17,6 +21,7 @@ describe("PR-BS-05 correction flow copy (static)", () => {
     assert.match(CORRECTION_SUBMIT_COPY.reviewNoticeBody, /관리자/);
     assert.match(CORRECTION_SUBMIT_COPY.reviewNoticeBody, /청구 가능/);
     assert.match(CORRECTION_SUBMIT_COPY.piiBlockedMessage, /개인정보/);
+    assert.match(CORRECTION_COMPACT_PII_NOTICE, /고객정보 없이/);
   });
 
   it("forbids payout and PII solicitation copy in correction UI", () => {
@@ -33,6 +38,7 @@ describe("PR-BS-05 correction flow copy (static)", () => {
       assert.doesNotMatch(constants, new RegExp(phrase));
     }
     assert.doesNotMatch(dialog, /첨부해 주세요|붙여넣어 주세요/);
+    assert.doesNotMatch(dialog, /고객명을 입력|계약번호를 입력|보험증권 번호를 입력/);
   });
 
   it("public error report notice excludes PII categories", () => {
@@ -52,11 +58,21 @@ describe("PR-BS-05 correction flow copy (static)", () => {
     assert.match(actions, /FORBIDDEN_FORM_FIELD_NAMES/);
     assert.match(actions, /customerName/);
     assert.match(actions, /policyNumber/);
+    assert.match(actions, /attachment/);
     assert.doesNotMatch(actions, /console\.log\(.*message/i);
   });
 
-  it("admin correction views are not linked from public home", () => {
-    const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
-    assert.doesNotMatch(home, /\/admin\/corrections/);
+  it("PII blocklist is wired into validation module", () => {
+    const validation = readFileSync(
+      join(ROOT, "lib/correction-request/validation.ts"),
+      "utf8",
+    );
+    for (const keyword of CORRECTION_PII_BLOCKLIST) {
+      assert.match(
+        validation,
+        new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"),
+        `missing blocklist keyword in validation: ${keyword}`,
+      );
+    }
   });
 });

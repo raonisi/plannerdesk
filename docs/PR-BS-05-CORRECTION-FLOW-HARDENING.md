@@ -117,6 +117,7 @@ PR-168 · PR-BS-04 workflow: 공식 출처 대조 → 검수 → `lastVerifiedAt
 | PR | 목적 |
 | --- | --- |
 | PR-BS-06 | Planner Favorites |
+| PR-BS-12 | PII guard 구현·테스트 정렬 — [완료](./PR-BS-12-CORRECTION-FLOW-PII-GUARD.md) |
 | PR-177 | Support Operations Design (조건부) |
 | PR-168-B~H | Live correction 처리 |
 

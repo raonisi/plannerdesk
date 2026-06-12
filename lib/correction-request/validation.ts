@@ -71,21 +71,27 @@ const BLOCKED_URL_PROTOCOLS = ["javascript:", "data:", "file:", "vbscript:"];
 const PERSONAL_INFO_KEYWORDS = [
   "주민등록번호",
   "주민번호",
+  "고객명",
   "연락처",
   "휴대폰",
   "휴대전화",
+  "휴대폰번호",
   "전화번호",
   "이메일",
   "주소",
   "계좌번호",
   "계약번호",
   "증권번호",
+  "보험증권",
   "고객번호",
   "신분증",
+  "가족정보",
+  "결제정보",
 ] as const;
 
 const MEDICAL_INFO_KEYWORDS = [
   "병명",
+  "병력",
   "진단명",
   "진단서",
   "소견서",
@@ -93,10 +99,12 @@ const MEDICAL_INFO_KEYWORDS = [
   "처방",
   "처방전",
   "수술명",
+  "수술기록지",
   "입원일",
   "퇴원일",
   "병원명",
   "검사결과",
+  "검사 결과",
   "장애",
   "투약",
   "약제비",
@@ -133,8 +141,11 @@ const FILE_UPLOAD_KEYWORDS = [
   "영수증을 첨부",
   "청구서류를 업로드",
   "캡처본을 첨부",
+  "스크린샷",
   "이미지를 첨부",
   "사진을 첨부",
+  "보험증권을 첨부",
+  "보험증권 이미지",
 ] as const;
 
 const SECRET_KEYWORDS = [
@@ -145,6 +156,7 @@ const SECRET_KEYWORDS = [
   "auth_secret",
   "secret key",
   "private key",
+  "token",
   ".env",
   "process.env",
 ] as const;

@@ -90,6 +90,8 @@ export const CORRECTION_SUBMIT_COPY = {
   dialogTitle: "정보 수정 요청",
   dialogDescription:
     "잘못된 링크, 연락처, 안내 문구를 발견했다면 제보해주세요. 접수된 내용은 관리자 검수 후 반영 여부가 결정됩니다.",
+  compactPiiNotice:
+    "고객정보 없이 오류만 알려주세요. 공식 출처가 있다면 URL을 함께 남겨주세요.",
   sensitiveWarningTitle: "입력 전 확인해주세요",
   sensitiveWarningBody:
     "고객 개인정보, 주민번호, 연락처, 계약번호, 병력, 진단명, 상담 원문은 입력하지 마세요.",

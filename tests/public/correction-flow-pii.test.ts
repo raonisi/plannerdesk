@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
+import { CORRECTION_PII_BLOCKLIST } from "@/lib/correction-request/pii-guard";
 import {
   hasClientSensitiveSignal,
   validateCorrectionSubmit,
@@ -16,7 +17,7 @@ const BASE_PAYLOAD = {
   sourceUrl: null,
 } as const;
 
-describe("PR-BS-05 correction PII guard", () => {
+describe("PR-BS-12 correction PII guard", () => {
   it("blocks resident id and phone patterns", () => {
     assert.equal(hasClientSensitiveSignal("고객 주민번호 900101-1234567"), true);
     assert.equal(hasClientSensitiveSignal("연락처 010-1234-5678"), true);
@@ -31,6 +32,7 @@ describe("PR-BS-05 correction PII guard", () => {
   it("blocks medical and consultation keywords", () => {
     assert.equal(hasClientSensitiveSignal("상담 원문 전체를 붙입니다"), true);
     assert.equal(hasClientSensitiveSignal("진단명 원문: 급성 위염"), true);
+    assert.equal(hasClientSensitiveSignal("병력 관련 상담 내용"), true);
     const medical = validateCorrectionSubmit({
       ...BASE_PAYLOAD,
       message: "병원 진단서 내용에 따라 청구 가능한지 문의",
@@ -49,7 +51,7 @@ describe("PR-BS-05 correction PII guard", () => {
 
     const upload = validateCorrectionSubmit({
       ...BASE_PAYLOAD,
-      message: "캡처본을 첨부해서 보내드리겠습니다",
+      message: "스크린샷을 첨부해서 보내드리겠습니다",
     });
     assert.equal(upload.ok, false);
     assert.equal(upload.reason, "file_upload");
@@ -58,6 +60,7 @@ describe("PR-BS-05 correction PII guard", () => {
   it("blocks secret and card keywords", () => {
     assert.equal(hasClientSensitiveSignal("API key 값을 공유합니다"), true);
     assert.equal(hasClientSensitiveSignal("카드번호 1234-5678-9012-3456"), true);
+    assert.equal(hasClientSensitiveSignal("access token 값"), true);
 
     const secret = validateCorrectionSubmit({
       ...BASE_PAYLOAD,
@@ -65,6 +68,23 @@ describe("PR-BS-05 correction PII guard", () => {
     });
     assert.equal(secret.ok, false);
     assert.equal(secret.reason, "personal_info");
+  });
+
+  it("blocks representative PII blocklist keywords in free text", () => {
+    const samples = [
+      "고객명 홍길동",
+      "보험증권 번호 확인",
+      "수술기록지 내용",
+      "가족정보 포함",
+    ];
+    for (const sample of samples) {
+      assert.equal(
+        hasClientSensitiveSignal(sample),
+        true,
+        `expected block: ${sample}`,
+      );
+    }
+    assert.ok(CORRECTION_PII_BLOCKLIST.length >= 20);
   });
 
   it("allows operational correction without PII", () => {
