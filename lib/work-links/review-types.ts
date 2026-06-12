@@ -84,3 +84,21 @@ export type PublicWorkLinkProjection = {
   sourceLabel: string | null;
   lastVerifiedAt: string | null;
 };
+
+/** PR-BS-15: Safe fields for public/planner surfaces (no admin-only fields). */
+export type PublicVerifiedWorkLinkView = {
+  id: string;
+  title: string;
+  insurerName: string;
+  infoType: WorkLinkInfoType;
+  targetUrl: string | null;
+  officialSourceUrl: string;
+  sourceLabel: string | null;
+  lastVerifiedAt: string;
+  riskLevel: WorkLinkRiskLevel;
+  displayNotice: string;
+};
+
+export type PlannerVerifiedWorkLinkView = PublicVerifiedWorkLinkView & {
+  plannerNotice: string;
+};

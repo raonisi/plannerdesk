@@ -26,6 +26,8 @@ import { searchPublicContent } from "@/lib/search/public";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
 import { SearchResultsList } from "./search-results";
+import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
+import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +68,10 @@ export default async function SearchPage({
   const showEmpty = rawQuery && results?.ok && results.results.length === 0;
   const emptyDomainLabel =
     domain !== "all" ? SEARCH_DOMAIN_LABEL[domain] : undefined;
+  const verifiedWorkLinks =
+    rawQuery && (domain === "all" || domain === "work_link")
+      ? getPublicVerifiedWorkLinks({ query: rawQuery })
+      : [];
 
   return (
     <PageFrame>
@@ -130,13 +136,20 @@ export default async function SearchPage({
           ) : null}
 
           {showResults && results?.ok ? (
-            <SearchResultsList
-              domainFilter={domain}
-              plannerFavoritesEnabled={plannerFavoritesEnabled}
-              query={rawQuery}
-              results={results.results}
-              total={results.total}
-            />
+            <>
+              <SearchResultsList
+                domainFilter={domain}
+                plannerFavoritesEnabled={plannerFavoritesEnabled}
+                query={rawQuery}
+                results={results.results}
+                total={results.total}
+              />
+              <VerifiedWorkLinksSection
+                compact
+                links={verifiedWorkLinks}
+                mode="public"
+              />
+            </>
           ) : null}
 
           {showEmpty ? (

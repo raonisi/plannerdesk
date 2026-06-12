@@ -14,6 +14,8 @@ import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-acces
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { DirectoryExplorer } from "./directory-explorer";
+import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
+import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +52,7 @@ export default async function DirectoryPage() {
     getWorkToolsAccess(),
   ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
+  const verifiedWorkLinks = getPublicVerifiedWorkLinks();
   const claimDocuments =
     claimResult.status === "ok" && claimResult.data.length > 0
       ? claimResult.data
@@ -88,6 +91,8 @@ export default async function DirectoryPage() {
               plannerFavoritesEnabled={plannerFavoritesEnabled}
             />
           )}
+
+          <VerifiedWorkLinksSection mode="public" links={verifiedWorkLinks} />
 
           <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
             {t.footerNote}

@@ -25,7 +25,9 @@ import {
   PUBLIC_WORK_HUB_SEARCH_HINT,
   PUBLIC_WORK_HUB_VISIBILITY_NOTICE,
 } from "@/lib/dashboard/work-hub-copy";
+import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
 import { PlannerWorkFavoritesPanel } from "@/components/dashboard/planner-work-favorites-panel";
+import type { PlannerVerifiedWorkLinkView } from "@/lib/work-links/review-types";
 import { HomeScreenInstallNotice } from "@/components/pwa/home-screen-install-notice";
 import { PlannerFavoritesLoginPrompt } from "@/components/planner-favorites/planner-favorites-login-prompt";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
@@ -61,6 +63,7 @@ interface HomeClientProps {
   knowledgeArticles: PublicKnowledgeArticleListItem[];
   publicStats: HomePublicStats;
   plannerFavoritesEnabled: boolean;
+  plannerVerifiedWorkLinks: PlannerVerifiedWorkLinkView[];
 }
 
 const QUICK_KEYWORDS = [
@@ -78,6 +81,7 @@ export function HomeClient({
   knowledgeArticles,
   publicStats,
   plannerFavoritesEnabled,
+  plannerVerifiedWorkLinks,
 }: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -505,6 +509,14 @@ export function HomeClient({
               </div>
             )}
           </section>
+          ) : null}
+
+          {plannerFavoritesEnabled && plannerVerifiedWorkLinks.length > 0 ? (
+            <VerifiedWorkLinksSection
+              compact
+              links={plannerVerifiedWorkLinks}
+              mode="planner"
+            />
           ) : null}
         </div>
       </div>

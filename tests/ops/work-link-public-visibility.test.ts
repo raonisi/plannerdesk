@@ -56,7 +56,7 @@ describe("PR-BS-14 work link public visibility rules", () => {
     }
   });
 
-  it("published public scope with official source can project without admin fields", () => {
+  it("published public scope with official source and lastVerifiedAt can project", () => {
     const candidate: WorkLinkReviewCandidate = {
       id: "mock-test-public",
       title: "테스트 공개 후보",

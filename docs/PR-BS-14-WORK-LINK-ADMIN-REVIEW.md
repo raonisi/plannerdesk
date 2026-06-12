@@ -45,7 +45,7 @@ customerCenter, fax, paymentInfo, insurerSystem, claimGuide, claimDocument → H
 
 ## 7. 후속
 
-- **PR-BS-15**: 검수 완료 데이터 public/planner projection (별도 PR)
+- **PR-BS-15**: 검수 완료 데이터 public/planner projection — [PR-BS-15 Verified Work Link UX](./PR-BS-15-VERIFIED-WORK-LINK-UX.md)
 
 ## 8. 최종 결론
 

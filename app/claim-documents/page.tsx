@@ -15,6 +15,8 @@ import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-can
 import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { ClaimDocumentExplorer } from "./claim-document-explorer";
+import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
+import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,9 @@ export default async function ClaimDocumentsPage() {
     documents.length > 0 ? documents : claimDocumentCandidateFallback;
   const dbError =
     result.status === "error" && claimDocumentCandidateFallback.length === 0;
+  const claimVerifiedWorkLinks = getPublicVerifiedWorkLinks().filter(
+    (link) => link.infoType === "claimGuide" || link.infoType === "claimDocument",
+  );
 
   return (
     <AppShell>
@@ -65,6 +70,8 @@ export default async function ClaimDocumentsPage() {
               />
             </Suspense>
           )}
+
+          <VerifiedWorkLinksSection compact links={claimVerifiedWorkLinks} mode="public" />
 
           <ClaimPracticeNotice />
 

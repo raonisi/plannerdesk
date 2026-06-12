@@ -17,11 +17,6 @@ const PRE_PUBLIC_REVIEW_STATUSES: ReadonlySet<WorkLinkReviewStatus> = new Set([
   "rejected",
 ]);
 
-const PUBLIC_READY_STATUSES: ReadonlySet<WorkLinkReviewStatus> = new Set([
-  "verified",
-  "published",
-]);
-
 /** Default risk by info type (PR-BS-14 §3). */
 export const WORK_LINK_INFO_TYPE_DEFAULT_RISK: Record<
   WorkLinkInfoType,
@@ -50,14 +45,15 @@ export function hasOfficialSourceUrl(candidate: WorkLinkReviewCandidate): boolea
   return Boolean(candidate.officialSourceUrl?.trim());
 }
 
-/** Whether a row could ever become public (PR-BS-15); BS-14 does not expose public UI. */
+/** Whether a row could become public (admin filter + BS-15 rules). */
 export function isWorkLinkPublicPublishCandidate(
   candidate: WorkLinkReviewCandidate,
 ): boolean {
   if (PRE_PUBLIC_REVIEW_STATUSES.has(candidate.reviewStatus)) return false;
   if (candidate.reviewStatus === "stale") return false;
+  if (candidate.reviewStatus !== "published") return false;
   if (!hasOfficialSourceUrl(candidate)) return false;
-  if (!PUBLIC_READY_STATUSES.has(candidate.reviewStatus)) return false;
+  if (!candidate.lastVerifiedAt?.trim()) return false;
   if (candidate.visibilityScope !== "public") return false;
   return true;
 }
@@ -67,7 +63,7 @@ export function projectWorkLinkToPublic(
 ): PublicWorkLinkProjection | null {
   if (!isWorkLinkPublicPublishCandidate(candidate)) return null;
   const officialSourceUrl = candidate.officialSourceUrl?.trim();
-  if (!officialSourceUrl) return null;
+  if (!officialSourceUrl || !candidate.lastVerifiedAt?.trim()) return null;
 
   return {
     id: candidate.id,

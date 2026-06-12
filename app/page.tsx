@@ -6,6 +6,7 @@ import { getPublicKnowledgeArticles } from "@/lib/public/knowledge-articles";
 import { AppShell } from "@/components/app-shell";
 import type { HomePublicStats } from "@/components/dashboard/home-public-stats-strip";
 import { HomeClient } from "./home-client";
+import { getPlannerVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,9 @@ export default async function Home() {
       getWorkToolsAccess(),
     ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
+  const plannerVerifiedWorkLinks = plannerFavoritesEnabled
+    ? getPlannerVerifiedWorkLinks()
+    : [];
 
   const insurers = insurerResult.status === "ok" ? insurerResult.insurers : [];
   const claimDocuments = claimResult.status === "ok" ? claimResult.data : [];
@@ -37,6 +41,7 @@ export default async function Home() {
         insurers={insurers}
         knowledgeArticles={knowledgeArticles}
         plannerFavoritesEnabled={plannerFavoritesEnabled}
+        plannerVerifiedWorkLinks={plannerVerifiedWorkLinks}
         publicStats={publicStats}
       />
     </AppShell>
