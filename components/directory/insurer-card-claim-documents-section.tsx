@@ -30,9 +30,11 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 function InsurerCardClaimDocumentsPanelBody({
   insurer,
   claimItems,
+  showFooterNotice = true,
 }: {
   insurer: PublicInsurer;
   claimItems: ClaimLibraryItem[];
+  showFooterNotice?: boolean;
 }) {
   const [showAllDocuments, setShowAllDocuments] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,7 +148,9 @@ function InsurerCardClaimDocumentsPanelBody({
         </Link>
       </div>
 
-      <p className={insurerCardClaimNotice}>{CLAIM_INSURER_CARD_NOTICE}</p>
+      {showFooterNotice ? (
+        <p className={insurerCardClaimNotice}>{CLAIM_INSURER_CARD_NOTICE}</p>
+      ) : null}
     </>
   );
 }
@@ -156,11 +160,17 @@ export function InsurerCardClaimDocumentsSection({
   claimItems,
   expanded,
   onExpandedChange,
+  hideToggle = false,
+  hideSectionTitle = false,
+  showFooterNotice = true,
 }: {
   insurer: PublicInsurer;
   claimItems: ClaimLibraryItem[];
   expanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
+  hideToggle?: boolean;
+  hideSectionTitle?: boolean;
+  showFooterNotice?: boolean;
 }) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = expanded !== undefined;
@@ -175,9 +185,30 @@ export function InsurerCardClaimDocumentsSection({
     onExpandedChange?.(next);
   }
 
+  const panelBody = (
+    <InsurerCardClaimDocumentsPanelBody
+      claimItems={claimItems}
+      insurer={insurer}
+      showFooterNotice={showFooterNotice}
+    />
+  );
+
+  if (hideToggle) {
+    return (
+      <section aria-label={`${insurer.name} 청구 안내`} className="space-y-2">
+        {!hideSectionTitle ? (
+          <h3 className={insurerCardSectionTitle}>청구 안내</h3>
+        ) : null}
+        <div className={insurerCardClaimPanel}>{panelBody}</div>
+      </section>
+    );
+  }
+
   return (
     <section aria-label={`${insurer.name} 청구 안내`} className="space-y-2">
-      <h3 className={insurerCardSectionTitle}>청구 안내</h3>
+      {!hideSectionTitle ? (
+        <h3 className={insurerCardSectionTitle}>청구 안내</h3>
+      ) : null}
       <button
         aria-controls={panelId}
         aria-expanded={isOpen}
@@ -206,12 +237,7 @@ export function InsurerCardClaimDocumentsSection({
         id={panelId}
         role="region"
       >
-        {isOpen ? (
-          <InsurerCardClaimDocumentsPanelBody
-            claimItems={claimItems}
-            insurer={insurer}
-          />
-        ) : null}
+        {isOpen ? panelBody : null}
       </div>
     </section>
   );

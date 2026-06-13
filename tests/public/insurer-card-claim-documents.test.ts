@@ -87,12 +87,13 @@ describe("PR-BS-22 insurer card claim documents integration", () => {
     assert.match(card, /\/claim-documents\?insurer=/);
   });
 
-  it("directory explorer passes claim items into cards", () => {
+  it("directory explorer passes claim items into workbench rows", () => {
     const explorer = readFileSync(
       join(ROOT, "app/directory/directory-explorer.tsx"),
       "utf8",
     );
     assert.match(explorer, /getClaimItemsForInsurer/);
+    assert.match(explorer, /InsurerCompactWorkbenchRow/);
     assert.match(explorer, /claimItems=\{getClaimItemsForInsurer/);
   });
 });

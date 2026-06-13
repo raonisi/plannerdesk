@@ -5,12 +5,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
+import { InsurerCompactWorkbenchRow } from "@/components/directory/insurer-compact-workbench-row";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
-import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { LOCAL_FAVORITES_DEVICE_NOTICE } from "@/lib/planner-favorites/copy";
 import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
+import {
+  DIRECTORY_CORRECTION_SECTION_TITLE,
+  DIRECTORY_WORKBENCH_GLOBAL_NOTICE,
+} from "@/lib/directory/directory-workbench-copy";
 import {
   buildClaimLibraryItems,
   getClaimItemsForInsurer,
@@ -51,7 +55,7 @@ function getDisplayCategory(insurer: PublicInsurer): "life" | "non_life" | "mutu
 
 const FAVORITES_EMPTY_TITLE = "즐겨찾기한 보험사가 아직 없습니다.";
 const FAVORITES_EMPTY_DESC =
-  "보험사 카드 상단 오른쪽 별표 버튼을 눌러 자주 쓰는 보험사를 이 화면에 고정해 보세요.";
+  "보험사 행 오른쪽 별표 버튼을 눌러 자주 쓰는 보험사를 이 화면에 고정해 보세요.";
 
 const CHOSUNG_LIST = [
   "ㄱ",
@@ -111,7 +115,7 @@ export function DirectoryExplorer({
   );
   const [query, setQuery] = useState(() => searchFromQuery ?? "");
   const [activeTab, setActiveTab] = useState<TabType>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
 
   const { isFavorite, toggle, count: favoriteCount } = useFavorites();
   const visibleTabs = plannerFavoritesEnabled
@@ -203,6 +207,13 @@ export function DirectoryExplorer({
         </section>
       ) : null}
 
+      <section
+        aria-label="보험사 링크 안내"
+        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 print:hidden"
+      >
+        <p>{DIRECTORY_WORKBENCH_GLOBAL_NOTICE}</p>
+      </section>
+
       {/* 탭 영역 */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between print:hidden">
         <div className="flex flex-wrap items-center gap-2">
@@ -257,8 +268,8 @@ export function DirectoryExplorer({
         <div
           className={
             viewMode === "grid"
-              ? "grid grid-cols-1 gap-5 lg:grid-cols-2"
-              : "grid grid-cols-1 gap-4"
+              ? "grid grid-cols-1 gap-3 lg:grid-cols-2"
+              : "grid grid-cols-1 gap-3"
           }
         >
           {filteredInsurers.map((insurer) => (
@@ -269,10 +280,11 @@ export function DirectoryExplorer({
                 insurer.id === insurerFromQuery ? highlightedInsurerRef : undefined
               }
             >
-              <InsurerActionCard
+              <InsurerCompactWorkbenchRow
                 claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
                 insurer={insurer}
                 isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
+                layout={viewMode === "grid" ? "grid" : "list"}
                 onRequestCorrection={openCorrectionRequest}
                 onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
               />
@@ -293,7 +305,7 @@ export function DirectoryExplorer({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a612d]">
-              제보 및 검수
+              {DIRECTORY_CORRECTION_SECTION_TITLE}
             </p>
             <h3 className="mt-1 text-lg font-semibold text-[#102235]">
               {CORRECTION_REQUEST_COPY.triggerLabel}

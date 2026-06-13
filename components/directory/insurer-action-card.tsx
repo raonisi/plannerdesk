@@ -278,6 +278,8 @@ export interface InsurerActionCardProps {
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
   onRequestCorrection?: (id: string) => void;
+  /** Workbench detail panel: expanded sections only (no compact card shell). */
+  workbenchDetailOnly?: boolean;
 }
 
 export function InsurerActionCard({
@@ -286,8 +288,9 @@ export function InsurerActionCard({
   isFavorite = false,
   onToggleFavorite,
   onRequestCorrection,
+  workbenchDetailOnly = false,
 }: InsurerActionCardProps) {
-  const [detailedOpen, setDetailedOpen] = useState(false);
+  const [detailedOpen, setDetailedOpen] = useState(workbenchDetailOnly);
   const [claimDocumentsOpen, setClaimDocumentsOpen] = useState(false);
   const [cardPaymentOpen, setCardPaymentOpen] = useState(false);
   const [mailAddressOpen, setMailAddressOpen] = useState(false);
@@ -296,20 +299,44 @@ export function InsurerActionCard({
   const claimFax = claimFaxDisplay(insurer);
   const disclosureLinks = getDisclosureLinksForInsurer(insurer.id);
   const disclosureState = disclosureLinkStatus(disclosureLinks);
+  const showExpandedDetails = workbenchDetailOnly || detailedOpen;
+  const Shell = workbenchDetailOnly ? "div" : "article";
 
   return (
-    <article className={insurerCardShell}>
-      {insurer.isFeatured ? (
+    <Shell className={workbenchDetailOnly ? "space-y-6" : insurerCardShell}>
+      {!workbenchDetailOnly && insurer.isFeatured ? (
         <span aria-hidden="true" className={insurerCardFeaturedBar} />
       ) : null}
 
-      <div className="relative">
-        <CardHeader
-          insurer={insurer}
-          isFavorite={isFavorite}
-          onToggleFavorite={onToggleFavorite}
-        />
+      <div className={workbenchDetailOnly ? "space-y-6" : "relative"}>
+        {!workbenchDetailOnly ? (
+          <CardHeader
+            insurer={insurer}
+            isFavorite={isFavorite}
+            onToggleFavorite={onToggleFavorite}
+          />
+        ) : null}
 
+        {workbenchDetailOnly ? (
+          <div className="space-y-6">
+            <InsurerPrimaryWorkLinks
+              insurer={insurer}
+              sections={["system", "support", "official"]}
+              showLinkCheckNotice={false}
+              showTrustHint={false}
+            />
+            <InsurerCardClaimDocumentsSection
+              claimItems={claimItems}
+              expanded={claimDocumentsOpen}
+              insurer={insurer}
+              onExpandedChange={setClaimDocumentsOpen}
+            />
+            <InsurerCardContactStrip
+              insurer={insurer}
+              onOpenMailAddress={() => setMailAddressOpen(true)}
+            />
+          </div>
+        ) : (
         <div className="mt-4 space-y-4">
           <InsurerPrimaryWorkLinks
             insurer={insurer}
@@ -353,25 +380,34 @@ export function InsurerActionCard({
             상세 실무 정보 {detailedOpen ? "닫기 ▲" : "열기 ▼"}
           </button>
         </div>
+        )}
 
-        {/* 아코디언 상세 정보 영역 (기본 닫힘) */}
-        {detailedOpen && (
-          <div className="mt-4 space-y-6 border-t border-[#E3DED4] pt-4 animate-in fade-in duration-200">
-            <InsurerPrimaryWorkLinks
-              insurer={insurer}
-              sections={["support"]}
-              showLinkCheckNotice={false}
-              showTrustHint={false}
-            />
+        {showExpandedDetails ? (
+          <div
+            className={
+              workbenchDetailOnly
+                ? "space-y-6"
+                : "mt-4 space-y-6 border-t border-[#E3DED4] pt-4 animate-in fade-in duration-200"
+            }
+          >
+            {!workbenchDetailOnly ? (
+              <InsurerPrimaryWorkLinks
+                insurer={insurer}
+                sections={["support"]}
+                showLinkCheckNotice={false}
+                showTrustHint={false}
+              />
+            ) : null}
 
-            {/* 안전 안내문구 */}
-            <div className={insurerCardTrustNote}>
-              <ul className="list-inside list-disc space-y-1 text-xs leading-relaxed">
-                <li>보험사별 링크와 연락처는 공식 출처 기준으로 확인 후 사용하세요.</li>
-                <li>PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않습니다.</li>
-                <li>고객 개인정보와 의료자료는 PlannerDesk에 입력하지 마세요.</li>
-              </ul>
-            </div>
+            {!workbenchDetailOnly ? (
+              <div className={insurerCardTrustNote}>
+                <ul className="list-inside list-disc space-y-1 text-xs leading-relaxed">
+                  <li>보험사별 링크와 연락처는 공식 출처 기준으로 확인 후 사용하세요.</li>
+                  <li>PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않습니다.</li>
+                  <li>고객 개인정보와 의료자료는 PlannerDesk에 입력하지 마세요.</li>
+                </ul>
+              </div>
+            ) : null}
 
             {/* 지원·문의 상세 */}
             <section className="space-y-3">
@@ -587,7 +623,7 @@ export function InsurerActionCard({
               </button>
             </section>
           </div>
-        )}
+        ) : null}
 
         {/* 정보 수정 요청 */}
         {onRequestCorrection ? (
@@ -615,7 +651,7 @@ export function InsurerActionCard({
         onClose={() => setMailAddressOpen(false)}
         open={mailAddressOpen}
       />
-    </article>
+    </Shell>
   );
 }
 
