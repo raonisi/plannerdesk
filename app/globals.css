@@ -53,3 +53,30 @@ select {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+@media print {
+  header,
+  footer,
+  nav,
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  details:not([open]) > :not(summary) {
+    display: none !important;
+  }
+
+  article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body {
+    background: #fff;
+    font-size: 11pt;
+  }
+}

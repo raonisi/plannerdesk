@@ -37,7 +37,7 @@ describe("PR154 public smoke expansion (static, no launch)", () => {
 
   it("smoke panel admin only no deploy or db writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminPublicSmokeExpansionPanel/);

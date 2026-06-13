@@ -39,7 +39,7 @@ describe("PR138 operations reminders (static, manual only)", () => {
 
   it("reminder panel admin only not public", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminOperationsReminderPanel/);

@@ -48,7 +48,7 @@ describe("PR171 refund support policy plan (static, no refund or inbox)", () => 
 
   it("panel admin only no prisma refund inbox webhook or notify", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminRefundSupportPolicyPlanPanel/);

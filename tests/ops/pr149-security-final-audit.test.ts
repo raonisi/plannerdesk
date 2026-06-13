@@ -27,7 +27,7 @@ describe("PR149 security final audit (static, no auth changes)", () => {
 
   it("security panel admin only no prisma or role mutation", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminSecurityFinalAuditPanel/);

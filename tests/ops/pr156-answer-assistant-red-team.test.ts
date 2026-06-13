@@ -41,7 +41,7 @@ describe("PR156 Answer Assistant red-team (static, no provider)", () => {
 
   it("red-team panel admin only no provider or allowlist writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminAnswerAssistantRedTeamPanel/);

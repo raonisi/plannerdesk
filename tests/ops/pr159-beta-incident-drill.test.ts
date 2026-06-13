@@ -39,7 +39,7 @@ describe("PR159 beta incident drill (static, no rollback or send)", () => {
 
   it("incident panel admin only no rollback prisma or webhook", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaIncidentDrillPanel/);

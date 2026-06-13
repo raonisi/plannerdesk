@@ -35,7 +35,7 @@ describe("PR163 public UX polish (static, guards unchanged)", () => {
 
   it("panel admin only no prisma or guard changes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminPublicUxPolishPanel/);

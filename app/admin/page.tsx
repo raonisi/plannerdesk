@@ -3,6 +3,7 @@ import {
   buildAdminDashboardSnapshot,
   type AdminDashboardSnapshot,
 } from "@/lib/admin/dashboard-status";
+import { buildAdminOperationalDashboardSnapshot } from "@/lib/admin/operational-dashboard";
 import AdminShell from "@/components/admin/AdminShell";
 
 export const dynamic = "force-dynamic";
@@ -55,11 +56,20 @@ export default async function AdminPage() {
   }
 
   let dashboard: AdminDashboardSnapshot;
+  let operational;
   try {
     dashboard = await buildAdminDashboardSnapshot();
+    operational = await buildAdminOperationalDashboardSnapshot(dashboard);
   } catch {
     dashboard = fallbackDashboard();
+    operational = await buildAdminOperationalDashboardSnapshot(dashboard);
   }
 
-  return <AdminShell session={access.session} dashboard={dashboard} />;
+  return (
+    <AdminShell
+      dashboard={dashboard}
+      operational={operational}
+      session={access.session}
+    />
+  );
 }

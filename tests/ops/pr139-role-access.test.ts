@@ -63,7 +63,7 @@ describe("PR139 role access (static, no role data changes)", () => {
 
   it("role access panel admin only not on public home", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminRoleAccessPanel/);

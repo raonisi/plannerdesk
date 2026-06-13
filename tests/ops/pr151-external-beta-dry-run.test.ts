@@ -50,7 +50,7 @@ describe("PR151 external beta dry run (static, no launch)", () => {
 
   it("dry-run panel admin only no deploy or role writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminExternalBetaDryRunPanel/);

@@ -33,7 +33,7 @@ describe("PR164 AI safety hardening (static, no access expansion)", () => {
 
   it("panel admin only no prisma allowlist or guard weakening", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminAiSafetyHardeningPanel/);

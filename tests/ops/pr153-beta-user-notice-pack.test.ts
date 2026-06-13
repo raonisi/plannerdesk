@@ -40,7 +40,7 @@ describe("PR153 beta user notice pack (static, no send)", () => {
 
   it("notice panel admin only no send or role writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaUserNoticePackPanel/);

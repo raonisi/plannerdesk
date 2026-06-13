@@ -310,7 +310,7 @@ export function InsurerActionCard({
           onToggleFavorite={onToggleFavorite}
         />
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-4 space-y-4">
           <InsurerPrimaryWorkLinks
             insurer={insurer}
             sections={["system"]}
@@ -318,7 +318,7 @@ export function InsurerActionCard({
             showTrustHint={false}
           />
 
-          <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="space-y-3">
+          <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="space-y-2">
             <InsurerQuickClaimActions
               claimItemCount={claimItems.length}
               insurer={insurer}
@@ -331,13 +331,6 @@ export function InsurerActionCard({
               onExpandedChange={setClaimDocumentsOpen}
             />
           </section>
-
-          <InsurerPrimaryWorkLinks
-            insurer={insurer}
-            sections={["support"]}
-            showLinkCheckNotice={false}
-            showTrustHint={false}
-          />
 
           <InsurerCardContactStrip
             insurer={insurer}
@@ -363,7 +356,14 @@ export function InsurerActionCard({
 
         {/* 아코디언 상세 정보 영역 (기본 닫힘) */}
         {detailedOpen && (
-          <div className="mt-6 space-y-8 border-t border-[#E3DED4] pt-6 animate-in fade-in duration-200">
+          <div className="mt-4 space-y-6 border-t border-[#E3DED4] pt-4 animate-in fade-in duration-200">
+            <InsurerPrimaryWorkLinks
+              insurer={insurer}
+              sections={["support"]}
+              showLinkCheckNotice={false}
+              showTrustHint={false}
+            />
+
             {/* 안전 안내문구 */}
             <div className={insurerCardTrustNote}>
               <ul className="list-inside list-disc space-y-1 text-xs leading-relaxed">

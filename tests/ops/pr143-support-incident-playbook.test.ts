@@ -62,7 +62,7 @@ describe("PR143 support and incident playbook (static, no CS system)", () => {
 
   it("playbook panel admin only not public", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminSupportIncidentPlaybookPanel/);

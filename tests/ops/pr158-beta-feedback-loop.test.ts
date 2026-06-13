@@ -37,7 +37,7 @@ describe("PR158 beta feedback loop (static, no form or send)", () => {
 
   it("feedback panel admin only no form prisma or send", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaFeedbackLoopPanel/);

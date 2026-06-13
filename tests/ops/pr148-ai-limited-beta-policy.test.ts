@@ -28,7 +28,7 @@ describe("PR148 AI limited beta policy (static, no access expansion)", () => {
 
   it("panel admin only no prisma allowlist writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminAiLimitedBetaPolicyPanel/);

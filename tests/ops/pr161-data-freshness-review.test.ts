@@ -38,7 +38,7 @@ describe("PR161 data freshness review (static, no DB or crawl)", () => {
 
   it("freshness panel admin only no prisma crawl or bulk", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminDataFreshnessReviewPanel/);

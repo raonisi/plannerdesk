@@ -55,7 +55,7 @@ describe("PR144 public landing safety (static, no launch)", () => {
 
   it("landing safety panel admin only", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminPublicLandingSafetyPanel/);

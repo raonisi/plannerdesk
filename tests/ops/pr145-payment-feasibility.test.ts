@@ -58,7 +58,7 @@ describe("PR145 payment feasibility (static, no billing)", () => {
 
   it("payment panel admin only not on public home", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminPaymentFeasibilityPanel/);

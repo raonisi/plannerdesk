@@ -38,7 +38,7 @@ describe("PR162 user support inbox plan (static, no inbox or DB)", () => {
 
   it("inbox panel admin only no prisma webhook or send", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminUserSupportInboxPlanPanel/);

@@ -44,7 +44,7 @@ describe("PR136 admin operations report (static)", () => {
 
   it("admin panel only on admin shell not public routes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminOperationsReportPanel/);

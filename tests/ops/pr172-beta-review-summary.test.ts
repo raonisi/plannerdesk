@@ -42,7 +42,7 @@ describe("PR172 beta review summary (static, no public beta execution)", () => {
 
   it("panel admin only no user role allowlist db or billing changes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaReviewSummaryPanel/);

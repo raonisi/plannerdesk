@@ -48,7 +48,7 @@ describe("PR160 beta expansion decision (static, no expansion execution)", () =>
 
   it("expansion panel admin only no beta user or allowlist writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaExpansionDecisionPanel/);

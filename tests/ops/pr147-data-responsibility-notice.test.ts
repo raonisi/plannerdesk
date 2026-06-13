@@ -53,7 +53,7 @@ describe("PR147 data responsibility notice (static)", () => {
 
   it("data responsibility panel admin only", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminDataResponsibilityNoticePanel/);

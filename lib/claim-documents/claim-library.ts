@@ -21,6 +21,8 @@ import { groupClaimItemsByInsurer } from "./group-by-insurer";
 import {
   resolveInsurerMarketSegmentForItem,
 } from "./insurer-category";
+import { applyClaimPdfGovernanceOverlay } from "./governance-public";
+import type { PublicClaimPdfGovernanceOverlay } from "./governance-repository";
 
 export type ClaimLibraryFilters = {
   query: string;
@@ -33,11 +35,16 @@ export type ClaimLibraryFilters = {
 
 export function buildClaimLibraryItems(
   guideDocuments: PublicClaimDocument[],
+  pdfGovernanceOverlay?: PublicClaimPdfGovernanceOverlay | null,
 ): ClaimLibraryItem[] {
-  return [
+  const items = [
     ...claimFormFiles.map(claimFormToLibraryItem),
     ...guideDocuments.map(documentToLibraryItem),
   ];
+  if (!pdfGovernanceOverlay || Object.keys(pdfGovernanceOverlay).length === 0) {
+    return items;
+  }
+  return applyClaimPdfGovernanceOverlay(items, pdfGovernanceOverlay);
 }
 
 export function getClaimItemsForInsurer(

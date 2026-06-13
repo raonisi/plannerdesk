@@ -42,7 +42,7 @@ describe("PR131 integrated work dashboard (static)", () => {
     const adminPage = readFileSync(join(ROOT, "app/admin/page.tsx"), "utf8");
     assert.match(adminPage, /getAdminAccess/);
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminReviewQueuePanel/);

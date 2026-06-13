@@ -37,7 +37,7 @@ describe("PR155 admin access regression (static, no role changes)", () => {
 
   it("regression panel admin only no role or db writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminAccessRegressionPanel/);

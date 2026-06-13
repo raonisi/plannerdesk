@@ -1,6 +1,6 @@
 # PlannerDesk Agent Operating System
 
-PlannerDesk (?�래?�데?�크) is a public B2B SaaS platform for Korean insurance planners. It is **completely separate from BOA CRM** and must not reuse BOA CRM infrastructure, databases, customer data, or product assumptions.
+PlannerDesk (?�래?�데?�크) is a public B2B SaaS platform for Korean insurance planners. It is **completely separate from BOA CRM** and must not reuse BOA CRM infrastructure, databases, customer data, or product assumptions.
 
 This file is the **single source of truth** for human and AI agents working in this repository. When instructions conflict, **safety rules and product boundaries in this file win**.
 
@@ -193,17 +193,17 @@ When touching auth:
 
 Never ship user-facing text that:
 
-- Confirms insurance payout (`보험금이 지급됩?�다`, `?�상 보험�?, `?�급 ?�상`)
-- Simplifies claims (`???�류�??�면 ?�니??, `무조�?지�?부지�?)
-- Urges purchase or cancellation or fear (`반드??가??, `?��??�는 �?�?, `지�????�면 ?�해`)
-- Presents AI as final authority (`AI가 최종 ?�단`)
+- Confirms insurance payout (`보험금이 지급됩?�다`, `?�상 보험�?, `?�급 ?�상`)
+- Simplifies claims (`???�류�??�면 ?�니??, `무조�?지�?부지�?)
+- Urges purchase or cancellation or fear (`반드??가??, `?��??�는 �?�?, `지�????�면 ?�해`)
+- Presents AI as final authority (`AI가 최종 ?�단`)
 
 Use official insurer sources; label internal references as non-final. See `lib/work-tools/claim-boundary-copy.ts` and `docs/PR-174-TERMS-LEGAL-REVIEW-PREP.md`.
 
 Allowed tone:
 
-- "?�인 ?�요", "보험???��? 기�??�로 최종 ?�인", "참고??, "검???�??
-- "지�?부지�??�단???�닙?�다", "?�해?�정 ?�는 법률 ?�단???�체하지 ?�습?�다"
+- "?�인 ?�요", "보험???��? 기�??�로 최종 ?�인", "참고??, "검???�??
+- "지�?부지�??�단???�닙?�다", "?�해?�정 ?�는 법률 ?�단???�체하지 ?�습?�다"
 
 Blocked implementation pattern:
 

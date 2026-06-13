@@ -45,7 +45,7 @@ describe("PR165 payment legal readiness (static, no billing)", () => {
 
   it("panel admin only no prisma stripe checkout or paid role", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminPaymentLegalReadinessPanel/);

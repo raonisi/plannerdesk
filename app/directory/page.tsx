@@ -102,7 +102,7 @@ export default async function DirectoryPage() {
           </p>
 
           <aside
-            className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-5 sm:p-6"
+            className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-5 sm:p-6 print:hidden"
             role="note"
           >
             <h3 className="text-base font-bold text-[#0F1D2E]">관련 업무 바로가기</h3>
@@ -142,7 +142,9 @@ export default async function DirectoryPage() {
             </p>
           </aside>
 
-          <PublicErrorReportNotice />
+          <div className="print:hidden">
+            <PublicErrorReportNotice />
+          </div>
         </div>
       </ContentSection>
     </AppShell>

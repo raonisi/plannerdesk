@@ -17,7 +17,7 @@ import {
 } from "@/lib/claim-documents/claim-library";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicInsurer } from "@/lib/public/insurers";
-import type { ClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
+import type { PublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
 
 type TabType = "all" | "life" | "non_life" | "mutual" | "digital" | "favorites";
 type ViewMode = "grid" | "list";
@@ -100,7 +100,7 @@ export function DirectoryExplorer({
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
   plannerFavoritesEnabled?: boolean;
-  pdfGovernanceOverlay?: ClaimPdfGovernanceOverlay | null;
+  pdfGovernanceOverlay?: PublicClaimPdfGovernanceOverlay | null;
 }) {
   const searchParams = useSearchParams();
   const searchFromQuery = searchParams.get("search");
@@ -204,7 +204,7 @@ export function DirectoryExplorer({
       ) : null}
 
       {/* 탭 영역 */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between print:hidden">
         <div className="flex flex-wrap items-center gap-2">
           {visibleTabs.map((tab) => (
             <ViewTab

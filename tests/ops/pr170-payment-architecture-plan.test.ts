@@ -48,7 +48,7 @@ describe("PR170 payment architecture plan (static, no billing)", () => {
 
   it("panel admin only no prisma stripe checkout webhook or billing", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminPaymentArchitecturePlanPanel/);

@@ -40,7 +40,7 @@ describe("PR167 beta metrics review (static, no analytics or DB)", () => {
 
   it("panel admin only no analytics prisma or dashboard", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaMetricsReviewPanel/);

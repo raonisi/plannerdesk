@@ -43,7 +43,7 @@ describe("PR141 limited beta readiness (static, no launch)", () => {
 
   it("limited beta panel admin only", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminLimitedBetaReadinessPanel/);

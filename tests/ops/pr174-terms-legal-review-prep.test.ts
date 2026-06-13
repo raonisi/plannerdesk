@@ -44,7 +44,7 @@ describe("PR174 terms legal review prep (static, no legal finalization)", () => 
   });
 
   it("panel admin only no prisma billing checkout or consent form", () => {
-    const shell = readFileSync(join(ROOT, "components/admin/AdminShell.tsx"), "utf8");
+    const shell = readFileSync(join(ROOT, "components/admin/AdminPlanningPanels.tsx"), "utf8");
     assert.match(shell, /AdminTermsLegalReviewPrepPanel/);
     const panel = readFileSync(
       join(ROOT, "components/admin/AdminTermsLegalReviewPrepPanel.tsx"),
@@ -88,7 +88,7 @@ describe("PR174 terms legal review prep (static, no legal finalization)", () => 
       assert.equal(existsSync(join(ROOT, dir)), false);
     }
     for (const route of PAYMENT_FORBIDDEN) {
-      const shell = readFileSync(join(ROOT, "components/admin/AdminShell.tsx"), "utf8");
+      const shell = readFileSync(join(ROOT, "components/admin/AdminPlanningPanels.tsx"), "utf8");
       assert.doesNotMatch(shell, new RegExp(route, "i"));
     }
   });

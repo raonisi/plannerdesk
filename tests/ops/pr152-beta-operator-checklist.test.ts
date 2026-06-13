@@ -40,7 +40,7 @@ describe("PR152 beta operator checklist (static, no launch)", () => {
 
   it("checklist panel admin only no deploy or role writes", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaOperatorChecklistPanel/);

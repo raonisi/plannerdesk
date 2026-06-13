@@ -166,9 +166,8 @@ describe("PR155 admin access regression (static, no DB or role changes)", () => 
 
   describe("admin operational panels not on public surfaces", () => {
     const ADMIN_SHELL_PANELS = [
-      "AdminOperationsReportPanel",
-      "AdminOperationsReminderPanel",
-      "AdminReviewQueuePanel",
+      "AdminOperationalDashboard",
+      "AdminPlanningPanels",
     ];
 
     it("operational dashboard panels live in AdminShell only", () => {

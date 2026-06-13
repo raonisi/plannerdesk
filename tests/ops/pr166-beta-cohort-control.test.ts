@@ -38,7 +38,7 @@ describe("PR166 beta cohort control (static, no user/allowlist changes)", () => 
 
   it("panel admin only no prisma allowlist mutation or invite", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaCohortControlPanel/);

@@ -49,7 +49,7 @@ describe("PR146 beta access request flow (static, no form)", () => {
 
   it("beta flow panel admin only", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminBetaAccessRequestFlowPanel/);

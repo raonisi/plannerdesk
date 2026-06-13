@@ -1,7 +1,7 @@
 /** PR-BS-15: Public/planner verified work-link display copy (no certainty claims). */
 
-export const VERIFIED_WORK_LINK_PUBLIC_SECTION_TITLE = "검수 완료 업무 링크";
-export const VERIFIED_WORK_LINK_PLANNER_SECTION_TITLE = "검수 완료 업무 참고 링크";
+export const VERIFIED_WORK_LINK_PUBLIC_SECTION_TITLE = "확인된 업무 링크";
+export const VERIFIED_WORK_LINK_PLANNER_SECTION_TITLE = "업무 참고 링크";
 
 export const VERIFIED_WORK_LINK_PUBLIC_NOTICE =
   "공식 출처와 최근 확인일을 함께 확인하세요. 보험사 정책과 안내는 변경될 수 있습니다.";
@@ -21,6 +21,8 @@ export const VERIFIED_WORK_LINK_HIGH_RISK_NOTICE =
 export const VERIFIED_WORK_LINK_OFFICIAL_SOURCE_LABEL = "공식 출처 확인";
 
 export const VERIFIED_WORK_LINK_FORBIDDEN_UI_PHRASES = [
+  "mock 공개",
+  "검수 완료 업무 링크",
   "이 링크만 쓰면 됩니다",
   "이 번호로 보내면 됩니다",
   "카드납 가능합니다",

@@ -7,7 +7,7 @@ import type { WorkLinkReviewCandidate } from "./review-types";
 export const VERIFIED_WORK_LINK_DISPLAY_FIXTURES: readonly WorkLinkReviewCandidate[] = [
   {
     id: "mock-wl-pub-claim-005",
-    title: "청구 안내 (mock 공개)",
+    title: "청구 안내 자료",
     insurerName: "예시 보험사 E",
     infoType: "claimGuide",
     targetUrl: "https://example.invalid/target/claim-guide",
@@ -22,7 +22,7 @@ export const VERIFIED_WORK_LINK_DISPLAY_FIXTURES: readonly WorkLinkReviewCandida
   },
   {
     id: "mock-wl-pub-disclosure-006",
-    title: "공시·약관 허브 (mock 공개)",
+    title: "공시·약관 자료",
     insurerName: "예시 보험사 F",
     infoType: "disclosure",
     targetUrl: "https://example.invalid/target/disclosure",

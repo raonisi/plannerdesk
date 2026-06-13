@@ -47,7 +47,7 @@ describe("PR168 data correction workflow (static, no DB or crawl)", () => {
 
   it("panel admin only no prisma crawl bulk or dashboard", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminDataCorrectionWorkflowPanel/);

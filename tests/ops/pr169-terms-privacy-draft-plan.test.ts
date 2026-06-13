@@ -42,7 +42,7 @@ describe("PR169 terms privacy draft plan (static, no legal finalization)", () =>
 
   it("panel admin only no prisma billing checkout or consent form", () => {
     const shell = readFileSync(
-      join(ROOT, "components/admin/AdminShell.tsx"),
+      join(ROOT, "components/admin/AdminPlanningPanels.tsx"),
       "utf8",
     );
     assert.match(shell, /AdminTermsPrivacyDraftPlanPanel/);
