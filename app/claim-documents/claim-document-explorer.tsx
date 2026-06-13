@@ -16,6 +16,7 @@ import {
 import { CLAIM_PDF_ACCORDION_NOTICE } from "@/lib/claim-documents/claim-pdf-governance";
 import type { InsurerClaimGroup } from "@/lib/claim-documents/group-by-insurer";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import type { ClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
 import { ClaimDocumentFavoritesStrip } from "@/components/planner-favorites/claim-document-favorites-strip";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { ClaimFormsFilters } from "./claim-forms-filters";
@@ -27,9 +28,11 @@ const EMPTY_SEARCH_MESSAGE =
 export function ClaimDocumentExplorer({
   documents,
   plannerFavoritesEnabled = false,
+  pdfGovernanceOverlay,
 }: {
   documents: PublicClaimDocument[];
   plannerFavoritesEnabled?: boolean;
+  pdfGovernanceOverlay?: ClaimPdfGovernanceOverlay | null;
 }) {
   const searchParams = useSearchParams();
   const insurerFromQuery = searchParams.get("insurer");
@@ -46,8 +49,8 @@ export function ClaimDocumentExplorer({
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => new Set());
 
   const allItems = useMemo(
-    () => buildClaimLibraryItems(documents),
-    [documents],
+    () => buildClaimLibraryItems(documents, pdfGovernanceOverlay),
+    [documents, pdfGovernanceOverlay],
   );
 
   const insurerOptions = useMemo(

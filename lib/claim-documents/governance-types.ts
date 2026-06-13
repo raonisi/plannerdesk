@@ -7,6 +7,7 @@ export type ClaimDocumentReviewStatus =
 
 export type ClaimDocumentGovernance = {
   id: string;
+  documentKey: string;
   insurerId?: string;
   insurerName: string;
   documentId?: string;
@@ -28,10 +29,23 @@ export type ClaimDocumentGovernance = {
   updatedBy?: string;
 };
 
+export type ClaimDocumentGovernanceAuditLogEntry = {
+  id: string;
+  fieldName: string;
+  previousValue?: string;
+  nextValue?: string;
+  changedBy?: string;
+  changedAt: string;
+  changeReason?: string;
+};
+
 export type ClaimDocumentWithGovernance = {
   governance: ClaimDocumentGovernance;
   /** Static PDF href from claim-form-files SSOT — never rewritten by governance merge */
   href: string;
+  /** DB governance record id when persisted */
+  governanceRecordId?: string;
+  recentAuditLogs?: ClaimDocumentGovernanceAuditLogEntry[];
 };
 
 export type ClaimDocumentGovernanceRegistryEntry = Partial<

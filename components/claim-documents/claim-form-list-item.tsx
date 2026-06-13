@@ -25,6 +25,43 @@ const primaryButtonClass =
 const secondaryButtonClass =
   "inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-[#B9975B] hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25";
 
+const disabledButtonClass =
+  "inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-400";
+
+function isPdfDownloadEnabled(item: ClaimLibraryItem): boolean {
+  return item.kind !== "pdf" || item.downloadEnabled !== false;
+}
+
+function renderPdfDownloadButton(
+  title: string,
+  item: Extract<ClaimLibraryItem, { kind: "pdf" }>,
+  className: string,
+  gridSpanClass = "",
+) {
+  if (!isPdfDownloadEnabled(item)) {
+    return (
+      <span
+        aria-disabled="true"
+        className={`${disabledButtonClass} ${gridSpanClass}`}
+        title="관리자 설정으로 다운로드가 비활성화되었습니다"
+      >
+        PDF 다운로드 비활성
+      </span>
+    );
+  }
+
+  return (
+    <a
+      aria-label={`${title} PDF 다운로드`}
+      className={`${className} ${gridSpanClass}`}
+      download={item.fileName}
+      href={item.href}
+    >
+      PDF 다운로드
+    </a>
+  );
+}
+
 export function ClaimFormListItem({
   item,
   variant = "default",
@@ -89,14 +126,11 @@ export function ClaimFormListItem({
           <article className={`${insurerCardClaimDocumentCard} space-y-3`}>
             <div className={insurerCardClaimDocumentTitle}>{title}</div>
             <div className={insurerCardClaimDocumentActions}>
-              <a
-                aria-label={`${title} PDF 다운로드`}
-                className={insurerCardPdfDownloadButton}
-                download={item.fileName}
-                href={item.href}
-              >
-                PDF 다운로드
-              </a>
+              {renderPdfDownloadButton(
+                title,
+                item,
+                insurerCardPdfDownloadButton,
+              )}
               <ExternalTabAnchor
                 aria-label={`${title} PDF 바로 열기`}
                 className={insurerCardPdfSecondaryButton}
@@ -159,16 +193,12 @@ export function ClaimFormListItem({
             ) : null}
           </div>
           <div className={actionGridClass}>
-            <a
-              aria-label={`${title} PDF 다운로드`}
-              className={`${primaryButtonClass} ${
-                variant === "accordion" ? "sm:col-span-2 lg:col-span-3" : ""
-              }`}
-              download={item.fileName}
-              href={item.href}
-            >
-              PDF 다운로드
-            </a>
+            {renderPdfDownloadButton(
+              title,
+              item,
+              primaryButtonClass,
+              variant === "accordion" ? "sm:col-span-2 lg:col-span-3" : "",
+            )}
             <ExternalTabAnchor
               aria-label={`${title} PDF 바로 열기`}
               className={secondaryButtonClass}

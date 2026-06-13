@@ -16,6 +16,8 @@ export type ClaimLibraryPdfItem = {
   categoryLabel: string;
   href: string;
   verificationStatus: typeof VerificationStatus.verified;
+  /** When false, download button is disabled. Defaults to enabled. */
+  downloadEnabled?: boolean;
 } & StoredClaimPdfMetadata;
 export type ClaimLibraryGuideItem = {
   kind: "guide";

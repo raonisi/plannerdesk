@@ -15,7 +15,7 @@ export const DEFAULT_CLAIM_DOCUMENT_GOVERNANCE_CAUTION =
   "업무 편의를 위해 청구서류 PDF 다운로드를 제공합니다. 실제 제출 전에는 보험사 공식 안내를 함께 확인해 주세요.";
 
 export const CLAIM_DOCUMENT_GOVERNANCE_ADMIN_SCOPE_NOTICE =
-  "현재 화면은 검수 정보 확인용입니다. 저장 기능은 후속 PR에서 연결됩니다.";
+  "PDF 파일은 그대로 유지됩니다. 아래 검수 정보만 저장되며, 변경 이력은 audit log에 기록됩니다.";
 
 export const CLAIM_DOCUMENT_GOVERNANCE_EMPTY_FILTER_MESSAGE =
   "조건에 맞는 청구서류가 없습니다. 필터를 다시 확인해 주세요.";

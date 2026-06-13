@@ -913,3 +913,58 @@ model AnswerAssistantCleanupLog {
   @@index([createdAt])
   @@index([mode, createdAt])
 }
+
+// Stored PDF governance metadata (PR-BS-27). PDF files remain in public/; only admin metadata is persisted.
+enum ClaimDocumentGovernanceReviewStatus {
+  verified
+  needs_review
+  outdated
+  hidden
+  unknown
+}
+
+model ClaimDocumentGovernance {
+  id                  String                              @id @default(cuid())
+  documentKey         String                              @unique
+  insurerId           String?
+  insurerName         String
+  documentTitle       String
+  fileName            String
+  filePath            String
+  officialSourceUrl   String?
+  officialSourceLabel String?
+  lastVerifiedAt      DateTime?
+  nextReviewDueAt     DateTime?
+  reviewStatus        ClaimDocumentGovernanceReviewStatus @default(unknown)
+  isVisible           Boolean                             @default(true)
+  isDownloadEnabled   Boolean                             @default(true)
+  cautionText         String?                             @db.Text
+  adminMemo           String?                             @db.Text
+  createdAt           DateTime                            @default(now())
+  updatedAt           DateTime                            @updatedAt
+  updatedBy           String?
+
+  auditLogs ClaimDocumentGovernanceAuditLog[]
+
+  @@index([insurerId])
+  @@index([reviewStatus])
+  @@index([isVisible])
+  @@index([updatedAt])
+}
+
+model ClaimDocumentGovernanceAuditLog {
+  id            String                  @id @default(cuid())
+  governanceId  String
+  governance    ClaimDocumentGovernance @relation(fields: [governanceId], references: [id], onDelete: Cascade)
+  documentKey   String
+  changedBy     String?
+  changedAt     DateTime                @default(now())
+  fieldName     String
+  previousValue String?                 @db.Text
+  nextValue     String?                 @db.Text
+  changeReason  String?                 @db.Text
+
+  @@index([governanceId])
+  @@index([documentKey])
+  @@index([changedAt])
+}

@@ -16,6 +16,7 @@ import { getPublicInsurers } from "@/lib/public/insurers";
 import { DirectoryExplorer } from "./directory-explorer";
 import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
 import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
+import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
 
 export const dynamic = "force-dynamic";
 
@@ -46,10 +47,11 @@ const t = {
 };
 
 export default async function DirectoryPage() {
-  const [result, claimResult, workToolsAccess] = await Promise.all([
+  const [result, claimResult, workToolsAccess, pdfGovernanceOverlay] = await Promise.all([
     getPublicInsurers(),
     getPublicClaimDocuments(),
     getWorkToolsAccess(),
+    safeGetPublicClaimPdfGovernanceOverlay(),
   ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
   const verifiedWorkLinks = getPublicVerifiedWorkLinks();
@@ -89,6 +91,7 @@ export default async function DirectoryPage() {
               claimDocuments={claimDocuments}
               insurers={result.insurers}
               plannerFavoritesEnabled={plannerFavoritesEnabled}
+              pdfGovernanceOverlay={pdfGovernanceOverlay}
             />
           )}
 

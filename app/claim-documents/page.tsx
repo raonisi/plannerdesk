@@ -17,6 +17,8 @@ import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { ClaimDocumentExplorer } from "./claim-document-explorer";
 import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
 import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
+import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
+
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +29,10 @@ const t = {
 };
 
 export default async function ClaimDocumentsPage() {
-  const [result, workToolsAccess] = await Promise.all([
+  const [result, workToolsAccess, pdfGovernanceOverlay] = await Promise.all([
     getPublicClaimDocuments(),
     getWorkToolsAccess(),
+    safeGetPublicClaimPdfGovernanceOverlay(),
   ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
   const documents = result.status === "ok" ? result.data : [];
@@ -67,6 +70,7 @@ export default async function ClaimDocumentsPage() {
               <ClaimDocumentExplorer
                 documents={visibleDocuments}
                 plannerFavoritesEnabled={plannerFavoritesEnabled}
+                pdfGovernanceOverlay={pdfGovernanceOverlay}
               />
             </Suspense>
           )}

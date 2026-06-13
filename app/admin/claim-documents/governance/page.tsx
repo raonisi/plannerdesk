@@ -6,7 +6,7 @@ import {
   CLAIM_DOCUMENT_GOVERNANCE_PAGE_DESCRIPTION,
   CLAIM_DOCUMENT_GOVERNANCE_PAGE_TITLE,
 } from "@/lib/claim-documents/governance-defaults";
-import { buildClaimDocumentGovernanceList } from "@/lib/claim-documents/governance-helpers";
+import { buildClaimDocumentGovernanceListWithDb } from "@/lib/claim-documents/governance-helpers";
 import { getClaimDocumentAdminAccess } from "../access";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +32,7 @@ export default async function AdminClaimDocumentGovernancePage() {
     return <AdminAccessDeniedState email={access.session.user?.email ?? null} />;
   }
 
-  const items = buildClaimDocumentGovernanceList();
+  const items = await buildClaimDocumentGovernanceListWithDb();
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">

@@ -21,7 +21,7 @@ describe("PR-BS-25 admin claim document governance board", () => {
 
     assert.match(page, /청구서류 검수 관리/);
     assert.match(page, /ClaimDocumentGovernanceBoard/);
-    assert.match(page, /buildClaimDocumentGovernanceList/);
+    assert.match(page, /buildClaimDocumentGovernanceListWithDb/);
     assert.match(board, /ClaimDocumentGovernanceSummary/);
     assert.match(board, /ClaimDocumentGovernanceFilters/);
     assert.match(board, /ClaimDocumentGovernanceTable/);
@@ -57,8 +57,8 @@ describe("PR-BS-25 admin claim document governance board", () => {
     assert.match(table, /ClaimDocumentGovernancePdfActions/);
     assert.match(detail, /CLAIM_DOCUMENT_GOVERNANCE_ADMIN_SCOPE_NOTICE/);
     assert.match(detail, /상세 보기/);
-    assert.doesNotMatch(detail, /저장 완료/);
-    assert.doesNotMatch(detail, /수정 완료/);
+    assert.match(detail, /saveClaimDocumentGovernanceAction/);
+    assert.match(detail, /검수 정보 저장/);
   });
 
   it("does not expose adminMemo on public claim list item", () => {

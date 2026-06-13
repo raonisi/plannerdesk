@@ -1,5 +1,6 @@
 import type { ClaimFormFile } from "@/lib/content/claim-form-files";
 import { insurerDirectoryEntries } from "@/lib/content/insurers";
+import { buildClaimDocumentKey } from "./document-key";
 import {
   extractClaimPdfFileName,
   resolveOfficialSourceUrlForInsurerSlug,
@@ -17,6 +18,8 @@ import type {
   ClaimDocumentGovernancePriorityCounts,
   ClaimDocumentWithGovernance,
 } from "./governance-types";
+import type { ClaimDocumentGovernanceRecord } from "./governance-repository";
+import { safeListClaimDocumentGovernanceRecords } from "./governance-repository";
 import { INSURER_ID_TO_CLAIM_SLUGS } from "./insurer-matching";
 import { claimFormFiles } from "@/lib/content/claim-form-files";
 
@@ -69,6 +72,12 @@ function findRegistryEntry(
 function buildBaseGovernance(form: ClaimFormFile): ClaimDocumentGovernance {
   const filePath = form.href;
   const fileName = extractClaimPdfFileName(filePath);
+  const documentKey = buildClaimDocumentKey({
+    filePath,
+    fileName,
+    insurerName: form.insurerName,
+    documentTitle: form.label,
+  });
   const registryEntry = findRegistryEntry(form);
   const insurerId = resolveInsurerIdForSlug(form.insurerSlug);
   const officialSourceUrl =
@@ -78,6 +87,7 @@ function buildBaseGovernance(form: ClaimFormFile): ClaimDocumentGovernance {
 
   return {
     id: registryEntry?.id ?? form.id,
+    documentKey,
     insurerId: registryEntry?.insurerId ?? insurerId,
     insurerName: registryEntry?.insurerName ?? form.insurerName,
     documentId: registryEntry?.documentId ?? form.id,
@@ -115,6 +125,58 @@ export function mergeClaimFormWithGovernance(
 
 export function buildClaimDocumentGovernanceList(): ClaimDocumentWithGovernance[] {
   return claimFormFiles.map(mergeClaimFormWithGovernance);
+}
+
+export function mergeGovernanceDbRecord(
+  item: ClaimDocumentWithGovernance,
+  record: ClaimDocumentGovernanceRecord | undefined,
+): ClaimDocumentWithGovernance {
+  const base = item.governance;
+  if (!record) {
+    return item;
+  }
+
+  return {
+    ...item,
+    governanceRecordId: record.id,
+    governance: {
+      ...base,
+      id: record.id,
+      documentKey: record.documentKey,
+      insurerId: record.insurerId ?? base.insurerId,
+      insurerName: record.insurerName,
+      documentTitle: record.documentTitle,
+      fileName: record.fileName,
+      filePath: base.filePath,
+      officialSourceUrl: record.officialSourceUrl,
+      officialSourceLabel: record.officialSourceLabel,
+      lastVerifiedAt: record.lastVerifiedAt,
+      nextReviewDueAt: record.nextReviewDueAt,
+      reviewStatus: record.reviewStatus,
+      isVisible: record.isVisible,
+      isDownloadEnabled: record.isDownloadEnabled,
+      cautionText: record.cautionText ?? undefined,
+      adminMemo: record.adminMemo,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+      updatedBy: record.updatedBy,
+    },
+  };
+}
+
+export async function buildClaimDocumentGovernanceListWithDb(): Promise<
+  ClaimDocumentWithGovernance[]
+> {
+  const baseItems = buildClaimDocumentGovernanceList();
+  const records = await safeListClaimDocumentGovernanceRecords();
+  if (records.length === 0) {
+    return baseItems;
+  }
+
+  const byKey = new Map(records.map((record) => [record.documentKey, record]));
+  return baseItems.map((item) =>
+    mergeGovernanceDbRecord(item, byKey.get(item.governance.documentKey)),
+  );
 }
 
 export function isGovernanceVerifiedComplete(

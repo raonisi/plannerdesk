@@ -17,6 +17,7 @@ import {
 } from "@/lib/claim-documents/claim-library";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicInsurer } from "@/lib/public/insurers";
+import type { ClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
 
 type TabType = "all" | "life" | "non_life" | "mutual" | "digital" | "favorites";
 type ViewMode = "grid" | "list";
@@ -94,17 +95,19 @@ export function DirectoryExplorer({
   insurers,
   claimDocuments,
   plannerFavoritesEnabled = false,
+  pdfGovernanceOverlay,
 }: {
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
   plannerFavoritesEnabled?: boolean;
+  pdfGovernanceOverlay?: ClaimPdfGovernanceOverlay | null;
 }) {
   const searchParams = useSearchParams();
   const searchFromQuery = searchParams.get("search");
   const insurerFromQuery = searchParams.get("insurer");
   const allClaimItems = useMemo(
-    () => buildClaimLibraryItems(claimDocuments),
-    [claimDocuments],
+    () => buildClaimLibraryItems(claimDocuments, pdfGovernanceOverlay),
+    [claimDocuments, pdfGovernanceOverlay],
   );
   const [query, setQuery] = useState(() => searchFromQuery ?? "");
   const [activeTab, setActiveTab] = useState<TabType>("all");
