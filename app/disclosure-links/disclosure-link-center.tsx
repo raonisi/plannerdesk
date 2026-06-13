@@ -189,7 +189,7 @@ export function DisclosureLinkCenter({
                 <label className="block text-xs text-[#5B6470]">
                   보험사
                   <select
-                    className="mt-1 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#0F1D2E]"
+                    className="mt-1 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#0F1D2E]"
                     value={insurerFilter}
                     onChange={(event) => setInsurerFilter(event.target.value)}
                   >

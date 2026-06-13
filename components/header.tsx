@@ -135,7 +135,7 @@ function MobileNavLink({
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+      className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 min-h-11 inline-flex items-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
         isActive ? buttons.mobileActive : buttons.mobileIdle
       }`}
       href={href}

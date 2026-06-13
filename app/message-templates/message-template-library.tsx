@@ -294,7 +294,7 @@ export function MessageTemplateLibrary({
               <label className="block text-xs text-[#5B6470]">
                 사용 상황
                 <input
-                  className="mt-1 min-h-10 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A]"
+                    className="mt-1 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A]"
                   value={useCaseQuery}
                   onChange={(e) => setUseCaseQuery(e.target.value)}
                   placeholder="사용 상황 키워드"
@@ -427,7 +427,7 @@ function TemplateCard({
         <button
           type="button"
           onClick={() => onToggleFav(template.id)}
-          className="shrink-0 rounded-lg p-1.5 text-[#E3DED4] transition hover:text-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-[#E3DED4] transition hover:text-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
           aria-label={
             isFav
               ? `${template.title} 즐겨찾기 해제`

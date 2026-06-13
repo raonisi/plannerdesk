@@ -74,7 +74,7 @@ export function PageHero({
 }
 
 export function PageFrame({ children }: { children: ReactNode }) {
-  return <div className={`min-h-screen ${surfaces.page}`}>{children}</div>;
+  return <div className={`min-h-screen overflow-x-hidden ${surfaces.page}`}>{children}</div>;
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
@@ -409,7 +409,7 @@ export function SearchBar({
       {value && onClear ? (
         <button
           aria-label="검색어 지우기"
-          className="ml-2 inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+          className="ml-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
           onClick={onClear}
           type="button"
         >

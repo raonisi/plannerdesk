@@ -168,7 +168,7 @@ export function ClaimFormListItem({
               </div>
             ) : null}
             <p
-              className={`break-keep text-base font-bold leading-6 text-slate-900 ${
+              className={`break-words text-base font-bold leading-6 text-slate-900 ${
                 isCompactVariant ? "" : "mt-2"
               }`}
             >

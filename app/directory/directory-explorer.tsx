@@ -9,6 +9,7 @@ import { InsurerCompactWorkbenchRow } from "@/components/directory/insurer-compa
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { LOCAL_FAVORITES_DEVICE_NOTICE } from "@/lib/planner-favorites/copy";
+import { MOBILE_FAVORITES_NOTICE_SHORT } from "@/lib/mobile/field-usability";
 import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
 import {
@@ -209,14 +210,42 @@ export function DirectoryExplorer({
 
       <section
         aria-label="보험사 링크 안내"
-        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 print:hidden"
+        className="hidden rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 print:hidden sm:block"
       >
         <p>{DIRECTORY_WORKBENCH_GLOBAL_NOTICE}</p>
+      </section>
+      <details className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm leading-6 text-slate-600 print:hidden sm:hidden">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
+          안내 보기
+        </summary>
+        <p className="pb-2 pt-1">{DIRECTORY_WORKBENCH_GLOBAL_NOTICE}</p>
+      </details>
+
+      {/* 검색 영역 — 모바일에서 탭보다 먼저 */}
+      <section className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-4 shadow-sm sm:p-6">
+        <label className="block">
+          <span className="text-sm font-bold text-[#0F1D2E]">보험사 검색</span>
+          <input
+            aria-label="보험사명·초성 검색"
+            className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-[#E3DED4] bg-white px-4 py-3 text-base text-[#17202A] outline-none transition placeholder:text-[#5B6470] focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#B9975B]/30"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="보험사명·초성 검색, 예: 삼성화재 또는 ㅅㅅㅎㅈ"
+            type="search"
+            value={query}
+          />
+        </label>
+        <p className="mt-3 text-sm leading-6 text-[#4f5661]">
+          {filteredInsurers.length}개 보험사
+          <span className="sm:hidden"> · {MOBILE_FAVORITES_NOTICE_SHORT}</span>
+          <span className="hidden sm:inline">
+            {" "}가 표시됩니다. {LOCAL_FAVORITES_DEVICE_NOTICE}
+          </span>
+        </p>
       </section>
 
       {/* 탭 영역 */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between print:hidden">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
           {visibleTabs.map((tab) => (
             <ViewTab
               active={activeTab === tab.value}
@@ -224,6 +253,7 @@ export function DirectoryExplorer({
               label={tab.label}
               onClick={() => setActiveTab(tab.value)}
               count={tab.value === "favorites" ? favoriteCount : undefined}
+              compact
             />
           ))}
         </div>
@@ -240,24 +270,6 @@ export function DirectoryExplorer({
           />
         </div>
       </div>
-
-      {/* 검색 영역 */}
-      <section className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 shadow-sm sm:p-6">
-        <label className="block">
-          <span className="text-sm font-bold text-[#0F1D2E]">보험사 검색</span>
-          <input
-            aria-label="보험사명·초성 검색"
-            className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-[#E3DED4] bg-white px-4 py-3 text-base text-[#17202A] outline-none transition placeholder:text-[#5B6470] focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#B9975B]/30"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="보험사명·초성 검색, 예: 삼성화재 또는 ㅅㅅㅎㅈ"
-            type="search"
-            value={query}
-          />
-        </label>
-        <p className="mt-4 text-sm leading-6 text-[#4f5661]">
-          {filteredInsurers.length}개 보험사가 표시됩니다. {LOCAL_FAVORITES_DEVICE_NOTICE}
-        </p>
-      </section>
 
       {showFavoritesEmpty ? (
         <EmptyState
@@ -340,20 +352,22 @@ function ViewTab({
   label,
   onClick,
   count,
+  compact = false,
 }: {
   active: boolean;
   label: string;
   onClick: () => void;
   count?: number;
+  compact?: boolean;
 }) {
   return (
     <button
       aria-pressed={active}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] ${
+      className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] ${
         active
           ? "border-[#102235] bg-[#102235] text-[#fbf7ee]"
           : "border-[#d9c9a8] bg-white text-[#303845] hover:border-[#aa8137]"
-      }`}
+      } ${compact ? "whitespace-nowrap" : ""}`}
       onClick={onClick}
       type="button"
     >

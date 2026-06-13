@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { EmptyState } from "@/components/content-page";
+import { EmptyState, CollapsibleNotice } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import {
   buildCategoryFilterOptions,
@@ -172,9 +172,13 @@ export function ClaimDocumentExplorer({
           status={status}
         />
 
-        <p className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm font-semibold leading-6 text-[#5B6470] break-keep">
+        <CollapsibleNotice
+          defaultOpen={false}
+          summary="PDF 다운로드·공식 안내 사용 시 확인할 내용"
+          title="청구서류 안내"
+        >
           {CLAIM_PDF_ACCORDION_NOTICE}
-        </p>
+        </CollapsibleNotice>
 
         {selectedInsurerLabel && selectedInsurerKey !== "all" ? (
           <section

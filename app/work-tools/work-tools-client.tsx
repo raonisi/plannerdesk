@@ -21,6 +21,7 @@ import {
   matchesWorkToolCategory,
 } from "@/lib/tool-display";
 import { EmptyState, SearchBar } from "@/components/content-page";
+import { touchTargets } from "@/lib/design-system";
 import {
   SILBI_CALC_DESCRIPTION,
   SILBI_CALC_TITLE,
@@ -2405,7 +2406,8 @@ function Pagination({
   return (
     <div className="flex items-center justify-center gap-1 pt-4 border-t border-slate-200">
       <button
-        className="p-2 border border-slate-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white transition"
+        aria-label="이전 페이지"
+        className={`${touchTargets.paginationButton} disabled:opacity-40`}
         disabled={page === 1}
         onClick={() => onChange(page - 1)}
         type="button"
@@ -2417,7 +2419,7 @@ function Pagination({
       {visiblePages[0] > 1 && (
         <>
           <button
-            className="w-9 h-9 border border-slate-200 text-xs font-semibold rounded-lg hover:bg-white transition"
+            className={touchTargets.paginationButton}
             onClick={() => onChange(1)}
             type="button"
           >
@@ -2429,10 +2431,10 @@ function Pagination({
       {visiblePages.map((p) => (
         <button
           key={p}
-          className={`w-9 h-9 text-xs font-semibold rounded-lg border transition ${
+          className={`${touchTargets.paginationButton} ${
             p === page
               ? "bg-indigo-600 !text-slate-50 border-transparent"
-              : "border-slate-200 text-indigo-600 hover:bg-white"
+              : "text-indigo-600"
           }`}
           onClick={() => onChange(p)}
           type="button"
@@ -2446,7 +2448,7 @@ function Pagination({
             <span className="text-slate-500 text-xs px-1">...</span>
           )}
           <button
-            className="w-9 h-9 border border-slate-200 text-xs font-semibold rounded-lg hover:bg-white transition"
+            className={touchTargets.paginationButton}
             onClick={() => onChange(totalPages)}
             type="button"
           >
@@ -2455,7 +2457,8 @@ function Pagination({
         </>
       )}
       <button
-        className="p-2 border border-slate-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white transition"
+        aria-label="다음 페이지"
+        className={`${touchTargets.paginationButton} disabled:opacity-40`}
         disabled={page === totalPages}
         onClick={() => onChange(page + 1)}
         type="button"
@@ -2554,7 +2557,7 @@ function FolderDownloadModal({
             <p className="text-[10px] font-mono text-slate-400 mt-0.5">{target}</p>
           </div>
           <button
-            className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition"
+            className={`${touchTargets.iconButton} text-slate-400 hover:text-slate-600 hover:bg-slate-50`}
             onClick={onClose}
             aria-label="닫기"
             type="button"

@@ -14,6 +14,7 @@ import type { AdminBulkActionId } from "@/lib/admin/bulk-policies";
 import type { AdminBulkSelectableItem } from "@/lib/admin/bulk-policies";
 import { getAdminPublicSurfaceLabel } from "@/lib/admin/public-surface-label";
 import { borders, shadows, surfaces } from "@/lib/design-system";
+import { MOBILE_ADMIN_ACTION } from "@/lib/mobile/field-usability";
 import {
   executeClaimDocumentBulkAction,
   setClaimDocumentPublished,
@@ -120,7 +121,85 @@ export default function ClaimDocumentsAdminList({
               resetHref="/admin/claim-documents"
             />
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            <div className="divide-y divide-[#e7ddc9] md:hidden">
+              {claimDocuments.map((claimDocument) => {
+                const publiclyVisible = isClaimDocumentPubliclyVisible({
+                  isPublished: claimDocument.isPublished,
+                  verificationStatus: claimDocument.verificationStatus,
+                });
+                const surface = getAdminPublicSurfaceLabel({
+                  isPublished: claimDocument.isPublished,
+                  publiclyVisible,
+                });
+                const togglePublishTarget = !claimDocument.isPublished;
+                const publishWouldBeBlocked = wouldPublishDraft({
+                  isPublished: togglePublishTarget,
+                  verificationStatus: claimDocument.verificationStatus,
+                });
+                return (
+                  <article className="space-y-3 p-4" key={claimDocument.id}>
+                    <div className="flex items-start gap-3">
+                      <BulkRowCheckbox
+                        id={claimDocument.id}
+                        label={claimDocument.title}
+                        selection={selection}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="break-words font-semibold text-[#102235]">
+                          {claimDocument.title}
+                        </h3>
+                        <p className="mt-1 break-words text-xs text-[#5f6875]">
+                          {claimDocument.insurerName ?? "보험사 미연결"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className={badgeClass("navy")}>
+                        {categoryLabel(claimDocument.category)}
+                      </span>
+                      <span
+                        className={badgeClass(statusTone(claimDocument.verificationStatus))}
+                      >
+                        {statusLabel(claimDocument.verificationStatus)}
+                      </span>
+                      <span className={badgeClass(surface.tone)} title={surface.title}>
+                        {surface.label}
+                      </span>
+                    </div>
+                    <div className="grid gap-2">
+                      <Link
+                        href={`/admin/claim-documents/${claimDocument.id}/edit`}
+                        className={MOBILE_ADMIN_ACTION}
+                      >
+                        수정
+                      </Link>
+                      <form
+                        action={setClaimDocumentPublished.bind(
+                          null,
+                          claimDocument.id,
+                          togglePublishTarget,
+                        )}
+                      >
+                        <button
+                          type="submit"
+                          disabled={publishWouldBeBlocked}
+                          title={
+                            publishWouldBeBlocked
+                              ? ADMIN_CLAIM_DOC_COPY.draftPublishBlocked
+                              : undefined
+                          }
+                          className={`${MOBILE_ADMIN_ACTION} disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a]`}
+                        >
+                          {claimDocument.isPublished ? "비공개로 전환" : "공개로 전환"}
+                        </button>
+                      </form>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full divide-y divide-[#d9c9a8] text-sm">
                 <thead className="bg-[#f7f1e5] text-left text-xs font-semibold uppercase tracking-wide text-[#4f5661]">
                   <tr>
@@ -201,7 +280,7 @@ export default function ClaimDocumentsAdminList({
                           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                             <Link
                               href={`/admin/claim-documents/${claimDocument.id}/edit`}
-                              className="rounded-md border border-[#d9c9a8] px-3 py-1.5 text-center text-xs font-semibold text-[#102235] transition hover:bg-[#f7f1e5]"
+                              className={`${MOBILE_ADMIN_ACTION} w-auto px-3 py-1.5 text-xs`}
                             >
                               수정
                             </Link>
@@ -220,7 +299,7 @@ export default function ClaimDocumentsAdminList({
                                     ? ADMIN_CLAIM_DOC_COPY.draftPublishBlocked
                                     : undefined
                                 }
-                                className="w-full rounded-md border border-[#d9c9a8] px-3 py-1.5 text-xs font-semibold text-[#4f5661] transition hover:bg-[#f7f1e5] disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a] disabled:hover:bg-[#f4f5f6]"
+                                className={`${MOBILE_ADMIN_ACTION} w-full text-xs disabled:cursor-not-allowed disabled:border-[#d6d8dc] disabled:bg-[#f4f5f6] disabled:text-[#8a909a] disabled:hover:bg-[#f4f5f6]`}
                               >
                                 {claimDocument.isPublished
                                   ? "비공개로 전환"
@@ -235,6 +314,7 @@ export default function ClaimDocumentsAdminList({
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </section>
       )}

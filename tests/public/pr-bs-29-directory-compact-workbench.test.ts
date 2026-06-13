@@ -23,12 +23,17 @@ describe("PR-BS-29 directory compact workbench list", () => {
       join(ROOT, "components/directory/insurer-compact-workbench-row.tsx"),
       "utf8",
     );
+    const ui = readFileSync(
+      join(ROOT, "lib/directory/insurer-workbench-ui.ts"),
+      "utf8",
+    );
 
     assert.match(explorer, /useState<ViewMode>\("list"\)/);
     assert.match(explorer, /InsurerCompactWorkbenchRow/);
     assert.doesNotMatch(explorer, /InsurerActionCard/);
     assert.match(explorer, /DIRECTORY_WORKBENCH_GLOBAL_NOTICE/);
     assert.match(row, /insurerWorkbenchRowShell/);
+    assert.match(ui, /min-h-11/);
     assert.match(row, /PDF \{pdfCount\}/);
   });
 

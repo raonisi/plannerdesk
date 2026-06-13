@@ -82,6 +82,15 @@ export const buttons = {
     "border-[#E3DED4] bg-white text-[#5B6470] hover:border-[#B9975B] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]"
 } as const;
 
+/** Shared 44px touch targets for mobile field usability (PR-BS-30). */
+export const touchTargets = {
+  minHeight: "min-h-11",
+  minSquare: "min-h-11 min-w-11",
+  iconButton: `inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg ${buttonFocus}`,
+  paginationButton:
+    "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-200 text-xs font-semibold transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40",
+} as const;
+
 export const notices = {
   box: "rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 sm:p-6 shadow-sm",
   boxTitle: "text-sm font-bold text-[#0F1D2E]",
