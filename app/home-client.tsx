@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { HomePublicStatsStrip, type HomePublicStats } from "@/components/dashboard/home-public-stats-strip";
+import { HomeDataStatusNotice } from "@/components/dashboard/home-data-status-notice";
 import { WorkHubNextSteps } from "@/components/dashboard/work-hub-next-steps";
 import {
   CLAIM_WORK_FLOW_LINKS,
@@ -56,12 +57,14 @@ import {
 } from "@/lib/planner-favorites/recent-work";
 import { WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION } from "@/lib/work-tools/work-tools-public-copy";
 import { uiLabels } from "@/lib/ui-labels";
+import type { HomeLoadState } from "@/lib/dashboard/home-data-state";
 
 interface HomeClientProps {
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
   knowledgeArticles: PublicKnowledgeArticleListItem[];
   publicStats: HomePublicStats;
+  loadState: HomeLoadState;
   plannerFavoritesEnabled: boolean;
   plannerVerifiedWorkLinks: PlannerVerifiedWorkLinkView[];
 }
@@ -80,6 +83,7 @@ export function HomeClient({
   claimDocuments,
   knowledgeArticles,
   publicStats,
+  loadState,
   plannerFavoritesEnabled,
   plannerVerifiedWorkLinks,
 }: HomeClientProps) {
@@ -311,7 +315,11 @@ export function HomeClient({
               </Link>
             ))}
           </div>
-          <HomePublicStatsStrip stats={publicStats} />
+          <HomePublicStatsStrip loadState={loadState} stats={publicStats} />
+          <HomeDataStatusNotice
+            loadState={loadState}
+            showQuickLinks={loadState === "error" || loadState === "partial-error"}
+          />
         </div>
       </section>
 
