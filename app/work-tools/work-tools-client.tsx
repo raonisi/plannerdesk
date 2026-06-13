@@ -469,8 +469,8 @@ const toolGroups: ToolGroup[] = [
     ],
   },
   {
-    title: "시험교재/모의고사",
-    description: "자격시험 준비에 필요한 공식 교육기관 링크입니다.",
+    title: "시험교재",
+    description: "자격시험 준비에 필요한 공식 교재 PDF를 제공합니다.",
     tools: [
       {
         id: "nonlife-textbook",
@@ -480,13 +480,6 @@ const toolGroups: ToolGroup[] = [
         href: "quick-link-files/general-insurance-textbook",
       },
       {
-        id: "nonlife-mock",
-        label: "손해보험모의고사",
-        description: "손해보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
-        kind: "folder",
-        href: "quick-link-files/general-insurance-mock-exam",
-      },
-      {
         id: "life-textbook",
         label: "생명보험교재",
         description: "생명보험 설계사 등록 자격시험 교재 PDF 다운로드 목록을 제공합니다.",
@@ -494,18 +487,31 @@ const toolGroups: ToolGroup[] = [
         href: "quick-link-files/life-insurance-textbook",
       },
       {
-        id: "life-mock",
-        label: "생명보험모의고사",
-        description: "생명보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
-        kind: "folder",
-        href: "quick-link-files/life-insurance-mock-exam",
-      },
-      {
         id: "variable-textbook",
         label: "변액보험교재",
         description: "변액보험 판매관리사 시험 교재 PDF 다운로드 목록을 제공합니다.",
         kind: "folder",
         href: "quick-link-files/variable-insurance-textbook",
+      },
+    ],
+  },
+  {
+    title: "모의고사",
+    description: "자격시험 대비 핵심 모의고사 파일을 제공합니다.",
+    tools: [
+      {
+        id: "nonlife-mock",
+        label: "손해보험모의고사",
+        description: "손해보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
+        kind: "folder",
+        href: "quick-link-files/general-insurance-mock-exam",
+      },
+      {
+        id: "life-mock",
+        label: "생명보험모의고사",
+        description: "생명보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
+        kind: "folder",
+        href: "quick-link-files/life-insurance-mock-exam",
       },
       {
         id: "variable-mock",
