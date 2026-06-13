@@ -14,6 +14,7 @@ import type {
   ClaimDocumentGovernanceFilters,
   ClaimDocumentGovernanceRegistryEntry,
   ClaimDocumentGovernanceSummary,
+  ClaimDocumentGovernancePriorityCounts,
   ClaimDocumentWithGovernance,
 } from "./governance-types";
 import { INSURER_ID_TO_CLAIM_SLUGS } from "./insurer-matching";
@@ -141,16 +142,64 @@ export function computeClaimDocumentGovernanceSummary(
 ): ClaimDocumentGovernanceSummary {
   return {
     total: items.length,
-    verifiedComplete: items.filter((item) =>
-      isGovernanceVerifiedComplete(item.governance),
+    missingOfficialUrl: items.filter(
+      (item) => !item.governance.officialSourceUrl,
+    ).length,
+    missingLastVerified: items.filter(
+      (item) => !item.governance.lastVerifiedAt,
     ).length,
     needsReview: items.filter((item) =>
       isGovernanceNeedsReviewAttention(item.governance),
     ).length,
+  };
+}
+
+export function computeClaimDocumentGovernancePriorityCounts(
+  items: ClaimDocumentWithGovernance[],
+): ClaimDocumentGovernancePriorityCounts {
+  return {
     missingOfficialUrl: items.filter(
       (item) => !item.governance.officialSourceUrl,
     ).length,
+    missingLastVerified: items.filter(
+      (item) => !item.governance.lastVerifiedAt,
+    ).length,
+    needsReview: items.filter((item) =>
+      isGovernanceNeedsReviewAttention(item.governance),
+    ).length,
+    hiddenOrRestricted: items.filter(
+      (item) =>
+        !item.governance.isVisible ||
+        !item.governance.isDownloadEnabled ||
+        item.governance.reviewStatus === "hidden",
+    ).length,
   };
+}
+
+export type ClaimDocumentGovernancePriorityFilter =
+  | "needsReview"
+  | "hiddenOrRestricted";
+
+export function applyClaimDocumentGovernancePriorityFilter(
+  items: ClaimDocumentWithGovernance[],
+  priorityFilter: ClaimDocumentGovernancePriorityFilter | null,
+): ClaimDocumentWithGovernance[] {
+  if (priorityFilter === "needsReview") {
+    return items.filter((item) =>
+      isGovernanceNeedsReviewAttention(item.governance),
+    );
+  }
+
+  if (priorityFilter === "hiddenOrRestricted") {
+    return items.filter(
+      (item) =>
+        !item.governance.isVisible ||
+        !item.governance.isDownloadEnabled ||
+        item.governance.reviewStatus === "hidden",
+    );
+  }
+
+  return items;
 }
 
 export function filterClaimDocumentsForPublicUser(

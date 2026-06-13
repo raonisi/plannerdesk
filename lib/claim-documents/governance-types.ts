@@ -45,9 +45,16 @@ export type ClaimDocumentGovernanceRegistryEntry = Partial<
 
 export type ClaimDocumentGovernanceSummary = {
   total: number;
-  verifiedComplete: number;
-  needsReview: number;
   missingOfficialUrl: number;
+  missingLastVerified: number;
+  needsReview: number;
+};
+
+export type ClaimDocumentGovernancePriorityCounts = {
+  missingOfficialUrl: number;
+  missingLastVerified: number;
+  needsReview: number;
+  hiddenOrRestricted: number;
 };
 
 export type ClaimDocumentGovernanceFilters = {

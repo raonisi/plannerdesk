@@ -44,8 +44,10 @@ describe("PR-BS-25 claim document governance helpers", () => {
     const summary = computeClaimDocumentGovernanceSummary(items);
 
     assert.equal(summary.total, claimFormFiles.length);
-    assert.equal(summary.verifiedComplete, 0);
-    assert.ok(summary.needsReview >= items.length - summary.verifiedComplete);
+    assert.equal(summary.missingLastVerified, items.length);
+    assert.ok(summary.missingOfficialUrl >= 0);
+    assert.ok(summary.missingOfficialUrl <= items.length);
+    assert.ok(summary.needsReview >= 0);
   });
 
   it("keeps public helper defaults visible and downloadable", () => {

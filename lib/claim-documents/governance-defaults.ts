@@ -1,5 +1,13 @@
 import type { ClaimDocumentReviewStatus } from "./governance-types";
 
+export const CLAIM_DOCUMENT_GOVERNANCE_PAGE_TITLE = "청구서류 검수 관리";
+
+export const CLAIM_DOCUMENT_GOVERNANCE_PAGE_DESCRIPTION =
+  "청구서류 PDF의 공식 URL, 검수일, 노출 여부를 점검하는 관리자용 운영 보드입니다. PDF 파일은 삭제하지 않고 관리 정보만 확인합니다.";
+
+export const CLAIM_DOCUMENT_GOVERNANCE_PRIORITY_SECTION_TITLE =
+  "우선 점검 항목";
+
 export const DEFAULT_CLAIM_DOCUMENT_REVIEW_STATUS: ClaimDocumentReviewStatus =
   "unknown";
 

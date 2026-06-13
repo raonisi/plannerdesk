@@ -19,15 +19,19 @@ const REVIEW_STATUS_OPTIONS: Array<ClaimDocumentReviewStatus | "all"> = [
 const fieldClass =
   "min-h-[44px] w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2";
 
-const toggleButtonClass =
+const buttonClass =
   "inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2";
 
 export function ClaimDocumentGovernanceFilters({
   filters,
   onChange,
+  onReset,
+  resultCount,
 }: {
   filters: ClaimDocumentGovernanceFilters;
   onChange: (next: ClaimDocumentGovernanceFilters) => void;
+  onReset: () => void;
+  resultCount: number;
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -36,6 +40,13 @@ export function ClaimDocumentGovernanceFilters({
       aria-label="청구서류 governance 필터"
       className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
     >
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-slate-900">목록 필터</p>
+        <p className="text-xs text-slate-500">
+          필터 결과 {resultCount.toLocaleString("ko-KR")}건
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <label className="mb-1 block text-xs font-semibold text-slate-600" htmlFor="governance-insurer">
@@ -71,7 +82,7 @@ export function ClaimDocumentGovernanceFilters({
         </div>
         <div>
           <label className="mb-1 block text-xs font-semibold text-slate-600" htmlFor="governance-status">
-            검수 상태
+            상태
           </label>
           <select
             aria-label="검수 상태 필터"
@@ -117,14 +128,17 @@ export function ClaimDocumentGovernanceFilters({
         </div>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-3 flex flex-wrap gap-2">
         <button
           aria-expanded={showAdvanced}
-          className={toggleButtonClass}
+          className={buttonClass}
           onClick={() => setShowAdvanced((current) => !current)}
           type="button"
         >
           {showAdvanced ? "고급 필터 닫기" : "고급 필터 열기"}
+        </button>
+        <button className={buttonClass} onClick={onReset} type="button">
+          필터 초기화
         </button>
       </div>
 

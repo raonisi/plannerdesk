@@ -66,7 +66,7 @@ export function ClaimDocumentGovernanceDetail({
           </p>
 
           <dl className="mt-4">
-            <DetailRow label="보험사" value={governance.insurerName} />
+            <DetailRow label="보험사명" value={governance.insurerName} />
             <DetailRow label="문서명" value={governance.documentTitle} />
             <DetailRow label="파일명" value={governance.fileName} />
             <DetailRow label="파일 경로" value={governance.filePath} />
@@ -98,7 +98,7 @@ export function ClaimDocumentGovernanceDetail({
               value={<ClaimDocumentGovernanceStatusBadge status={governance.reviewStatus} />}
             />
             <DetailRow
-              label="사용자 노출"
+              label="노출 여부"
               value={governance.isVisible ? "표시" : "숨김"}
             />
             <DetailRow
