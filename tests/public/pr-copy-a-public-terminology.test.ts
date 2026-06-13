@@ -6,7 +6,8 @@ import { describe, it } from "node:test";
 import {
   PUBLIC_SURFACE_FORBIDDEN_UI_PHRASES,
   PUBLIC_SURFACE_ROUTE_FILES,
-} from "@/lib/public/public-surface-terminology";
+  stripPublicCopyScanNoise,
+} from "@/lib/public/public-copy-guard";
 
 const ROOT = process.cwd();
 
@@ -14,18 +15,10 @@ function readRouteSource(rel: string): string {
   return readFileSync(join(ROOT, rel), "utf8");
 }
 
-function stripInternalCodeRefs(source: string): string {
-  return source
-    .replace(/\.safeCopy\b/g, "")
-    .replace(/applySafeCopyPlaceholders/g, "")
-    .replace(/safeCopy:\s*\{/g, "")
-    .replace(/safeCopy:\s*true/g, "");
-}
-
 describe("PR-COPY-A public internal terminology cleanup", () => {
   it("public route sources avoid forbidden internal UI phrases", () => {
     for (const rel of PUBLIC_SURFACE_ROUTE_FILES) {
-      const source = stripInternalCodeRefs(readRouteSource(rel));
+      const source = stripPublicCopyScanNoise(readRouteSource(rel));
       const withoutForbiddenList = source.replace(
         /PUBLIC_SURFACE_FORBIDDEN_UI_PHRASES[\s\S]*?\] as const;/,
         "",
