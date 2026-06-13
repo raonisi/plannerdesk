@@ -17,6 +17,8 @@ const ALLOWED_CONTENT_TYPES = new Set([
   "text/plain",
 ]);
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   const denied = await workToolsRouteGuard();
   if (denied) return denied;
