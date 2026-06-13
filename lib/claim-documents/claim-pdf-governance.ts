@@ -26,6 +26,12 @@ export const CLAIM_PDF_GOVERNANCE_NOTICE =
 export const CLAIM_PDF_ACCORDION_NOTICE =
   "청구서류 양식은 보험사 기준에 따라 변경될 수 있습니다. 업무 편의를 위해 PDF 다운로드를 제공하되, 실제 제출 전에는 보험사 공식 안내를 함께 확인해 주세요.";
 
+export const CLAIM_INSURER_CARD_NOTICE =
+  "업무 편의를 위해 청구서류 PDF 다운로드를 제공합니다. 실제 제출 전에는 보험사 공식 안내를 함께 확인해 주세요.";
+
+export const CLAIM_INSURER_CARD_EMPTY_MESSAGE =
+  "등록된 청구서류 PDF가 없습니다. 보험사 공식 안내를 확인해 주세요.";
+
 const insurerById = new Map(
   insurerDirectoryEntries.map((entry) => [entry.id, entry]),
 );

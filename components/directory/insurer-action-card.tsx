@@ -13,7 +13,7 @@ import {
 import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
-import { InsurerClaimGuidePanel } from "@/components/directory/insurer-claim-guide-panel";
+import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
 import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
 import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
@@ -279,6 +279,7 @@ export function InsurerActionCard({
   onRequestCorrection,
 }: InsurerActionCardProps) {
   const [detailedOpen, setDetailedOpen] = useState(false);
+  const [claimDocumentsOpen, setClaimDocumentsOpen] = useState(false);
   const [cardPaymentOpen, setCardPaymentOpen] = useState(false);
   const [mailAddressOpen, setMailAddressOpen] = useState(false);
   
@@ -303,12 +304,18 @@ export function InsurerActionCard({
           onToggleFavorite={onToggleFavorite}
         />
 
-        <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="mt-5 space-y-2">
+        <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="mt-5 space-y-3">
           <CardSectionTitle>{WORK_LINK_GROUP_LABELS.claim}</CardSectionTitle>
           <InsurerQuickClaimActions
             claimItemCount={claimItems.length}
             insurer={insurer}
-            onOpenClaimGuide={() => setDetailedOpen(true)}
+            onOpenClaimGuide={() => setClaimDocumentsOpen(true)}
+          />
+          <InsurerCardClaimDocumentsSection
+            claimItems={claimItems}
+            expanded={claimDocumentsOpen}
+            insurer={insurer}
+            onExpandedChange={setClaimDocumentsOpen}
           />
         </section>
 
@@ -462,10 +469,9 @@ export function InsurerActionCard({
               </div>
 
               {claimItems.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  <p className="text-xs font-semibold text-slate-500">필요 청구서류 양식 ({claimItems.length}건)</p>
-                  <InsurerClaimGuidePanel claimItems={claimItems} insurer={insurer} />
-                </div>
+                <p className="text-xs font-medium leading-5 text-[#5B6470] break-keep">
+                  PDF 다운로드는 카드 상단 청구 안내에서 바로 확인할 수 있습니다.
+                </p>
               ) : null}
 
               <div className="pt-2 flex flex-wrap gap-2">
