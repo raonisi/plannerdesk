@@ -527,7 +527,7 @@ const toolGroups: ToolGroup[] = [
         kind: "accordion",
         items: [
           { label: "2026년 06월", href: "quick-link-files/newsletters/202606" },
-          { label: "2026년 05월", href: "quick-link-files/bulletin" },
+          { label: "2026년 05월", href: "quick-link-files/newsletters/202605" },
         ],
       },
     ],
@@ -2568,7 +2568,7 @@ function FolderDownloadModal({
         console.error(err);
         if (active) {
           if (err.message === "STORAGE_NOT_CONFIGURED") {
-            setError("스토리지 환경 변수(WORK_TOOLS_SUPABASE_URL, ANON_KEY)가 설정되지 않았습니다. (.env 확인 필요)");
+            setError("스토리지 환경 변수(WORK_TOOLS_FIREBASE_BUCKET)가 설정되지 않았습니다. (.env 확인 필요)");
           } else {
             setError("파일 목록을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
           }
