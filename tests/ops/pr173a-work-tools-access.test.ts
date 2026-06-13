@@ -62,9 +62,9 @@ describe("PR173-A / PR-BS-19C work-tools access policy", () => {
   });
 
   it("public header links to work-tools as public nav entry", () => {
-    const header = readFileSync(join(ROOT, "components/header.tsx"), "utf8");
-    assert.match(header, /href:\s*"\/work-tools"/);
-    assert.match(header, /uiLabels\.workTools/);
+    const nav = readFileSync(join(ROOT, "lib/navigation/public-nav.ts"), "utf8");
+    assert.match(nav, /href:\s*"\/work-tools"/);
+    assert.match(nav, /uiLabels\.workTools/);
     const page = readFileSync(join(ROOT, "app/work-tools/page.tsx"), "utf8");
     assert.doesNotMatch(page, /getWorkToolsAccess/);
   });

@@ -3,17 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { MobileNavigation } from "@/components/navigation/mobile-nav-drawer";
 import { buttons } from "@/lib/design-system";
+import { desktopNavItems, isNavItemActive } from "@/lib/navigation/public-nav";
 import { uiLabels } from "@/lib/ui-labels";
 
-const navItems = [
-  { label: "통합 검색", shortLabel: "검색", href: "/search" },
-  { label: "보험사 바로가기", shortLabel: "보험사", href: "/directory" },
-  { label: uiLabels.workTools, shortLabel: uiLabels.workTools, href: "/work-tools" },
-  { label: "청구서류", shortLabel: "청구서류", href: "/claim-documents" },
-  { label: uiLabels.disclosure, shortLabel: uiLabels.disclosure, href: "/disclosure-links" },
-  { label: uiLabels.customerMessages, shortLabel: "고객 문구", href: "/message-templates" },
-];
+export { MobileNavigation } from "@/components/navigation/mobile-nav-drawer";
+export { desktopNavItems as navItems, isNavItemActive } from "@/lib/navigation/public-nav";
 
 export function Header() {
   const pathname = usePathname();
@@ -41,15 +37,16 @@ export function Header() {
 
         <MainNavigation pathname={pathname} />
 
-        <Link
-          className={`hidden min-h-10 sm:inline-flex ${buttons.base} ${buttons.primary} rounded-full px-5`}
-          href="/message-templates"
-        >
-          {uiLabels.findMessage}
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            className={`hidden min-h-10 sm:inline-flex ${buttons.base} ${buttons.primary} rounded-full px-5`}
+            href="/message-templates"
+          >
+            {uiLabels.findMessage}
+          </Link>
+          <MobileNavigation pathname={pathname} />
+        </div>
       </div>
-
-      <MobileNavigation pathname={pathname} />
     </header>
   );
 }
@@ -60,7 +57,7 @@ export function MainNavigation({ pathname }: { pathname: string }) {
       aria-label={uiLabels.mainMenu}
       className="hidden items-center gap-1.5 text-sm font-bold lg:flex"
     >
-      {navItems.map((item) => (
+      {desktopNavItems.map((item) => (
         <NavLink
           href={item.href}
           isActive={isNavItemActive(pathname, item.href)}
@@ -71,34 +68,6 @@ export function MainNavigation({ pathname }: { pathname: string }) {
       ))}
     </nav>
   );
-}
-
-export function MobileNavigation({ pathname }: { pathname: string }) {
-  return (
-    <nav
-      aria-label={uiLabels.mobileMenu}
-      className="scrollbar-none flex gap-2 overflow-x-auto border-t border-[#E3DED4] bg-[#F8F7F3]/80 px-5 py-3 text-sm font-bold lg:hidden"
-    >
-      <MobileNavLink href="/" isActive={pathname === "/"}>
-        홈
-      </MobileNavLink>
-      {navItems.map((item) => (
-        <MobileNavLink
-          href={item.href}
-          isActive={isNavItemActive(pathname, item.href)}
-          key={item.href}
-        >
-          {item.shortLabel}
-        </MobileNavLink>
-      ))}
-    </nav>
-  );
-}
-
-function isNavItemActive(pathname: string, href: string): boolean {
-  if (pathname === href) return true;
-  if (href !== "/" && pathname.startsWith(`${href}/`)) return true;
-  return false;
 }
 
 function NavLink({
@@ -115,28 +84,6 @@ function NavLink({
       aria-current={isActive ? "page" : undefined}
       className={`whitespace-nowrap rounded-full px-4 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
         isActive ? buttons.navActive : buttons.navIdle
-      }`}
-      href={href}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function MobileNavLink({
-  children,
-  href,
-  isActive,
-}: {
-  children: ReactNode;
-  href: string;
-  isActive: boolean;
-}) {
-  return (
-    <Link
-      aria-current={isActive ? "page" : undefined}
-      className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 min-h-11 inline-flex items-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
-        isActive ? buttons.mobileActive : buttons.mobileIdle
       }`}
       href={href}
     >

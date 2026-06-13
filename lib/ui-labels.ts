@@ -15,5 +15,7 @@ export const uiLabels = {
   keyFeatures: "주요 기능",
   mainMenu: "주요 메뉴",
   mobileMenu: "모바일 주요 메뉴",
+  mobileMenuOpen: "메뉴 열기",
+  mobileMenuClose: "메뉴 닫기",
   findMessage: "문구 찾기",
 } as const;
