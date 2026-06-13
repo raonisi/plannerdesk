@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
+import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 import { InsurerCompactWorkbenchRow } from "@/components/directory/insurer-compact-workbench-row";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
@@ -12,10 +13,8 @@ import { LOCAL_FAVORITES_DEVICE_NOTICE } from "@/lib/planner-favorites/copy";
 import { MOBILE_FAVORITES_NOTICE_SHORT } from "@/lib/mobile/field-usability";
 import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
-import {
-  DIRECTORY_CORRECTION_SECTION_TITLE,
-  DIRECTORY_WORKBENCH_GLOBAL_NOTICE,
-} from "@/lib/directory/directory-workbench-copy";
+import { DIRECTORY_CORRECTION_SECTION_TITLE } from "@/lib/directory/directory-workbench-copy";
+import { DIRECTORY_PUBLIC_GLOBAL_NOTICE } from "@/lib/directory/public-directory-surface";
 import {
   buildClaimLibraryItems,
   getClaimItemsForInsurer,
@@ -116,7 +115,7 @@ export function DirectoryExplorer({
   );
   const [query, setQuery] = useState(() => searchFromQuery ?? "");
   const [activeTab, setActiveTab] = useState<TabType>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const { isFavorite, toggle, count: favoriteCount } = useFavorites();
   const visibleTabs = plannerFavoritesEnabled
@@ -212,13 +211,13 @@ export function DirectoryExplorer({
         aria-label="보험사 링크 안내"
         className="hidden rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 print:hidden sm:block"
       >
-        <p>{DIRECTORY_WORKBENCH_GLOBAL_NOTICE}</p>
+        <p>{DIRECTORY_PUBLIC_GLOBAL_NOTICE}</p>
       </section>
       <details className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm leading-6 text-slate-600 print:hidden sm:hidden">
         <summary className="flex min-h-11 cursor-pointer list-none items-center font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
           안내 보기
         </summary>
-        <p className="pb-2 pt-1">{DIRECTORY_WORKBENCH_GLOBAL_NOTICE}</p>
+        <p className="pb-2 pt-1">{DIRECTORY_PUBLIC_GLOBAL_NOTICE}</p>
       </details>
 
       {/* 검색 영역 — 모바일에서 탭보다 먼저 */}
@@ -292,14 +291,24 @@ export function DirectoryExplorer({
                 insurer.id === insurerFromQuery ? highlightedInsurerRef : undefined
               }
             >
-              <InsurerCompactWorkbenchRow
-                claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
-                insurer={insurer}
-                isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
-                layout={viewMode === "grid" ? "grid" : "list"}
-                onRequestCorrection={openCorrectionRequest}
-                onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
-              />
+              {viewMode === "list" ? (
+                <InsurerCompactWorkbenchRow
+                  claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
+                  insurer={insurer}
+                  isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
+                  layout="list"
+                  onRequestCorrection={openCorrectionRequest}
+                  onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
+                />
+              ) : (
+                <InsurerActionCard
+                  claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
+                  insurer={insurer}
+                  isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
+                  onRequestCorrection={openCorrectionRequest}
+                  onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
+                />
+              )}
             </div>
           ))}
         </div>

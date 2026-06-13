@@ -28,7 +28,15 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 
 type InsurerWorkLinkSection = "system" | "official" | "support";
 
-function MissingLinkSlot({ label }: { label: string }) {
+function MissingLinkSlot({
+  label,
+  hidden = false,
+}: {
+  label: string;
+  hidden?: boolean;
+}) {
+  if (hidden) return null;
+
   return (
     <span
       aria-label={`${label} — ${WORK_LINK_COPY.missing}`}
@@ -46,9 +54,11 @@ function CardSectionTitle({ children }: { children: ReactNode }) {
 function PhoneActionButton({
   label,
   phone,
+  hideMissingSlots = false,
 }: {
   label: string;
   phone: string | null;
+  hideMissingSlots?: boolean;
 }) {
   const href = telHref(phone);
 
@@ -64,7 +74,7 @@ function PhoneActionButton({
     );
   }
 
-  return <MissingLinkSlot label={label} />;
+  return <MissingLinkSlot hidden={hideMissingSlots} label={label} />;
 }
 
 export function InsurerPrimaryWorkLinks({
@@ -72,11 +82,16 @@ export function InsurerPrimaryWorkLinks({
   sections = ["system", "official", "support"],
   showTrustHint = true,
   showLinkCheckNotice = true,
+  hideMissingSlots = false,
+  showActionHints = true,
 }: {
   insurer: PublicInsurer;
   sections?: InsurerWorkLinkSection[];
   showTrustHint?: boolean;
   showLinkCheckNotice?: boolean;
+  /** Hide placeholder slots such as "공식 확인 후 업데이트 예정" on public directory cards. */
+  hideMissingSlots?: boolean;
+  showActionHints?: boolean;
 }) {
   const { primary, secondary, primaryLabel, secondaryLabel } =
     resolveSystemLinks(insurer);
@@ -109,13 +124,17 @@ export function InsurerPrimaryWorkLinks({
               >
                 {primaryLabel} ↗
               </ExternalTabAnchor>
-              <p className="text-center text-xs font-medium text-slate-500">
-                {WORK_LINK_COPY.externalOpenHint}
-              </p>
-              {systemNote ? (
-                <p className="text-center text-xs font-medium leading-relaxed text-slate-500">
-                  {systemNote}
-                </p>
+              {showActionHints ? (
+                <>
+                  <p className="text-center text-xs font-medium text-slate-500">
+                    {WORK_LINK_COPY.externalOpenHint}
+                  </p>
+                  {systemNote ? (
+                    <p className="text-center text-xs font-medium leading-relaxed text-slate-500">
+                      {systemNote}
+                    </p>
+                  ) : null}
+                </>
               ) : null}
               {secondary ? (
                 <ExternalTabAnchor
@@ -128,9 +147,14 @@ export function InsurerPrimaryWorkLinks({
               ) : null}
             </>
           ) : (
-            <MissingLinkSlot label={WORK_LINK_ACTION_LABELS.system} />
+            <MissingLinkSlot
+              hidden={hideMissingSlots}
+              label={WORK_LINK_ACTION_LABELS.system}
+            />
           )}
-          {insurer.supportedBrowsers && insurer.supportedBrowsers.length > 0 ? (
+          {showActionHints &&
+          insurer.supportedBrowsers &&
+          insurer.supportedBrowsers.length > 0 ? (
             <p className="text-center text-xs font-medium text-slate-500">
               (
               {insurer.supportedBrowsers
@@ -147,10 +171,12 @@ export function InsurerPrimaryWorkLinks({
           <CardSectionTitle>{WORK_LINK_GROUP_LABELS.support}</CardSectionTitle>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <PhoneActionButton
+              hideMissingSlots={hideMissingSlots}
               label={WORK_LINK_ACTION_LABELS.customerCenter}
               phone={insurer.customerCenterPhone}
             />
             <PhoneActionButton
+              hideMissingSlots={hideMissingSlots}
               label={WORK_LINK_ACTION_LABELS.helpdesk}
               phone={insurer.helpdeskPhone}
             />
@@ -171,7 +197,10 @@ export function InsurerPrimaryWorkLinks({
                 {WORK_LINK_ACTION_LABELS.homepage} ↗
               </ExternalTabAnchor>
             ) : (
-              <MissingLinkSlot label={WORK_LINK_ACTION_LABELS.homepage} />
+              <MissingLinkSlot
+                hidden={hideMissingSlots}
+                label={WORK_LINK_ACTION_LABELS.homepage}
+              />
             )}
             {insurer.termsUrl ? (
               <ExternalTabAnchor
@@ -190,10 +219,13 @@ export function InsurerPrimaryWorkLinks({
                 {WORK_LINK_ACTION_LABELS.productDisclosure} ↗
               </ExternalTabAnchor>
             ) : (
-              <MissingLinkSlot label={WORK_LINK_ACTION_LABELS.productDisclosure} />
+              <MissingLinkSlot
+                hidden={hideMissingSlots}
+                label={WORK_LINK_ACTION_LABELS.productDisclosure}
+              />
             )}
           </div>
-          {disclosureState === "partial" ? (
+          {showActionHints && disclosureState === "partial" ? (
             <p className="text-xs font-medium leading-relaxed text-slate-500">
               {disclosureHint ?? WORK_LINK_COPY.disclosureUnverified}
             </p>

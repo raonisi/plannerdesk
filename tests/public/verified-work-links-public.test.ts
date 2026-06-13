@@ -8,11 +8,11 @@ import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 const ROOT = process.cwd();
 
 describe("PR-BS-15 verified work links public surfaces", () => {
-  it("directory page includes verified work links section", () => {
+  it("directory page no longer renders mock verified work link fixtures", () => {
     const page = readFileSync(join(ROOT, "app/directory/page.tsx"), "utf8");
-    assert.match(page, /VerifiedWorkLinksSection/);
-    assert.match(page, /getPublicVerifiedWorkLinks/);
-    assert.match(page, /mode="public"/);
+    assert.doesNotMatch(page, /VerifiedWorkLinksSection/);
+    assert.doesNotMatch(page, /getPublicVerifiedWorkLinks/);
+    assert.doesNotMatch(page, /예시 보험사/);
   });
 
   it("search page shows verified links for work_link domain", () => {

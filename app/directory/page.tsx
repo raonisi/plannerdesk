@@ -13,9 +13,8 @@ import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-can
 import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
+import { DIRECTORY_PUBLIC_GLOBAL_NOTICE } from "@/lib/directory/public-directory-surface";
 import { DirectoryExplorer } from "./directory-explorer";
-import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
-import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +24,9 @@ const t = {
   title: "보험사 디렉토리",
   description:
     "전산 바로가기, 청구안내, 공식 홈페이지, 공시·헬프데스크를 목적별로 확인하세요.",
-  subcopy:
-    "링크는 공식 출처 확인 후 반영됩니다. 확인 전 항목은 정상 링크로 표시하지 않습니다.",
+  subcopy: DIRECTORY_PUBLIC_GLOBAL_NOTICE,
   footerNote:
-    "보험사별 링크와 연락처는 공식 출처 확인 후 업데이트됩니다.",
+    "보험사별 링크와 연락처는 공식 홈페이지와 안내 페이지에서 다시 확인하세요.",
 
   emptyTitle: "공개된 보험사 정보가 아직 없습니다.",
   emptyDescription:
@@ -54,7 +52,6 @@ export default async function DirectoryPage() {
     safeGetPublicClaimPdfGovernanceOverlay(),
   ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
-  const verifiedWorkLinks = getPublicVerifiedWorkLinks();
   const claimDocuments =
     claimResult.status === "ok" && claimResult.data.length > 0
       ? claimResult.data
@@ -94,8 +91,6 @@ export default async function DirectoryPage() {
               pdfGovernanceOverlay={pdfGovernanceOverlay}
             />
           )}
-
-          <VerifiedWorkLinksSection mode="public" links={verifiedWorkLinks} />
 
           <p className="break-keep border-l border-[#aa8137] pl-4 text-sm leading-6 text-[#5f6670]">
             {t.footerNote}

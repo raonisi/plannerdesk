@@ -63,7 +63,6 @@ describe("PR-BS-10 data freshness UI (static, no DB)", () => {
     const targets = [
       "components/content/data-freshness-meta.tsx",
       "lib/public/data-freshness.ts",
-      "components/directory/insurer-action-card.tsx",
       "components/claim-documents/claim-form-list-item.tsx",
       "app/search/search-results.tsx",
     ];
@@ -93,12 +92,17 @@ describe("PR-BS-10 data freshness UI (static, no DB)", () => {
       join(ROOT, "components/directory/insurer-action-card.tsx"),
       "utf8",
     );
+    const explorer = readFileSync(
+      join(ROOT, "app/directory/directory-explorer.tsx"),
+      "utf8",
+    );
     const item = readFileSync(
       join(ROOT, "components/claim-documents/claim-form-list-item.tsx"),
       "utf8",
     );
     const search = readFileSync(join(ROOT, "app/search/search-results.tsx"), "utf8");
-    assert.match(card, /DataFreshnessMeta/);
+    assert.doesNotMatch(card, /DataFreshnessMeta/);
+    assert.match(explorer, /DIRECTORY_PUBLIC_GLOBAL_NOTICE/);
     assert.match(item, /DataFreshnessMeta/);
     assert.match(search, /DataFreshnessMeta/);
     assert.doesNotMatch(item, /StatusBadge/);

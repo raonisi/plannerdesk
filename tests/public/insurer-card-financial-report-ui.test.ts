@@ -19,7 +19,7 @@ describe("PR-BS-23 insurer card financial report UI polish", () => {
 
     assert.match(card, /insurerCardShell/);
     assert.match(card, /InsurerCardContactStrip/);
-    assert.match(card, /sections=\{\["system"\]\}/);
+    assert.match(card, /InsurerCardDeskActions/);
     assert.match(card, /sections=\{\["support"\]\}/);
     assert.match(card, /sections=\{\["official"\]\}/);
     assert.match(ui, /insurerCardPrimaryButton/);

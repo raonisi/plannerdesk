@@ -12,9 +12,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
-import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
 import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
 import { InsurerCardContactStrip } from "@/components/directory/insurer-card-contact-strip";
+import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
 import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
 import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
 import {
@@ -34,7 +34,6 @@ import {
   cardPaymentLegLabel,
   cardPaymentStatusLabel,
   claimFaxDisplay,
-  publicContentTrustHint,
   telHref,
 } from "@/lib/directory/formatting";
 import {
@@ -320,8 +319,10 @@ export function InsurerActionCard({
         {workbenchDetailOnly ? (
           <div className="space-y-6">
             <InsurerPrimaryWorkLinks
+              hideMissingSlots
               insurer={insurer}
               sections={["system", "support", "official"]}
+              showActionHints={false}
               showLinkCheckNotice={false}
               showTrustHint={false}
             />
@@ -338,11 +339,11 @@ export function InsurerActionCard({
           </div>
         ) : (
         <div className="mt-4 space-y-4">
-          <InsurerPrimaryWorkLinks
+          <InsurerCardDeskActions
+            claimItems={claimItems}
             insurer={insurer}
-            sections={["system"]}
-            showLinkCheckNotice={false}
-            showTrustHint={false}
+            onOpenClaimDocuments={() => setClaimDocumentsOpen(true)}
+            onOpenDetail={() => setDetailedOpen(true)}
           />
 
           <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="space-y-2">
@@ -365,8 +366,11 @@ export function InsurerActionCard({
           />
 
           <InsurerPrimaryWorkLinks
+            hideMissingSlots
             insurer={insurer}
             sections={["official"]}
+            showActionHints={false}
+            showLinkCheckNotice={false}
             showTrustHint={false}
           />
 
@@ -392,8 +396,10 @@ export function InsurerActionCard({
           >
             {!workbenchDetailOnly ? (
               <InsurerPrimaryWorkLinks
+                hideMissingSlots
                 insurer={insurer}
                 sections={["support"]}
+                showActionHints={false}
                 showLinkCheckNotice={false}
                 showTrustHint={false}
               />
@@ -678,17 +684,6 @@ function CardHeader({
             <h2 className={`mt-2 ${insurerCardInsurerName}`}>
               {insurer.name}
             </h2>
-            <div className="mt-2 space-y-1">
-              {publicContentTrustHint(insurer.verificationStatus) ? (
-                <p className="text-xs font-medium text-slate-500">
-                  {publicContentTrustHint(insurer.verificationStatus)}
-                </p>
-              ) : null}
-              <DataFreshnessMeta
-                lastVerifiedAt={insurer.lastVerifiedAt}
-                officialSourceUrl={insurer.officialWebsiteUrl}
-              />
-            </div>
           </div>
         </div>
 

@@ -61,19 +61,35 @@ export function plannerSystemAccessNote(url: string | null): string | null {
   return null;
 }
 
+/** Returns true when href is safe to render as an external work link. */
+export function isUsableExternalHref(
+  href: string | null | undefined,
+): href is string {
+  if (!href?.trim()) return false;
+  if (href.trim() === "#") return false;
+  try {
+    const parsed = new URL(href);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return /^https?:\/\//i.test(href.trim());
+  }
+}
+
 export function resolveSystemLinks(insurer: PublicInsurer): {
   primary: string | null;
   secondary: string | null;
   primaryLabel: string;
   secondaryLabel: string;
 } {
-  const primary = insurer.systemUrl ?? insurer.plannerPortalUrl;
-  const secondary =
+  const rawPrimary = insurer.systemUrl ?? insurer.plannerPortalUrl;
+  const primary = isUsableExternalHref(rawPrimary) ? rawPrimary : null;
+  const rawSecondary =
     insurer.systemUrl &&
     insurer.plannerPortalUrl &&
     insurer.plannerPortalUrl !== insurer.systemUrl
       ? insurer.plannerPortalUrl
       : null;
+  const secondary = isUsableExternalHref(rawSecondary) ? rawSecondary : null;
 
   return {
     primary,

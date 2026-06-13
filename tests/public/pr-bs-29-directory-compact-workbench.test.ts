@@ -5,7 +5,6 @@ import { describe, it } from "node:test";
 
 import {
   DIRECTORY_CORRECTION_SECTION_TITLE,
-  DIRECTORY_WORKBENCH_GLOBAL_NOTICE,
 } from "@/lib/directory/directory-workbench-copy";
 import {
   VERIFIED_WORK_LINK_FORBIDDEN_UI_PHRASES,
@@ -14,7 +13,7 @@ import {
 const ROOT = process.cwd();
 
 describe("PR-BS-29 directory compact workbench list", () => {
-  it("defaults directory explorer to compact list with workbench rows", () => {
+  it("keeps compact list as optional view with workbench rows", () => {
     const explorer = readFileSync(
       join(ROOT, "app/directory/directory-explorer.tsx"),
       "utf8",
@@ -28,10 +27,10 @@ describe("PR-BS-29 directory compact workbench list", () => {
       "utf8",
     );
 
-    assert.match(explorer, /useState<ViewMode>\("list"\)/);
+    assert.match(explorer, /useState<ViewMode>\("grid"\)/);
     assert.match(explorer, /InsurerCompactWorkbenchRow/);
-    assert.doesNotMatch(explorer, /InsurerActionCard/);
-    assert.match(explorer, /DIRECTORY_WORKBENCH_GLOBAL_NOTICE/);
+    assert.match(explorer, /InsurerActionCard/);
+    assert.match(explorer, /viewMode === "list"/);
     assert.match(row, /insurerWorkbenchRowShell/);
     assert.match(ui, /min-h-11/);
     assert.match(row, /PDF \{pdfCount\}/);
@@ -94,7 +93,6 @@ describe("PR-BS-29 directory compact workbench list", () => {
     assert.doesNotMatch(actionCard, /adminMemo/);
     assert.equal(DIRECTORY_CORRECTION_SECTION_TITLE, "정보 수정 요청");
     assert.match(explorer, /DIRECTORY_CORRECTION_SECTION_TITLE/);
-    assert.equal(DIRECTORY_WORKBENCH_GLOBAL_NOTICE.length > 0, true);
   });
 
   it("keeps claim-documents and admin governance routes intact", () => {
