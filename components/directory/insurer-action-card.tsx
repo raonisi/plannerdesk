@@ -14,8 +14,17 @@ import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
 import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
+import { InsurerCardContactStrip } from "@/components/directory/insurer-card-contact-strip";
 import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
 import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
+import {
+  insurerCardCategoryBadge,
+  insurerCardDetailedToggle,
+  insurerCardFeaturedBar,
+  insurerCardInsurerName,
+  insurerCardShell,
+  insurerCardTrustNote,
+} from "@/lib/directory/insurer-card-ui";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { getDisclosureLinksForInsurer } from "@/lib/content/disclosure-match";
 import type { PublicInsurer } from "@/lib/public/insurers";
@@ -289,51 +298,64 @@ export function InsurerActionCard({
   const disclosureState = disclosureLinkStatus(disclosureLinks);
 
   return (
-    <article className="group/insurer relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-white shadow-[0_4px_20px_rgba(15,29,46,0.02)] transition-all hover:shadow-[0_10px_30px_rgba(15,29,46,0.06)] hover:-translate-y-0.5">
+    <article className={insurerCardShell}>
       {insurer.isFeatured ? (
-        <span
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#B9975B] via-[#0F1D2E] to-[#B9975B]"
-        />
+        <span aria-hidden="true" className={insurerCardFeaturedBar} />
       ) : null}
 
-      <div className="p-6 sm:p-7">
+      <div className="relative">
         <CardHeader
           insurer={insurer}
           isFavorite={isFavorite}
           onToggleFavorite={onToggleFavorite}
         />
 
-        <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="mt-5 space-y-3">
-          <CardSectionTitle>{WORK_LINK_GROUP_LABELS.claim}</CardSectionTitle>
-          <InsurerQuickClaimActions
-            claimItemCount={claimItems.length}
+        <div className="mt-6 space-y-6">
+          <InsurerPrimaryWorkLinks
             insurer={insurer}
-            onOpenClaimGuide={() => setClaimDocumentsOpen(true)}
+            sections={["system"]}
+            showLinkCheckNotice={false}
+            showTrustHint={false}
           />
-          <InsurerCardClaimDocumentsSection
-            claimItems={claimItems}
-            expanded={claimDocumentsOpen}
+
+          <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="space-y-3">
+            <InsurerQuickClaimActions
+              claimItemCount={claimItems.length}
+              insurer={insurer}
+              onOpenClaimGuide={() => setClaimDocumentsOpen(true)}
+            />
+            <InsurerCardClaimDocumentsSection
+              claimItems={claimItems}
+              expanded={claimDocumentsOpen}
+              insurer={insurer}
+              onExpandedChange={setClaimDocumentsOpen}
+            />
+          </section>
+
+          <InsurerPrimaryWorkLinks
             insurer={insurer}
-            onExpandedChange={setClaimDocumentsOpen}
+            sections={["support"]}
+            showLinkCheckNotice={false}
+            showTrustHint={false}
           />
-        </section>
 
-        <div className="mt-6">
-          <InsurerPrimaryWorkLinks insurer={insurer} />
-        </div>
+          <InsurerCardContactStrip
+            insurer={insurer}
+            onOpenMailAddress={() => setMailAddressOpen(true)}
+          />
 
-        <div className="mt-6 space-y-5">
+          <InsurerPrimaryWorkLinks
+            insurer={insurer}
+            sections={["official"]}
+            showTrustHint={false}
+          />
+
           <button
             type="button"
             aria-expanded={detailedOpen}
             aria-label={`${insurer.name} 상세 실무 정보 ${detailedOpen ? "닫기" : "열기"}`}
             onClick={() => setDetailedOpen(!detailedOpen)}
-            className={`inline-flex min-h-12 w-full items-center justify-center rounded-lg border text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
-              detailedOpen
-                ? "border-[#B9975B] bg-[#F7F4EE] text-[#B9975B]"
-                : "border-[#E3DED4] bg-white text-[#0F1D2E] hover:bg-slate-50"
-            }`}
+            className={insurerCardDetailedToggle(detailedOpen)}
           >
             상세 실무 정보 {detailedOpen ? "닫기 ▲" : "열기 ▼"}
           </button>
@@ -343,8 +365,8 @@ export function InsurerActionCard({
         {detailedOpen && (
           <div className="mt-6 space-y-8 border-t border-[#E3DED4] pt-6 animate-in fade-in duration-200">
             {/* 안전 안내문구 */}
-            <div className="rounded-xl border border-[#c5b08a] bg-[#fff9ed] p-4 text-sm font-medium leading-relaxed text-[#7a612d]">
-              <ul className="list-inside list-disc space-y-1">
+            <div className={insurerCardTrustNote}>
+              <ul className="list-inside list-disc space-y-1 text-xs leading-relaxed">
                 <li>보험사별 링크와 연락처는 공식 출처 기준으로 확인 후 사용하세요.</li>
                 <li>PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않습니다.</li>
                 <li>고객 개인정보와 의료자료는 PlannerDesk에 입력하지 마세요.</li>
@@ -597,14 +619,6 @@ export function InsurerActionCard({
   );
 }
 
-function CardSectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <h3 className="text-xs font-bold uppercase tracking-wide text-[#B9975B]">
-      {children}
-    </h3>
-  );
-}
-
 function CardHeader({
   insurer,
   isFavorite,
@@ -621,16 +635,16 @@ function CardHeader({
           <InsurerLogo insurer={insurer} />
           <div className="min-w-0 pt-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#B9975B]">
+              <span className={insurerCardCategoryBadge}>
                 {CATEGORY_LABELS[insurer.category]}
-              </p>
+              </span>
             </div>
-            <h2 className="mt-2 break-keep text-2xl font-bold leading-tight text-slate-900 sm:text-[1.75rem]">
+            <h2 className={`mt-2 ${insurerCardInsurerName}`}>
               {insurer.name}
             </h2>
             <div className="mt-2 space-y-1">
               {publicContentTrustHint(insurer.verificationStatus) ? (
-                <p className="text-xs font-medium text-[#5B6470]">
+                <p className="text-xs font-medium text-slate-500">
                   {publicContentTrustHint(insurer.verificationStatus)}
                 </p>
               ) : null}

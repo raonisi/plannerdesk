@@ -11,6 +11,10 @@ import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
 import { categoryLabels } from "@/lib/claim-documents/category-labels";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { publicClaimTrustHint } from "@/lib/directory/formatting";
+import {
+  insurerCardPdfDownloadButton,
+  insurerCardPdfSecondaryButton,
+} from "@/lib/directory/insurer-card-ui";
 
 const primaryButtonClass =
   "inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25";
@@ -23,7 +27,7 @@ export function ClaimFormListItem({
   variant = "default",
 }: {
   item: ClaimLibraryItem;
-  variant?: "default" | "accordion";
+  variant?: "default" | "accordion" | "card";
 }) {
   const favoriteId = claimLibraryFavoriteId(item);
   const { isFavorite, toggle } = useLocalIdFavorites(
@@ -70,10 +74,55 @@ export function ClaimFormListItem({
   }
 
   if (item.kind === "pdf") {
+    const isCompactVariant = variant === "accordion" || variant === "card";
     const actionGridClass =
-      variant === "accordion"
-        ? "grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
-        : "grid gap-2 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-stretch xl:grid-cols-2";
+      variant === "card"
+        ? "grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-2"
+        : variant === "accordion"
+          ? "grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+          : "grid gap-2 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-stretch xl:grid-cols-2";
+    const downloadButtonClass =
+      variant === "card" ? insurerCardPdfDownloadButton : primaryButtonClass;
+    const compactSecondaryButtonClass =
+      variant === "card" ? insurerCardPdfSecondaryButton : secondaryButtonClass;
+
+    if (variant === "card") {
+      return (
+        <li className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="min-w-0 flex-1 break-words text-sm font-medium leading-snug text-slate-900">
+              {title}
+            </p>
+            <div className={actionGridClass}>
+              <a
+                aria-label={`${title} PDF 다운로드`}
+                className={`${downloadButtonClass} sm:col-span-2`}
+                download={item.fileName}
+                href={item.href}
+              >
+                PDF 다운로드
+              </a>
+              <ExternalTabAnchor
+                aria-label={`${title} PDF 바로 열기`}
+                className={compactSecondaryButtonClass}
+                href={item.href}
+              >
+                PDF 바로 열기
+              </ExternalTabAnchor>
+              {item.officialSourceUrl ? (
+                <ExternalTabAnchor
+                  aria-label={`${insurerName} 보험사 공식 안내 확인`}
+                  className={compactSecondaryButtonClass}
+                  href={item.officialSourceUrl}
+                >
+                  보험사 공식 안내 확인
+                </ExternalTabAnchor>
+              ) : null}
+            </div>
+          </div>
+        </li>
+      );
+    }
 
     return (
       <li className="border-t border-slate-200 first:border-t-0">
@@ -91,7 +140,7 @@ export function ClaimFormListItem({
             ) : null}
             <p
               className={`break-keep text-base font-bold leading-6 text-slate-900 ${
-                variant === "default" ? "mt-2" : ""
+                isCompactVariant ? "" : "mt-2"
               }`}
             >
               {title}

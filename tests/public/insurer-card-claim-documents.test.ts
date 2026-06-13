@@ -56,7 +56,7 @@ describe("PR-BS-22 insurer card claim documents integration", () => {
     assert.match(section, /aria-expanded=\{isOpen\}/);
     assert.match(section, /aria-controls=\{panelId\}/);
     assert.match(section, /청구 안내/);
-    assert.match(section, /variant="accordion"/);
+    assert.match(section, /variant="card"/);
   });
 
   it("card section keeps PDF download and open actions", () => {
@@ -69,7 +69,7 @@ describe("PR-BS-22 insurer card claim documents integration", () => {
       "utf8",
     );
     assert.match(section, /ClaimFormListItem/);
-    assert.match(section, /variant="accordion"/);
+    assert.match(section, /variant="card"/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /download=\{item\.fileName\}/);
     assert.match(section, /CLAIM_INSURER_CARD_NOTICE/);

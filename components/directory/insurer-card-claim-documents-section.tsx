@@ -9,7 +9,14 @@ import {
   CLAIM_INSURER_CARD_NOTICE,
 } from "@/lib/claim-documents/claim-pdf-governance";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
-import { buttons } from "@/lib/design-system";
+import {
+  insurerCardClaimNotice,
+  insurerCardClaimPanel,
+  insurerCardClaimToggle,
+  insurerCardOutlineButton,
+  insurerCardSectionTitle,
+  insurerCardSubtleButton,
+} from "@/lib/directory/insurer-card-ui";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
 export function InsurerCardClaimDocumentsSection({
@@ -43,59 +50,54 @@ export function InsurerCardClaimDocumentsSection({
 
   return (
     <section aria-label={`${insurer.name} 청구 안내`} className="space-y-2">
+      <h3 className={insurerCardSectionTitle}>청구 안내</h3>
       <button
         aria-controls={panelId}
         aria-expanded={isOpen}
-        className={`inline-flex min-h-12 w-full items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
-          isOpen
-            ? "border-[#B9975B] bg-[#F7F4EE] text-[#0F1D2E]"
-            : "border-[#E3DED4] bg-white text-[#0F1D2E] hover:border-[#B9975B]"
-        }`}
+        className={insurerCardClaimToggle(isOpen)}
         id={buttonId}
         onClick={() => setOpen(!isOpen)}
         type="button"
       >
         <span className="min-w-0">
-          <span className="block break-keep">청구 안내</span>
-          <span className="mt-0.5 block text-xs font-semibold text-[#5B6470]">
-            청구서류 {claimItems.length}건
+          <span className="block break-words leading-snug">
+            청구서류 · PDF 다운로드
+          </span>
+          <span className="mt-0.5 block text-xs font-medium text-emerald-700/80">
+            청구서류 {claimItems.length}건 · 공식 안내 확인
           </span>
         </span>
-        <span aria-hidden="true" className="shrink-0 text-[#B9975B]">
+        <span aria-hidden="true" className="shrink-0 text-emerald-700">
           {isOpen ? "닫기 ▲" : "열기 ▼"}
         </span>
       </button>
 
       <div
         aria-labelledby={buttonId}
-        className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-4 sm:p-5"
+        className={insurerCardClaimPanel}
         hidden={!isOpen}
         id={panelId}
         role="region"
       >
-        <p className="break-keep text-xs font-medium leading-5 text-[#5B6470]">
-          {CLAIM_INSURER_CARD_NOTICE}
-        </p>
-
         {claimItems.length > 0 ? (
-          <ul className="mt-4 space-y-1 rounded-lg border border-[#E3DED4] bg-white px-3 sm:px-4">
+          <ul className="space-y-3">
             {claimItems.map((item) => (
               <ClaimFormListItem
                 item={item}
                 key={item.kind === "pdf" ? item.id : item.document.id}
-                variant="accordion"
+                variant="card"
               />
             ))}
           </ul>
         ) : (
-          <div className="mt-4 space-y-3 rounded-lg border border-dashed border-[#E3DED4] bg-white px-4 py-5 text-center">
-            <p className="break-keep text-sm font-semibold leading-6 text-[#5B6470]">
+          <div className="space-y-3 rounded-xl border border-dashed border-slate-200 bg-white px-4 py-5 text-center">
+            <p className="break-words text-sm font-medium leading-relaxed text-slate-600">
               {CLAIM_INSURER_CARD_EMPTY_MESSAGE}
             </p>
             {insurer.claimPageUrl || insurer.claimFormUrl ? (
               <ExternalTabAnchor
                 aria-label={`${insurer.name} 보험사 공식 안내 확인`}
-                className={`${buttons.base} ${buttons.outline} w-full text-sm`}
+                className={insurerCardOutlineButton}
                 href={officialGuideHref}
               >
                 보험사 공식 안내 확인 ↗
@@ -104,14 +106,16 @@ export function InsurerCardClaimDocumentsSection({
           </div>
         )}
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
-            className={`${buttons.base} ${buttons.ghost} text-xs`}
+            className={`${insurerCardSubtleButton} w-auto px-4 text-sm`}
             href={`/claim-documents?insurer=${encodeURIComponent(insurer.id)}`}
           >
             전체 청구서류 보기
           </Link>
         </div>
+
+        <p className={insurerCardClaimNotice}>{CLAIM_INSURER_CARD_NOTICE}</p>
       </div>
     </section>
   );
