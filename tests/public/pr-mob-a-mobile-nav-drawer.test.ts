@@ -123,7 +123,7 @@ describe("PR-MOB-A global mobile nav drawer", () => {
   });
 
   it("directory and claim-documents regressions remain wired", () => {
-    const directoryActions = read("components/directory/insurer-card-desk-actions.tsx");
+    const directoryActions = read("components/directory/insurer-system-portal-primary-cta.tsx");
     assert.match(directoryActions, /전산 바로가기/);
     const claimItem = read("components/claim-documents/claim-form-list-item.tsx");
     assert.match(claimItem, /PDF 다운로드/);

@@ -80,7 +80,7 @@ describe("PR-PUBLIC-SAFETY-A public forbidden copy guard", () => {
     assert.doesNotMatch(explorer, /verificationStatusLabel/);
     assert.doesNotMatch(actionCard, /verificationStatusLabel/);
     assert.match(
-      read("components/directory/insurer-card-desk-actions.tsx"),
+      read("components/directory/insurer-system-portal-primary-cta.tsx"),
       /전산 바로가기/,
     );
   });

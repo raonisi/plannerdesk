@@ -132,6 +132,8 @@ export const PUBLIC_ROUTE_SOURCE_FILES: Readonly<
     "app/directory/directory-explorer.tsx",
     "components/directory/insurer-action-card.tsx",
     "components/directory/insurer-card-desk-actions.tsx",
+    "components/directory/insurer-system-portal-primary-cta.tsx",
+    "components/directory/insurer-compact-workbench-row.tsx",
     "components/directory/insurer-card-claim-documents-section.tsx",
     "lib/directory/public-directory-surface.ts",
   ],

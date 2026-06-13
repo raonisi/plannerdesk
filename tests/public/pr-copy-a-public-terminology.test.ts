@@ -49,13 +49,15 @@ describe("PR-COPY-A public internal terminology cleanup", () => {
   });
 
   it("directory keeps system portal and PDF actions", () => {
-    const desk = readRouteSource("components/directory/insurer-card-desk-actions.tsx");
+    const systemCta = readRouteSource(
+      "components/directory/insurer-system-portal-primary-cta.tsx",
+    );
     const claimSection = readRouteSource(
       "components/directory/insurer-card-claim-documents-section.tsx",
     );
     const claimItem = readRouteSource("components/claim-documents/claim-form-list-item.tsx");
-    assert.match(desk, /insurerWorkbenchSystemPrimaryCta/);
-    assert.match(desk, /전산 바로가기/);
+    assert.match(systemCta, /insurerWorkbenchSystemPrimaryCta/);
+    assert.match(systemCta, /전산 바로가기/);
     assert.match(claimSection, /PDF 다운로드/);
     assert.match(claimItem, /PDF 바로 열기/);
   });

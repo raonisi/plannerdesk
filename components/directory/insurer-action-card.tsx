@@ -15,6 +15,7 @@ import { ExternalTabAnchor } from "@/components/content-page";
 import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
 import { InsurerCardContactStrip } from "@/components/directory/insurer-card-contact-strip";
 import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
+import { InsurerSystemPortalPrimaryCta } from "@/components/directory/insurer-system-portal-primary-cta";
 import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
 import {
   insurerCardCategoryBadge,
@@ -337,10 +338,14 @@ export function InsurerActionCard({
             />
           </div>
         ) : (
-        <div className="mt-4 space-y-4">
+        <div className="mt-2 space-y-2 lg:mt-4 lg:space-y-4">
+          <div className="lg:hidden">
+            <InsurerSystemPortalPrimaryCta insurer={insurer} />
+          </div>
           <InsurerCardDeskActions
             claimItems={claimItems}
             claimPanelOpen={claimDocumentsOpen}
+            hideSystemPortalCta
             insurer={insurer}
             onClaimPanelOpenChange={setClaimDocumentsOpen}
             onOpenDetail={() => setDetailedOpen(true)}
@@ -692,7 +697,7 @@ function InsurerLogo({ insurer }: { insurer: PublicInsurer }) {
   const logoSrc = insurerLogoSrc(insurer);
 
   return (
-    <span className="grid h-16 w-32 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-sm sm:w-36">
+    <span className="grid h-12 w-24 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-sm sm:h-16 sm:w-32 lg:w-36">
       {logoSrc && !imageFailed ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img

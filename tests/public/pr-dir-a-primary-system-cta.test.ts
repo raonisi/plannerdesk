@@ -18,14 +18,16 @@ function read(rel: string) {
 describe("PR-DIR-A directory primary system CTA and claim consolidation", () => {
   it("renders full-width system primary CTA before secondary actions", () => {
     const desk = read("components/directory/insurer-card-desk-actions.tsx");
+    const cta = read("components/directory/insurer-system-portal-primary-cta.tsx");
 
-    assert.match(desk, /insurerWorkbenchSystemPrimaryCta/);
-    assert.match(desk, /resolveSystemLinks/);
-    assert.match(desk, /전산 바로가기/);
+    assert.match(cta, /insurerWorkbenchSystemPrimaryCta/);
+    assert.match(cta, /resolveSystemLinks/);
+    assert.match(desk, /InsurerSystemPortalPrimaryCta/);
+    assert.match(cta, /전산 바로가기/);
     assert.doesNotMatch(desk, /insurerWorkbenchActionScrollRow/);
     assert.match(desk, /insurerWorkbenchSecondaryActionGrid/);
 
-    const systemIdx = desk.indexOf("insurerWorkbenchSystemPrimaryCta");
+    const systemIdx = desk.indexOf("InsurerSystemPortalPrimaryCta");
     const claimIdx = desk.indexOf("청구·서류");
     assert.ok(systemIdx > 0 && claimIdx > systemIdx);
   });
@@ -70,6 +72,7 @@ describe("PR-DIR-A directory primary system CTA and claim consolidation", () => 
   it("does not expose forbidden internal phrases on directory surfaces", () => {
     const targets = [
       "components/directory/insurer-card-desk-actions.tsx",
+      "components/directory/insurer-system-portal-primary-cta.tsx",
       "components/directory/insurer-action-card.tsx",
       "components/directory/insurer-compact-workbench-row.tsx",
     ];
@@ -85,6 +88,6 @@ describe("PR-DIR-A directory primary system CTA and claim consolidation", () => 
   it("uses mobile-friendly layout without horizontal scroll row", () => {
     const ui = read("lib/directory/insurer-workbench-ui.ts");
     assert.match(ui, /min-h-12 w-full/);
-    assert.match(ui, /grid-cols-2/);
+    assert.match(ui, /grid-cols-2 gap-2 lg:grid-cols-4/);
   });
 });

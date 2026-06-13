@@ -17,10 +17,13 @@ export const insurerWorkbenchActionButton = `inline-flex min-h-11 shrink-0 items
 export const insurerWorkbenchActionButtonPrimary = `inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-slate-900 bg-slate-900 px-3 text-xs font-semibold text-white transition hover:bg-slate-800 ${focusRing}`;
 
 /** Full-width system portal CTA — first action on directory insurer cards (PR-DIR-A). */
-export const insurerWorkbenchSystemPrimaryCta = `inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#0F1D2E] bg-[#0F1D2E] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#102235] sm:text-base ${focusRing}`;
+export const insurerWorkbenchSystemPrimaryCta = `inline-flex min-h-12 w-full items-center justify-between gap-2 rounded-xl border border-[#0F1D2E] bg-[#0F1D2E] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#102235] max-lg:min-h-12 max-lg:text-base max-lg:shadow-md sm:text-base ${focusRing}`;
+
+/** Disabled system portal slot when resolveSystemLinks has no primary href (PR-DIR-B). */
+export const insurerWorkbenchSystemPortalDisabled = `inline-flex min-h-12 w-full cursor-not-allowed items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-400 max-lg:min-h-12 ${focusRing}`;
 
 export const insurerWorkbenchSecondaryActionGrid =
-  "grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4";
+  "grid min-w-0 grid-cols-2 gap-2 lg:grid-cols-4";
 
 export const insurerWorkbenchClaimPanel =
   "min-w-0 space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 print:hidden";

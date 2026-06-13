@@ -5,6 +5,7 @@
 import { useState } from "react";
 
 import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
+import { InsurerSystemPortalPrimaryCta } from "@/components/directory/insurer-system-portal-primary-cta";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
@@ -196,9 +197,13 @@ export function InsurerCompactWorkbenchRow({
 
 
 
-        <div className="min-w-0">
+        <div className="min-w-0 space-y-2">
+          <div className="lg:hidden">
+            <InsurerSystemPortalPrimaryCta insurer={insurer} />
+          </div>
           <InsurerCardDeskActions
             claimItems={claimItems}
+            hideSystemPortalCta
             insurer={insurer}
             onOpenDetail={() => {
               setDetailOpen(true);

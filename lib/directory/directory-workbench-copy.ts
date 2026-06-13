@@ -6,6 +6,9 @@ export const DIRECTORY_WORKBENCH_GLOBAL_NOTICE =
 
 export const DIRECTORY_CORRECTION_SECTION_TITLE = "정보 수정 요청";
 
+/** Public directory card — no usable system portal href (PR-DIR-B). */
+export const DIRECTORY_SYSTEM_PORTAL_UNAVAILABLE_LABEL = "전산 준비중";
+
 export function getInsurerWorkbenchCategoryLabel(insurer: PublicInsurer): string {
   if (
     insurer.id.endsWith("-mutual") ||

@@ -30,12 +30,14 @@ describe("PR-BS-31 directory card restore and status cleanup", () => {
   it("hides internal status phrases from public directory card surfaces", () => {
     const actionCard = read("components/directory/insurer-action-card.tsx");
     const deskActions = read("components/directory/insurer-card-desk-actions.tsx");
+    const systemCta = read("components/directory/insurer-system-portal-primary-cta.tsx");
     const compactRow = read("components/directory/insurer-compact-workbench-row.tsx");
     const directoryPage = read("app/directory/page.tsx");
 
     for (const phrase of DIRECTORY_PUBLIC_FORBIDDEN_CARD_PHRASES) {
       assert.doesNotMatch(actionCard, new RegExp(phrase));
       assert.doesNotMatch(deskActions, new RegExp(phrase));
+      assert.doesNotMatch(systemCta, new RegExp(phrase));
       assert.doesNotMatch(compactRow, new RegExp(phrase));
     }
 
@@ -49,11 +51,11 @@ describe("PR-BS-31 directory card restore and status cleanup", () => {
   });
 
   it("uses resolveSystemLinks for 전산 buttons instead of systemUrl-only mapping", () => {
-    const deskActions = read("components/directory/insurer-card-desk-actions.tsx");
+    const systemCta = read("components/directory/insurer-system-portal-primary-cta.tsx");
     const compactRow = read("components/directory/insurer-compact-workbench-row.tsx");
 
     assert.match(compactRow, /InsurerCardDeskActions/);
-    assert.match(deskActions, /resolveSystemLinks/);
+    assert.match(systemCta, /resolveSystemLinks/);
     assert.doesNotMatch(compactRow, /href=\{insurer\.systemUrl\}/);
   });
 
