@@ -487,42 +487,42 @@ const toolGroups: ToolGroup[] = [
         label: "손해보험교재",
         description: "손해보험 설계사 등록 자격시험 교재 PDF 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/nonlife/textbook",
+        href: "quick-link-files/general-insurance-textbook",
       },
       {
         id: "nonlife-mock",
         label: "손해보험모의고사",
         description: "손해보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/nonlife/mock",
+        href: "quick-link-files/general-insurance-mock-exam",
       },
       {
         id: "life-textbook",
         label: "생명보험교재",
         description: "생명보험 설계사 등록 자격시험 교재 PDF 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/life/textbook",
+        href: "quick-link-files/life-insurance-textbook",
       },
       {
         id: "life-mock",
         label: "생명보험모의고사",
         description: "생명보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/life/mock",
+        href: "quick-link-files/life-insurance-mock-exam",
       },
       {
         id: "variable-textbook",
         label: "변액보험교재",
         description: "변액보험 판매관리사 시험 교재 PDF 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/variable/textbook",
+        href: "quick-link-files/variable-insurance-textbook",
       },
       {
         id: "variable-mock",
         label: "변액보험모의고사",
         description: "변액보험 자격시험 대비 핵심 모의고사 파일 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/variable/mock",
+        href: "quick-link-files/variable-insurance-mock-exam",
       },
     ],
   },
@@ -535,7 +535,7 @@ const toolGroups: ToolGroup[] = [
         label: "2026년 5월",
         description: "보험사별 소식지/소책자/교육자료 모음 다운로드 목록을 제공합니다.",
         kind: "folder",
-        href: "quick-link-files/newsletters/202605",
+        href: "quick-link-files/bulletin",
       },
     ],
   },
@@ -2491,7 +2491,7 @@ function FolderDownloadModal({
 }) {
   const [files, setFiles] = useState<StorageFileItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const hf = (url: string) => {
     const t = url.replace(/^\/+/, "").replace(/\/+$/, "");
@@ -2506,7 +2506,7 @@ function FolderDownloadModal({
     Promise.resolve().then(() => {
       if (active) {
         setIsLoading(true);
-        setError(false);
+        setError(null);
         setFiles([]);
       }
     });
@@ -2515,8 +2515,14 @@ function FolderDownloadModal({
     const params = new URLSearchParams({ bucket, prefix });
 
     fetch(`/api/work-tools/storage?${params.toString()}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch storage files");
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data?.error === "storage_not_configured") {
+            throw new Error("STORAGE_NOT_CONFIGURED");
+          }
+          throw new Error("Failed to fetch storage files");
+        }
         return res.json();
       })
       .then((data) => {
@@ -2528,7 +2534,11 @@ function FolderDownloadModal({
       .catch((err) => {
         console.error(err);
         if (active) {
-          setError(true);
+          if (err.message === "STORAGE_NOT_CONFIGURED") {
+            setError("스토리지 환경 변수(WORK_TOOLS_SUPABASE_URL, ANON_KEY)가 설정되지 않았습니다. (.env 확인 필요)");
+          } else {
+            setError("파일 목록을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+          }
           setIsLoading(false);
         }
       });
@@ -2580,7 +2590,7 @@ function FolderDownloadModal({
               <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span>파일 목록을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</span>
+              <span>{error}</span>
             </div>
           ) : files.length === 0 ? (
             <div className="py-12 text-center text-sm text-slate-500 border border-dashed border-slate-200 bg-slate-50/40 rounded-xl">

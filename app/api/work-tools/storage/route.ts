@@ -22,6 +22,22 @@ export async function GET(request: NextRequest) {
 
   const config = getWorkToolsSupabaseConfig();
   if (!config) {
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json([
+        {
+          name: "샘플_테스트_자료_1.pdf",
+          size: 1024 * 1024 * 2.5,
+          updated_at: new Date().toISOString(),
+          public_url: "#",
+        },
+        {
+          name: "샘플_테스트_자료_2.pdf",
+          size: 1024 * 1024 * 1.2,
+          updated_at: new Date().toISOString(),
+          public_url: "#",
+        },
+      ]);
+    }
     return NextResponse.json(
       { ok: false, error: WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR },
       { status: 503 },
