@@ -15,16 +15,21 @@ describe("Directory / claim documents UX (PR112, static)", () => {
     assert.match(source, /\/claim-documents\?insurer=/);
   });
 
-  it("insurer card exposes quick claim actions on the card surface", () => {
+  it("insurer card exposes quick claim actions inside the claim panel", () => {
     const card = readFileSync(
       join(ROOT, "components/directory/insurer-action-card.tsx"),
+      "utf8",
+    );
+    const desk = readFileSync(
+      join(ROOT, "components/directory/insurer-card-desk-actions.tsx"),
       "utf8",
     );
     const quick = readFileSync(
       join(ROOT, "components/directory/insurer-quick-claim-actions.tsx"),
       "utf8",
     );
-    assert.match(card, /InsurerQuickClaimActions/);
+    assert.match(card, /InsurerCardDeskActions/);
+    assert.match(desk, /InsurerQuickClaimActions/);
     assert.match(quick, /WORK_LINK_ACTION_LABELS\.claimGuide/);
     assert.match(quick, /WORK_LINK_ACTION_LABELS\.claimDocuments/);
   });

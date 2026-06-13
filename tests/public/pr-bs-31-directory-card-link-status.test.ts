@@ -52,8 +52,8 @@ describe("PR-BS-31 directory card restore and status cleanup", () => {
     const deskActions = read("components/directory/insurer-card-desk-actions.tsx");
     const compactRow = read("components/directory/insurer-compact-workbench-row.tsx");
 
+    assert.match(compactRow, /InsurerCardDeskActions/);
     assert.match(deskActions, /resolveSystemLinks/);
-    assert.match(compactRow, /resolveSystemLinks/);
     assert.doesNotMatch(compactRow, /href=\{insurer\.systemUrl\}/);
   });
 
@@ -85,7 +85,7 @@ describe("PR-BS-31 directory card restore and status cleanup", () => {
     const adminActions = read("app/admin/claim-documents/governance/actions.ts");
     const claimPage = read("app/claim-documents/page.tsx");
 
-    assert.match(actionCard, /InsurerCardClaimDocumentsSection/);
+    assert.match(actionCard, /InsurerCardClaimDocumentsSection|InsurerCardDeskActions/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /바로 열기/);
     assert.match(adminActions, /saveClaimDocumentGovernance/);

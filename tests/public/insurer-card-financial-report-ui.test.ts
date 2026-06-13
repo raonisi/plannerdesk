@@ -47,11 +47,11 @@ describe("PR-BS-23 insurer card financial report UI polish", () => {
   });
 
   it("keeps quick claim actions and standalone claim-documents route", () => {
-    const card = readFileSync(
-      join(ROOT, "components/directory/insurer-action-card.tsx"),
+    const desk = readFileSync(
+      join(ROOT, "components/directory/insurer-card-desk-actions.tsx"),
       "utf8",
     );
-    assert.match(card, /InsurerQuickClaimActions/);
+    assert.match(desk, /InsurerQuickClaimActions/);
     assert.equal(existsSync(join(ROOT, "app/claim-documents/page.tsx")), true);
   });
 });

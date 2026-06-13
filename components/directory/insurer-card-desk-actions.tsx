@@ -1,14 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { ExternalTabAnchor } from "@/components/content-page";
+import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
+import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { claimFaxDisplay, DIRECTORY_TEXT, telHref } from "@/lib/directory/formatting";
 import {
   insurerWorkbenchActionButton,
   insurerWorkbenchActionButtonAccent,
-  insurerWorkbenchActionButtonPrimary,
-  insurerWorkbenchActionScrollRow,
+  insurerWorkbenchClaimPanel,
+  insurerWorkbenchSecondaryActionGrid,
+  insurerWorkbenchSystemPrimaryCta,
 } from "@/lib/directory/insurer-workbench-ui";
 import { resolveSystemLinks } from "@/lib/directory/work-links";
 import type { PublicInsurer } from "@/lib/public/insurers";
@@ -16,14 +19,22 @@ import type { PublicInsurer } from "@/lib/public/insurers";
 export function InsurerCardDeskActions({
   insurer,
   claimItems,
-  onOpenClaimDocuments,
+  claimPanelOpen,
+  onClaimPanelOpenChange,
   onOpenDetail,
+  showDetailButton = true,
 }: {
   insurer: PublicInsurer;
   claimItems: ClaimLibraryItem[];
-  onOpenClaimDocuments: () => void;
+  claimPanelOpen?: boolean;
+  onClaimPanelOpenChange?: (open: boolean) => void;
   onOpenDetail: () => void;
+  showDetailButton?: boolean;
 }) {
+  const [internalClaimOpen, setInternalClaimOpen] = useState(false);
+  const isClaimControlled = claimPanelOpen !== undefined;
+  const claimOpen = isClaimControlled ? claimPanelOpen : internalClaimOpen;
+
   const systemLinks = resolveSystemLinks(insurer);
   const pdfCount = claimItems.filter((item) => item.kind === "pdf").length;
   const customerTel = telHref(insurer.customerCenterPhone);
@@ -33,89 +44,101 @@ export function InsurerCardDeskActions({
     claimFax.primary !== DIRECTORY_TEXT.unavailable &&
     Boolean(claimFax.primary?.trim());
 
+  function setClaimOpen(next: boolean) {
+    if (!isClaimControlled) {
+      setInternalClaimOpen(next);
+    }
+    onClaimPanelOpenChange?.(next);
+  }
+
+  const claimPanelLabel =
+    pdfCount > 0 ? `청구·서류 (${pdfCount})` : "청구·서류";
+
   return (
     <div
       aria-label={`${insurer.name} 업무 바로가기`}
-      className={insurerWorkbenchActionScrollRow}
+      className="min-w-0 space-y-3"
       role="group"
     >
       {systemLinks.primary ? (
         <ExternalTabAnchor
           aria-label={`${insurer.name} 전산 바로가기`}
-          className={insurerWorkbenchActionButtonPrimary}
+          className={insurerWorkbenchSystemPrimaryCta}
           href={systemLinks.primary}
         >
-          전산
+          <span>전산 바로가기</span>
+          <span aria-hidden="true" className="text-xs opacity-80">
+            ↗
+          </span>
         </ExternalTabAnchor>
       ) : null}
 
-      {insurer.claimPageUrl ? (
-        <ExternalTabAnchor
-          aria-label={`${insurer.name} 청구안내`}
-          className={insurerWorkbenchActionButtonAccent}
-          href={insurer.claimPageUrl}
-        >
-          청구
-        </ExternalTabAnchor>
-      ) : (
+      <div className={insurerWorkbenchSecondaryActionGrid}>
         <button
-          aria-label={`${insurer.name} 청구안내`}
-          className={insurerWorkbenchActionButtonAccent}
-          onClick={onOpenClaimDocuments}
+          aria-controls={`${insurer.id}-claim-panel`}
+          aria-expanded={claimOpen}
+          aria-label={`${insurer.name} ${claimPanelLabel}`}
+          className={`${insurerWorkbenchActionButtonAccent} w-full`}
+          onClick={() => setClaimOpen(!claimOpen)}
           type="button"
         >
-          청구
+          {claimPanelLabel}
         </button>
-      )}
 
-      {pdfCount > 0 ? (
-        <button
-          aria-label={`${insurer.name} PDF ${pdfCount}건`}
-          className={insurerWorkbenchActionButton}
-          onClick={onOpenClaimDocuments}
-          type="button"
+        {customerTel ? (
+          <a
+            aria-label={`${insurer.name} 고객센터`}
+            className={`${insurerWorkbenchActionButton} w-full`}
+            href={customerTel}
+          >
+            고객센터
+          </a>
+        ) : null}
+
+        {hasFax ? (
+          <button
+            aria-label={`${insurer.name} 팩스 ${claimFax.primary}`}
+            className={`${insurerWorkbenchActionButton} w-full`}
+            onClick={onOpenDetail}
+            title={claimFax.primary}
+            type="button"
+          >
+            팩스
+          </button>
+        ) : null}
+
+        {showDetailButton ? (
+          <button
+            aria-label={`${insurer.name} 상세 보기`}
+            className={`${insurerWorkbenchActionButton} w-full text-slate-600`}
+            onClick={onOpenDetail}
+            type="button"
+          >
+            상세
+          </button>
+        ) : null}
+      </div>
+
+      {claimOpen ? (
+        <div
+          className={insurerWorkbenchClaimPanel}
+          id={`${insurer.id}-claim-panel`}
+          role="region"
         >
-          PDF {pdfCount}
-        </button>
+          <InsurerQuickClaimActions
+            claimItemCount={claimItems.length}
+            insurer={insurer}
+            onOpenClaimGuide={() => setClaimOpen(true)}
+          />
+          <InsurerCardClaimDocumentsSection
+            claimItems={claimItems}
+            expanded
+            hideSectionTitle
+            hideToggle
+            insurer={insurer}
+          />
+        </div>
       ) : null}
-
-      {customerTel ? (
-        <a
-          aria-label={`${insurer.name} 고객센터`}
-          className={insurerWorkbenchActionButton}
-          href={customerTel}
-        >
-          고객센터
-        </a>
-      ) : null}
-
-      {hasFax ? (
-        <button
-          aria-label={`${insurer.name} 팩스 ${claimFax.primary}`}
-          className={insurerWorkbenchActionButton}
-          onClick={onOpenDetail}
-          title={claimFax.primary}
-          type="button"
-        >
-          팩스
-        </button>
-      ) : null}
-
-      <button
-        aria-label={`${insurer.name} 상세 보기`}
-        className={insurerWorkbenchActionButton}
-        onClick={onOpenDetail}
-        type="button"
-      >
-        상세
-      </button>
-
-      <Link
-        className={`${insurerWorkbenchActionButton} no-underline`}
-        href={`/claim-documents?insurer=${encodeURIComponent(insurer.id)}`}
-      >
-        서류
-      </Link>
     </div>
   );
 }

@@ -2,35 +2,20 @@
 
 
 
-import Link from "next/link";
-
 import { useState } from "react";
 
-import { ExternalTabAnchor } from "@/components/content-page";
-
+import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
-
-import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
 
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 
 import { getInsurerWorkbenchCategoryLabel } from "@/lib/directory/directory-workbench-copy";
 
-import { claimFaxDisplay, DIRECTORY_TEXT, telHref } from "@/lib/directory/formatting";
-
 import {
 
   insurerWorkbenchActionButton,
 
-  insurerWorkbenchActionButtonAccent,
-
-  insurerWorkbenchActionButtonPrimary,
-
-  insurerWorkbenchActionScrollRow,
-
   insurerWorkbenchDetailPanel,
-
-  insurerWorkbenchPdfPanel,
 
   insurerWorkbenchRowShell,
 
@@ -40,7 +25,6 @@ import { insurerCardCategoryBadge } from "@/lib/directory/insurer-card-ui";
 
 import { MOBILE_PANEL_CLOSE_BUTTON } from "@/lib/mobile/field-usability";
 
-import { resolveSystemLinks } from "@/lib/directory/work-links";
 import type { PublicInsurer } from "@/lib/public/insurers";
 
 
@@ -174,140 +158,8 @@ export function InsurerCompactWorkbenchRow({
   layout = "list",
 
 }: InsurerCompactWorkbenchRowProps) {
-
-  const [pdfPanelOpen, setPdfPanelOpen] = useState(false);
-
   const [detailOpen, setDetailOpen] = useState(false);
-
-  const pdfCount = claimItems.filter((item) => item.kind === "pdf").length;
-
-  const claimFax = claimFaxDisplay(insurer);
   const categoryLabel = getInsurerWorkbenchCategoryLabel(insurer);
-
-  const customerTel = telHref(insurer.customerCenterPhone);
-  const systemPrimary = resolveSystemLinks(insurer).primary;
-  const claimFaxHasValue =
-    claimFax.primary !== DIRECTORY_TEXT.missing &&
-    claimFax.primary !== DIRECTORY_TEXT.unavailable &&
-    Boolean(claimFax.primary?.trim());
-
-  const actionButtons = (
-
-    <div className={insurerWorkbenchActionScrollRow}>
-
-      {systemPrimary ? (
-        <ExternalTabAnchor
-          aria-label={`${insurer.name} 전산 바로가기`}
-          className={insurerWorkbenchActionButtonPrimary}
-          href={systemPrimary}
-        >
-          전산
-        </ExternalTabAnchor>
-      ) : null}
-
-
-
-      {insurer.claimPageUrl ? (
-
-        <ExternalTabAnchor
-
-          aria-label={`${insurer.name} 청구안내`}
-
-          className={insurerWorkbenchActionButtonAccent}
-
-          href={insurer.claimPageUrl}
-
-        >
-
-          청구
-
-        </ExternalTabAnchor>
-
-      ) : (
-
-        <button
-
-          aria-label={`${insurer.name} 청구안내`}
-
-          className={insurerWorkbenchActionButtonAccent}
-
-          onClick={() => {
-
-            setPdfPanelOpen(true);
-
-            setDetailOpen(false);
-
-          }}
-
-          type="button"
-
-        >
-
-          청구
-
-        </button>
-
-      )}
-
-
-
-      {pdfCount > 0 ? (
-      <button
-
-        aria-expanded={pdfPanelOpen}
-
-        aria-label={`${insurer.name} PDF ${pdfCount}건`}
-
-        className={insurerWorkbenchActionButton}
-
-        onClick={() => {
-
-          setPdfPanelOpen((open) => !open);
-
-          if (detailOpen) setDetailOpen(false);
-
-        }}
-
-        type="button"
-
-      >
-
-        PDF {pdfCount}
-
-      </button>
-      ) : null}
-
-
-
-      {customerTel ? (
-        <a
-          aria-label={`${insurer.name} 고객센터`}
-          className={insurerWorkbenchActionButton}
-          href={customerTel}
-        >
-          고객센터
-        </a>
-      ) : null}
-      {claimFaxHasValue ? (
-        <button
-          aria-label={`${insurer.name} 팩스 ${claimFax.primary}`}
-          className={insurerWorkbenchActionButton}
-          onClick={() => {
-            setDetailOpen(true);
-            setPdfPanelOpen(false);
-          }}
-          title={claimFax.primary}
-          type="button"
-        >
-          팩스
-        </button>
-      ) : null}
-
-    </div>
-
-  );
-
-
 
   return (
 
@@ -344,7 +196,16 @@ export function InsurerCompactWorkbenchRow({
 
 
 
-        <div className="min-w-0">{actionButtons}</div>
+        <div className="min-w-0">
+          <InsurerCardDeskActions
+            claimItems={claimItems}
+            insurer={insurer}
+            onOpenDetail={() => {
+              setDetailOpen(true);
+            }}
+            showDetailButton={false}
+          />
+        </div>
 
 
 
@@ -373,11 +234,7 @@ export function InsurerCompactWorkbenchRow({
             className={insurerWorkbenchActionButton}
 
             onClick={() => {
-
               setDetailOpen((open) => !open);
-
-              if (!detailOpen) setPdfPanelOpen(false);
-
             }}
 
             type="button"
@@ -411,77 +268,6 @@ export function InsurerCompactWorkbenchRow({
         </div>
 
       </div>
-
-
-
-      {pdfPanelOpen ? (
-
-        <div className={insurerWorkbenchPdfPanel}>
-
-          <WorkbenchPanelHeader
-
-            closeLabel={`${insurer.name} PDF 패널 닫기`}
-
-            onClose={() => setPdfPanelOpen(false)}
-
-            title={`${insurer.name} 청구서류 · PDF`}
-
-          />
-
-          <Link
-
-            className="mb-3 inline-flex min-h-11 items-center text-xs font-semibold text-emerald-800 underline underline-offset-2"
-
-            href={`/claim-documents?insurer=${encodeURIComponent(insurer.id)}`}
-
-          >
-
-            전체 청구서류 보기
-
-          </Link>
-
-          <InsurerCardClaimDocumentsSection
-
-            claimItems={claimItems}
-
-            expanded
-
-            hideSectionTitle
-
-            hideToggle
-
-            insurer={insurer}
-
-            showFooterNotice={false}
-
-          />
-
-          <div className="mt-3 flex justify-end sm:hidden">
-
-            <button
-
-              aria-label={`${insurer.name} PDF 패널 닫기`}
-
-              className={insurerWorkbenchActionButton}
-
-              onClick={() => setPdfPanelOpen(false)}
-
-              type="button"
-
-            >
-
-              닫기
-
-            </button>
-
-          </div>
-
-        </div>
-
-      ) : null}
-
-
-
       {detailOpen ? (
 
         <div className={insurerWorkbenchDetailPanel}>

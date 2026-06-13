@@ -29,9 +29,10 @@ describe("PR-BS-30 mobile field usability polish", () => {
     );
 
     assert.match(ui, /min-h-11/);
+    assert.match(ui, /min-h-12 w-full/);
     assert.match(row, /WorkbenchPanelHeader/);
     assert.match(row, /닫기/);
-    assert.match(row, /PDF \{pdfCount\}/);
+    assert.match(row, /InsurerCardDeskActions/);
     assert.match(explorer, /MOBILE_FAVORITES_NOTICE_SHORT/);
     assert.equal(MOBILE_TOUCH_MIN_HEIGHT, "min-h-11");
   });

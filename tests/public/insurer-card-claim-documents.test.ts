@@ -41,18 +41,24 @@ describe("PR-BS-22 insurer card claim documents integration", () => {
     }
   });
 
-  it("insurer card embeds collapsible claim documents section", () => {
+  it("insurer card embeds claim documents inside the consolidated claim panel", () => {
     const card = readFileSync(
       join(ROOT, "components/directory/insurer-action-card.tsx"),
+      "utf8",
+    );
+    const desk = readFileSync(
+      join(ROOT, "components/directory/insurer-card-desk-actions.tsx"),
       "utf8",
     );
     const section = readFileSync(
       join(ROOT, "components/directory/insurer-card-claim-documents-section.tsx"),
       "utf8",
     );
-    assert.match(card, /InsurerCardClaimDocumentsSection/);
-    assert.match(card, /claimDocumentsOpen/);
-    assert.match(card, /setClaimDocumentsOpen\(true\)/);
+    assert.match(card, /InsurerCardDeskActions/);
+    assert.match(card, /claimPanelOpen=\{claimDocumentsOpen\}/);
+    assert.match(card, /onClaimPanelOpenChange=\{setClaimDocumentsOpen\}/);
+    assert.match(desk, /InsurerCardClaimDocumentsSection/);
+    assert.match(desk, /청구·서류/);
     assert.match(section, /aria-expanded=\{isOpen\}/);
     assert.match(section, /aria-controls=\{panelId\}/);
     assert.match(section, /청구 안내/);

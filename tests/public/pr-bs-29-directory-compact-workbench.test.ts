@@ -33,7 +33,7 @@ describe("PR-BS-29 directory compact workbench list", () => {
     assert.match(explorer, /viewMode === "list"/);
     assert.match(row, /insurerWorkbenchRowShell/);
     assert.match(ui, /min-h-11/);
-    assert.match(row, /PDF \{pdfCount\}/);
+    assert.match(row, /InsurerCardDeskActions/);
   });
 
   it("keeps PDF list collapsed on the default row surface", () => {
@@ -41,21 +41,25 @@ describe("PR-BS-29 directory compact workbench list", () => {
       join(ROOT, "components/directory/insurer-compact-workbench-row.tsx"),
       "utf8",
     );
+    const desk = readFileSync(
+      join(ROOT, "components/directory/insurer-card-desk-actions.tsx"),
+      "utf8",
+    );
     const section = readFileSync(
       join(ROOT, "components/directory/insurer-card-claim-documents-section.tsx"),
       "utf8",
     );
 
-    assert.match(row, /pdfPanelOpen/);
-    assert.match(row, /hideToggle/);
+    assert.match(row, /InsurerCardDeskActions/);
+    assert.match(desk, /hideToggle/);
     assert.doesNotMatch(row, /ClaimFormListItem/);
     assert.match(section, /hideToggle/);
     assert.match(section, /ClaimFormListItem/);
   });
 
-  it("opens PDF download links only after PDF panel interaction", () => {
-    const row = readFileSync(
-      join(ROOT, "components/directory/insurer-compact-workbench-row.tsx"),
+  it("opens PDF download links only after claim panel interaction", () => {
+    const desk = readFileSync(
+      join(ROOT, "components/directory/insurer-card-desk-actions.tsx"),
       "utf8",
     );
     const listItem = readFileSync(
@@ -63,7 +67,7 @@ describe("PR-BS-29 directory compact workbench list", () => {
       "utf8",
     );
 
-    assert.match(row, /setPdfPanelOpen/);
+    assert.match(desk, /claimOpen/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /download=\{item\.fileName\}/);
     assert.match(listItem, /바로 열기/);
@@ -110,7 +114,7 @@ describe("PR-BS-29 directory compact workbench list", () => {
     );
 
     assert.match(explorer, /getClaimItemsForInsurer/);
-    assert.match(row, /\/claim-documents\?insurer=/);
+    assert.match(row, /InsurerCardDeskActions/);
     assert.match(adminActions, /saveClaimDocumentGovernance/);
   });
 });

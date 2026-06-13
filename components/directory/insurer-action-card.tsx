@@ -16,7 +16,6 @@ import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer
 import { InsurerCardContactStrip } from "@/components/directory/insurer-card-contact-strip";
 import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
 import { InsurerPrimaryWorkLinks } from "@/components/directory/insurer-primary-work-links";
-import { InsurerQuickClaimActions } from "@/components/directory/insurer-quick-claim-actions";
 import {
   insurerCardCategoryBadge,
   insurerCardDetailedToggle,
@@ -341,24 +340,11 @@ export function InsurerActionCard({
         <div className="mt-4 space-y-4">
           <InsurerCardDeskActions
             claimItems={claimItems}
+            claimPanelOpen={claimDocumentsOpen}
             insurer={insurer}
-            onOpenClaimDocuments={() => setClaimDocumentsOpen(true)}
+            onClaimPanelOpenChange={setClaimDocumentsOpen}
             onOpenDetail={() => setDetailedOpen(true)}
           />
-
-          <section aria-label={WORK_LINK_GROUP_LABELS.claim} className="space-y-2">
-            <InsurerQuickClaimActions
-              claimItemCount={claimItems.length}
-              insurer={insurer}
-              onOpenClaimGuide={() => setClaimDocumentsOpen(true)}
-            />
-            <InsurerCardClaimDocumentsSection
-              claimItems={claimItems}
-              expanded={claimDocumentsOpen}
-              insurer={insurer}
-              onExpandedChange={setClaimDocumentsOpen}
-            />
-          </section>
 
           <InsurerCardContactStrip
             insurer={insurer}
