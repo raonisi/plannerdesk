@@ -79,7 +79,7 @@ describe("PR173-B work-tools storage hardcoded key removal (static)", () => {
     const bucket = "test-bucket.appspot.com";
     assert.equal(
       buildWorkToolsStorageListUrl(bucket, "claim-docs"),
-      "https://firebasestorage.googleapis.com/v0/b/test-bucket.appspot.com/o?prefix=claim-docs",
+      "https://firebasestorage.googleapis.com/v0/b/test-bucket.appspot.com/o?prefix=claim-docs%2F",
     );
     assert.equal(
       buildWorkToolsStoragePublicUrl(bucket, "claim-docs", "file.pdf"),

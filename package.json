@@ -18,6 +18,7 @@
     "claim-documents:import:dry-run": "node scripts/import-claim-document-candidates.mjs",
     "claim-documents:import:apply": "node scripts/import-claim-document-candidates.mjs --apply",
     "knowledge:import:drafts": "npx tsx scripts/import-knowledge-drafts.ts",
+    "firebase:upload": "node scripts/firebase-upload.mjs",
     "smoke:public": "node scripts/smoke-public-routes.mjs",
     "skills:sync": "node scripts/codex-agents-to-cursor-skills.mjs",
     "test": "npm run test:answer-assistant && npm run test:regression",
@@ -26,7 +27,7 @@
     "test:public": "npx tsx --test tests/public/*.test.ts",
     "test:admin": "npx tsx --test tests/admin/*.test.ts",
     "test:ops:gate": "npx tsx --test tests/ops/pr147-data-responsibility-notice.test.ts tests/ops/pr148-ai-limited-beta-policy.test.ts tests/ops/pr149-security-final-audit.test.ts tests/ops/pr154-public-smoke-expansion.test.ts tests/ops/pr155-admin-access-regression.test.ts tests/ops/pr172-beta-review-summary.test.ts tests/ops/pr174-terms-legal-review-prep.test.ts",
-    "test:work-tools": "npx tsx --test tests/ops/pr173a-work-tools-access.test.ts tests/ops/pr173b-work-tools-storage-config.test.ts tests/ops/pr173c-claim-boundary.test.ts tests/ops/pr173c-claim-boundary-copy.test.ts",
+    "test:work-tools": "npx tsx --test tests/ops/pr173a-work-tools-access.test.ts tests/ops/pr173b-work-tools-storage-config.test.ts tests/ops/pr173c-claim-boundary.test.ts tests/ops/pr173c-claim-boundary-copy.test.ts tests/ops/firebase-codex-upload-script.test.ts",
     "test:regression:manifest": "npx tsx --test tests/regression/*.test.ts"
   },
   "dependencies": {

@@ -50,15 +50,9 @@ const result = await uploadFileToFirebaseStorage({
 console.log(JSON.stringify(result, null, 2));
 
 function getUploadConfig() {
-  const bucket = readEnv("FIREBASE_UPLOAD_BUCKET") || readEnv("WORK_TOOLS_FIREBASE_BUCKET");
-  const clientEmail =
-    readEnv("FIREBASE_UPLOAD_CLIENT_EMAIL") ||
-    readEnv("GOOGLE_CLIENT_EMAIL") ||
-    readEnv("WORK_TOOLS_FIREBASE_CLIENT_EMAIL");
-  const privateKey =
-    readEnv("FIREBASE_UPLOAD_PRIVATE_KEY") ||
-    readEnv("GOOGLE_PRIVATE_KEY") ||
-    readEnv("WORK_TOOLS_FIREBASE_PRIVATE_KEY");
+  const bucket = readEnv("FIREBASE_UPLOAD_BUCKET");
+  const clientEmail = readEnv("FIREBASE_UPLOAD_CLIENT_EMAIL");
+  const privateKey = readEnv("FIREBASE_UPLOAD_PRIVATE_KEY");
 
   if (!bucket || !clientEmail || !privateKey) {
     fail("firebase_upload_env_missing");
