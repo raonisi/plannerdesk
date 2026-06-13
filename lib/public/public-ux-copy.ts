@@ -3,7 +3,7 @@
  */
 
 export const PUBLIC_UX_LIMITED_BETA_SUMMARY =
-  "PlannerDesk는 설계사 업무를 돕기 위한 제한 베타 도구입니다. 현재는 검수된 공개 정보와 운영 기준에 따라 일부 기능만 제공됩니다.";
+  "PlannerDesk는 설계사 업무를 돕기 위한 제한 베타 도구입니다. 현재는 확인된 공개 정보와 운영 기준에 따라 일부 기능만 제공됩니다.";
 
 export const PUBLIC_UX_DATA_RESPONSIBILITY =
   "보험사 정보, 청구서류, 업무 링크는 보험사 정책과 공식 안내 변경에 따라 달라질 수 있습니다. 실제 고객 안내 전에는 반드시 보험사 공식 자료를 확인해 주세요.";
@@ -21,10 +21,10 @@ export const PUBLIC_UX_ACCESS_RESTRICTED_BODY =
 
 /** @deprecated PR-BS-19C — use WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION for public home card. */
 export const WORK_TOOLS_PLANNER_ACCESS_NOTICE =
-  "업무 도구는 검증 완료된 설계사 권한으로 이용할 수 있습니다.";
+  "업무 도구는 실무 참고용으로 제공됩니다. 일부 기능은 접근 권한이 필요할 수 있습니다.";
 
 export const WORK_TOOLS_ACCESS_DENIED_BODY =
-  "업무 도구는 검증 완료된 설계사 또는 관리자 권한이 필요합니다.";
+  "업무 도구는 설계사 또는 운영 권한이 필요할 수 있습니다.";
 
 export const PUBLIC_UX_KNOWLEDGE_SAFETY_TITLE = "상담 보조용 안내";
 

@@ -45,12 +45,12 @@ const roadmapItems = [
   {
     title: "설계사 커뮤니티",
     description:
-      "검증 설계사 Q&A, 실무 노하우, 업무 팁 공유 공간으로 확장 예정입니다.",
+      "실무 Q&A, 업무 노하우, 업무 팁 공유 공간으로 확장 예정입니다.",
   },
   {
     title: "AI 답변 보조",
     description:
-      "검수된 지식 아카이브를 바탕으로 답변 초안을 돕는 기능을 준비 중입니다.",
+      "지식 아카이브를 바탕으로 답변 초안을 돕는 기능을 준비 중입니다.",
   },
 ] as const;
 
@@ -268,7 +268,7 @@ export function MajorWorkLinks() {
           <div className="space-y-3">
             <p className={textStyles.eyebrow}>자주 쓰는 업무 도구</p>
             <h3 className="break-keep text-xl font-bold text-slate-900 sm:text-2xl leading-snug">
-              보험학교 주요 업무 링크를 플래너데스크 도구로 정리했습니다
+              자주 쓰는 업무 도구를 한 화면에서 정리했습니다
             </h3>
             <p className="break-keep text-sm leading-relaxed text-slate-600">
               전산 로그인 그룹은 제외하고, 설계사가 반복해서 여는 검색·계산
@@ -315,7 +315,7 @@ export function MajorWorkLinks() {
               <StatusBadge tone="info">안내</StatusBadge>
             </div>
             <p className="break-keep text-sm leading-6 text-slate-600 mt-2">
-              잘못된 링크, 번호, 서류 정보를 발견했다면 검수 요청으로
+              잘못된 링크, 번호, 서류 정보를 발견했다면 정보 수정 요청으로
               남겨주세요.
             </p>
             <p className="break-keep text-xs leading-5 text-slate-500">

@@ -19,7 +19,7 @@ export function HomePublicStatsStrip({ stats }: { stats: HomePublicStats }) {
       className="mt-6 rounded-xl border border-[#E3DED4] bg-white/80 px-4 py-4 sm:px-5"
       aria-label="공개 콘텐츠 요약"
     >
-      <p className={sectionEyebrow}>공개·검수 완료 항목</p>
+      <p className={sectionEyebrow}>공개 콘텐츠 요약</p>
       <div className="mt-3 grid grid-cols-1 gap-3 min-[360px]:grid-cols-3">
         {items.map((item) => (
           <div

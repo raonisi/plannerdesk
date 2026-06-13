@@ -43,7 +43,7 @@ function renderPdfDownloadButton(
       <span
         aria-disabled="true"
         className={`${disabledButtonClass} ${gridSpanClass}`}
-        title="관리자 설정으로 다운로드가 비활성화되었습니다"
+        title="현재 다운로드할 수 없습니다"
       >
         PDF 다운로드 비활성
       </span>

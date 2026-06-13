@@ -18,6 +18,7 @@ import { ClaimDocumentExplorer } from "./claim-document-explorer";
 import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
 import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
 import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
+import { PUBLIC_EMPTY_CONTENT_UPDATING } from "@/lib/public/public-surface-terminology";
 
 
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export default async function ClaimDocumentsPage() {
             />
           ) : visibleDocuments.length === 0 ? (
             <EmptyState
-              description="관리자 검수 후 순차적으로 업데이트됩니다."
+              description={PUBLIC_EMPTY_CONTENT_UPDATING}
               title="공개된 청구서류 안내가 아직 없습니다."
             />
           ) : (

@@ -185,7 +185,7 @@ export function MessageTemplateLibrary({
         </h2>
         <p className="mt-1 break-keep text-sm text-[#5B6470]">
           문구에 {"{고객명}"}, {"{담당자명}"} placeholder가 있을 때만 치환됩니다.
-          복사·표시되는 본문은 검수된 안전 문구(safeCopy)입니다.
+          복사·표시되는 본문은 고객 안내용 참고 문구입니다.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="block">
@@ -308,7 +308,7 @@ export function MessageTemplateLibrary({
           <span className="font-bold text-[#0F1D2E]">
             {filteredTemplates.length}
           </span>
-          개 검수된 안내 문구
+          개 고객 안내 문구
         </p>
       </section>
 
@@ -395,7 +395,7 @@ function TemplateCard({
 
   async function handleCopySafeCopy() {
     await copyTextToClipboard(previewText);
-    onToast("검수된 안전 문구가 복사되었습니다.");
+    onToast("고객 안내 문구가 복사되었습니다.");
   }
 
   return (
@@ -449,9 +449,7 @@ function TemplateCard({
       </p>
 
       <div className="mt-4 rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] p-4">
-        <p className="text-[10px] font-bold text-[#B9975B]">
-          검수된 안전 문구 (safeCopy)
-        </p>
+        <p className="text-[10px] font-bold text-[#B9975B]">고객 안내 문구</p>
         <p className="mt-2 line-clamp-6 whitespace-pre-wrap break-keep text-sm leading-relaxed text-[#17202A]">
           {previewText}
         </p>
@@ -469,11 +467,11 @@ function TemplateCard({
         </button>
       </div>
 
-      <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] text-[#5B6470]">
-        게시일 {formatVerifiedDate(template.publishedAt ?? template.updatedAt)}
-        <span className="mx-1.5 text-[#E3DED4]">·</span>
-        검수 완료
-      </p>
+      {(template.publishedAt ?? template.updatedAt) ? (
+        <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] text-[#5B6470]">
+          게시일 {formatVerifiedDate(template.publishedAt ?? template.updatedAt)}
+        </p>
+      ) : null}
     </article>
   );
 }

@@ -22,15 +22,15 @@ import {
 } from "@/lib/design-system";
 
 const uiText = {
-  missing: "공식 확인 후 업데이트 예정",
+  missing: "준비 중",
   emptyTitle: "조건에 맞는 항목이 없습니다.",
   emptyDescription:
     "검색어를 줄이거나 필터를 변경해 주세요.",
   officialSource: "공식 출처 열기",
   lastVerified: "최근 확인일",
-  safetyTitle: "검수 및 안전 안내",
+  safetyTitle: "안전 안내",
   generalSafety:
-    "일부 항목은 검수 전 초안 데이터를 사용할 수 있습니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 공개 전 공식 출처 확인이 필요합니다.",
+    "일부 항목은 준비 중일 수 있습니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 고객 안내 전 공식 출처를 확인해 주세요.",
   messageSafety:
     "메시지 템플릿은 실무 참고용 초안입니다. 발송 전 고객 상황, 상품 기준, 보험사 기준에 맞게 검토하고 수정해야 합니다.",
   noPayoutJudge:
@@ -540,7 +540,7 @@ export function CollapsibleNotice({
 
 export function DraftDataNotice({ children }: { children?: ReactNode }) {
   return (
-    <NoticeBox title="검수 및 초안 안내">
+    <NoticeBox title="안내">
       <p>{children ?? uiText.generalSafety}</p>
     </NoticeBox>
   );

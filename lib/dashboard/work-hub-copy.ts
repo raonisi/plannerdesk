@@ -6,7 +6,7 @@ export {
 } from "@/lib/ops/public-landing-safety";
 
 export const PUBLIC_WORK_HUB_VISIBILITY_NOTICE =
-  "검수·공개 기준을 통과한 항목만 이 화면에 표시됩니다. 미검수·비공개 데이터는 공개 화면에 노출되지 않습니다.";
+  "공개 기준을 통과한 항목만 이 화면에 표시됩니다. 비공개 자료는 공개 화면에 노출되지 않습니다.";
 
 export const PUBLIC_WORK_HUB_SEARCH_HINT =
   "보험사를 먼저 검색해 보세요. 청구서류·지식·고객 문구도 같은 검색창에서 찾을 수 있습니다.";
@@ -21,7 +21,7 @@ export const PUBLIC_WORK_HUB_LOAD_ERROR =
   "정보를 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.";
 
 export const PLANNER_ANSWER_ASSISTANT_HUB_NOTE =
-  "답변 보조(베타)는 검증 설계사·허용 목록에 한해 이용할 수 있습니다. 접근 범위는 자동으로 확대되지 않습니다.";
+  "답변 보조(베타)는 접근 권한이 있는 설계사에 한해 이용할 수 있습니다. 접근 범위는 자동으로 확대되지 않습니다.";
 
 export const ADMIN_REVIEW_QUEUE_INTRO =
   "검수 대기·확인 필요 항목은 관리자 권한에서만 집계합니다. 공개 화면에는 노출되지 않습니다.";

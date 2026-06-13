@@ -660,7 +660,7 @@ const newsletterItems = [
   "월별 보험사 상품 개정·인수기준 변경 여부 확인",
   "고객 안내에 쓰기 전 해당 보험사 공식 공지와 약관 링크 재확인",
   "판매 권유 문구가 아니라 설계사 내부 실무 메모로만 활용",
-  "불확실한 내용은 수정 요청/제보로 남겨 검수 대상에 올리기",
+  "불확실한 내용은 수정 요청/제보로 남겨 주세요",
 ] as const;
 
 const moneyFormatter = new Intl.NumberFormat("ko-KR");
@@ -3636,7 +3636,7 @@ function ExternalTool({ copy }: { copy: ToolItem }) {
         <p className="text-xs font-semibold text-indigo-600">공식 출처</p>
         <p className="mt-1 text-lg font-semibold text-slate-900">{copy.source}</p>
         <p className="mt-2 break-keep text-sm leading-6 text-slate-500">
-          보험학교 링크를 재사용하지 않고, 플래너데스크에서 별도로 정리한 공식
+          플래너데스크에서 별도로 정리한 공식
           기관 링크입니다.
         </p>
         <a

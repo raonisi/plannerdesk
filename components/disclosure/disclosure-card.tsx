@@ -92,11 +92,11 @@ export function DisclosureCard({
         </div>
       </div>
 
-      <p className="mt-4 flex flex-wrap gap-x-1.5 gap-y-0.5 border-t border-[#E3DED4] pt-3 text-[10px] leading-relaxed text-[#5B6470]">
-        최근 확인일 {formatVerifiedDate(entry.lastVerifiedAt)}
-        <span className="mx-1.5 text-[#E3DED4]">·</span>
-        <span className="text-[#5B6470]/90">검수 완료</span>
-      </p>
+      {entry.lastVerifiedAt ? (
+        <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] leading-relaxed text-[#5B6470]">
+          최근 확인일 {formatVerifiedDate(entry.lastVerifiedAt)}
+        </p>
+      ) : null}
     </article>
   );
 }

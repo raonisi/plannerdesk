@@ -4,6 +4,7 @@ import { ContentSection, EmptyState, PageHero } from "@/components/content-page"
 import { getPublicDisclosureLinks } from "@/lib/public/disclosure-links";
 import { getPublicInsurers } from "@/lib/public/insurers";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
+import { PUBLIC_EMPTY_CONTENT_UPDATING } from "@/lib/public/public-surface-terminology";
 import { DisclosureLinksClient } from "./disclosure-links-client";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,7 @@ export default async function DisclosureLinksPage() {
           />
         ) : entries.length === 0 ? (
           <EmptyState
-            description="관리자 검수·게시 완료 후 순차적으로 업데이트됩니다."
+            description={PUBLIC_EMPTY_CONTENT_UPDATING}
             title="공개된 공시·약관 링크가 아직 없습니다."
           />
         ) : (

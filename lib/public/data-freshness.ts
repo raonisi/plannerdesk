@@ -17,7 +17,10 @@ export const DATA_FRESHNESS_FORBIDDEN_PHRASES = [
 ] as const;
 
 export const DATA_FRESHNESS_COPY = {
+  /** Internal/admin label — do not render on public surfaces. */
   missingDate: "확인일 정보 부족",
+  /** Public UI: omit date row when value is missing (PR-COPY-A). */
+  publicMissingDateLabel: "",
   missingSource: "공식 출처 확인 필요",
   freshnessUncertain: "최신성 확인 필요",
   officialSourceConfirm: "공식 출처 확인",
@@ -54,7 +57,7 @@ export function formatVerifiedDateShort(
 export function formatVerifiedDate(
   value: string | Date | null | undefined,
 ): string {
-  return formatVerifiedDateShort(value) ?? DATA_FRESHNESS_COPY.missingDate;
+  return formatVerifiedDateShort(value) ?? DATA_FRESHNESS_COPY.publicMissingDateLabel;
 }
 
 export function resolveOfficialSourceUrl(
@@ -77,7 +80,7 @@ export function getFreshnessDateLabel(
   const formatted = formatVerifiedDateShort(raw);
   if (!formatted) {
     return {
-      label: DATA_FRESHNESS_COPY.missingDate,
+      label: DATA_FRESHNESS_COPY.publicMissingDateLabel,
       hasDate: false,
     };
   }
@@ -111,5 +114,5 @@ export function getOfficialSourceLabel(
 /** @deprecated Prefer getFreshnessDateLabel — kept for directory card compatibility. */
 export function lastVerifiedLabel(value: string | null): string {
   const formatted = formatVerifiedDateShort(value);
-  return formatted ?? DATA_FRESHNESS_COPY.missingDate;
+  return formatted ?? DATA_FRESHNESS_COPY.publicMissingDateLabel;
 }

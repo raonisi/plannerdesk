@@ -89,7 +89,7 @@ export const CORRECTION_SUBMIT_COPY = {
   cardTriggerAria: "이 보험사 정보의 수정 요청",
   dialogTitle: "정보 수정 요청",
   dialogDescription:
-    "잘못된 링크, 연락처, 안내 문구를 발견했다면 제보해주세요. 접수된 내용은 관리자 검수 후 반영 여부가 결정됩니다.",
+    "잘못된 링크, 연락처, 안내 문구를 발견했다면 제보해주세요. 접수된 내용은 확인 후 반영 여부가 결정됩니다.",
   compactPiiNotice:
     "고객정보 없이 오류만 알려주세요. 공식 출처가 있다면 URL을 함께 남겨주세요.",
   sensitiveWarningTitle: "입력 전 확인해주세요",
@@ -119,7 +119,7 @@ export const CORRECTION_SUBMIT_COPY = {
   submitAction: "제보 접수",
   cancelAction: "닫기",
   submitSuccess:
-    "제보가 접수되었습니다. 관리자 검수 전에는 공개 정보에 반영되지 않습니다.",
+    "제보가 접수되었습니다. 공개 정보에 반영되기 전에는 확인 절차가 필요합니다.",
   declarationLabel:
     "고객 개인정보·민감정보·상담 원문·보험금 지급 판단 요청을 포함하지 않았습니다.",
   declarationRequired: "안전 확인 체크 후 제보를 접수할 수 있습니다.",

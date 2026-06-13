@@ -128,7 +128,7 @@ export const PUBLIC_INLINE_NOTICE: Record<
   knowledge:
     "상담 보조용 참고 자료입니다. 약관·공시·보험사 기준으로 최종 확인하세요.",
   search:
-    "검수·공개 완료된 정보만 검색됩니다. 미검수·비공개 데이터는 표시되지 않습니다.",
+    "공개 완료된 정보만 검색됩니다. 비공개 자료는 표시되지 않습니다.",
 };
 
 export const ERROR_REPORT_ESCALATION: readonly {

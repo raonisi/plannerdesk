@@ -36,7 +36,7 @@ export function DataFreshnessMeta({
       <span
         className={`inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#5f6670] ${className}`}
       >
-        <span>{date.label}</span>
+        {date.hasDate ? <span>{date.label}</span> : null}
         {source.kind === "link" ? (
           <ExternalTabAnchor
             className={`${badgeClass} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55] hover:bg-[#e3f2eb]`}
@@ -44,18 +44,14 @@ export function DataFreshnessMeta({
           >
             {source.label}
           </ExternalTabAnchor>
-        ) : (
-          <span className={`${badgeClass} border-[#e3ded4] bg-[#f8f7f3] text-[#5B6470]`}>
-            {source.label}
-          </span>
-        )}
+        ) : null}
       </span>
     );
   }
 
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <p className={metaTextClass}>{date.label}</p>
+      {date.hasDate ? <p className={metaTextClass}>{date.label}</p> : null}
       <div className="flex flex-wrap items-center gap-2">
         {source.kind === "link" ? (
           <ExternalTabAnchor
@@ -64,15 +60,6 @@ export function DataFreshnessMeta({
           >
             {source.label}
           </ExternalTabAnchor>
-        ) : (
-          <span className={`${badgeClass} border-[#e3ded4] bg-[#f8f7f3] text-[#5B6470]`}>
-            {source.label}
-          </span>
-        )}
-        {!date.hasDate ? (
-          <span className={`${badgeClass} border-[#e8dfd0] bg-[#fbf7ee] text-[#7a612d]`}>
-            {DATA_FRESHNESS_COPY.freshnessUncertain}
-          </span>
         ) : null}
       </div>
       {showClaimNotice ? (

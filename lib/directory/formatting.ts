@@ -6,7 +6,7 @@ import { lastVerifiedLabel as formatLastVerifiedLabel } from "@/lib/public/data-
 // governance). Never render raw null, undefined, empty strings, or enum
 // identifiers in the public surface.
 export const DIRECTORY_TEXT = {
-  missing: "공식 확인 후 업데이트 예정",
+  missing: "준비 중",
   unavailable: "해당사항 없음",
   callCenterIndividual: "콜센터 개별접수",
   conditional: "조건 확인 필요",

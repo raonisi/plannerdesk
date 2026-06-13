@@ -193,7 +193,7 @@ export function SearchResultsList({
         검색 결과 {total}건
       </h2>
       <p className="mt-1 text-xs text-[#5f6670]">
-        영역별로 구분해 표시합니다. 공개·검수 기준을 통과한 항목만 포함되며, 업무
+        영역별로 구분해 표시합니다. 공개 기준을 통과한 항목만 포함되며, 업무
         도구·Answer Assistant는 검색 대상이 아닙니다.
       </p>
 

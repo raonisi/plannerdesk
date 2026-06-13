@@ -9,6 +9,7 @@ import {
   KnowledgeRiskLevel,
 } from "@prisma/client";
 import { EmptyState } from "@/components/content-page";
+import { PUBLIC_EMPTY_CONTENT_UPDATING } from "@/lib/public/public-surface-terminology";
 import { GatedFavoriteButton } from "@/components/planner-favorites/gated-favorite-button";
 import { KnowledgeFavoritesStrip } from "@/components/planner-favorites/knowledge-favorites-strip";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
@@ -179,7 +180,7 @@ export function KnowledgeArchiveList({
   if (isCatalogEmpty) {
     return (
       <EmptyState
-        description="관리자 검수와 게시 설정이 완료된 문서만 표시됩니다. 공개 전 검수 중인 항목은 표시되지 않습니다."
+        description={PUBLIC_EMPTY_CONTENT_UPDATING}
         title="등록된 지식 콘텐츠가 없습니다."
       />
     );
@@ -216,7 +217,7 @@ export function KnowledgeArchiveList({
           <PreserveFiltersExceptQ filterState={filterState} />
           <p className="text-xs leading-5 text-[#5f6670]">
             개인정보·의료정보·계약정보·보험금 지급 판단 관련 검색은 제공하지
-            않습니다. 공개 전 검수 중인 항목은 표시되지 않습니다.
+            않습니다. 준비 중인 항목은 표시되지 않습니다.
           </p>
         </form>
 

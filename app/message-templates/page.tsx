@@ -7,6 +7,7 @@ import {
   PageHero,
 } from "@/components/content-page";
 import { getPublicMessageTemplates } from "@/lib/public/message-templates";
+import { PUBLIC_EMPTY_CONTENT_UPDATING } from "@/lib/public/public-surface-terminology";
 import { uiLabels } from "@/lib/ui-labels";
 import { MessageTemplateLibrary } from "./message-template-library";
 
@@ -15,14 +16,14 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "고객 안내 문구 | PlannerDesk",
   description:
-    "보험 상담, 후속 연락, 점검 안내에 활용할 수 있는 검수된 고객 안내 문구를 확인할 수 있는 실무 참고 페이지입니다.",
+    "보험 상담, 후속 연락, 점검 안내에 활용할 수 있는 고객 안내 문구를 확인할 수 있는 실무 참고 페이지입니다.",
 };
 
 const t = {
   eyebrow: "고객 문구",
   title: "고객 문구 복사",
   description:
-    "검수된 안전 문구(safeCopy)를 확인하고 복사할 수 있습니다. 보험금 지급·상품 권유 문구가 아닙니다.",
+    "고객 안내 문구를 확인하고 복사할 수 있습니다. 보험금 지급·상품 권유 문구가 아닙니다.",
 };
 
 export default async function MessageTemplatesPage() {
@@ -42,7 +43,7 @@ export default async function MessageTemplatesPage() {
             />
           ) : templates.length === 0 ? (
             <EmptyState
-              description="관리자 검수·게시 완료 후 순차적으로 업데이트됩니다."
+              description={PUBLIC_EMPTY_CONTENT_UPDATING}
               title="공개된 고객 안내 문구가 아직 없습니다."
             />
           ) : (
@@ -54,7 +55,7 @@ export default async function MessageTemplatesPage() {
             title={uiLabels.safetyBoundary}
           >
             <ul className="space-y-2 break-keep">
-              <li>표시·복사되는 문구는 검수된 safeCopy이며, 보험금 지급 여부를 단정하지 않습니다.</li>
+              <li>표시·복사되는 문구는 고객 안내용 참고 문구이며, 보험금 지급 여부를 단정하지 않습니다.</li>
               <li>고객 의료서류 원본 업로드나 과도한 개인정보 요구는 하지 마세요.</li>
               <li>상품 가입 유도·공포 조장·특정 상품 추천처럼 보이는 표현은 피해 주세요.</li>
               <li>카카오톡 등 메신저에 붙여넣기 전 최종 문구를 한 번 더 검토해 주세요.</li>

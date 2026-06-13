@@ -18,17 +18,17 @@ const ROOT = process.cwd();
 describe("PR-BS-10 data freshness UI (static, no DB)", () => {
   it("formats verified dates without fabricating missing values", () => {
     assert.equal(formatVerifiedDate("2024-03-15"), "2024.03.15");
-    assert.equal(formatVerifiedDate(null), DATA_FRESHNESS_COPY.missingDate);
-    assert.equal(formatVerifiedDate(undefined), DATA_FRESHNESS_COPY.missingDate);
+    assert.equal(formatVerifiedDate(null), DATA_FRESHNESS_COPY.publicMissingDateLabel);
+    assert.equal(formatVerifiedDate(undefined), DATA_FRESHNESS_COPY.publicMissingDateLabel);
     assert.equal(getFreshnessDateLabel(null).hasDate, false);
     assert.match(getFreshnessDateLabel("2024-01-02").label, /2024\.01\.02/);
   });
 
   it("treats invalid dates as missing without broken UI text", () => {
     assert.equal(formatVerifiedDateShort("not-a-date"), null);
-    assert.equal(formatVerifiedDate("not-a-date"), DATA_FRESHNESS_COPY.missingDate);
+    assert.equal(formatVerifiedDate("not-a-date"), DATA_FRESHNESS_COPY.publicMissingDateLabel);
     assert.equal(getFreshnessDateLabel("not-a-date").hasDate, false);
-    assert.equal(getFreshnessDateLabel("not-a-date").label, DATA_FRESHNESS_COPY.missingDate);
+    assert.equal(getFreshnessDateLabel("not-a-date").label, DATA_FRESHNESS_COPY.publicMissingDateLabel);
   });
 
   it("prefers lastVerifiedAt over reviewedAt", () => {
@@ -85,6 +85,7 @@ describe("PR-BS-10 data freshness UI (static, no DB)", () => {
     );
     assert.doesNotMatch(meta, /adminMemo|internalNote|reviewNote|sourceNote/i);
     assert.doesNotMatch(meta, /verificationStatus|reviewStatus/);
+    assert.doesNotMatch(meta, /freshnessUncertain|확인일 정보 부족|최신성 확인 필요/);
   });
 
   it("public directory, claim list, and search integrate freshness meta", () => {

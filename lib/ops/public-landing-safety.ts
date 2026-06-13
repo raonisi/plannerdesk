@@ -331,10 +331,10 @@ export const PR144_LINKED_DOCS = [
 
 /** Short lines for public home hero (PR144). */
 export const PUBLIC_LANDING_LIMITED_BETA_NOTICE =
-  "PlannerDesk는 제한 베타 준비 단계의 설계사 업무 보조 도구입니다. 검수 완료된 공개 정보 중심으로 제공됩니다.";
+  "PlannerDesk는 제한 베타 준비 단계의 설계사 업무 보조 도구입니다. 확인된 공개 정보 중심으로 제공됩니다.";
 
 export const PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE =
   "청구서류·업무 링크·공시 정보는 보험사 공식 안내 변경에 따라 달라질 수 있으니 제출·안내 전 공식 출처를 확인해 주세요.";
 
 export const PUBLIC_LANDING_FOOTER_LINE =
-  "제한 베타 준비 단계 · 검수 완료 공개 정보 중심";
+  "제한 베타 준비 단계 · 확인된 공개 정보 중심";
