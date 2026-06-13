@@ -2,7 +2,7 @@
 
 import { createSign, randomUUID } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { basename, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const SERVER_NAME = "plannerdesk-firebase-storage";
 const SERVER_VERSION = "0.1.0";

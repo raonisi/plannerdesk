@@ -1249,42 +1249,70 @@ export function WorkToolsClient() {
           title="전체 업무 도구"
         />
         {gridTools.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {gridTools.map((tool) => (
-              tool.kind === "accordion" && tool.items ? (
-                <ToolAccordionCard
-                  key={tool.id}
-                  title={tool.label}
-                  description={tool.description}
-                  kind={tool.kind}
-                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
-                  icon={getToolIcon(tool.kind)}
-                  items={tool.items}
-                  isFavorite={favorites.includes(tool.id)}
-                  onToggleFavorite={() => toggleFavorite(tool.id)}
-                  onSelectFolder={(href) => {
-                    const item = tool.items?.find((i) => i.href === href);
-                    setFolderTitle(`${tool.label} - ${item?.label}`);
-                    setFolderTarget(href);
-                    setIsFolderOpen(true);
-                  }}
-                />
-              ) : (
-                <ToolCard
-                  key={tool.id}
-                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
-                  description={tool.description}
-                  icon={getToolIcon(tool.kind)}
-                  isActive={activeTool === tool.id}
-                  isFavorite={favorites.includes(tool.id)}
-                  kind={tool.kind}
-                  onRun={() => handleToolSelect(tool)}
-                  onToggleFavorite={() => toggleFavorite(tool.id)}
-                  source={tool.source}
-                  title={tool.label}
-                />
-              )
-            ))}
+          <div className="space-y-12">
+            {visibleToolGroups.map((group) => {
+              const toolsInGroup = group.tools.filter((t) =>
+                gridTools.some((gt) => gt.id === t.id)
+              );
+              if (toolsInGroup.length === 0) return null;
+
+              return (
+                <div key={group.title} className="space-y-4">
+                  <div className="border-b border-slate-100 pb-2">
+                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-indigo-500" />
+                      {group.title}
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {group.description}
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {toolsInGroup.map((tool) =>
+                      tool.kind === "accordion" && tool.items ? (
+                        <ToolAccordionCard
+                          key={tool.id}
+                          title={tool.label}
+                          description={tool.description}
+                          kind={tool.kind}
+                          categoryLabel={getCategoryLabelForTool(
+                            toolToCategoryId[tool.id]
+                          )}
+                          icon={getToolIcon(tool.kind)}
+                          items={tool.items}
+                          isFavorite={favorites.includes(tool.id)}
+                          onToggleFavorite={() => toggleFavorite(tool.id)}
+                          onSelectFolder={(href) => {
+                            const item = tool.items?.find(
+                              (i) => i.href === href
+                            );
+                            setFolderTitle(`${tool.label} - ${item?.label}`);
+                            setFolderTarget(href);
+                            setIsFolderOpen(true);
+                          }}
+                        />
+                      ) : (
+                        <ToolCard
+                          key={tool.id}
+                          categoryLabel={getCategoryLabelForTool(
+                            toolToCategoryId[tool.id]
+                          )}
+                          description={tool.description}
+                          icon={getToolIcon(tool.kind)}
+                          isActive={activeTool === tool.id}
+                          isFavorite={favorites.includes(tool.id)}
+                          kind={tool.kind}
+                          onRun={() => handleToolSelect(tool)}
+                          onToggleFavorite={() => toggleFavorite(tool.id)}
+                          source={tool.source}
+                          title={tool.label}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <EmptyState
