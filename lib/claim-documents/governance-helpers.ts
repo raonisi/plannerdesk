@@ -231,3 +231,51 @@ export const EMPTY_CLAIM_DOCUMENT_GOVERNANCE_FILTERS: ClaimDocumentGovernanceFil
     visibility: "all",
     download: "all",
   };
+
+export const DEFAULT_CLAIM_DOCUMENT_GOVERNANCE_PAGE_SIZE = 25;
+export const MOBILE_CLAIM_DOCUMENT_GOVERNANCE_PAGE_SIZE = 10;
+export const CLAIM_DOCUMENT_GOVERNANCE_PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+
+export type ClaimDocumentGovernancePaginationMeta = {
+  totalItems: number;
+  totalPages: number;
+  page: number;
+  pageSize: number;
+  rangeStart: number;
+  rangeEnd: number;
+};
+
+export function paginateClaimDocumentGovernanceItems<T>(
+  items: T[],
+  page: number,
+  pageSize: number,
+): T[] {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const start = (page - 1) * pageSize;
+  return items.slice(start, start + pageSize);
+}
+
+export function computeClaimDocumentGovernancePaginationMeta(
+  totalItems: number,
+  page: number,
+  pageSize: number,
+): ClaimDocumentGovernancePaginationMeta {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const rangeStart =
+    totalItems === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const rangeEnd =
+    totalItems === 0 ? 0 : Math.min(safePage * pageSize, totalItems);
+
+  return {
+    totalItems,
+    totalPages,
+    page: safePage,
+    pageSize,
+    rangeStart,
+    rangeEnd,
+  };
+}

@@ -2,12 +2,10 @@
 
 import type { ClaimDocumentWithGovernance } from "@/lib/claim-documents/governance-types";
 import {
-  ClaimDocumentGovernanceDownloadCell,
   ClaimDocumentGovernanceLastVerifiedCell,
   ClaimDocumentGovernanceOfficialUrlCell,
   ClaimDocumentGovernancePdfActions,
   ClaimDocumentGovernanceStatusCell,
-  ClaimDocumentGovernanceVisibilityCell,
 } from "./claim-document-governance-row";
 
 const detailButtonClass =
@@ -32,49 +30,37 @@ export function ClaimDocumentGovernanceTable({
               <th className="px-4 py-3">공식 URL</th>
               <th className="px-4 py-3">검수일</th>
               <th className="px-4 py-3">상태</th>
-              <th className="px-4 py-3">노출</th>
-              <th className="px-4 py-3">다운로드</th>
               <th className="px-4 py-3">관리</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {items.map((item) => (
               <tr className="align-top" key={item.governance.id}>
-                <td className="px-4 py-4 font-medium text-slate-900">
+                <td className="px-4 py-3 font-medium text-slate-900">
                   {item.governance.insurerName}
                 </td>
-                <td className="max-w-xs px-4 py-4">
+                <td className="max-w-xs px-4 py-3">
                   <p className="break-words font-medium text-slate-900">
                     {item.governance.documentTitle}
                   </p>
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-3">
                   <ClaimDocumentGovernancePdfActions item={item} />
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-3">
                   <ClaimDocumentGovernanceOfficialUrlCell
                     officialSourceUrl={item.governance.officialSourceUrl}
                   />
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-3">
                   <ClaimDocumentGovernanceLastVerifiedCell
                     lastVerifiedAt={item.governance.lastVerifiedAt}
                   />
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-3">
                   <ClaimDocumentGovernanceStatusCell item={item} />
                 </td>
-                <td className="px-4 py-4">
-                  <ClaimDocumentGovernanceVisibilityCell
-                    isVisible={item.governance.isVisible}
-                  />
-                </td>
-                <td className="px-4 py-4">
-                  <ClaimDocumentGovernanceDownloadCell
-                    isDownloadEnabled={item.governance.isDownloadEnabled}
-                  />
-                </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-3">
                   <button
                     className={detailButtonClass}
                     onClick={() => onSelect(item)}

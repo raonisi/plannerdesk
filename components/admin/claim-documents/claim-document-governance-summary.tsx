@@ -35,14 +35,14 @@ export function ClaimDocumentGovernanceSummary({
     >
       {SUMMARY_CARDS.map((card) => (
         <article
-          className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+          className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
           key={card.key}
         >
           <p className="text-sm font-semibold text-slate-900">{card.title}</p>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+          <p className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
             {summary[card.key].toLocaleString("ko-KR")}
           </p>
-          <p className="mt-2 text-xs leading-relaxed text-slate-500">
+          <p className="mt-1 text-xs leading-snug text-slate-500">
             {card.description}
           </p>
         </article>

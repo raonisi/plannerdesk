@@ -2,12 +2,10 @@
 
 import type { ClaimDocumentWithGovernance } from "@/lib/claim-documents/governance-types";
 import {
-  ClaimDocumentGovernanceDownloadCell,
   ClaimDocumentGovernanceLastVerifiedCell,
   ClaimDocumentGovernanceOfficialUrlCell,
   ClaimDocumentGovernancePdfActions,
   ClaimDocumentGovernanceStatusCell,
-  ClaimDocumentGovernanceVisibilityCell,
 } from "./claim-document-governance-row";
 
 const detailButtonClass =
@@ -21,54 +19,37 @@ export function ClaimDocumentGovernanceMobileList({
   onSelect: (item: ClaimDocumentWithGovernance) => void;
 }) {
   return (
-    <div className="space-y-3 lg:hidden">
+    <div className="space-y-2 lg:hidden">
       {items.map((item) => (
         <article
-          className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+          className="space-y-2.5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
           key={item.governance.id}
         >
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="space-y-0.5">
+            <p className="text-xs font-semibold text-slate-500">
               {item.governance.insurerName}
             </p>
-            <h3 className="break-words text-base font-semibold text-slate-950">
+            <h3 className="break-words text-sm font-semibold text-slate-950">
               {item.governance.documentTitle}
             </h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-xs text-slate-500">상태</p>
-              <div className="mt-1">
-                <ClaimDocumentGovernanceStatusCell item={item} />
-              </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500">상태</span>
+              <ClaimDocumentGovernanceStatusCell item={item} />
             </div>
-            <div>
-              <p className="text-xs text-slate-500">공식 URL</p>
-              <div className="mt-1">
-                <ClaimDocumentGovernanceOfficialUrlCell
-                  officialSourceUrl={item.governance.officialSourceUrl}
-                />
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500">공식 URL</span>
+              <ClaimDocumentGovernanceOfficialUrlCell
+                officialSourceUrl={item.governance.officialSourceUrl}
+              />
             </div>
-            <div>
-              <p className="text-xs text-slate-500">검수일</p>
-              <div className="mt-1">
-                <ClaimDocumentGovernanceLastVerifiedCell
-                  lastVerifiedAt={item.governance.lastVerifiedAt}
-                />
-              </div>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">노출 / 다운로드</p>
-              <div className="mt-1 space-y-0.5">
-                <ClaimDocumentGovernanceVisibilityCell
-                  isVisible={item.governance.isVisible}
-                />
-                <ClaimDocumentGovernanceDownloadCell
-                  isDownloadEnabled={item.governance.isDownloadEnabled}
-                />
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500">검수일</span>
+              <ClaimDocumentGovernanceLastVerifiedCell
+                lastVerifiedAt={item.governance.lastVerifiedAt}
+              />
             </div>
           </div>
 

@@ -106,8 +106,24 @@ export function ClaimDocumentGovernanceDetail({
               value={governance.isDownloadEnabled ? "허용" : "비활성"}
             />
             <DetailRow
+              label="다음 검수 예정"
+              value={
+                governance.nextReviewDueAt
+                  ? governance.nextReviewDueAt.slice(0, 10)
+                  : "—"
+              }
+            />
+            <DetailRow
+              label="최종 수정자"
+              value={governance.updatedBy?.trim() || "—"}
+            />
+            <DetailRow
               label="관리자 메모"
               value={governance.adminMemo?.trim() || "—"}
+            />
+            <DetailRow
+              label="안내 문구"
+              value={governance.cautionText?.trim() || "—"}
             />
           </dl>
 
