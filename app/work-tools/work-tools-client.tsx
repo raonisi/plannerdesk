@@ -526,8 +526,10 @@ const toolGroups: ToolGroup[] = [
         description: "보험사별 소식지/소책자/교육자료 모음 월별 다운로드 목록을 제공합니다.",
         kind: "accordion",
         items: [
-          { label: "2026년 06월", href: "quick-link-files/newsletters/202606" },
-          { label: "2026년 05월", href: "quick-link-files/newsletters/202605" },
+          { label: "2026년 06월 (손해보험)", href: "quick-link-files/newsletters/general/202606" },
+          { label: "2026년 06월 (생명보험)", href: "quick-link-files/newsletters/life/202606" },
+          { label: "2026년 05월 (손해보험)", href: "quick-link-files/newsletters/general/202605" },
+          { label: "2026년 05월 (생명보험)", href: "quick-link-files/newsletters/life/202605" },
         ],
       },
     ],
