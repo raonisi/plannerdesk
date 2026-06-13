@@ -12,6 +12,9 @@ import { categoryLabels } from "@/lib/claim-documents/category-labels";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { publicClaimTrustHint } from "@/lib/directory/formatting";
 import {
+  insurerCardClaimDocumentActions,
+  insurerCardClaimDocumentCard,
+  insurerCardClaimDocumentTitle,
   insurerCardPdfDownloadButton,
   insurerCardPdfSecondaryButton,
 } from "@/lib/directory/insurer-card-ui";
@@ -76,27 +79,19 @@ export function ClaimFormListItem({
   if (item.kind === "pdf") {
     const isCompactVariant = variant === "accordion" || variant === "card";
     const actionGridClass =
-      variant === "card"
-        ? "grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-2"
-        : variant === "accordion"
-          ? "grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
-          : "grid gap-2 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-stretch xl:grid-cols-2";
-    const downloadButtonClass =
-      variant === "card" ? insurerCardPdfDownloadButton : primaryButtonClass;
-    const compactSecondaryButtonClass =
-      variant === "card" ? insurerCardPdfSecondaryButton : secondaryButtonClass;
+      variant === "accordion"
+        ? "grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+        : "grid gap-2 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-stretch xl:grid-cols-2";
 
     if (variant === "card") {
       return (
-        <li className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
-          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="min-w-0 flex-1 break-words text-sm font-medium leading-snug text-slate-900">
-              {title}
-            </p>
-            <div className={actionGridClass}>
+        <li className="w-full min-w-0">
+          <article className={`${insurerCardClaimDocumentCard} space-y-3`}>
+            <div className={insurerCardClaimDocumentTitle}>{title}</div>
+            <div className={insurerCardClaimDocumentActions}>
               <a
                 aria-label={`${title} PDF 다운로드`}
-                className={`${downloadButtonClass} sm:col-span-2`}
+                className={insurerCardPdfDownloadButton}
                 download={item.fileName}
                 href={item.href}
               >
@@ -104,7 +99,7 @@ export function ClaimFormListItem({
               </a>
               <ExternalTabAnchor
                 aria-label={`${title} PDF 바로 열기`}
-                className={compactSecondaryButtonClass}
+                className={insurerCardPdfSecondaryButton}
                 href={item.href}
               >
                 PDF 바로 열기
@@ -112,14 +107,14 @@ export function ClaimFormListItem({
               {item.officialSourceUrl ? (
                 <ExternalTabAnchor
                   aria-label={`${insurerName} 보험사 공식 안내 확인`}
-                  className={compactSecondaryButtonClass}
+                  className={insurerCardPdfSecondaryButton}
                   href={item.officialSourceUrl}
                 >
                   보험사 공식 안내 확인
                 </ExternalTabAnchor>
               ) : null}
             </div>
-          </div>
+          </article>
         </li>
       );
     }

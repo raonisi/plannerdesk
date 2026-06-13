@@ -1,0 +1,39 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, it } from "node:test";
+
+const ROOT = process.cwd();
+
+describe("hotfix claim document card fixed layout", () => {
+  it("locks card variant to title-first vertical layout", () => {
+    const listItem = readFileSync(
+      join(ROOT, "components/claim-documents/claim-form-list-item.tsx"),
+      "utf8",
+    );
+    const cardBlock = listItem.slice(
+      listItem.indexOf('if (variant === "card")'),
+      listItem.indexOf('if (variant === "card")') + 1200,
+    );
+
+    assert.match(listItem, /insurerCardClaimDocumentTitle/);
+    assert.match(listItem, /insurerCardClaimDocumentActions/);
+    assert.match(listItem, /insurerCardClaimDocumentCard/);
+    assert.doesNotMatch(cardBlock, /sm:flex-row/);
+    assert.doesNotMatch(cardBlock, /sm:items-center/);
+    assert.doesNotMatch(cardBlock, /sm:justify-between/);
+    assert.match(cardBlock, /PDF 다운로드/);
+    assert.match(cardBlock, /download=\{item\.fileName\}/);
+    assert.match(cardBlock, /PDF 바로 열기/);
+    assert.match(cardBlock, /보험사 공식 안내 확인/);
+  });
+
+  it("stabilizes claim panel list wrappers", () => {
+    const section = readFileSync(
+      join(ROOT, "components/directory/insurer-card-claim-documents-section.tsx"),
+      "utf8",
+    );
+    assert.match(section, /min-w-0 w-full space-y-3/);
+    assert.match(section, /ul className="min-w-0 w-full space-y-3"/);
+  });
+});

@@ -60,7 +60,7 @@ function InsurerCardClaimDocumentsPanelBody({
   return (
     <>
       {claimItems.length > 0 ? (
-        <div className="space-y-3">
+        <div className="min-w-0 w-full space-y-3">
           {showSearch ? (
             <div className="min-w-0">
               <label className="sr-only" htmlFor={searchId}>
@@ -83,7 +83,7 @@ function InsurerCardClaimDocumentsPanelBody({
 
           {totalCount > 0 ? (
             <>
-              <ul className="space-y-3" id={listId}>
+              <ul className="min-w-0 w-full space-y-3" id={listId}>
                 {visibleItems.map((item) => (
                   <ClaimFormListItem
                     item={item}

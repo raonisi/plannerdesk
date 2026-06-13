@@ -35,7 +35,20 @@ export const insurerCardClaimToggle = (open: boolean) =>
   }`;
 
 export const insurerCardClaimPanel =
-  "mt-4 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4";
+  "mt-4 min-w-0 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4";
+
+export const insurerCardClaimDocumentTitle =
+  "min-w-0 w-full text-left text-sm font-semibold text-slate-900 leading-snug whitespace-normal break-words [word-break:keep-all]";
+
+export const insurerCardClaimDocumentCard =
+  "w-full min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm";
+
+export const insurerCardClaimDocumentActions =
+  "grid min-w-0 w-full grid-cols-1 gap-2 sm:grid-cols-3";
+
+export const insurerCardPdfDownloadButton = `inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 ${focusRing}`;
+
+export const insurerCardPdfSecondaryButton = `inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${focusRing}`;
 
 export const insurerCardClaimNotice =
   "border-t border-slate-200 pt-3 text-xs leading-relaxed text-slate-500";
@@ -52,9 +65,5 @@ export const insurerCardTrustNote =
 
 export const insurerCardContactTile =
   "flex min-h-[44px] flex-col justify-center rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:bg-slate-50";
-
-export const insurerCardPdfDownloadButton = `inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 ${focusRing}`;
-
-export const insurerCardPdfSecondaryButton = `inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${focusRing}`;
 
 export const insurerCardClaimSearchInput = `min-h-[44px] w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus-visible:border-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2`;
