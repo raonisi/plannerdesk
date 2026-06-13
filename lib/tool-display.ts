@@ -5,13 +5,14 @@ export type ToolKind =
   | "external"
   | "newsletter"
   | "folder"
-  | "internal";
+  | "internal"
+  | "accordion";
 
 export type ToolTypeLabel = "내부 도구" | "외부 공식 링크" | "공식 자료" | "문구 도구" | "실무 연결";
 
 export function getToolTypeLabel(kind: ToolKind): ToolTypeLabel {
   if (kind === "external") return "외부 공식 링크";
-  if (kind === "folder" || kind === "newsletter") return "공식 자료";
+  if (kind === "folder" || kind === "newsletter" || kind === "accordion") return "공식 자료";
   if (kind === "internal") return "실무 연결";
   return "내부 도구";
 }
@@ -29,6 +30,7 @@ export function getToolActionLabel(
     return officialOrg ? "공식 사이트 열기" : "공식 링크 열기";
   }
   if (kind === "folder") return "자료 열기";
+  if (kind === "accordion") return "월별 자료 보기";
   if (kind === "internal") return "업무로 이동";
   return "실행하기";
 }

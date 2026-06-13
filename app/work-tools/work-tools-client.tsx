@@ -15,6 +15,7 @@ import {
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { SectionHeader } from "@/components/launcher/section-header";
 import { ToolCard } from "@/components/launcher/tool-card";
+import { ToolAccordionCard } from "@/components/launcher/tool-accordion-card";
 import {
   WORK_TOOL_CATEGORIES,
   getCategoryLabelForTool,
@@ -35,7 +36,7 @@ import {
   isWorkToolIdPublicVisible,
 } from "@/lib/work-tools/work-tools-registry";
 
-type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder" | "internal";
+type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder" | "internal" | "accordion";
 
 type ToolId =
   | "planner-stats"
@@ -103,6 +104,7 @@ type ToolItem = {
   href?: string;
   source?: string;
   auxText?: string;
+  items?: { label: string; href: string }[];
 };
 
 type ToolGroup = {
@@ -152,14 +154,14 @@ const toolGroups: ToolGroup[] = [
       },
       {
         id: "insurance-age",
-        label: "보험나이",
-        description: "생년월일 기준 만 나이와 보험나이를 계산합니다.",
+        label: "보험나이 계산기",
+        description: "만 나이와 보험나이를 계산하고 변경일까지 남은 일수를 알려줍니다.",
         kind: "calculator",
       },
       {
         id: "bmi-calculator",
-        label: "BMI",
-        description: "키와 체중으로 BMI와 표준체중을 계산합니다.",
+        label: "BMI 인수 확인",
+        description: "키와 체중으로 BMI를 계산하고 유병자 플랜 우회 여부를 참고합니다.",
         kind: "calculator",
       },
     ],
@@ -170,63 +172,63 @@ const toolGroups: ToolGroup[] = [
     tools: [
       {
         id: "currency-value",
-        label: "화폐가치",
-        description: "현재 금액의 미래 가치와 현재 구매력을 계산합니다.",
+        label: "화폐가치 계산기",
+        description: "보장금액의 미래 구매력 하락, 현재 가치를 시뮬레이션 합니다.",
         kind: "calculator",
       },
       {
         id: "loan",
-        label: "대출 이자",
-        description: "원리금균등 기준 월 납입액과 총 이자를 계산합니다.",
+        label: "대출 원리금 계산기",
+        description: "원리금균등, 원금균등, 만기일시 등 대출 상환 스케줄을 확인합니다.",
         kind: "calculator",
       },
       {
         id: "savings",
-        label: "예/적금 이자",
-        description: "예치금 또는 월 납입액 기준 만기 금액을 계산합니다.",
+        label: "예적금/단복리 계산기",
+        description: "일반/세금우대/비과세에 따른 세후 실수령액, 단복리 차이를 확인합니다.",
         kind: "calculator",
       },
       {
         id: "net-salary",
-        label: "연봉 실수령액",
-        description: "연봉 기준 대략적인 월 실수령액을 계산합니다.",
+        label: "연봉 실수령액 계산기",
+        description: "세전 연봉 기준으로 4대보험, 소득세를 제외한 세후 월급을 확인합니다.",
         kind: "calculator",
       },
       {
         id: "earned-tax",
-        label: "간편 근로소득세",
-        description: "과세표준 구간별 간편 산출세액을 계산합니다.",
+        label: "근로소득세 계산기",
+        description: "연말정산 시 예상되는 종합소득세액과 환급/납부액을 확인합니다.",
         kind: "calculator",
       },
       {
         id: "comp-tax",
-        label: "간편 종합소득세",
-        description: "종합소득 과세표준 기준 간편 산출세액을 계산합니다.",
+        label: "종합소득세 계산기",
+        description: "사업소득, 근로소득 등 다양한 소득 합산 시의 종소세를 확인합니다.",
         kind: "calculator",
       },
       {
         id: "inheritance-tax",
-        label: "간편 상속세",
-        description: "상속재산과 공제액 기준 참고 세액을 계산합니다.",
+        label: "상속세/증여세 계산기",
+        description: "재산, 공제 한도에 따른 상속세 및 증여세 예상액을 확인합니다.",
         kind: "calculator",
       },
       {
         id: "card-deduction",
-        label: "카드/현금 소득공제",
-        description: "연봉과 카드·현금 사용액 기준 공제 가능 참고액을 계산합니다.",
+        label: "소비 황금비율 계산기",
+        description: "신용카드, 체크카드 소득공제 한도에 맞춘 최적 사용 비율을 찾습니다.",
         kind: "calculator",
       },
       {
         id: "vat",
-        label: "부가세/공급가액",
-        description: "합계금액에서 공급가액과 부가세를 분리합니다.",
+        label: "부가세/공급가액 분리",
+        description: "합계금액에서 부가세 포함/별도 기준에 따라 공급가액을 계산합니다.",
         kind: "calculator",
       },
     ],
   },
   {
-    title: "보험금청구",
-    description: "청구 업무에 자주 쓰는 검색 도구와 공식 사이트입니다.",
+    title: "법인/실무 검색",
+    description: "법인 정보 조회, 사업장 정보 검색 등을 연결합니다.",
     tools: [
       {
         id: "surgery-code",
@@ -242,139 +244,127 @@ const toolGroups: ToolGroup[] = [
       },
       {
         id: "hospital-pharmacy",
-        label: "병원/약국찾기",
-        description: "건강보험심사평가원 병원·약국 찾기 공식 페이지로 연결합니다.",
+        label: "심평원(병원/약국)",
+        description: "고객 집 근처 건강검진, 진료 가능한 병원과 약국을 찾습니다.",
         kind: "external",
-        href: "https://www.hira.or.kr/ra/hosp/getHealthMap.do?pgmid=HIRAA030002010000",
+        href: "https://www.hira.or.kr/dummy/dummy.do?pgmid=HIRAA030002000000",
         source: "건강보험심사평가원",
       },
       {
         id: "silson24",
-        label: "실손24(전산간편청구)",
-        description: "실손24 전산간편청구 공식 서비스로 연결합니다.",
+        label: "실손24",
+        description: "서류 발급 없이 실손보험을 앱이나 웹에서 다이렉트로 청구합니다.",
         kind: "external",
-        href: "https://www.silson24.or.kr/claim/web/",
-        source: "실손24",
+        href: "https://www.silson24.or.kr/main.do",
+        source: "보험개발원",
       },
       {
         id: "hidden-insurance",
-        label: "숨은보험금찾기",
-        description: "생명보험협회·손해보험협회 내보험찾아줌 공식 서비스로 연결합니다.",
+        label: "내보험찾아줌",
+        description: "고객이 잊고 있는 숨은 보험금과 가입 내역을 한 번에 조회합니다.",
         kind: "external",
-        href: "https://cont.insure.or.kr/cont_web/intro.do",
-        source: "내보험찾아줌",
+        href: "https://cont.insure.or.kr/",
+        source: "생명/손해보험협회",
       },
-    ],
-  },
-  {
-    title: "실손보험",
-    description: "실손보험 인수기준과 비교 공시 확인에 쓰는 공식 링크입니다.",
-    tools: [
       {
         id: "lost-health-standard",
-        label: "실손 인수기준 확인",
-        description: "손해보험협회 실손의료보험 인수기준 공시 페이지로 연결합니다.",
+        label: "건강보험료 상실 기준",
+        description: "퇴사 후 지역가입자 전환 시, 임의계속가입 기준을 확인합니다.",
         kind: "external",
-        href: "https://kpub.knia.or.kr/productDisc/lostHealth/lostHealthDisclosure.do",
-        source: "손해보험협회",
+        href: "https://www.nhis.or.kr/",
+        source: "국민건강보험공단",
       },
     ],
   },
   {
-    title: "자동차보험",
-    description: "자동차보험 비교, 할인/할증, 과실비율 확인 공식 링크입니다.",
+    title: "자동차 / 화재 / 재물",
+    description: "차량 가액, 과실 비율, 건축물 정보 등 손보 특화 도구입니다.",
     tools: [
       {
         id: "car-face-quote",
-        label: "대면 간편견적",
-        description: "손해보험협회 자동차보험 공시/간편견적 페이지로 연결합니다.",
+        label: "차량 기준가액 조회",
+        description: "차량 모델, 연식별로 자차 보험가입 기준이 되는 가액을 조회합니다.",
         kind: "external",
-        href: "https://kpub.knia.or.kr/carInsuranceDisc/insurance/carInsurance.do",
-        source: "손해보험협회",
+        href: "https://www.kidi.or.kr/user/car/carprice.do",
+        source: "보험개발원",
       },
       {
         id: "car-einsmarket",
-        label: "보험다모아 비교견적",
-        description: "보험다모아 자동차보험 비교견적 서비스로 연결합니다.",
+        label: "보험다모아(차·실손)",
+        description: "다이렉트 자동차보험, 실손보험 등 온라인 전용 상품 보험료를 비교합니다.",
         kind: "external",
-        href: "https://e-insmarket.or.kr/aimt/aimtRealIntro.knia",
-        source: "보험다모아",
+        href: "https://e-insmarket.or.kr/",
+        source: "생명/손해보험협회",
       },
       {
         id: "car-premium-factor",
-        label: "할인/할증요인 조회",
-        description: "자동차보험료 할인·할증요인 조회 시스템으로 연결합니다.",
+        label: "자동차보험 할인/할증",
+        description: "고객의 차량 사고 이력에 따른 보험료 할인·할증 요인을 확인합니다.",
         kind: "external",
-        href: "https://prem.kidi.or.kr:1443/",
+        href: "https://prem.kidi.or.kr:1443/main.do",
         source: "보험개발원",
       },
       {
         id: "car-kidi-register",
-        label: "보험개발원 등록",
-        description: "자동차보험 관련 등록 업무 페이지로 연결합니다.",
+        label: "카히스토리(사고이력)",
+        description: "중고차량의 침수, 사고, 도난, 침수 등 상세 이력을 조회합니다.",
         kind: "external",
-        href: "https://iics.kidi.or.kr/insuUserReal/viewInsuUserReal.do",
+        href: "https://www.carhistory.or.kr/",
         source: "보험개발원",
       },
       {
         id: "car-fault-ratio",
-        label: "과실비율 정보포털",
-        description: "자동차사고 과실비율 인정기준 포털로 연결합니다.",
+        label: "자동차사고 과실비율",
+        description: "사고 상황별 명확한 과실 비율 인정 기준을 분쟁심의위에서 확인합니다.",
         kind: "external",
         href: "https://accident.knia.or.kr/",
         source: "손해보험협회",
       },
-    ],
-  },
-  {
-    title: "화재보험",
-    description: "건물 확인과 화재보험 실무에 쓰는 공식 조회 링크입니다.",
-    tools: [
       {
         id: "fire-special-building",
-        label: "특수건물 정보조회",
-        description: "한국화재보험협회 특수건물 정보조회 서비스로 연결합니다.",
+        label: "특수건물 조회",
+        description: "화재보험 의무가입 대상인 특수건물 여부와 등급을 조회합니다.",
         kind: "external",
-        href: "https://bridge.kfpa.or.kr/#/",
+        href: "https://www.kfpa.or.kr/",
         source: "한국화재보험협회",
       },
       {
         id: "building-register",
-        label: "건축물대장",
-        description: "정부24 건축물대장 발급/열람 서비스로 연결합니다.",
+        label: "건축물대장(정부24)",
+        description: "건물의 구조, 용도, 면적, 층수 등 화재보험 가입에 필요한 정보를 확인합니다.",
         kind: "external",
-        href: "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=15000000098&HighCtgCD=A02004002&Mcode=10205",
+        href: "https://www.gov.kr/portal/ntis/service/111000000000",
         source: "정부24",
       },
       {
         id: "elevator-info",
-        label: "승강기 정보 열람",
-        description: "국가승강기정보센터 승강기 정보 열람으로 연결합니다.",
+        label: "승강기 정보조회",
+        description: "승강기 사고배상책임보험 가입 시 고유번호와 용도 정보를 확인합니다.",
         kind: "external",
-        href: "https://www.elevator.go.kr/opn/MainPage.do",
-        source: "국가승강기정보센터",
+        href: "https://minwon.koelsa.or.kr/admin/cmm/main/mainPage.do",
+        source: "한국승강기안전공단",
       },
     ],
   },
   {
-    title: "온라인공문서",
-    description: "고객이 직접 발급해야 하는 주요 공문서 공식 사이트입니다.",
+    title: "공문서 / 부동산 조회",
+    description: "부동산 등기, 가족관계증명 등 행정 서류 조회를 위한 공식 링크입니다.",
     tools: [
       {
         id: "gov-resident",
-        label: "정부24(등본/초본)",
-        description: "주민등록표 등본/초본 발급 페이지로 연결합니다.",
+        label: "정부24(주민등록)",
+        description: "가족관계나 등본 등 서류 발급 안내를 위해 정부24 메인으로 연결합니다.",
         kind: "external",
-        href: "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000015&HighCtgCD=A01010001&tp_seq=01&Mcode=10200",
+        href: "https://www.gov.kr/",
         source: "정부24",
       },
       {
         id: "hometax-income",
         label: "홈택스(소득금액증명)",
-        description: "국세청 홈택스 민원증명 화면으로 연결합니다.",
+        description: "소득금액증명, 납세증명서 확인을 위해 국세청 홈택스로 연결합니다.",
         kind: "external",
-        href: "https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&menuCd=index3",
-        source: "국세청 홈택스",
+        href: "https://www.hometax.go.kr/",
+        source: "국세청",
       },
       {
         id: "court-family",
@@ -441,8 +431,8 @@ const toolGroups: ToolGroup[] = [
     ],
   },
   {
-    title: "모집종사자",
-    description: "모집종사자 조회, 교육, 상품비교에 쓰는 공식 링크입니다.",
+    title: "자격시험 / 교재 다운로드",
+    description: "자격시험과 보수교육 확인을 지원합니다.",
     tools: [
       {
         id: "knia-agent",
@@ -532,10 +522,13 @@ const toolGroups: ToolGroup[] = [
     tools: [
       {
         id: "insurer-newsletter",
-        label: "2026년 5월",
-        description: "보험사별 소식지/소책자/교육자료 모음 다운로드 목록을 제공합니다.",
-        kind: "folder",
-        href: "quick-link-files/bulletin",
+        label: "2026년 소식지",
+        description: "보험사별 소식지/소책자/교육자료 모음 월별 다운로드 목록을 제공합니다.",
+        kind: "accordion",
+        items: [
+          { label: "2026년 06월", href: "quick-link-files/newsletters/202606" },
+          { label: "2026년 05월", href: "quick-link-files/bulletin" },
+        ],
       },
     ],
   },
@@ -1203,20 +1196,40 @@ export function WorkToolsClient() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {featuredTools.map((tool) => (
-              <ToolCard
-                key={"featured-" + tool.id}
-                categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
-                description={tool.description}
-                icon={getToolIcon(tool.kind)}
-                isActive={activeTool === tool.id}
-                isFavorite={favorites.includes(tool.id)}
-                kind={tool.kind}
-                onRun={() => handleToolSelect(tool)}
-                onToggleFavorite={() => toggleFavorite(tool.id)}
-                size="featured"
-                source={tool.source}
-                title={tool.label}
-              />
+              tool.kind === "accordion" && tool.items ? (
+                <ToolAccordionCard
+                  key={"featured-" + tool.id}
+                  title={tool.label}
+                  description={tool.description}
+                  kind={tool.kind}
+                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                  icon={getToolIcon(tool.kind)}
+                  items={tool.items}
+                  isFavorite={favorites.includes(tool.id)}
+                  onToggleFavorite={() => toggleFavorite(tool.id)}
+                  onSelectFolder={(href) => {
+                    const item = tool.items?.find((i) => i.href === href);
+                    setFolderTitle(`${tool.label} - ${item?.label}`);
+                    setFolderTarget(href);
+                    setIsFolderOpen(true);
+                  }}
+                />
+              ) : (
+                <ToolCard
+                  key={"featured-" + tool.id}
+                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                  description={tool.description}
+                  icon={getToolIcon(tool.kind)}
+                  isActive={activeTool === tool.id}
+                  isFavorite={favorites.includes(tool.id)}
+                  kind={tool.kind}
+                  onRun={() => handleToolSelect(tool)}
+                  onToggleFavorite={() => toggleFavorite(tool.id)}
+                  size="featured"
+                  source={tool.source}
+                  title={tool.label}
+                />
+              )
             ))}
           </div>
         </section>
@@ -1230,19 +1243,39 @@ export function WorkToolsClient() {
         {gridTools.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {gridTools.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
-                description={tool.description}
-                icon={getToolIcon(tool.kind)}
-                isActive={activeTool === tool.id}
-                isFavorite={favorites.includes(tool.id)}
-                kind={tool.kind}
-                onRun={() => handleToolSelect(tool)}
-                onToggleFavorite={() => toggleFavorite(tool.id)}
-                source={tool.source}
-                title={tool.label}
-              />
+              tool.kind === "accordion" && tool.items ? (
+                <ToolAccordionCard
+                  key={tool.id}
+                  title={tool.label}
+                  description={tool.description}
+                  kind={tool.kind}
+                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                  icon={getToolIcon(tool.kind)}
+                  items={tool.items}
+                  isFavorite={favorites.includes(tool.id)}
+                  onToggleFavorite={() => toggleFavorite(tool.id)}
+                  onSelectFolder={(href) => {
+                    const item = tool.items?.find((i) => i.href === href);
+                    setFolderTitle(`${tool.label} - ${item?.label}`);
+                    setFolderTarget(href);
+                    setIsFolderOpen(true);
+                  }}
+                />
+              ) : (
+                <ToolCard
+                  key={tool.id}
+                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                  description={tool.description}
+                  icon={getToolIcon(tool.kind)}
+                  isActive={activeTool === tool.id}
+                  isFavorite={favorites.includes(tool.id)}
+                  kind={tool.kind}
+                  onRun={() => handleToolSelect(tool)}
+                  onToggleFavorite={() => toggleFavorite(tool.id)}
+                  source={tool.source}
+                  title={tool.label}
+                />
+              )
             ))}
           </div>
         ) : (
