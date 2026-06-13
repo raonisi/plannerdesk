@@ -153,12 +153,20 @@ export default async function AdminClaimDocumentsPage({
               {PAGE_DESCRIPTION}
             </p>
           </div>
-          <Link
-            href="/admin/claim-documents/new"
-            className="inline-flex items-center justify-center rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
-          >
-            새 청구서류 등록
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/claim-documents/governance"
+              className="inline-flex items-center justify-center rounded-md border border-[#d9c9a8] bg-white px-4 py-2 text-sm font-semibold text-[#102235] shadow-sm transition hover:bg-[#f7f1e5] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
+            >
+              PDF 검수 governance
+            </Link>
+            <Link
+              href="/admin/claim-documents/new"
+              className="inline-flex items-center justify-center rounded-md bg-[#10243E] px-4 py-2 text-sm font-semibold text-[#F7F3E8] shadow-sm transition hover:bg-[#17324F] focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
+            >
+              새 청구서류 등록
+            </Link>
+          </div>
         </div>
 
         {resolvedSearchParams.error ? (
