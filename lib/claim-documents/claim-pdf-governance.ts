@@ -32,6 +32,12 @@ export const CLAIM_INSURER_CARD_NOTICE =
 export const CLAIM_INSURER_CARD_EMPTY_MESSAGE =
   "등록된 청구서류 PDF가 없습니다. 보험사 공식 안내를 확인해 주세요.";
 
+export const CLAIM_INSURER_CARD_COMPACT_NOTICE =
+  "목록이 많은 보험사는 일부 서류만 먼저 보여드립니다. 전체 보기를 누르면 모든 PDF를 확인할 수 있습니다.";
+
+export const CLAIM_INSURER_CARD_SEARCH_EMPTY_MESSAGE =
+  "일치하는 청구서류가 없습니다. 문서명을 다시 확인해 주세요.";
+
 const insurerById = new Map(
   insurerDirectoryEntries.map((entry) => [entry.id, entry]),
 );
