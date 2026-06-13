@@ -68,6 +68,9 @@ export function buildWorkToolsStorageListUrl(bucket: string, prefix: string): st
 }
 
 export function buildWorkToolsStoragePublicUrl(
+  bucket: string,
+  prefix: string,
+  fileName: string,
 ): string {
   const fullPath = prefix ? `${prefix}/${fileName}` : fileName;
   // Firebase requires the full path to be URL-encoded, but slashes must be %2F
