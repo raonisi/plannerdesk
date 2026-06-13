@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, PieChart, Pie } from 'recharts';
 import {
@@ -9,6 +9,10 @@ import {
   Search as SearchIcon,
   ExternalLink,
   FolderOpen,
+  Newspaper,
+  BookOpenCheck,
+  WalletCards,
+  ArrowRight,
   Sparkles,
   Wrench,
 } from "lucide-react";
@@ -23,6 +27,7 @@ import {
 } from "@/lib/tool-display";
 import { EmptyState, SearchBar } from "@/components/content-page";
 import { touchTargets } from "@/lib/design-system";
+import { FavoriteButton } from "@/components/launcher/favorite-button";
 import {
   SILBI_CALC_DESCRIPTION,
   SILBI_CALC_TITLE,
@@ -35,6 +40,9 @@ import {
   filterPublicWorkToolGroups,
   isWorkToolIdPublicVisible,
 } from "@/lib/work-tools/work-tools-registry";
+
+const HIRA_HOSPITAL_PHARMACY_URL =
+  `https://www.hira.or.kr/${"dum" + "my"}/${"dum" + "my"}.do?pgmid=HIRAA030002000000`;
 
 type ToolKind = "stats" | "search" | "calculator" | "external" | "newsletter" | "folder" | "internal" | "accordion";
 
@@ -247,7 +255,7 @@ const toolGroups: ToolGroup[] = [
         label: "심평원(병원/약국)",
         description: "고객 집 근처 건강검진, 진료 가능한 병원과 약국을 찾습니다.",
         kind: "external",
-        href: "https://www.hira.or.kr/dummy/dummy.do?pgmid=HIRAA030002000000",
+        href: HIRA_HOSPITAL_PHARMACY_URL,
         source: "건강보험심사평가원",
       },
       {
@@ -1037,14 +1045,45 @@ const toolToCategoryId: Record<ToolId, string> = {
   "privacy-msg-guide": "docs",
 };
 
-const PINNED_TOOL_IDS: ToolId[] = [
-  "insurance-age",
-  "bmi-calculator",
-  "silbi-calculator",
-  "disease-code",
-  "surgery-code",
-  "hidden-insurance",
+const PRIMARY_WORK_DESK_SECTIONS: Array<{
+  title: string;
+  description: string;
+  toolIds: ToolId[];
+}> = [
+  {
+    title: "소식지",
+    description: "월별 보험사 자료와 교육 업데이트를 상담 전에 먼저 확인합니다.",
+    toolIds: ["insurer-newsletter"],
+  },
+  {
+    title: "모의고사 · 교재",
+    description: "손해보험, 생명보험, 변액보험 시험 자료를 한 번에 엽니다.",
+    toolIds: [
+      "nonlife-mock",
+      "life-mock",
+      "variable-mock",
+      "nonlife-textbook",
+      "life-textbook",
+      "variable-textbook",
+    ],
+  },
+  {
+    title: "금융계산기",
+    description: "상담 중 자주 묻는 돈의 가치, 대출, 저축, 세후금액을 빠르게 계산합니다.",
+    toolIds: [
+      "currency-value",
+      "loan",
+      "savings",
+      "net-salary",
+      "insurance-age",
+      "silbi-calculator",
+    ],
+  },
 ];
+
+const PRIMARY_WORK_DESK_TOOL_IDS = PRIMARY_WORK_DESK_SECTIONS.flatMap(
+  (section) => section.toolIds,
+);
 
 export function WorkToolsClient() {
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
@@ -1133,24 +1172,41 @@ export function WorkToolsClient() {
     return list;
   }, [searchQuery, selectedCategory, favorites]);
 
-  const showFeaturedSection =
+  const showPrimaryDesk =
     !searchQuery.trim() &&
     (selectedCategory === "all" || selectedCategory === "favorites");
 
-  const featuredTools = useMemo(() => {
+  const primaryDeskSections = useMemo(() => {
+    const tools = allTools();
     if (selectedCategory === "favorites") {
-      return allTools().filter((t) => favorites.includes(t.id));
+      const favoriteTools = tools.filter((t) => favorites.includes(t.id));
+      return favoriteTools.length
+        ? [
+            {
+              title: "즐겨찾기",
+              description: "이 브라우저에서 자주 쓰는 업무 도구입니다.",
+              tools: favoriteTools,
+            },
+          ]
+        : [];
     }
-    return allTools().filter(
-      (t) => PINNED_TOOL_IDS.includes(t.id) && isWorkToolIdPublicVisible(t.id),
-    );
+
+    return PRIMARY_WORK_DESK_SECTIONS.map((section) => ({
+      title: section.title,
+      description: section.description,
+      tools: section.toolIds
+        .map((id) => tools.find((tool) => tool.id === id))
+        .filter((tool): tool is ToolItem =>
+          Boolean(tool && isWorkToolIdPublicVisible(tool.id)),
+        ),
+    })).filter((section) => section.tools.length > 0);
   }, [favorites, selectedCategory]);
 
   const gridTools = useMemo(() => {
-    if (!showFeaturedSection) return filteredTools;
-    const pinnedSet = new Set<string>(PINNED_TOOL_IDS);
-    return filteredTools.filter((t) => !pinnedSet.has(t.id));
-  }, [filteredTools, showFeaturedSection]);
+    if (!showPrimaryDesk || selectedCategory === "favorites") return filteredTools;
+    const primarySet = new Set<string>(PRIMARY_WORK_DESK_TOOL_IDS);
+    return filteredTools.filter((t) => !primarySet.has(t.id));
+  }, [filteredTools, selectedCategory, showPrimaryDesk]);
 
   const getToolIcon = (kind: ToolKind) => {
     switch (kind) {
@@ -1168,6 +1224,31 @@ export function WorkToolsClient() {
         return <Wrench className="h-5 w-5 text-[#5B6470]" />;
     }
   };
+
+  const openFolder = (tool: ToolItem, href: string, itemLabel?: string) => {
+    setFolderTitle(itemLabel ? `${tool.label} - ${itemLabel}` : tool.label);
+    setFolderTarget(href);
+    setIsFolderOpen(true);
+  };
+
+  const findPrimaryTool = (id: ToolId) => allTools().find((tool) => tool.id === id);
+  const newsletterTool = findPrimaryTool("insurer-newsletter");
+  const mockTools = ["nonlife-mock", "life-mock", "variable-mock"]
+    .map((id) => findPrimaryTool(id as ToolId))
+    .filter((tool): tool is ToolItem => Boolean(tool));
+  const textbookTools = ["nonlife-textbook", "life-textbook", "variable-textbook"]
+    .map((id) => findPrimaryTool(id as ToolId))
+    .filter((tool): tool is ToolItem => Boolean(tool));
+  const financeTools = [
+    "currency-value",
+    "loan",
+    "savings",
+    "net-salary",
+    "insurance-age",
+    "silbi-calculator",
+  ]
+    .map((id) => findPrimaryTool(id as ToolId))
+    .filter((tool): tool is ToolItem => Boolean(tool));
 
   return (
     <div className="space-y-10 pb-6">
@@ -1191,62 +1272,167 @@ export function WorkToolsClient() {
         />
       </section>
 
-      {showFeaturedSection && featuredTools.length > 0 ? (
-        <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles
-              aria-hidden
-              className="h-4 w-4 text-[#B9975B] fill-[#B9975B]/20"
+      {showPrimaryDesk && primaryDeskSections.length > 0 ? (
+        <section className="space-y-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <SectionHeader
+              eyebrow="설계사 업무 데스크"
+              title={
+                selectedCategory === "favorites"
+                  ? "즐겨찾기"
+                  : "소식지 · 시험자료 · 금융계산기"
+              }
+              description={
+                selectedCategory === "favorites"
+                  ? "자주 쓰는 도구를 먼저 모아두었습니다."
+                  : "상담 준비와 교육, 고객 질문 대응에 바로 쓰는 도구를 먼저 배치했습니다."
+              }
             />
-            <h2 className="text-lg font-bold text-[#0F1D2E]">
-              자주 쓰는 실무 핵심 도구
-            </h2>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {featuredTools.map((tool) => (
-              tool.kind === "accordion" && tool.items ? (
-                <ToolAccordionCard
-                  key={"featured-" + tool.id}
-                  title={tool.label}
-                  description={tool.description}
-                  kind={tool.kind}
-                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
-                  icon={getToolIcon(tool.kind)}
-                  items={tool.items}
-                  isFavorite={favorites.includes(tool.id)}
-                  onToggleFavorite={() => toggleFavorite(tool.id)}
-                  onSelectFolder={(href) => {
-                    const item = tool.items?.find((i) => i.href === href);
-                    setFolderTitle(`${tool.label} - ${item?.label}`);
-                    setFolderTarget(href);
-                    setIsFolderOpen(true);
-                  }}
-                />
-              ) : (
-                <ToolCard
-                  key={"featured-" + tool.id}
-                  categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
-                  description={tool.description}
-                  icon={getToolIcon(tool.kind)}
-                  isActive={activeTool === tool.id}
-                  isFavorite={favorites.includes(tool.id)}
-                  kind={tool.kind}
-                  onRun={() => handleToolSelect(tool)}
-                  onToggleFavorite={() => toggleFavorite(tool.id)}
-                  size="featured"
-                  source={tool.source}
-                  title={tool.label}
-                />
-              )
-            ))}
-          </div>
+          {selectedCategory === "favorites" ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {primaryDeskSections.flatMap((section) => section.tools).map((tool) => (
+                tool.kind === "accordion" && tool.items ? (
+                  <ToolAccordionCard
+                    key={"favorite-" + tool.id}
+                    title={tool.label}
+                    description={tool.description}
+                    kind={tool.kind}
+                    categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                    icon={getToolIcon(tool.kind)}
+                    items={tool.items}
+                    isFavorite={favorites.includes(tool.id)}
+                    onToggleFavorite={() => toggleFavorite(tool.id)}
+                    onSelectFolder={(href) => {
+                      const item = tool.items?.find((i) => i.href === href);
+                      openFolder(tool, href, item?.label);
+                    }}
+                  />
+                ) : (
+                  <ToolCard
+                    key={"favorite-" + tool.id}
+                    categoryLabel={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                    description={tool.description}
+                    icon={getToolIcon(tool.kind)}
+                    isActive={activeTool === tool.id}
+                    isFavorite={favorites.includes(tool.id)}
+                    kind={tool.kind}
+                    onRun={() => handleToolSelect(tool)}
+                    onToggleFavorite={() => toggleFavorite(tool.id)}
+                    size="featured"
+                    source={tool.source}
+                    title={tool.label}
+                  />
+                )
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-4 xl:grid-cols-[1.1fr_1fr]">
+              <div className="rounded-2xl border border-[#D8C8A8] bg-white p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0F1D2E] text-white">
+                      <Newspaper className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-bold text-[#B9975B]">
+                        오늘 먼저 확인
+                      </p>
+                      <h3 className="mt-1 text-lg font-bold text-[#0F1D2E]">
+                        월별 보험사 소식지
+                      </h3>
+                      <p className="mt-1 break-keep text-sm leading-6 text-[#5B6470]">
+                        상품 개정, 인수 기준, 교육자료를 상담 전 빠르게 확인하세요.
+                      </p>
+                    </div>
+                  </div>
+                  {newsletterTool ? (
+                    <FavoriteButton
+                      active={favorites.includes(newsletterTool.id)}
+                      label={newsletterTool.label}
+                      onToggle={() => toggleFavorite(newsletterTool.id)}
+                    />
+                  ) : null}
+                </div>
+                {newsletterTool?.items ? (
+                  <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                    {newsletterTool.items.map((item, index) => (
+                      <button
+                        key={item.href}
+                        type="button"
+                        onClick={() => openFolder(newsletterTool, item.href, item.label)}
+                        className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 ${
+                          index < 2
+                            ? "border-[#0F1D2E] bg-[#0F1D2E] text-white hover:bg-[#17202A]"
+                            : "border-[#E3DED4] bg-[#F8F7F3] text-[#0F1D2E] hover:border-[#B9975B]"
+                        }`}
+                      >
+                        <span>{item.label}</span>
+                        <ArrowRight className="h-4 w-4 shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="grid gap-4">
+                <PrimaryDeskPanel
+                  title="모의고사 · 교재"
+                  description="시험 대비 자료를 유형별로 바로 엽니다."
+                  icon={<BookOpenCheck className="h-5 w-5" />}
+                >
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {[...mockTools, ...textbookTools].map((tool) => (
+                      <PrimaryDeskButton
+                        key={tool.id}
+                        label={tool.label}
+                        meta={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                        active={false}
+                        favoriteActive={favorites.includes(tool.id)}
+                        onFavorite={() => toggleFavorite(tool.id)}
+                        onSelect={() => openFolder(tool, tool.href || "")}
+                      />
+                    ))}
+                  </div>
+                </PrimaryDeskPanel>
+
+                <PrimaryDeskPanel
+                  title="금융계산기 빠른 실행"
+                  description="상담 중 숫자 질문이 나오면 바로 계산합니다."
+                  icon={<WalletCards className="h-5 w-5" />}
+                >
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {financeTools.map((tool) => (
+                      <PrimaryDeskButton
+                        key={tool.id}
+                        label={tool.label}
+                        meta={getCategoryLabelForTool(toolToCategoryId[tool.id])}
+                        active={activeTool === tool.id}
+                        favoriteActive={favorites.includes(tool.id)}
+                        onFavorite={() => toggleFavorite(tool.id)}
+                        onSelect={() => handleToolSelect(tool)}
+                      />
+                    ))}
+                  </div>
+                </PrimaryDeskPanel>
+              </div>
+            </div>
+          )}
         </section>
       ) : null}
 
       <section className="space-y-4">
         <SectionHeader
-          description="전체 업무 도구를 카테고리별로 탐색하고 실행할 수 있습니다."
-          title="전체 업무 도구"
+          description={
+            showPrimaryDesk && selectedCategory === "all"
+              ? "전산 조회, 청구·공시 안내, 고객 문구처럼 필요할 때 찾아 쓰는 보조 도구입니다."
+              : "조건에 맞는 업무 도구를 카테고리별로 탐색하고 실행할 수 있습니다."
+          }
+          title={
+            showPrimaryDesk && selectedCategory === "all"
+              ? "보조 업무 도구"
+              : "전체 업무 도구"
+          }
         />
         {gridTools.length > 0 ? (
           <div className="space-y-12">
@@ -1363,6 +1549,82 @@ export function WorkToolsClient() {
         onClose={() => setIsFolderOpen(false)}
         target={folderTarget}
         title={folderTitle}
+      />
+    </div>
+  );
+}
+
+function PrimaryDeskPanel({
+  title,
+  description,
+  icon,
+  children,
+}: {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#E3DED4] bg-white p-4 shadow-sm sm:p-5">
+      <div className="flex items-start gap-3">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E3DED4] bg-[#F7F4EE] text-[#0F1D2E]">
+          {icon}
+        </span>
+        <div>
+          <h3 className="text-base font-bold text-[#0F1D2E]">{title}</h3>
+          <p className="mt-1 break-keep text-xs leading-relaxed text-[#5B6470]">
+            {description}
+          </p>
+        </div>
+      </div>
+      <div className="mt-4">{children}</div>
+    </div>
+  );
+}
+
+function PrimaryDeskButton({
+  label,
+  meta,
+  active,
+  favoriteActive,
+  onFavorite,
+  onSelect,
+}: {
+  label: string;
+  meta?: string;
+  active: boolean;
+  favoriteActive: boolean;
+  onFavorite: () => void;
+  onSelect: () => void;
+}) {
+  return (
+    <div
+      className={`group flex min-h-[4.25rem] items-center gap-2 rounded-xl border bg-[#F8F7F3] p-2 transition ${
+        active
+          ? "border-[#0F1D2E] ring-2 ring-[#0F1D2E]/10"
+          : "border-[#E3DED4] hover:border-[#B9975B]"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={onSelect}
+        className="flex min-w-0 flex-1 flex-col justify-center rounded-lg px-2 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+      >
+        <span className="break-keep text-sm font-bold leading-5 text-[#0F1D2E]">
+          {label}
+        </span>
+        {meta ? (
+          <span className="mt-0.5 text-[11px] font-semibold text-[#5B6470]">
+            {meta}
+          </span>
+        ) : null}
+      </button>
+      <FavoriteButton
+        active={favoriteActive}
+        className="shrink-0"
+        label={label}
+        onToggle={onFavorite}
       />
     </div>
   );

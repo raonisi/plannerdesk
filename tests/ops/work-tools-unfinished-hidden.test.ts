@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
-import { listHiddenWorkToolIds } from "@/lib/work-tools/work-tools-registry";
+import {
+  listHiddenWorkToolIds,
+  listPublicWorkToolIds,
+} from "@/lib/work-tools/work-tools-registry";
 
 const ROOT = process.cwd();
 
@@ -29,18 +32,35 @@ const ALL_TOOL_IDS = [
   "hidden-insurance",
   "lost-health-standard",
   "car-face-quote",
+  "nonlife-textbook",
+  "life-textbook",
+  "variable-textbook",
   "nonlife-mock",
   "life-mock",
   "variable-mock",
+  "insurer-newsletter",
   "claim-docs-guide",
 ] as const;
 
 describe("PR-BS-19C unfinished tools hidden", () => {
-  it("registry marks mock tools as hidden", () => {
-    const hidden = listHiddenWorkToolIds([...ALL_TOOL_IDS]);
-    for (const id of ["nonlife-mock", "life-mock", "variable-mock"]) {
-      assert.ok(hidden.includes(id), id);
+  it("registry marks exam files and newsletter tools as public planner resources", () => {
+    const visible = listPublicWorkToolIds([...ALL_TOOL_IDS]);
+    for (const id of [
+      "nonlife-textbook",
+      "life-textbook",
+      "variable-textbook",
+      "nonlife-mock",
+      "life-mock",
+      "variable-mock",
+      "insurer-newsletter",
+    ]) {
+      assert.ok(visible.includes(id), id);
     }
+  });
+
+  it("registry has no hidden placeholders in the published work-tools set", () => {
+    const hidden = listHiddenWorkToolIds([...ALL_TOOL_IDS]);
+    assert.deepEqual(hidden, []);
   });
 
   it("work-tools client does not render disabled placeholders for mock tools", () => {
