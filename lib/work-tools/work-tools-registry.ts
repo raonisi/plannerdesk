@@ -26,9 +26,6 @@ const PUBLIC_READY_STATUSES: readonly WorkToolStatus[] = ["complete", "ready"];
 
 /** Tools hidden from public Work Tools (mock / unfinished). */
 const TOOL_OVERRIDES: Record<string, Partial<WorkToolConfig>> = {
-  "nonlife-mock": { status: "placeholder", visibility: "public" },
-  "life-mock": { status: "placeholder", visibility: "public" },
-  "variable-mock": { status: "placeholder", visibility: "public" },
 };
 
 const DEFAULT_CONFIG: Omit<WorkToolConfig, "id"> = {

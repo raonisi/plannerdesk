@@ -19,6 +19,7 @@
     "claim-documents:import:apply": "node scripts/import-claim-document-candidates.mjs --apply",
     "knowledge:import:drafts": "npx tsx scripts/import-knowledge-drafts.ts",
     "firebase:upload": "node scripts/firebase-upload.mjs",
+    "mcp:firebase": "node mcp/firebase-storage-server.mjs",
     "smoke:public": "node scripts/smoke-public-routes.mjs",
     "skills:sync": "node scripts/codex-agents-to-cursor-skills.mjs",
     "test": "npm run test:answer-assistant && npm run test:regression",

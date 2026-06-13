@@ -45,6 +45,8 @@ export const WORK_TOOL_CATEGORIES = [
   { id: "car-fire", label: "자동차·화재" },
   { id: "docs", label: "공문서" },
   { id: "assoc-edu", label: "협회·교육" },
+  { id: "exam-mock", label: "시험·모의고사" },
+  { id: "newsletter", label: "소식지" },
 ] as const;
 
 export type WorkToolCategoryId = (typeof WORK_TOOL_CATEGORIES)[number]["id"];
@@ -56,7 +58,9 @@ const CATEGORY_GROUP: Record<string, readonly string[]> = {
   search: ["search"],
   "car-fire": ["car", "fire"],
   docs: ["docs"],
-  "assoc-edu": ["stats", "recruits", "exam", "news"],
+  "assoc-edu": ["stats", "recruits"],
+  "exam-mock": ["exam"],
+  "newsletter": ["news"],
 };
 
 export function matchesWorkToolCategory(
@@ -83,8 +87,8 @@ const CATEGORY_LABEL_BY_TOOL_CAT: Record<string, string> = {
   fire: "자동차·화재",
   docs: "공문서",
   recruits: "협회·교육",
-  exam: "협회·교육",
-  news: "협회·교육",
+  exam: "시험·모의고사",
+  news: "소식지",
 };
 
 export function getCategoryLabelForTool(toolCategoryId: string): string {
