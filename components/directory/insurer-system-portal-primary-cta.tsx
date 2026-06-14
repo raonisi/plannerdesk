@@ -36,13 +36,13 @@ export function InsurerSystemPortalPrimaryCta({
   }
 
   return (
-    <div
-      aria-disabled="true"
-      aria-label={`${insurer.name} ${DIRECTORY_SYSTEM_PORTAL_UNAVAILABLE_LABEL}`}
+    <button
+      aria-label={`${insurer.name} 전산 바로가기 준비중`}
       className={`${insurerWorkbenchSystemPortalDisabled} ${className}`.trim()}
-      role="status"
+      disabled
+      type="button"
     >
       {DIRECTORY_SYSTEM_PORTAL_UNAVAILABLE_LABEL}
-    </div>
+    </button>
   );
 }

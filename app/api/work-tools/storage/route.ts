@@ -9,6 +9,7 @@ import {
   getWorkToolsSupabaseConfig,
   WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR,
 } from "@/lib/api/work-tools-storage-config";
+import { WORK_TOOLS_STORAGE_EMPTY_MESSAGE } from "@/lib/work-tools/storage-public-copy";
 
 // Firebase types
 interface FirebaseStorageFile {
@@ -33,21 +34,27 @@ interface SupabaseStorageFile {
   } | null;
 }
 
-function getDevFallbackResponse() {
-  return NextResponse.json([
+function storageUnavailableResponse() {
+  return NextResponse.json(
     {
-      name: "샘플_테스트_자료_1.pdf",
-      size: 1024 * 1024 * 2.5,
-      updated_at: new Date().toISOString(),
-      public_url: "#",
+      items: [],
+      status: "unavailable",
+      message: WORK_TOOLS_STORAGE_EMPTY_MESSAGE,
+      error: WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR,
     },
-    {
-      name: "샘플_테스트_자료_2.pdf",
-      size: 1024 * 1024 * 1.2,
-      updated_at: new Date().toISOString(),
-      public_url: "#",
-    },
-  ]);
+    { status: 503 },
+  );
+}
+
+function storageListResponse(
+  items: Array<{
+    name: string;
+    size: number | null;
+    updated_at: string | null;
+    public_url: string;
+  }>,
+) {
+  return NextResponse.json(items);
 }
 
 export async function GET(request: NextRequest) {
@@ -82,13 +89,7 @@ export async function GET(request: NextRequest) {
   if (useFirebase) {
     const config = getWorkToolsFirebaseConfig();
     if (!config) {
-      if (process.env.NODE_ENV === "development") {
-        return getDevFallbackResponse();
-      }
-      return NextResponse.json(
-        { ok: false, error: WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR },
-        { status: 503 },
-      );
+      return storageUnavailableResponse();
     }
 
     const listUrl = buildWorkToolsStorageListUrl(config.bucket, prefix);
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
       });
 
       if (!res.ok) {
-        return NextResponse.json({ error: "Failed to list storage files" }, { status: res.status });
+        return NextResponse.json({ error: "storage_unavailable" }, { status: res.status });
       }
 
       const data = (await res.json()) as FirebaseListResponse;
@@ -119,22 +120,16 @@ export async function GET(request: NextRequest) {
           };
         });
 
-      return NextResponse.json(formatted);
+      return storageListResponse(formatted);
     } catch (err) {
       console.error("Error in storage proxy:", err);
-      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+      return NextResponse.json({ error: "storage_unavailable" }, { status: 500 });
     }
   } else {
     // Supabase Storage route
     const config = getWorkToolsSupabaseConfig();
     if (!config) {
-      if (process.env.NODE_ENV === "development") {
-        return getDevFallbackResponse();
-      }
-      return NextResponse.json(
-        { ok: false, error: WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR },
-        { status: 503 },
-      );
+      return storageUnavailableResponse();
     }
 
     const listUrl = buildSupabaseStorageListUrl(config.url, bucket);
@@ -155,7 +150,7 @@ export async function GET(request: NextRequest) {
       });
 
       if (!res.ok) {
-        return NextResponse.json({ error: "Failed to list storage files" }, { status: res.status });
+        return NextResponse.json({ error: "storage_unavailable" }, { status: res.status });
       }
 
       const data = (await res.json()) as SupabaseStorageFile[];
@@ -173,10 +168,10 @@ export async function GET(request: NextRequest) {
           ),
         }));
 
-      return NextResponse.json(formatted);
+      return storageListResponse(formatted);
     } catch (err) {
       console.error("Error in storage proxy:", err);
-      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+      return NextResponse.json({ error: "storage_unavailable" }, { status: 500 });
     }
   }
 }

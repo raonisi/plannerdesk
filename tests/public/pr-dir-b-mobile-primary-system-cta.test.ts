@@ -59,7 +59,10 @@ describe("PR-DIR-B mobile primary system CTA enhancement", () => {
     const cta = read("components/directory/insurer-system-portal-primary-cta.tsx");
     assert.match(cta, /systemLinks\.primary/);
     assert.match(cta, /DIRECTORY_SYSTEM_PORTAL_UNAVAILABLE_LABEL/);
-    assert.match(cta, /aria-disabled="true"/);
+    assert.match(cta, /type="button"/);
+    assert.match(cta, /disabled/);
+    assert.doesNotMatch(cta, /aria-disabled/);
+    assert.doesNotMatch(cta, /role="status"/);
     assert.doesNotMatch(cta, /href=\{systemLinks\.primary\}[\s\S]*?: null/);
     assert.doesNotMatch(
       cta,

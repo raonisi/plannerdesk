@@ -40,6 +40,11 @@ import {
   filterPublicWorkToolGroups,
   isWorkToolIdPublicVisible,
 } from "@/lib/work-tools/work-tools-registry";
+import {
+  isWorkToolsStoragePublicUrl,
+  WORK_TOOLS_STORAGE_EMPTY_MESSAGE,
+  WORK_TOOLS_STORAGE_LOAD_ERROR,
+} from "@/lib/work-tools/storage-public-copy";
 
 const HIRA_HOSPITAL_PHARMACY_URL =
   `https://www.hira.or.kr/${"dum" + "my"}/${"dum" + "my"}.do?pgmid=HIRAA030002000000`;
@@ -2823,6 +2828,7 @@ function FolderDownloadModal({
   const [files, setFiles] = useState<StorageFileItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
 
   const hf = (url: string) => {
     const t = url.replace(/^\/+/, "").replace(/\/+$/, "");
@@ -2838,6 +2844,7 @@ function FolderDownloadModal({
       if (active) {
         setIsLoading(true);
         setError(null);
+        setEmptyMessage(null);
         setFiles([]);
       }
     });
@@ -2847,29 +2854,44 @@ function FolderDownloadModal({
 
     fetch(`/api/work-tools/storage?${params.toString()}`)
       .then(async (res) => {
+        const data = await res.json().catch(() => null);
         if (!res.ok) {
-          const data = await res.json().catch(() => null);
-          if (data?.error === "storage_not_configured") {
-            throw new Error("STORAGE_NOT_CONFIGURED");
+          if (
+            data?.error === "storage_not_configured" ||
+            data?.status === "unavailable"
+          ) {
+            return { unavailable: true as const, items: [] as StorageFileItem[] };
           }
-          throw new Error("Failed to fetch storage files");
+          throw new Error("load_failed");
         }
-        return res.json();
+        const rawItems = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.items)
+            ? data.items
+            : [];
+        const items = rawItems.filter(
+          (file: StorageFileItem) =>
+            file?.name && isWorkToolsStoragePublicUrl(file.public_url),
+        );
+        return { unavailable: false as const, items };
       })
-      .then((data) => {
+      .then((result) => {
         if (active) {
-          setFiles(data);
+          if (result.unavailable) {
+            setFiles([]);
+            setEmptyMessage(WORK_TOOLS_STORAGE_EMPTY_MESSAGE);
+            setError(null);
+          } else {
+            setFiles(result.items);
+            setEmptyMessage(null);
+          }
           setIsLoading(false);
         }
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         if (active) {
-          if (err.message === "STORAGE_NOT_CONFIGURED") {
-            setError("스토리지 환경 변수(WORK_TOOLS_FIREBASE_BUCKET)가 설정되지 않았습니다. (.env 확인 필요)");
-          } else {
-            setError("파일 목록을 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
-          }
+          setError(WORK_TOOLS_STORAGE_LOAD_ERROR);
+          setEmptyMessage(null);
           setIsLoading(false);
         }
       });
@@ -2924,8 +2946,8 @@ function FolderDownloadModal({
               <span>{error}</span>
             </div>
           ) : files.length === 0 ? (
-            <div className="py-12 text-center text-sm text-slate-500 border border-dashed border-slate-200 bg-slate-50/40 rounded-xl">
-              등록된 파일이 없습니다.
+            <div className="py-12 text-center text-sm text-slate-500 border border-dashed border-slate-200 bg-slate-50/40 rounded-xl break-keep px-4">
+              {emptyMessage ?? "등록된 파일이 없습니다."}
             </div>
           ) : (
             <ul className="space-y-2">
