@@ -16,7 +16,7 @@ import {
   Sparkles,
   Wrench,
 } from "lucide-react";
-import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
+import { ResponsiveCategoryFilter } from "@/components/launcher/responsive-category-filter";
 import { SectionHeader } from "@/components/launcher/section-header";
 import { ToolCard } from "@/components/launcher/tool-card";
 import { ToolAccordionCard } from "@/components/launcher/tool-accordion-card";
@@ -662,6 +662,13 @@ export function WorkToolsClient() {
     .map((id) => findPrimaryTool(id as ToolId))
     .filter((tool): tool is ToolItem => Boolean(tool));
 
+  const totalToolCount = allTools().length;
+
+  const resetWorkToolFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+  };
+
   return (
     <div className="space-y-10 pb-6">
       <section className="space-y-5">
@@ -676,11 +683,17 @@ export function WorkToolsClient() {
             value={searchQuery}
           />
         </label>
-        <CategoryPillBar
+        <ResponsiveCategoryFilter
           ariaLabel="업무 도구 카테고리"
           categories={WORK_TOOL_CATEGORIES}
+          onReset={resetWorkToolFilters}
           onSelect={setSelectedCategory}
+          resultNoun="도구"
+          searchQuery={searchQuery}
+          selectId="work-tools-category-filter"
           selectedId={selectedCategory}
+          totalCount={totalToolCount}
+          visibleCount={filteredTools.length}
         />
       </section>
 

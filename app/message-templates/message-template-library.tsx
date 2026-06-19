@@ -7,6 +7,7 @@ import {
   SearchBar,
   formatVerifiedDate,
 } from "@/components/content-page";
+import { ResponsiveCategoryFilter } from "@/components/launcher/responsive-category-filter";
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { CopyToast } from "@/components/ui/copy-toast";
 import type { PublicMessageTemplate } from "@/lib/public/message-templates";
@@ -164,6 +165,16 @@ export function MessageTemplateLibrary({
     [filteredTemplates, favorites],
   );
 
+  const resetMessageFilters = useCallback(() => {
+    setQuery("");
+    setCategory("all");
+    setChannel("all");
+    setAudience("all");
+    setTone("all");
+    setRisk("all");
+    setUseCaseQuery("");
+  }, []);
+
   const groups = publicMessageCategoryOrder
     .map((categoryKey) => ({
       category: categoryKey,
@@ -227,11 +238,17 @@ export function MessageTemplateLibrary({
         <div>
           <p className={sectionEyebrow}>카테고리</p>
           <div className="mt-2">
-            <CategoryPillBar
+            <ResponsiveCategoryFilter
               ariaLabel="카테고리 필터"
               categories={publicMessageCategoryFilterTabs}
+              onReset={resetMessageFilters}
               onSelect={(id) => setCategory(id as PublicMessageCategoryFilterId)}
+              resultNoun="고객 안내 문구"
+              searchQuery={query}
+              selectId="message-templates-category-filter"
               selectedId={category}
+              totalCount={templates.length}
+              visibleCount={filteredTemplates.length}
             />
           </div>
         </div>
@@ -257,39 +274,127 @@ export function MessageTemplateLibrary({
             >
               <div>
                 <p className="mb-2 text-xs text-[#5B6470]">채널</p>
-                <CategoryPillBar
-                  ariaLabel="채널"
-                  categories={channelFilterOptions}
-                  onSelect={(id) => setChannel(id as PublicMessageChannelFilter)}
-                  selectedId={channel}
-                />
+                <div className="lg:hidden">
+                  <label className="sr-only" htmlFor="message-channel-filter">
+                    채널
+                  </label>
+                  <select
+                    id="message-channel-filter"
+                    aria-label="채널"
+                    value={channel}
+                    onChange={(event) =>
+                      setChannel(event.target.value as PublicMessageChannelFilter)
+                    }
+                    className="min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm font-semibold text-[#0F1D2E] outline-none focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
+                  >
+                    {channelFilterOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hidden lg:block">
+                  <CategoryPillBar
+                    ariaLabel="채널"
+                    categories={channelFilterOptions}
+                    onSelect={(id) => setChannel(id as PublicMessageChannelFilter)}
+                    selectedId={channel}
+                  />
+                </div>
               </div>
               <div>
                 <p className="mb-2 text-xs text-[#5B6470]">대상 고객</p>
-                <CategoryPillBar
-                  ariaLabel="대상 고객"
-                  categories={audienceFilterOptions}
-                  onSelect={(id) => setAudience(id as PublicMessageAudienceFilter)}
-                  selectedId={audience}
-                />
+                <div className="lg:hidden">
+                  <label className="sr-only" htmlFor="message-audience-filter">
+                    대상 고객
+                  </label>
+                  <select
+                    id="message-audience-filter"
+                    aria-label="대상 고객"
+                    value={audience}
+                    onChange={(event) =>
+                      setAudience(event.target.value as PublicMessageAudienceFilter)
+                    }
+                    className="min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm font-semibold text-[#0F1D2E] outline-none focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
+                  >
+                    {audienceFilterOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hidden lg:block">
+                  <CategoryPillBar
+                    ariaLabel="대상 고객"
+                    categories={audienceFilterOptions}
+                    onSelect={(id) => setAudience(id as PublicMessageAudienceFilter)}
+                    selectedId={audience}
+                  />
+                </div>
               </div>
               <div>
                 <p className="mb-2 text-xs text-[#5B6470]">톤</p>
-                <CategoryPillBar
-                  ariaLabel="톤"
-                  categories={toneFilterOptions}
-                  onSelect={(id) => setTone(id as PublicMessageToneFilter)}
-                  selectedId={tone}
-                />
+                <div className="lg:hidden">
+                  <label className="sr-only" htmlFor="message-tone-filter">
+                    톤
+                  </label>
+                  <select
+                    id="message-tone-filter"
+                    aria-label="톤"
+                    value={tone}
+                    onChange={(event) =>
+                      setTone(event.target.value as PublicMessageToneFilter)
+                    }
+                    className="min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm font-semibold text-[#0F1D2E] outline-none focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
+                  >
+                    {toneFilterOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hidden lg:block">
+                  <CategoryPillBar
+                    ariaLabel="톤"
+                    categories={toneFilterOptions}
+                    onSelect={(id) => setTone(id as PublicMessageToneFilter)}
+                    selectedId={tone}
+                  />
+                </div>
               </div>
               <div>
                 <p className="mb-2 text-xs text-[#5B6470]">위험도</p>
-                <CategoryPillBar
-                  ariaLabel="위험도"
-                  categories={riskFilterOptions}
-                  onSelect={(id) => setRisk(id as PublicMessageRiskFilter)}
-                  selectedId={risk}
-                />
+                <div className="lg:hidden">
+                  <label className="sr-only" htmlFor="message-risk-filter">
+                    위험도
+                  </label>
+                  <select
+                    id="message-risk-filter"
+                    aria-label="위험도"
+                    value={risk}
+                    onChange={(event) =>
+                      setRisk(event.target.value as PublicMessageRiskFilter)
+                    }
+                    className="min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm font-semibold text-[#0F1D2E] outline-none focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
+                  >
+                    {riskFilterOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="hidden lg:block">
+                  <CategoryPillBar
+                    ariaLabel="위험도"
+                    categories={riskFilterOptions}
+                    onSelect={(id) => setRisk(id as PublicMessageRiskFilter)}
+                    selectedId={risk}
+                  />
+                </div>
               </div>
               <label className="block text-xs text-[#5B6470]">
                 사용 상황
@@ -303,13 +408,6 @@ export function MessageTemplateLibrary({
             </div>
           ) : null}
         </div>
-
-        <p className="text-sm text-[#5B6470]">
-          <span className="font-bold text-[#0F1D2E]">
-            {filteredTemplates.length}
-          </span>
-          개 고객 안내 문구
-        </p>
       </section>
 
       {favoriteItems.length > 0 && !query && category === "all" ? (
