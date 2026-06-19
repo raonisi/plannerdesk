@@ -47,6 +47,14 @@ export function buildClaimLibraryItems(
   return applyClaimPdfGovernanceOverlay(items, pdfGovernanceOverlay);
 }
 
+/** SSOT public count — same list as ClaimDocumentExplorer `allItems` before filters. */
+export function countPublicClaimLibraryItems(
+  guideDocuments: PublicClaimDocument[],
+  pdfGovernanceOverlay?: PublicClaimPdfGovernanceOverlay | null,
+): number {
+  return buildClaimLibraryItems(guideDocuments, pdfGovernanceOverlay).length;
+}
+
 export function getClaimItemsForInsurer(
   insurer: { id: string; name: string },
   allItems: ClaimLibraryItem[],

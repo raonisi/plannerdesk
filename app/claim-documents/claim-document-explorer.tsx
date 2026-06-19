@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { EmptyState, CollapsibleNotice } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import {
@@ -27,24 +26,24 @@ const EMPTY_SEARCH_MESSAGE =
 
 export function ClaimDocumentExplorer({
   documents,
+  initialInsurerKey = null,
+  initialSearchQuery = null,
   plannerFavoritesEnabled = false,
   pdfGovernanceOverlay,
 }: {
   documents: PublicClaimDocument[];
+  initialInsurerKey?: string | null;
+  initialSearchQuery?: string | null;
   plannerFavoritesEnabled?: boolean;
   pdfGovernanceOverlay?: PublicClaimPdfGovernanceOverlay | null;
 }) {
-  const searchParams = useSearchParams();
-  const insurerFromQuery = searchParams.get("insurer");
-  const searchFromQuery = searchParams.get("search");
-
-  const [query, setQuery] = useState(() => searchFromQuery ?? "");
+  const [query, setQuery] = useState(() => initialSearchQuery ?? "");
   const [category, setCategory] = useState<string>("all");
   const [status, setStatus] = useState<string>("all");
   const [documentNature, setDocumentNature] = useState<string>("all");
   const [marketSegment, setMarketSegment] = useState<string>("all");
   const [selectedInsurerKey, setSelectedInsurerKey] = useState(
-    () => insurerFromQuery ?? "all",
+    () => initialInsurerKey ?? "all",
   );
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => new Set());
 

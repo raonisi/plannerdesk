@@ -9,10 +9,10 @@ import {
   PageHero,
 } from "@/components/content-page";
 import { getWorkToolsAccess } from "@/lib/auth/access";
-import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
 import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
 import { getPublicInsurers } from "@/lib/public/insurers";
+import { resolveVisiblePublicClaimDocuments } from "@/lib/public/public-surface-resolvers";
 import { DIRECTORY_PUBLIC_GLOBAL_NOTICE } from "@/lib/directory/public-directory-surface";
 import { DirectoryExplorer } from "./directory-explorer";
 import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
@@ -51,10 +51,7 @@ export default async function DirectoryPage() {
     safeGetPublicClaimPdfGovernanceOverlay(),
   ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
-  const claimDocuments =
-    claimResult.status === "ok" && claimResult.data.length > 0
-      ? claimResult.data
-      : claimDocumentCandidateFallback;
+  const claimDocuments = resolveVisiblePublicClaimDocuments(claimResult).items;
 
   return (
     <AppShell>

@@ -3,6 +3,8 @@
  * Admin-only surfaces stay on /admin; unfinished tools are omitted (not disabled).
  */
 
+import { WORK_TOOL_CATALOG_IDS } from "@/lib/work-tools/work-tool-catalog";
+
 export type WorkToolStatus =
   | "complete"
   | "ready"
@@ -81,4 +83,9 @@ export function listHiddenWorkToolIds(allIds: string[]): string[] {
 
 export function listPublicWorkToolIds(allIds: string[]): string[] {
   return allIds.filter((id) => isWorkToolIdPublicVisible(id));
+}
+
+/** Count of Work Tools panels visible on /work-tools (registry-filtered). */
+export function countPublicWorkTools(): number {
+  return listPublicWorkToolIds([...WORK_TOOL_CATALOG_IDS]).length;
 }
