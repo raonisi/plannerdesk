@@ -21,10 +21,10 @@ import {
 } from "@/lib/directory/insurer-card-ui";
 
 const primaryButtonClass =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25";
+  "inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35";
 
 const secondaryButtonClass =
-  "inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-[#B9975B] hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25";
+  "inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-[#B9975B] hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35";
 
 const disabledButtonClass =
   "inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-400";
@@ -160,10 +160,10 @@ export function ClaimFormListItem({
           <div className="min-w-0 flex-1">
             {variant === "default" ? (
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500">
+                <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
                   {categoryLabel}
                 </span>
-                <span className="rounded-md border border-[#e3ded4] bg-[#f8f7f3] px-2.5 py-1 text-[11px] font-semibold text-[#5B6470]">
+                <span className="rounded-md border border-[#e3ded4] bg-[#f8f7f3] px-2.5 py-1 text-[11px] font-semibold text-[#4A5565]">
                   PDF
                 </span>
               </div>
@@ -186,9 +186,9 @@ export function ClaimFormListItem({
             ) : null}
             {variant === "default" ? (
               <>
-                <p className="mt-1 break-all text-xs text-[#5B6470]">{item.fileName}</p>
+                <p className="mt-1 break-all text-xs text-[#4A5565]">{item.fileName}</p>
                 {trustHint ? (
-                  <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
+                  <p className="mt-2 text-xs font-medium text-[#4A5565]">{trustHint}</p>
                 ) : null}
                 <DataFreshnessMeta
                   className="mt-2"
@@ -197,7 +197,7 @@ export function ClaimFormListItem({
                   showClaimNotice
                   verificationStatus={status}
                 />
-                <p className="mt-2 break-keep text-xs leading-5 text-[#5B6470]">
+                <p className="mt-2 break-keep text-xs leading-5 text-[#4A5565]">
                   {item.cautionText}
                 </p>
               </>
@@ -275,12 +275,12 @@ export function ClaimFormListItem({
             {title}
           </p>
           {doc.summary ? (
-            <p className="mt-1 break-keep text-sm leading-6 text-slate-500">
+            <p className="mt-1 break-keep text-sm leading-6 text-slate-600">
               {doc.summary}
             </p>
           ) : null}
           {trustHint ? (
-            <p className="mt-2 text-xs font-medium text-[#5B6470]">{trustHint}</p>
+            <p className="mt-2 text-xs font-medium text-[#4A5565]">{trustHint}</p>
           ) : null}
           <DataFreshnessMeta
             className="mt-2"
@@ -301,7 +301,7 @@ export function ClaimFormListItem({
             </ExternalTabAnchor>
           ) : (
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-bold !text-white shadow-md transition-all hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-bold !text-white shadow-md transition-all hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
               href="/claim-documents"
             >
               전체 청구서류 검색

@@ -17,7 +17,7 @@ export type DataFreshnessMetaProps = {
 };
 
 const metaTextClass =
-  "text-[11px] font-medium leading-relaxed text-[#5B6470]";
+  "text-[11px] font-medium leading-relaxed text-[#4A5565]";
 const badgeClass =
   "inline-flex min-h-6 items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold";
 
@@ -70,7 +70,7 @@ export function DataFreshnessMeta({
             {source.label}
           </ExternalTabAnchor>
         ) : (
-          <span className={`${badgeClass} border-[#E3DED4] bg-[#F8F7F3] text-[#5B6470]`}>
+          <span className={`${badgeClass} border-[#E3DED4] bg-[#F8F7F3] text-[#4A5565]`}>
             {DATA_FRESHNESS_COPY.missingSource}
           </span>
         )}

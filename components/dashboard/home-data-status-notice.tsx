@@ -63,7 +63,7 @@ export function HomeDataStatusNotice({
       role="status"
     >
       <p className="break-keep text-sm font-bold text-[#0F1D2E]">{content.title}</p>
-      <p className="mt-2 break-keep text-sm leading-relaxed text-[#5B6470]">
+      <p className="mt-2 break-keep text-sm leading-relaxed text-[#4A5565]">
         {content.description}
       </p>
       {showQuickLinks ? (

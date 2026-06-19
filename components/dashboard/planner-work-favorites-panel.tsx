@@ -236,7 +236,7 @@ export function PlannerWorkFavoritesPanel({
                 className="inline-flex min-h-9 max-w-full items-center gap-2 rounded-lg border border-[#E3DED4] bg-white px-3 py-1.5 text-xs font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
               >
                 <span className="truncate">{chip.label}</span>
-                <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#5B6470]">
+                <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A5565]">
                   {kindLabel[chip.kind]}
                 </span>
               </Link>

@@ -97,36 +97,36 @@ export default async function DirectoryPage() {
             role="note"
           >
             <h3 className="text-base font-bold text-[#0F1D2E]">관련 업무 바로가기</h3>
-            <p className="mt-1 break-keep text-sm text-[#5B6470]">
+            <p className="mt-1 break-keep text-sm text-[#4A5565]">
               {t.moduleDescription}
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Link
-                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
                 href="/claim-documents"
               >
                 <span className="text-sm font-bold text-[#0F1D2E]">{t.claim}</span>
-                <span className="mt-1 text-xs text-[#5B6470] break-keep">{t.claimDesc}</span>
+                <span className="mt-1 text-xs text-[#4A5565] break-keep">{t.claimDesc}</span>
               </Link>
               <Link
-                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
                 href="/disclosure-links"
               >
                 <span className="text-sm font-bold text-[#0F1D2E]">{t.disclosure}</span>
-                <span className="mt-1 text-xs text-[#5B6470] break-keep">{t.disclosureDesc}</span>
+                <span className="mt-1 text-xs text-[#4A5565] break-keep">{t.disclosureDesc}</span>
               </Link>
               <Link
-                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+                className="flex min-h-[5.5rem] flex-col rounded-lg border border-[#E3DED4] bg-white p-4 transition hover:border-[#B9975B] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
                 href="/message-templates"
               >
                 <span className="text-sm font-bold text-[#0F1D2E]">고객 안내문 확인</span>
-                <span className="mt-1 text-xs text-[#5B6470] break-keep">
+                <span className="mt-1 text-xs text-[#4A5565] break-keep">
                   상황별 안내 문구 복사
                 </span>
               </Link>
               <WorkToolsPlannerNoticeCard />
             </div>
-            <p className="mt-4 break-keep text-xs leading-relaxed text-[#5B6470]">
+            <p className="mt-4 break-keep text-xs leading-relaxed text-[#4A5565]">
               보험사별 링크와 연락처는 공식 출처 기준으로 확인 후 사용하세요.
               PlannerDesk는 보험금 지급 여부와 지급 금액을 판단하지 않습니다.
               고객 개인정보와 의료자료는 PlannerDesk에 입력하지 마세요.

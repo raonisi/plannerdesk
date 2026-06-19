@@ -44,7 +44,7 @@ export function ResponsiveCategoryFilter({
     <div className="space-y-2">
       <div className="lg:hidden">
         <label className="block" htmlFor={selectId}>
-          <span className="text-xs font-bold text-[#5B6470]">{ariaLabel}</span>
+          <span className="text-xs font-bold text-[#4A5565]">{ariaLabel}</span>
           <select
             id={selectId}
             aria-label={ariaLabel}
@@ -64,7 +64,7 @@ export function ResponsiveCategoryFilter({
           className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#E3DED4]/80 bg-[#F8F7F3] px-3 py-2"
           aria-live="polite"
         >
-          <div className="min-w-0 text-sm text-[#5B6470]">
+          <div className="min-w-0 text-sm text-[#4A5565]">
             <p>
               <span className="font-bold text-[#0F1D2E]">선택한 카테고리:</span>{" "}
               {selectedLabel}
@@ -100,7 +100,7 @@ export function ResponsiveCategoryFilter({
           selectedId={selectedId}
         />
         <div
-          className="flex flex-wrap items-center justify-between gap-2 text-sm text-[#5B6470]"
+          className="flex flex-wrap items-center justify-between gap-2 text-sm text-[#4A5565]"
           aria-live="polite"
         >
           <p>

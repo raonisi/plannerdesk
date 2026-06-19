@@ -55,7 +55,7 @@ export function InsurerClaimGroup({
           <button
             aria-controls={panelId}
             aria-expanded={isExpanded}
-            className="flex min-h-11 w-full items-center gap-3 rounded-lg text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+            className="flex min-h-11 w-full items-center gap-3 rounded-lg text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
             id={buttonId}
             onClick={onToggle}
             type="button"
@@ -64,7 +64,7 @@ export function InsurerClaimGroup({
               <span className="block break-keep text-lg font-bold leading-snug text-[#0F1D2E]">
                 {group.label}
               </span>
-              <span className="mt-1 block text-sm font-semibold text-[#5B6470]">
+              <span className="mt-1 block text-sm font-semibold text-[#4A5565]">
                 청구서류 {group.items.length}건
                 {segmentLabel ? ` · ${segmentLabel}` : ""}
               </span>
@@ -86,7 +86,7 @@ export function InsurerClaimGroup({
         <div className="grid gap-2 sm:flex sm:justify-end">
           <button
             aria-label={`${group.label} 고객 안내문 복사`}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#16382C] bg-[#16382C] px-4 text-sm font-bold text-white transition hover:bg-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#16382C] bg-[#16382C] px-4 text-sm font-bold text-white transition hover:bg-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
             onClick={handleCopyNotice}
             title="고객에게 보낼 서류 목록 텍스트를 복사합니다"
             type="button"
@@ -98,7 +98,7 @@ export function InsurerClaimGroup({
                 : "안내문 복사"}
           </button>
           <Link
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
             href={officialGuideHref}
           >
             청구안내 보기
@@ -121,7 +121,7 @@ export function InsurerClaimGroup({
             />
           ))}
         </ul>
-        <p className="border-t border-[#E3DED4] px-4 py-3 text-xs leading-5 text-[#5B6470] break-keep sm:px-5">
+        <p className="border-t border-[#E3DED4] px-4 py-3 text-xs leading-5 text-[#4A5565] break-keep sm:px-5">
           {CLAIM_PDF_CAUTION_TEXT}
         </p>
       </div>

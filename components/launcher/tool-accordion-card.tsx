@@ -50,7 +50,7 @@ export function ToolAccordionCard({
         <h3 className="mt-4 font-bold text-[#0F1D2E] text-sm">
           {title}
         </h3>
-        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#5B6470] break-keep">
+        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#4A5565] break-keep">
           {description}
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5 mb-4">
@@ -58,7 +58,7 @@ export function ToolAccordionCard({
             {typeLabel}
           </span>
           {categoryLabel ? (
-            <span className="rounded-md border border-[#E3DED4] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#5B6470]">
+            <span className="rounded-md border border-[#E3DED4] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#4A5565]">
               {categoryLabel}
             </span>
           ) : null}
@@ -69,10 +69,10 @@ export function ToolAccordionCard({
         <button 
           onClick={() => setIsOpen(!isOpen)} 
           type="button"
-          className="flex w-full items-center justify-between px-4 py-2.5 text-xs font-bold text-[#0F1D2E] hover:bg-[#E3DED4]/50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+          className="flex w-full items-center justify-between px-4 py-2.5 text-xs font-bold text-[#0F1D2E] hover:bg-[#E3DED4]/50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
         >
           <span>월별 자료 보기</span>
-          <svg className={`w-4 h-4 text-[#5B6470] transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className={`w-4 h-4 text-[#4A5565] transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </button>

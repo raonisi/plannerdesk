@@ -236,13 +236,13 @@ export function ClaimDocumentExplorer({
             />
             <div className="flex flex-wrap justify-center gap-3">
               <Link
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
                 href="/directory"
               >
                 보험사 디렉터리
               </Link>
               <Link
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
                 href="/search"
               >
                 통합 검색
@@ -252,7 +252,7 @@ export function ClaimDocumentExplorer({
             <div className="flex justify-center">
               <button
                 aria-label="검색어 및 필터 초기화"
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
                 onClick={resetFilters}
                 type="button"
               >

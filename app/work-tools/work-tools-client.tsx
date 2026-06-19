@@ -633,7 +633,7 @@ export function WorkToolsClient() {
       case "external":
         return <ExternalLink className="h-5 w-5 text-[#16382C]" />;
       default:
-        return <Wrench className="h-5 w-5 text-[#5B6470]" />;
+        return <Wrench className="h-5 w-5 text-[#4A5565]" />;
     }
   };
 
@@ -766,7 +766,7 @@ export function WorkToolsClient() {
                       <h3 className="mt-1 text-lg font-bold text-[#0F1D2E]">
                         월별 보험사 소식지
                       </h3>
-                      <p className="mt-1 break-keep text-sm leading-6 text-[#5B6470]">
+                      <p className="mt-1 break-keep text-sm leading-6 text-[#4A5565]">
                         상품 개정, 인수 기준, 교육자료를 상담 전 빠르게 확인하세요.
                       </p>
                     </div>
@@ -786,7 +786,7 @@ export function WorkToolsClient() {
                         key={item.href}
                         type="button"
                         onClick={() => openFolder(newsletterTool, item.href, item.label)}
-                        className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 ${
+                        className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 ${
                           index < 2
                             ? "border-[#0F1D2E] bg-[#0F1D2E] text-white hover:bg-[#17202A]"
                             : "border-[#E3DED4] bg-[#F8F7F3] text-[#0F1D2E] hover:border-[#B9975B]"
@@ -874,7 +874,7 @@ export function WorkToolsClient() {
                       <Sparkles className="w-5 h-5 text-indigo-500" />
                       {group.title}
                     </h3>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm text-slate-600 mt-1">
                       {group.description}
                     </p>
                   </div>
@@ -950,7 +950,7 @@ export function WorkToolsClient() {
               type="button"
               aria-label="실행 화면 닫기"
               onClick={() => setActiveTool(null)}
-              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-500 transition hover:border-slate-300 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:border-slate-300 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
             >
               닫기
             </button>
@@ -964,7 +964,7 @@ export function WorkToolsClient() {
       {/* 6. 접이식 안전 안내 */}
       <aside className="rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5">
         <h2 className="text-[11px] font-bold tracking-[0.12em] text-[#B9975B]">주의 사항 및 안전 안내</h2>
-        <p className="mt-2 text-xs leading-relaxed text-[#5B6470] break-keep">
+        <p className="mt-2 text-xs leading-relaxed text-[#4A5565] break-keep">
           계산 및 검색 결과는 설계사 업무 참고 가이드라인입니다. 보험금 지급 여부, 지급 금액, 손해사정, 진단서 해석을 결정하지 않습니다. PlannerDesk는 조회 결과를 저장하지 않으며, 고객 개인정보와 의료자료를 처리하지 않습니다. 개인정보나 민감한 질병 자료 원본은 절대 입력하지 않도록 주의해 주세요.
         </p>
       </aside>
@@ -998,7 +998,7 @@ function PrimaryDeskPanel({
         </span>
         <div>
           <h3 className="text-base font-bold text-[#0F1D2E]">{title}</h3>
-          <p className="mt-1 break-keep text-xs leading-relaxed text-[#5B6470]">
+          <p className="mt-1 break-keep text-xs leading-relaxed text-[#4A5565]">
             {description}
           </p>
         </div>
@@ -1034,13 +1034,13 @@ function PrimaryDeskButton({
       <button
         type="button"
         onClick={onSelect}
-        className="flex min-w-0 flex-1 flex-col justify-center rounded-lg px-2 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+        className="flex min-w-0 flex-1 flex-col justify-center rounded-lg px-2 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
       >
         <span className="break-keep text-sm font-bold leading-5 text-[#0F1D2E]">
           {label}
         </span>
         {meta ? (
-          <span className="mt-0.5 text-[11px] font-semibold text-[#5B6470]">
+          <span className="mt-0.5 text-[11px] font-semibold text-[#4A5565]">
             {meta}
           </span>
         ) : null}

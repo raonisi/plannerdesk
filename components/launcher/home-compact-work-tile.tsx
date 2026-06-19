@@ -30,7 +30,7 @@ export function HomeCompactWorkTile({
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-[#0F1D2E]">{title}</p>
-        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-[#5B6470]">
+        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-[#4A5565]">
           {description}
         </p>
       </div>

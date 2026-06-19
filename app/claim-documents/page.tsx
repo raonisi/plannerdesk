@@ -90,28 +90,28 @@ export default async function ClaimDocumentsPage({
 
           <div className="mt-8 rounded-xl border border-[#E3DED4] bg-[#F8F7F3] p-5 sm:p-6">
             <h3 className="text-base font-bold text-[#0F1D2E]">관련 업무 바로가기</h3>
-            <p className="mt-1 text-sm text-[#5B6470] break-keep">청구서류 확인 후 다음 단계 실무를 빠르게 진행하세요.</p>
+            <p className="mt-1 text-sm text-[#4A5565] break-keep">청구서류 확인 후 다음 단계 실무를 빠르게 진행하세요.</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Link
                 href="/message-templates"
                 className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
               >
                 <span className="text-sm font-bold text-[#0F1D2E]">고객 안내문 작성</span>
-                <span className="mt-1 text-xs text-[#5B6470]">청구 안내 문구 복사</span>
+                <span className="mt-1 text-xs text-[#4A5565]">청구 안내 문구 복사</span>
               </Link>
               <Link
                 href="/directory"
                 className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
               >
                 <span className="text-sm font-bold text-[#0F1D2E]">보험사 연락처</span>
-                <span className="mt-1 text-xs text-[#5B6470]">콜센터·팩스번호 조회</span>
+                <span className="mt-1 text-xs text-[#4A5565]">콜센터·팩스번호 조회</span>
               </Link>
               <Link
                 href="/disclosure-links"
                 className="flex flex-col rounded-lg border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:shadow-sm"
               >
                 <span className="text-sm font-bold text-[#0F1D2E]">공시·약관 확인</span>
-                <span className="mt-1 text-xs text-[#5B6470]">공식 약관 원문 연결</span>
+                <span className="mt-1 text-xs text-[#4A5565]">공식 약관 원문 연결</span>
               </Link>
               <WorkToolsPlannerNoticeCard />
             </div>
@@ -125,10 +125,10 @@ export default async function ClaimDocumentsPage({
 function ClaimPracticeNotice() {
   return (
     <details className="group rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 [&::-webkit-details-marker]:hidden">
         <div>
           <p className="text-sm font-bold text-[#0F1D2E]">실무 참고 기준</p>
-          <p className="mt-1 break-keep text-sm leading-6 text-[#5B6470]">
+          <p className="mt-1 break-keep text-sm leading-6 text-[#4A5565]">
             필요할 때만 펼쳐 확인하는 청구서류 안내 기준입니다.
           </p>
         </div>
@@ -139,7 +139,7 @@ function ClaimPracticeNotice() {
           접기
         </span>
       </summary>
-      <ul className="mt-4 space-y-2 border-t border-[#E3DED4] pt-4 text-sm leading-6 text-[#5B6470]">
+      <ul className="mt-4 space-y-2 border-t border-[#E3DED4] pt-4 text-sm leading-6 text-[#4A5565]">
         <li>보험금 지급 여부는 보험사 심사 결과에 따라 달라집니다.</li>
         <li>지급 금액을 단정하거나 예상 금액을 안내하지 않습니다.</li>
         <li>청구서류와 접수 기준은 보험사 공식 안내를 최종 확인합니다.</li>

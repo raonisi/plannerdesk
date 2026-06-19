@@ -115,7 +115,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
               className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-5 py-4"
             >
               <section aria-label="빠른 이동" className="mb-6">
-                <h3 className="mb-3 text-xs font-bold tracking-wide text-[#5B6470]">
+                <h3 className="mb-3 text-xs font-bold tracking-wide text-[#4A5565]">
                   빠른 이동
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -134,7 +134,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
 
               {mobileDrawerGroups.map((group) => (
                 <section className="mb-6" key={group.title}>
-                  <h3 className="mb-2 text-xs font-bold tracking-wide text-[#5B6470]">
+                  <h3 className="mb-2 text-xs font-bold tracking-wide text-[#4A5565]">
                     {group.title}
                   </h3>
                   <ul className="space-y-1">
@@ -157,7 +157,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
             <footer className="border-t border-[#E3DED4] bg-[#F8F7F3] px-5 py-4">
               {drawerFooterNotices.map((line) => (
                 <p
-                  className="break-keep text-xs leading-relaxed text-[#5B6470]"
+                  className="break-keep text-xs leading-relaxed text-[#4A5565]"
                   key={line}
                 >
                   {line}
@@ -186,14 +186,14 @@ function DrawerHeader({
         <p className="text-lg font-bold leading-tight text-[#0F1D2E]" id={titleId}>
           {uiLabels.brand}
         </p>
-        <p className="mt-1 break-keep text-xs font-semibold leading-5 text-[#5B6470]">
+        <p className="mt-1 break-keep text-xs font-semibold leading-5 text-[#4A5565]">
           {uiLabels.brandTagline}
         </p>
       </div>
       <button
         ref={closeButtonRef}
         aria-label={uiLabels.mobileMenuClose}
-        className={`${touchTargets.iconButton} shrink-0 text-[#5B6470] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]`}
+        className={`${touchTargets.iconButton} shrink-0 text-[#4A5565] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]`}
         onClick={onClose}
         type="button"
       >
@@ -217,7 +217,7 @@ function QuickActionLink({
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-3 py-2 text-center text-sm font-bold leading-snug transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+      className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-3 py-2 text-center text-sm font-bold leading-snug transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
         isActive ? buttons.mobileActive : buttons.mobileIdle
       }`}
       href={href}
@@ -242,7 +242,7 @@ function DrawerNavLink({
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className={`flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+      className={`flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
         isActive ? buttons.navActive : buttons.navIdle
       }`}
       href={href}

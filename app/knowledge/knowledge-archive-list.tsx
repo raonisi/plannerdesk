@@ -198,7 +198,7 @@ export function KnowledgeArchiveList({
             <span className="text-sm font-semibold text-[#303845]">검색</span>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
               <input
-                className="min-h-12 min-w-0 flex-1 rounded-xl border border-[#E3DED4] bg-white px-4 text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470] focus:ring-2 focus:ring-[#B9975B]/40"
+                className="min-h-12 min-w-0 flex-1 rounded-xl border border-[#E3DED4] bg-white px-4 text-base font-medium text-[#17202A] outline-none placeholder:text-[#4A5565] focus:ring-2 focus:ring-[#B9975B]/40"
                 defaultValue={filterState.q}
                 id="knowledge-archive-search"
                 maxLength={50}

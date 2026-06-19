@@ -13,7 +13,7 @@ export function EmptyStatePanel({
   return (
     <div className="rounded-xl border border-dashed border-[#E3DED4] bg-[#F7F4EE] p-5">
       <p className="text-sm font-bold text-[#0F1D2E]">{title}</p>
-      <p className="mt-2 text-xs leading-relaxed text-[#5B6470] break-keep">
+      <p className="mt-2 text-xs leading-relaxed text-[#4A5565] break-keep">
         {description}
       </p>
       {actions && actions.length > 0 ? (

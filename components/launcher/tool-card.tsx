@@ -62,7 +62,7 @@ export function ToolCard({
         >
           {title}
         </h3>
-        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#5B6470] break-keep">
+        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#4A5565] break-keep">
           {description}
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -70,7 +70,7 @@ export function ToolCard({
             {typeLabel}
           </span>
           {categoryLabel ? (
-            <span className="rounded-md border border-[#E3DED4] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#5B6470]">
+            <span className="rounded-md border border-[#E3DED4] bg-white px-2 py-0.5 text-[10px] font-semibold text-[#4A5565]">
               {categoryLabel}
             </span>
           ) : null}
@@ -85,7 +85,7 @@ export function ToolCard({
               ? externalLinkAriaLabel(`${title} ${actionLabel}`)
               : `${title} ${actionLabel}`
           }
-          className={`inline-flex min-h-11 w-full items-center justify-center rounded-lg text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+          className={`inline-flex min-h-11 w-full items-center justify-center rounded-lg text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
             kind === "external"
               ? "border border-[#16382C] bg-white text-[#16382C] hover:bg-[#F7F4EE]"
               : "bg-[#0F1D2E] text-white hover:bg-[#17202A]"

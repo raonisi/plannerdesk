@@ -192,7 +192,7 @@ export function HomeClient({
             보험사 전산, 청구서류, 공시·약관을 한곳에서 확인합니다. 상담 전
             확인할 자료를 빠르게 찾습니다.
           </p>
-          <p className={`mt-2 max-w-2xl break-keep text-sm text-[#5B6470]`}>
+          <p className={`mt-2 max-w-2xl break-keep text-sm text-[#4A5565]`}>
             {PUBLIC_WORK_HUB_SEARCH_HINT}
           </p>
 
@@ -201,12 +201,12 @@ export function HomeClient({
               통합 검색
             </label>
             <div className="flex min-h-12 items-center rounded-xl border border-[#E3DED4] bg-white px-4 shadow-md ring-1 ring-[#E3DED4]/80 focus-within:ring-2 focus-within:ring-[#B9975B]/50">
-              <Search aria-hidden className="h-5 w-5 shrink-0 text-[#5B6470]" />
+              <Search aria-hidden className="h-5 w-5 shrink-0 text-[#4A5565]" />
               <input
                 id="home-unified-search"
                 type="search"
                 placeholder="보험사명, 청구서류, 지식, 업무 도구, 고객 문구 검색"
-                className="ml-3 min-w-0 flex-1 bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470]"
+                className="ml-3 min-w-0 flex-1 bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#4A5565]"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -219,7 +219,7 @@ export function HomeClient({
                   type="button"
                   aria-label="검색어 지우기"
                   onClick={() => setSearchQuery("")}
-                  className="ml-2 inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+                  className="ml-2 inline-flex min-h-10 min-w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#4A5565] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
                 >
                   지우기
                 </button>
@@ -254,7 +254,7 @@ export function HomeClient({
                           <p className="truncate text-sm font-bold text-[#0F1D2E]">
                             {res.label}
                           </p>
-                          <p className="mt-0.5 truncate text-xs text-[#5B6470]">
+                          <p className="mt-0.5 truncate text-xs text-[#4A5565]">
                             {res.sub}
                           </p>
                         </div>
@@ -266,7 +266,7 @@ export function HomeClient({
                     ))}
                   </div>
                 ) : (
-                  <div className="px-3 py-4 text-center text-sm text-[#5B6470]">
+                  <div className="px-3 py-4 text-center text-sm text-[#4A5565]">
                     <p>{PUBLIC_WORK_HUB_NO_RESULTS}</p>
                     <Link
                       href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
@@ -302,7 +302,7 @@ export function HomeClient({
           </div>
 
           <details
-            className="mt-4 max-w-2xl rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#5B6470] group"
+            className="mt-4 max-w-2xl rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#4A5565] group"
             role="note"
           >
             <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 break-keep font-medium text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 [&::-webkit-details-marker]:hidden">
@@ -497,10 +497,10 @@ export function HomeClient({
                       <li key={rec.id + rec.href}>
                         <Link
                           href={rec.href}
-                          className="flex min-h-9 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs text-[#5B6470] transition hover:bg-[#F7F4EE] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+                          className="flex min-h-9 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs text-[#4A5565] transition hover:bg-[#F7F4EE] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
                         >
                           <span className="truncate font-medium">{rec.label}</span>
-                          <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#5B6470]">
+                          <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A5565]">
                             {rec.type === "insurer"
                               ? "보험사"
                               : rec.type === "knowledge"

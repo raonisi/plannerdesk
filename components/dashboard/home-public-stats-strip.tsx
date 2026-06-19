@@ -12,7 +12,7 @@ export type { HomePublicStats } from "@/lib/dashboard/home-data-state";
 function renderStatValue(value: HomePublicStats["insurers"]) {
   if (value.kind === "unavailable") {
     return (
-      <p className="mt-0.5 text-sm font-semibold leading-snug text-[#5B6470]">
+      <p className="mt-0.5 text-sm font-semibold leading-snug text-[#4A5565]">
         {HOME_DATA_STATUS_COPY.statUnavailable}
       </p>
     );
@@ -21,7 +21,7 @@ function renderStatValue(value: HomePublicStats["insurers"]) {
   return (
     <p className="mt-0.5 text-xl font-bold tabular-nums text-[#0F1D2E]">
       {value.value}
-      <span className="ml-1 text-xs font-semibold text-[#5B6470]">건</span>
+      <span className="ml-1 text-xs font-semibold text-[#4A5565]">건</span>
     </p>
   );
 }
@@ -40,7 +40,7 @@ export function HomePublicStatsStrip({
         aria-label="공개 콘텐츠 요약"
       >
         <p className={sectionEyebrow}>공개 콘텐츠 요약</p>
-        <p className="mt-3 break-keep text-sm font-semibold text-[#5B6470]">
+        <p className="mt-3 break-keep text-sm font-semibold text-[#4A5565]">
           {HOME_DATA_STATUS_COPY.statUnavailable}
         </p>
         <p className={`mt-2 break-keep ${textStyles.small}`}>
@@ -83,7 +83,7 @@ export function HomePublicStatsStrip({
             key={item.key}
             className="rounded-lg border border-[#E3DED4]/80 bg-[#F7F4EE] px-3 py-2.5"
           >
-            <p className="text-[10px] font-bold uppercase tracking-wide text-[#5B6470]">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-[#4A5565]">
               {item.label}
             </p>
             {renderStatValue(item.value)}
@@ -93,7 +93,7 @@ export function HomePublicStatsStrip({
       <p className={`mt-3 break-keep ${textStyles.small}`}>
         {PUBLIC_WORK_HUB_VISIBILITY_NOTICE}
       </p>
-      <p className={`mt-2 break-keep text-[11px] leading-relaxed text-[#5B6470]`}>
+      <p className={`mt-2 break-keep text-[11px] leading-relaxed text-[#4A5565]`}>
         {PUBLIC_HOME_FRESHNESS_NOTICE}
       </p>
     </section>

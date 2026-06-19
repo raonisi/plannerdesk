@@ -22,7 +22,7 @@ export function FavoriteButton({
         event.stopPropagation();
         onToggle();
       }}
-      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[#C4B8A8] transition hover:text-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${className}`.trim()}
+      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[#C4B8A8] transition hover:text-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${className}`.trim()}
     >
       <Star
         className={`h-4 w-4 ${active ? "fill-[#B9975B] text-[#B9975B]" : ""}`}

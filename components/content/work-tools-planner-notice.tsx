@@ -9,7 +9,7 @@ export function WorkToolsPlannerNotice({
 }) {
   return (
     <p
-      className={`break-keep text-[#5B6470] ${compact ? "text-xs" : "text-sm"} ${className}`}
+      className={`break-keep text-[#4A5565] ${compact ? "text-xs" : "text-sm"} ${className}`}
     >
       {WORK_TOOLS_PLANNER_ACCESS_NOTICE}
     </p>

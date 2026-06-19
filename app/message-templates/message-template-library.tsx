@@ -194,7 +194,7 @@ export function MessageTemplateLibrary({
         <h2 className="text-base font-bold text-[#0F1D2E]">
           선택적 이름 치환 (저장되지 않음)
         </h2>
-        <p className="mt-1 break-keep text-sm text-[#5B6470]">
+        <p className="mt-1 break-keep text-sm text-[#4A5565]">
           문구에 {"{고객명}"}, {"{담당자명}"} placeholder가 있을 때만 치환됩니다.
           복사·표시되는 본문은 고객 안내용 참고 문구입니다.
         </p>
@@ -203,7 +203,7 @@ export function MessageTemplateLibrary({
             <span className="text-xs font-bold text-[#17202A]">고객명 (선택)</span>
             <input
               aria-label="고객명"
-              className="mt-1.5 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none placeholder:text-[#5B6470]/60 focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
+              className="mt-1.5 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none placeholder:text-[#4A5565]/60 focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
               placeholder="예: 홍길동"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
@@ -213,7 +213,7 @@ export function MessageTemplateLibrary({
             <span className="text-xs font-bold text-[#17202A]">설계사명 (선택)</span>
             <input
               aria-label="설계사명"
-              className="mt-1.5 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none placeholder:text-[#5B6470]/60 focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
+              className="mt-1.5 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A] outline-none placeholder:text-[#4A5565]/60 focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/15"
               placeholder="예: 김설계"
               value={plannerName}
               onChange={(e) => setPlannerName(e.target.value)}
@@ -273,7 +273,7 @@ export function MessageTemplateLibrary({
               id="message-advanced-filter"
             >
               <div>
-                <p className="mb-2 text-xs text-[#5B6470]">채널</p>
+                <p className="mb-2 text-xs text-[#4A5565]">채널</p>
                 <div className="lg:hidden">
                   <label className="sr-only" htmlFor="message-channel-filter">
                     채널
@@ -304,7 +304,7 @@ export function MessageTemplateLibrary({
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs text-[#5B6470]">대상 고객</p>
+                <p className="mb-2 text-xs text-[#4A5565]">대상 고객</p>
                 <div className="lg:hidden">
                   <label className="sr-only" htmlFor="message-audience-filter">
                     대상 고객
@@ -335,7 +335,7 @@ export function MessageTemplateLibrary({
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs text-[#5B6470]">톤</p>
+                <p className="mb-2 text-xs text-[#4A5565]">톤</p>
                 <div className="lg:hidden">
                   <label className="sr-only" htmlFor="message-tone-filter">
                     톤
@@ -366,7 +366,7 @@ export function MessageTemplateLibrary({
                 </div>
               </div>
               <div>
-                <p className="mb-2 text-xs text-[#5B6470]">위험도</p>
+                <p className="mb-2 text-xs text-[#4A5565]">위험도</p>
                 <div className="lg:hidden">
                   <label className="sr-only" htmlFor="message-risk-filter">
                     위험도
@@ -396,7 +396,7 @@ export function MessageTemplateLibrary({
                   />
                 </div>
               </div>
-              <label className="block text-xs text-[#5B6470]">
+              <label className="block text-xs text-[#4A5565]">
                 사용 상황
                 <input
                     className="mt-1 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#17202A]"
@@ -506,10 +506,10 @@ function TemplateCard({
             <span className="rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-2 py-0.5 text-[10px] font-bold text-[#16382C]">
               {publicMessageCategoryLabels[template.category]}
             </span>
-            <span className="rounded-md border border-[#E3DED4] bg-[#F8F7F3] px-2 py-0.5 text-[10px] font-bold text-[#5B6470]">
+            <span className="rounded-md border border-[#E3DED4] bg-[#F8F7F3] px-2 py-0.5 text-[10px] font-bold text-[#4A5565]">
               {publicMessageChannelLabels[template.channel]}
             </span>
-            <span className="rounded-md border border-[#E3DED4] bg-[#F8F7F3] px-2 py-0.5 text-[10px] font-bold text-[#5B6470]">
+            <span className="rounded-md border border-[#E3DED4] bg-[#F8F7F3] px-2 py-0.5 text-[10px] font-bold text-[#4A5565]">
               {publicMessageToneLabels[template.tone]}
             </span>
             {template.riskLevel === MessageTemplateRiskLevel.high ? (
@@ -539,10 +539,10 @@ function TemplateCard({
         </button>
       </div>
 
-      <p className="mt-2 break-keep text-xs leading-relaxed text-[#5B6470]">
+      <p className="mt-2 break-keep text-xs leading-relaxed text-[#4A5565]">
         {template.useCase}
       </p>
-      <p className="mt-1 text-xs text-[#5B6470]/90">
+      <p className="mt-1 text-xs text-[#4A5565]/90">
         대상: {publicMessageAudienceLabels[template.audienceType]}
       </p>
 
@@ -566,7 +566,7 @@ function TemplateCard({
       </div>
 
       {(template.publishedAt ?? template.updatedAt) ? (
-        <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] text-[#5B6470]">
+        <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] text-[#4A5565]">
           게시일 {formatVerifiedDate(template.publishedAt ?? template.updatedAt)}
         </p>
       ) : null}

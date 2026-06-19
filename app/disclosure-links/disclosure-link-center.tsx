@@ -168,7 +168,7 @@ export function DisclosureLinkCenter({
               id="disclosure-advanced-filter"
             >
               <div>
-                <p className="mb-2 text-xs text-[#5B6470]">대상 유형</p>
+                <p className="mb-2 text-xs text-[#4A5565]">대상 유형</p>
                 <CategoryPillBar
                   ariaLabel="대상 유형"
                   categories={targetTypeFilterOptions}
@@ -177,7 +177,7 @@ export function DisclosureLinkCenter({
                 />
               </div>
               <div>
-                <p className="mb-2 text-xs text-[#5B6470]">공식 출처</p>
+                <p className="mb-2 text-xs text-[#4A5565]">공식 출처</p>
                 <CategoryPillBar
                   ariaLabel="공식 출처"
                   categories={officialFilterOptions}
@@ -186,7 +186,7 @@ export function DisclosureLinkCenter({
                 />
               </div>
               {insurerOptions.length > 0 ? (
-                <label className="block text-xs text-[#5B6470]">
+                <label className="block text-xs text-[#4A5565]">
                   보험사
                   <select
                     className="mt-1 min-h-11 w-full rounded-lg border border-[#E3DED4] bg-white px-3 py-2 text-sm text-[#0F1D2E]"
@@ -206,7 +206,7 @@ export function DisclosureLinkCenter({
           ) : null}
         </div>
 
-        <p className="text-sm text-[#5B6470]">
+        <p className="text-sm text-[#4A5565]">
           <span className="font-bold text-[#0F1D2E]">{filteredEntries.length}</span>
           개 공식 자료
         </p>

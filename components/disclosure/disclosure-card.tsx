@@ -46,13 +46,13 @@ export function DisclosureCard({
         <h3 className="mt-2 break-keep text-lg font-bold leading-snug text-[#0F1D2E]">
           {entry.title}
         </h3>
-        <p className="mt-1 text-xs font-medium text-[#5B6470]">{scopeLabel}</p>
+        <p className="mt-1 text-xs font-medium text-[#4A5565]">{scopeLabel}</p>
         {entry.sourceName ? (
-          <p className="mt-1 truncate text-xs text-[#5B6470]/90">
+          <p className="mt-1 truncate text-xs text-[#4A5565]/90">
             출처: {entry.sourceName}
           </p>
         ) : null}
-        <p className="mt-3 line-clamp-2 break-keep text-sm leading-relaxed text-[#5B6470]">
+        <p className="mt-3 line-clamp-2 break-keep text-sm leading-relaxed text-[#4A5565]">
           {entry.description}
         </p>
       </div>
@@ -68,7 +68,7 @@ export function DisclosureCard({
             공식 출처 열기
           </ExternalTabAnchor>
         ) : (
-          <p className="text-center text-xs text-[#5B6470]">공식 링크 준비 중</p>
+          <p className="text-center text-xs text-[#4A5565]">공식 링크 준비 중</p>
         )}
 
         <div className="flex flex-wrap gap-2">

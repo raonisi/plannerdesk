@@ -22,31 +22,31 @@ import {
 } from "@/lib/design-system";
 
 const uiText = {
-  missing: "준비 중",
-  emptyTitle: "조건에 맞는 항목이 없습니다.",
+  missing: "?? ?",
+  emptyTitle: "??? ?? ??? ????.",
   emptyDescription:
-    "검색어를 줄이거나 필터를 변경해 주세요.",
-  officialSource: "공식 출처 열기",
-  lastVerified: "최근 확인일",
-  safetyTitle: "안전 안내",
+    "???? ???? ??? ??? ???.",
+  officialSource: "?? ?? ??",
+  lastVerified: "?? ???",
+  safetyTitle: "?? ??",
   generalSafety:
-    "일부 항목은 준비 중일 수 있습니다. 공식 링크, 연락처, 팩스번호, 주소, 서류 기준은 고객 안내 전 공식 출처를 확인해 주세요.",
+    "?? ??? ?? ?? ? ????. ?? ??, ???, ????, ??, ?? ??? ?? ?? ? ?? ??? ??? ???.",
   messageSafety:
-    "메시지 템플릿은 실무 참고용 초안입니다. 발송 전 고객 상황, 상품 기준, 보험사 기준에 맞게 검토하고 수정해야 합니다.",
+    "??? ???? ?? ??? ?????. ?? ? ?? ??, ?? ??, ??? ??? ?? ???? ???? ???.",
   noPayoutJudge:
-    "플래너데스크는 보험금 지급 여부를 판단하지 않습니다.",
+    "??????? ??? ?? ??? ???? ????.",
   noPayoutEstimate:
-    "플래너데스크는 보험금 지급 금액을 산정하지 않습니다.",
+    "??????? ??? ?? ??? ???? ????.",
   noAdjusting:
-    "플래너데스크는 손해사정 업무를 수행하지 않습니다.",
+    "??????? ???? ??? ???? ????.",
   noMedicalDocs:
-    "고객 의료서류를 수집·저장하지 않습니다.",
+    "?? ????? ??????? ????.",
   referenceOnly:
-    "본 자료는 실무 참고와 업무 정리를 위한 용도입니다.",
-  directory: "보험사 바로가기",
-  claim: "청구서류",
-  disclosure: "공시·약관",
-  message: "고객 문구"
+    "? ??? ?? ??? ?? ??? ?? ?????.",
+  directory: "??? ????",
+  claim: "????",
+  disclosure: "?????",
+  message: "?? ??"
 };
 
 export function PageHero({
@@ -92,7 +92,7 @@ export function ContentSection({ children }: { children: ReactNode }) {
 }
 
 export function WorkflowStepsSection({
-  eyebrow = "설계사 실무 흐름",
+  eyebrow = "??? ?? ??",
   title,
   steps,
   columnsClass = "sm:grid-cols-2 lg:grid-cols-4"
@@ -114,8 +114,8 @@ export function WorkflowStepsSection({
             className="rounded-lg border border-[#E3DED4] bg-[#F8F7F3] p-4"
             key={step}
           >
-            <p className={sectionEyebrow}>{index + 1}단계</p>
-            <p className={`mt-2 break-keep text-xs font-semibold leading-relaxed text-[#5B6470]`}>
+            <p className={sectionEyebrow}>{index + 1}??</p>
+            <p className={`mt-2 break-keep text-xs font-semibold leading-relaxed text-[#4A5565]`}>
               {step}
             </p>
           </div>
@@ -195,7 +195,7 @@ export function LastVerified({ value }: { value: string | null }) {
 
 export function LastVerifiedText({ value }: { value: string | null }) {
   return (
-    <span className="whitespace-nowrap text-sm font-medium text-slate-500">
+    <span className="whitespace-nowrap text-sm font-medium text-slate-600">
       {uiText.lastVerified}: {formatVerifiedDate(value)}
     </span>
   );
@@ -399,7 +399,7 @@ export function SearchBar({
     >
       <input
         aria-label={ariaLabel ?? placeholder}
-        className="min-w-0 flex-1 bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#5B6470] focus-visible:outline-none"
+        className="min-w-0 flex-1 bg-transparent text-base font-medium text-[#17202A] outline-none placeholder:text-[#4A5565] focus-visible:outline-none"
         id={id}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
@@ -408,12 +408,12 @@ export function SearchBar({
       />
       {value && onClear ? (
         <button
-          aria-label="검색어 지우기"
-          className="ml-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#5B6470] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+          aria-label="??? ???"
+          className="ml-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-[#4A5565] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
           onClick={onClear}
           type="button"
         >
-          지우기
+          ???
         </button>
       ) : null}
     </div>
@@ -441,7 +441,7 @@ export function QuickActionCard({
         aria-hidden
       />
       <h3 className="mt-4 text-sm font-bold text-[#0F1D2E]">{title}</h3>
-      <p className="mt-1 text-xs leading-relaxed text-[#5B6470]">{description}</p>
+      <p className="mt-1 text-xs leading-relaxed text-[#4A5565]">{description}</p>
     </Link>
   );
 }
@@ -468,7 +468,7 @@ export function FeatureCard({
   title,
   description,
   href,
-  actionLabel = "바로가기"
+  actionLabel = "????"
 }: {
   title: string;
   description: string;
@@ -517,17 +517,17 @@ export function CollapsibleNotice({
       className={`group ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
       open={defaultOpen}
     >
-      <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className={notices.safetyTitle}>{title}</p>
             <p className={`mt-1 ${textStyles.small}`}>{summary}</p>
           </div>
           <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
-            펼치기
+            ???
           </span>
           <span className="hidden shrink-0 text-xs font-bold text-[#B9975B] group-open:inline">
-            접기
+            ??
           </span>
         </div>
       </summary>
@@ -540,7 +540,7 @@ export function CollapsibleNotice({
 
 export function DraftDataNotice({ children }: { children?: ReactNode }) {
   return (
-    <NoticeBox title="안내">
+    <NoticeBox title="??">
       <p>{children ?? uiText.generalSafety}</p>
     </NoticeBox>
   );
@@ -548,7 +548,7 @@ export function DraftDataNotice({ children }: { children?: ReactNode }) {
 
 export function OfficialSourceNotice({ children }: { children?: ReactNode }) {
   return (
-    <p className="break-keep border-l-2 border-[#B9975B] pl-4 text-sm font-medium leading-relaxed text-[#5B6470]">
+    <p className="break-keep border-l-2 border-[#B9975B] pl-4 text-sm font-medium leading-relaxed text-[#4A5565]">
       {children ?? uiText.generalSafety}
     </p>
   );
@@ -566,7 +566,7 @@ export function SafetyNotice({
     <aside className={notices.safety}>
       <p className={notices.safetyTitle}>{uiText.safetyTitle}</p>
       <p className={`${notices.safetyBody} font-medium`}>{message}</p>
-      <ul className="mt-4 grid gap-2 text-sm leading-relaxed text-[#5B6470] sm:grid-cols-2 list-inside list-disc">
+      <ul className="mt-4 grid gap-2 text-sm leading-relaxed text-[#4A5565] sm:grid-cols-2 list-inside list-disc">
         <li>{uiText.noPayoutJudge}</li>
         <li>{uiText.noPayoutEstimate}</li>
         <li>{uiText.noAdjusting}</li>

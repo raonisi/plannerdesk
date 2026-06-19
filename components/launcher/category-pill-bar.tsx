@@ -4,7 +4,7 @@ export function CategoryPillBar({
   categories,
   selectedId,
   onSelect,
-  ariaLabel = "필터",
+  ariaLabel = "??",
 }: {
   categories: ReadonlyArray<{ id: string; label: string }>;
   selectedId: string;
@@ -26,10 +26,10 @@ export function CategoryPillBar({
             role="tab"
             aria-selected={selected}
             onClick={() => onSelect(cat.id)}
-            className={`min-h-11 shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+            className={`min-h-11 shrink-0 rounded-full border px-3.5 py-2 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
               selected
                 ? "border-[#0F1D2E] bg-[#0F1D2E] text-white shadow-sm"
-                : "border-[#E3DED4] bg-white text-[#5B6470] hover:border-[#B9975B] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]"
+                : "border-[#E3DED4] bg-white text-[#4A5565] hover:border-[#B9975B] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]"
             }`}
           >
             {cat.label}

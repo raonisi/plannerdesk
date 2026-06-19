@@ -17,7 +17,7 @@ export function PlannerFavoritesLoginPrompt({
   if (compact) {
     return (
       <Link
-        className={`inline-flex min-h-9 items-center rounded-md border border-[#E3DED4] bg-white px-2.5 text-[11px] font-semibold text-[#5B6470] transition hover:border-[#B9975B] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 ${className}`}
+        className={`inline-flex min-h-9 items-center rounded-md border border-[#E3DED4] bg-white px-2.5 text-[11px] font-semibold text-[#4A5565] transition hover:border-[#B9975B] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 ${className}`}
         href={signInHref}
       >
         로그인 후 저장
@@ -36,7 +36,7 @@ export function PlannerFavoritesLoginPrompt({
         {PLANNER_FAVORITES_LOGIN_PROMPT}
       </p>
       <Link
-        className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#0F1D2E] px-4 text-sm font-semibold text-white transition hover:bg-[#1b344e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25"
+        className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#0F1D2E] px-4 text-sm font-semibold text-white transition hover:bg-[#1b344e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
         href={signInHref}
       >
         로그인하고 즐겨찾기 사용

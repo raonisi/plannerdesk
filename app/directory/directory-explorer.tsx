@@ -202,7 +202,7 @@ export function DirectoryExplorer({
           </p>
         </section>
       ) : insurerFromQuery ? (
-        <section className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm leading-6 text-[#5B6470]">
+        <section className="rounded-xl border border-[#E3DED4] bg-[#F8F7F3] px-4 py-3 text-sm leading-6 text-[#4A5565]">
           요청한 보험사를 찾을 수 없습니다. 검색어로 다시 찾아보세요.
         </section>
       ) : null}
@@ -226,7 +226,7 @@ export function DirectoryExplorer({
           <span className="text-sm font-bold text-[#0F1D2E]">보험사 검색</span>
           <input
             aria-label="보험사명·초성 검색"
-            className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-[#E3DED4] bg-white px-4 py-3 text-base text-[#17202A] outline-none transition placeholder:text-[#5B6470] focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#B9975B]/30"
+            className="mt-2 min-h-12 w-full min-w-0 rounded-lg border border-[#E3DED4] bg-white px-4 py-3 text-base text-[#17202A] outline-none transition placeholder:text-[#4A5565] focus-visible:border-[#B9975B] focus-visible:ring-2 focus-visible:ring-[#B9975B]/30"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="보험사명·초성 검색, 예: 삼성화재 또는 ㅅㅅㅎㅈ"
             type="search"
@@ -409,7 +409,7 @@ function ViewModeButton({
     <button
       aria-label={`${label} 보기`}
       aria-pressed={active}
-      className={`min-h-10 rounded-full px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+      className={`min-h-10 rounded-full px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
         active
           ? "bg-[#102235] text-[#fbf7ee]"
           : "text-[#5f6670] hover:text-[#102235]"

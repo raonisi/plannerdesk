@@ -17,11 +17,11 @@ export function HomeMiniToolCard({
     <Link
       href={href}
       onClick={onNavigate}
-      className={`group flex min-h-[104px] flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-4 ${shadows.card} transition hover:border-[#B9975B] hover:shadow-[0_8px_24px_rgba(15,29,46,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2`}
+      className={`group flex min-h-[104px] flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-4 ${shadows.card} transition hover:border-[#B9975B] hover:shadow-[0_8px_24px_rgba(15,29,46,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2`}
     >
       <div>
         <h3 className="text-sm font-bold text-[#0F1D2E]">{title}</h3>
-        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#5B6470]">
+        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#4A5565]">
           {description}
         </p>
       </div>

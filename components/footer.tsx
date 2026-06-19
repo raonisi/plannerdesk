@@ -5,7 +5,7 @@ import { uiLabels } from "@/lib/ui-labels";
 export function Footer() {
   return (
     <footer className="border-t border-[#E3DED4] bg-white">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-[#5B6470] sm:gap-6 sm:px-8 sm:py-12 md:flex-row md:items-center md:justify-between lg:px-10">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-[#4A5565] sm:gap-6 sm:px-8 sm:py-12 md:flex-row md:items-center md:justify-between lg:px-10">
         <div className="flex flex-col gap-1">
           <p className="font-bold tracking-tight text-[#0F1D2E]">{uiLabels.brand}</p>
           <p className="font-medium">{uiLabels.footerTagline}</p>
@@ -25,8 +25,8 @@ export function Footer() {
           <PublicErrorReportNotice variant="compact" />
         </div>
         <div className="flex flex-col gap-1 md:text-right">
-          <p className="font-medium text-[#5B6470]">© 2026 {uiLabels.brand}</p>
-          <p className="text-xs text-[#5B6470]/80">제작: 한국보험금융 이도현</p>
+          <p className="font-medium text-[#4A5565]">© 2026 {uiLabels.brand}</p>
+          <p className="text-xs text-[#4A5565]/80">제작: 한국보험금융 이도현</p>
         </div>
       </div>
     </footer>

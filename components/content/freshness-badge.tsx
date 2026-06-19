@@ -12,9 +12,9 @@ const TONE_CLASS: Record<FreshnessTone, string> = {
   caution:
     "border-[#d9c9a8] bg-[#f7f1e5] text-[#7a612d]",
   muted:
-    "border-[#d6d8dc] bg-[#f4f5f6] text-[#5B6470]",
+    "border-[#d6d8dc] bg-[#f4f5f6] text-[#475569]",
   neutral:
-    "border-[#E3DED4] bg-[#F8F7F3] text-[#5B6470]",
+    "border-[#E3DED4] bg-[#F8F7F3] text-[#475569]",
 };
 
 export type FreshnessBadgeProps = {
@@ -75,7 +75,7 @@ export function VerifiedAtLabel({
   const presentation = getFreshnessPresentation(input, { audience });
 
   return (
-    <p className={`text-[10px] font-medium leading-relaxed text-[#5B6470] ${className}`}>
+    <p className={`text-[10px] font-medium leading-relaxed text-[#4A5565] ${className}`}>
       {presentation.label}
     </p>
   );

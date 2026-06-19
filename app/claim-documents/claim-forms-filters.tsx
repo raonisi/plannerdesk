@@ -107,7 +107,7 @@ export function ClaimFormsFilters({
 
       <div className="mt-5 flex flex-col gap-3 border-t border-[#E3DED4] pt-4 sm:flex-row sm:items-start sm:justify-between">
         <details className="min-w-0 flex-1 rounded-lg border border-[#E3DED4] bg-[#F8F7F3] p-3">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-bold text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-bold text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
             고급 필터
             {advancedActive ? (
               <span className="ml-2 rounded-full bg-[#0F1D2E] px-2 py-0.5 text-[11px] font-semibold text-white">
@@ -133,7 +133,7 @@ export function ClaimFormsFilters({
 
         <button
           aria-label="검색어 및 필터 초기화"
-          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#303845] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#303845] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
           onClick={onReset}
           type="button"
         >
@@ -166,10 +166,10 @@ function FilterGroup({
             <button
               aria-label={`${label} ${option.label}`}
               aria-pressed={isSelected}
-              className={`min-h-11 rounded-full border px-3.5 py-2 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+              className={`min-h-11 rounded-full border px-3.5 py-2 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
                 isSelected
                   ? "border-[#0F1D2E] bg-[#0F1D2E] text-white"
-                  : "border-[#E3DED4] bg-white text-[#5B6470] hover:border-[#B9975B] hover:text-[#0F1D2E]"
+                  : "border-[#E3DED4] bg-white text-[#4A5565] hover:border-[#B9975B] hover:text-[#0F1D2E]"
               }`}
               key={option.value}
               onClick={() => onChange(option.value)}

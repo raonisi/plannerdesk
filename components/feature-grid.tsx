@@ -55,12 +55,12 @@ export function FeatureGrid() {
             <p className="text-[11px] font-bold tracking-[0.12em] text-[#B9975B]">
               {feature.eyebrow}
             </p>
-            <p className="rounded-md border border-[#E3DED4] px-2 py-1 text-xs font-medium text-[#5B6470]">
+            <p className="rounded-md border border-[#E3DED4] px-2 py-1 text-xs font-medium text-[#4A5565]">
               {feature.status}
             </p>
           </div>
           <h3 className="mt-5 text-2xl font-semibold text-[#0F1D2E]">{feature.title}</h3>
-          <p className="mt-4 text-base leading-7 text-[#5B6470]">{feature.description}</p>
+          <p className="mt-4 text-base leading-7 text-[#4A5565]">{feature.description}</p>
         </article>
       ))}
     </div>

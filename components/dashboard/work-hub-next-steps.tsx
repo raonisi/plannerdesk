@@ -20,7 +20,7 @@ export function WorkHubNextSteps({
               className="flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-[#E3DED4] bg-white px-4 py-3 shadow-sm transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
             >
               <span className="text-sm font-bold text-[#0F1D2E]">{hub.label}</span>
-              <span className="mt-1 text-xs text-[#5B6470]">{hub.description}</span>
+              <span className="mt-1 text-xs text-[#4A5565]">{hub.description}</span>
             </Link>
           </li>
         ))}

@@ -8,7 +8,7 @@ export function PublicErrorReportNotice({
   if (variant === "compact") {
     return (
       <details className="group mt-3 text-left">
-        <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md text-xs font-semibold text-[#1f6b55] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
+        <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md text-xs font-semibold text-[#1f6b55] underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 [&::-webkit-details-marker]:hidden">
           오류 제보 기준 보기
         </summary>
         <div
@@ -36,10 +36,10 @@ export function PublicErrorReportNotice({
 
   return (
     <details className="group rounded-xl border border-[#E3DED4] bg-white p-5 shadow-sm">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 [&::-webkit-details-marker]:hidden">
         <div>
           <p className="text-sm font-bold text-[#0F1D2E]">오류 제보 안내</p>
-          <p className="mt-1 break-keep text-sm leading-6 text-[#5B6470]">
+          <p className="mt-1 break-keep text-sm leading-6 text-[#4A5565]">
             고객정보를 제외한 비식별 요약으로 제보해 주세요.
           </p>
         </div>
@@ -50,7 +50,7 @@ export function PublicErrorReportNotice({
           접기
         </span>
       </summary>
-      <div className="mt-4 space-y-3 border-t border-[#E3DED4] pt-4 text-sm leading-6 text-[#5B6470]">
+      <div className="mt-4 space-y-3 border-t border-[#E3DED4] pt-4 text-sm leading-6 text-[#4A5565]">
         <p className="break-keep">{USER_REPORT_NOTICE.intro}</p>
         <div>
           <p className="font-semibold text-[#0F1D2E]">

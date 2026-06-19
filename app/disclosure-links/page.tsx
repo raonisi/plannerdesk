@@ -57,7 +57,7 @@ export default async function DisclosureLinksPage() {
           <p className="text-sm font-semibold text-[#0F1D2E]">
             약관 안내문이 필요하신가요?
           </p>
-          <p className="mt-1 break-keep text-xs text-[#5B6470]">
+          <p className="mt-1 break-keep text-xs text-[#4A5565]">
             고객에게 약관 확인을 안내하거나 판단 유보를 안내하는 실무 문구를 확인해
             보세요.
           </p>

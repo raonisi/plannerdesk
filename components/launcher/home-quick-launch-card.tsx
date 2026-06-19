@@ -29,7 +29,7 @@ export function HomeQuickLaunchCard({
         <Icon aria-hidden className="h-5 w-5" />
       </div>
       <h3 className="mt-4 text-sm font-bold text-[#0F1D2E]">{title}</h3>
-      <p className="mt-1 flex-1 text-xs leading-relaxed text-[#5B6470]">
+      <p className="mt-1 flex-1 text-xs leading-relaxed text-[#4A5565]">
         {description}
       </p>
       <Link

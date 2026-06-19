@@ -8,7 +8,13 @@
   --ivory: #f8f7f3;
   --cream: #f7f4ee;
   --gold: #b9975b;
-  --gray: #5b6470;
+  --color-text-primary: #17202a;
+  --color-text-secondary: #4a5565;
+  --color-text-muted: #475569;
+  --color-surface-cream: #f7f4ee;
+  --color-border-soft: #e3ded4;
+  --color-focus-ring: rgba(15, 29, 46, 0.35);
+  --gray: #4a5565;
   --border: #e3ded4;
 }
 

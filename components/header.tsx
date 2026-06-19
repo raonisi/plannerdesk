@@ -29,7 +29,7 @@ export function Header() {
             <span className="block text-lg font-bold leading-tight text-[#0F1D2E] sm:text-xl tracking-tight">
               {uiLabels.brand}
             </span>
-            <span className="block break-keep text-xs font-semibold leading-5 text-[#5B6470]">
+            <span className="block break-keep text-xs font-semibold leading-5 text-[#4A5565]">
               {uiLabels.brandTagline}
             </span>
           </span>
@@ -82,7 +82,7 @@ function NavLink({
   return (
     <Link
       aria-current={isActive ? "page" : undefined}
-      className={`whitespace-nowrap rounded-full px-4 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${
+      className={`whitespace-nowrap rounded-full px-4 py-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${
         isActive ? buttons.navActive : buttons.navIdle
       }`}
       href={href}

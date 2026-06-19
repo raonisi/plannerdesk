@@ -415,7 +415,7 @@ export function InsurerActionCard({
               </h4>
               <div className="overflow-hidden rounded-xl border border-[#E3DED4] bg-white text-sm">
                 <div className="grid grid-cols-[100px_1fr] border-b border-[#E3DED4] p-3 items-center">
-                  <span className="font-semibold text-slate-500">고객센터</span>
+                  <span className="font-semibold text-slate-600">고객센터</span>
                   <div className="text-right">
                     {insurer.customerCenterPhone ? (
                       <a
@@ -430,7 +430,7 @@ export function InsurerActionCard({
                   </div>
                 </div>
                 <div className="grid grid-cols-[100px_1fr] border-b border-[#E3DED4] p-3 items-center">
-                  <span className="font-semibold text-slate-500">헬프데스크</span>
+                  <span className="font-semibold text-slate-600">헬프데스크</span>
                   <div className="text-right">
                     {insurer.helpdeskPhone ? (
                       <a
@@ -445,7 +445,7 @@ export function InsurerActionCard({
                   </div>
                 </div>
                 <div className="grid grid-cols-[100px_1fr] p-3 items-center bg-[#F8F7F3]">
-                  <span className="font-semibold text-slate-500">인콜/모니터링</span>
+                  <span className="font-semibold text-slate-600">인콜/모니터링</span>
                   <div className="text-right">
                     {insurer.callMonitoringPhone ? (
                       <a
@@ -469,19 +469,19 @@ export function InsurerActionCard({
               </h4>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4">
-                  <span className="text-xs font-semibold text-slate-500">청구 팩스</span>
+                  <span className="text-xs font-semibold text-slate-600">청구 팩스</span>
                   <span
                     className={`mt-1 break-all text-sm font-bold ${
                       claimFax.primary !== DIRECTORY_TEXT.missing &&
                       claimFax.primary !== DIRECTORY_TEXT.unavailable
                         ? "text-[#0F1D2E]"
-                        : "text-[#5B6470]"
+                        : "text-[#4A5565]"
                     }`}
                   >
                     {claimFax.primary}
                   </span>
                   {claimFax.secondary ? (
-                    <span className="mt-1 text-[11px] font-medium text-[#5B6470] break-all">
+                    <span className="mt-1 text-[11px] font-medium text-[#4A5565] break-all">
                       {claimFax.secondary}
                     </span>
                   ) : null}
@@ -491,11 +491,11 @@ export function InsurerActionCard({
                   disabled={!mailAddress}
                   onClick={() => setMailAddressOpen(true)}
                   aria-label={`${insurer.name} 등기우편 주소 확인`}
-                  className="flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-[#E3DED4] bg-white p-4 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span className="text-xs font-semibold text-slate-500">등기우편 주소</span>
+                  <span className="text-xs font-semibold text-slate-600">등기우편 주소</span>
                   <span
-                    className={`mt-1 text-sm font-bold break-keep ${mailAddress ? "text-[#B9975B] underline" : "text-[#5B6470] no-underline"}`}
+                    className={`mt-1 text-sm font-bold break-keep ${mailAddress ? "text-[#B9975B] underline" : "text-[#4A5565] no-underline"}`}
                   >
                     {mailAddress ? "주소 확인" : DIRECTORY_TEXT.missing}
                   </span>
@@ -512,7 +512,7 @@ export function InsurerActionCard({
                     {WORK_LINK_ACTION_LABELS.claimForm} ↗
                   </ExternalTabAnchor>
                 ) : (
-                  <span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-3 text-xs font-semibold text-[#5B6470] break-keep">
+                  <span className="inline-flex min-h-11 items-center justify-center rounded-lg border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-3 text-xs font-semibold text-[#4A5565] break-keep">
                     {DIRECTORY_TEXT.missing}
                   </span>
                 )}
@@ -525,7 +525,7 @@ export function InsurerActionCard({
               </div>
 
               {claimItems.length > 0 ? (
-                <p className="text-xs font-medium leading-5 text-[#5B6470] break-keep">
+                <p className="text-xs font-medium leading-5 text-[#4A5565] break-keep">
                   PDF 다운로드는 카드 상단 청구 안내에서 바로 확인할 수 있습니다.
                 </p>
               ) : null}
@@ -546,7 +546,7 @@ export function InsurerActionCard({
                 {WORK_LINK_GROUP_LABELS.official}
               </h4>
               {disclosureState !== "available" ? (
-                <p className="text-xs leading-5 text-[#5B6470]">
+                <p className="text-xs leading-5 text-[#4A5565]">
                   {WORK_LINK_COPY.disclosureUnverified}
                 </p>
               ) : null}
@@ -606,14 +606,14 @@ export function InsurerActionCard({
                 type="button"
                 onClick={() => setCardPaymentOpen(true)}
                 aria-label={`${insurer.name} 카드납 가능 여부 상세`}
-                className="flex min-h-12 w-full flex-col gap-2 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 sm:flex-row sm:items-center sm:justify-between"
+                className="flex min-h-12 w-full flex-col gap-2 rounded-xl border border-[#E3DED4] bg-white px-4 py-3 text-left transition hover:border-[#B9975B] hover:bg-[#F7F4EE]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 sm:flex-row sm:items-center sm:justify-between"
               >
-                <span className="text-sm font-bold text-slate-500">카드납 가능 여부</span>
+                <span className="text-sm font-bold text-slate-600">카드납 가능 여부</span>
                 <span className="inline-flex flex-wrap items-center gap-2">
                   <span className="rounded-md bg-[#F7F4EE] px-2.5 py-1 text-xs font-bold text-[#0F1D2E]">
                     {cardPaymentStatusLabel(insurer.cardPaymentStatus)}
                   </span>
-                  <span className="text-[11px] font-medium text-[#5B6470]">
+                  <span className="text-[11px] font-medium text-[#4A5565]">
                     초회 {cardPaymentLegLabel(insurer.cardPaymentInitialAvailable)} · 계속{" "}
                     {cardPaymentLegLabel(insurer.cardPaymentRecurringAvailable)}
                   </span>
@@ -746,7 +746,7 @@ function FavoriteButton({
     <button
       aria-label={label}
       aria-pressed={isFavorite}
-      className={`inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/25 focus-visible:ring-offset-2 ${toneClass}`}
+      className={`inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${toneClass}`}
       onClick={() => onToggle(id)}
       title={label}
       type="button"
@@ -902,7 +902,7 @@ function CardPaymentDialog({
       open={open}
       title={`${insurer.name} 카드납 정보`}
     >
-      <p className="break-keep text-sm leading-relaxed text-slate-500">
+      <p className="break-keep text-sm leading-relaxed text-slate-600">
         참고용으로만 사용하고, 고객 안내 전 보험사 공식 기준을 다시 확인해 주세요.
       </p>
       {rows.length > 0 ? (
