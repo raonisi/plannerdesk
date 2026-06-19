@@ -12,13 +12,10 @@ import {
   ArrowRight,
   Clock,
   Library,
-  Sparkles,
 } from "lucide-react";
 import { HomePublicStatsStrip, type HomePublicStats } from "@/components/dashboard/home-public-stats-strip";
 import { HomeDataStatusNotice } from "@/components/dashboard/home-data-status-notice";
-import { WorkHubNextSteps } from "@/components/dashboard/work-hub-next-steps";
 import {
-  CLAIM_WORK_FLOW_LINKS,
   PLANNER_ANSWER_ASSISTANT_HUB_NOTE,
   PUBLIC_LANDING_LIMITED_BETA_NOTICE,
   PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE,
@@ -33,19 +30,19 @@ import { HomeScreenInstallNotice } from "@/components/pwa/home-screen-install-no
 import { PlannerFavoritesLoginPrompt } from "@/components/planner-favorites/planner-favorites-login-prompt";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
-import { HomeMiniToolCard } from "@/components/launcher/home-mini-tool-card";
-import { HomeQuickLaunchCard } from "@/components/launcher/home-quick-launch-card";
+import { HomeCompactWorkTile } from "@/components/launcher/home-compact-work-tile";
 import { SectionHeader } from "@/components/launcher/section-header";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 import {
+  buttons,
   launcherIconTone,
   notices,
   sectionEyebrow,
   shadows,
-  spacing,
   surfaces,
+  spacing,
   textStyles,
 } from "@/lib/design-system";
 import { RECENT_WORK_PII_NOTICE } from "@/lib/planner-favorites/copy";
@@ -69,14 +66,7 @@ interface HomeClientProps {
   plannerVerifiedWorkLinks: PlannerVerifiedWorkLinkView[];
 }
 
-const QUICK_KEYWORDS = [
-  { label: "삼성화재", href: "/directory?search=삼성화재" },
-  { label: "현대해상", href: "/directory?search=현대해상" },
-  { label: "실손 청구", href: "/claim-documents?search=실손" },
-  { label: "고객 안내문", href: "/message-templates" },
-  { label: "지식 아카이브", href: "/knowledge" },
-  { label: "통합 검색", href: "/search" },
-] as const;
+const PRIMARY_CTA_CLASS = `${buttons.base} inline-flex min-h-11 items-center px-4 text-sm`;
 
 export function HomeClient({
   insurers,
@@ -183,47 +173,34 @@ export function HomeClient({
   };
 
   return (
-    <div className="mx-auto min-w-0 max-w-7xl px-5 py-8 pb-14 sm:px-8 lg:px-10">
-      {/* Hero */}
+    <div className="mx-auto min-w-0 max-w-7xl px-5 py-6 pb-12 sm:px-8 lg:px-10">
+      {/* 1. 업무 시작 히어로 */}
       <section
-        className={`relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-gradient-to-br from-[#F8F7F3] via-white to-[#F7F4EE] p-6 shadow-sm sm:p-10 md:p-12`}
+        aria-labelledby="home-work-start-heading"
+        className="relative overflow-hidden rounded-2xl border border-[#E3DED4] bg-gradient-to-br from-[#F8F7F3] via-white to-[#F7F4EE] p-5 shadow-sm sm:p-8"
       >
-        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#16382C]/5" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-[#B9975B]/10" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#16382C]/5" />
         <div className="relative max-w-3xl">
-          <p className={sectionEyebrow}>보험설계사용 실무 데스크</p>
-          <h1 className="mt-3 break-keep text-3xl font-extrabold tracking-tight text-[#0F1D2E] sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
-            보험설계사의 하루를 빠르게 여는 실무 커맨드센터
+          <p className={sectionEyebrow}>실무 업무 시작</p>
+          <h1
+            id="home-work-start-heading"
+            className="mt-2 break-keep text-2xl font-extrabold tracking-tight text-[#0F1D2E] sm:text-3xl"
+          >
+            오늘 필요한 업무를 빠르게 시작하세요
           </h1>
-          <p className={`mt-4 max-w-2xl break-keep ${textStyles.body}`}>
-            보험사 전산, 청구서류, 지식 아카이브, 업무 도구, 고객 문구, 공시·약관을
-            한 화면에서 빠르게 찾고 실행하세요.
+          <p className={`mt-3 max-w-2xl break-keep ${textStyles.body}`}>
+            보험사 전산, 청구서류, 공시·약관을 한곳에서 확인합니다. 상담 전
+            확인할 자료를 빠르게 찾습니다.
           </p>
           <p className={`mt-2 max-w-2xl break-keep text-sm text-[#5B6470]`}>
             {PUBLIC_WORK_HUB_SEARCH_HINT}
           </p>
-          <details
-            className="mt-4 max-w-2xl rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#5B6470] group"
-            role="note"
-          >
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 break-keep font-medium text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 [&::-webkit-details-marker]:hidden">
-              제한 베타·공개 정보 안내
-              <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
-                펼치기
-              </span>
-            </summary>
-            <div className="mt-2 space-y-1.5 border-t border-[#E3DED4]/60 pt-3 text-xs">
-              <p className="break-keep">{PUBLIC_LANDING_LIMITED_BETA_NOTICE}</p>
-              <p className="break-keep">{PUBLIC_WORK_HUB_VISIBILITY_NOTICE}</p>
-              <p className="break-keep">{PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE}</p>
-            </div>
-          </details>
 
-          <div className="relative z-10 mt-8 max-w-2xl">
+          <div className="relative z-10 mt-5 max-w-2xl">
             <label className="sr-only" htmlFor="home-unified-search">
               통합 검색
             </label>
-            <div className="flex min-h-14 items-center rounded-xl border border-[#E3DED4] bg-white px-4 shadow-md ring-1 ring-[#E3DED4]/80 focus-within:ring-2 focus-within:ring-[#B9975B]/50">
+            <div className="flex min-h-12 items-center rounded-xl border border-[#E3DED4] bg-white px-4 shadow-md ring-1 ring-[#E3DED4]/80 focus-within:ring-2 focus-within:ring-[#B9975B]/50">
               <Search aria-hidden className="h-5 w-5 shrink-0 text-[#5B6470]" />
               <input
                 id="home-unified-search"
@@ -303,19 +280,54 @@ export function HomeClient({
             ) : null}
           </div>
 
-          <div className="relative mt-5 flex flex-wrap gap-2">
-            <span className="sr-only">빠른 검색 키워드</span>
-            {QUICK_KEYWORDS.map((kw) => (
-              <Link
-                key={kw.label}
-                href={kw.href}
-                className="inline-flex min-h-9 items-center rounded-full border border-[#E3DED4] bg-white px-3.5 text-xs font-bold text-[#5B6470] shadow-sm transition hover:border-[#B9975B] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
-              >
-                {kw.label}
-              </Link>
-            ))}
+          <div className="relative mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/directory"
+              className={`${PRIMARY_CTA_CLASS} ${buttons.primary}`}
+            >
+              보험사 찾기
+            </Link>
+            <Link
+              href="/claim-documents"
+              className={`${PRIMARY_CTA_CLASS} ${buttons.secondary}`}
+            >
+              청구서류 찾기
+            </Link>
+            <Link
+              href="/work-tools"
+              className={`${PRIMARY_CTA_CLASS} ${buttons.secondary}`}
+            >
+              업무 도구 열기
+            </Link>
           </div>
-          <HomePublicStatsStrip loadState={loadState} stats={publicStats} />
+
+          <details
+            className="mt-4 max-w-2xl rounded-lg border border-[#E3DED4]/90 bg-white/80 px-4 py-3 text-sm text-[#5B6470] group"
+            role="note"
+          >
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 break-keep font-medium text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 [&::-webkit-details-marker]:hidden">
+              제한 베타·공식 안내
+              <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
+                펼치기
+              </span>
+            </summary>
+            <div className="mt-2 space-y-1.5 border-t border-[#E3DED4]/60 pt-3 text-xs">
+              <p className="break-keep">{PUBLIC_LANDING_LIMITED_BETA_NOTICE}</p>
+              <p className="break-keep">{PUBLIC_WORK_HUB_VISIBILITY_NOTICE}</p>
+              <p className="break-keep">{PUBLIC_LANDING_OFFICIAL_SOURCE_NOTICE}</p>
+              <p className="break-keep">
+                <Link
+                  href="/planner/answer-assistant"
+                  className="font-semibold text-[#0F1D2E] underline decoration-[#B9975B] underline-offset-2"
+                >
+                  답변 보조(베타)
+                </Link>
+                {" — "}
+                {PLANNER_ANSWER_ASSISTANT_HUB_NOTE}
+              </p>
+            </div>
+          </details>
+
           <HomeDataStatusNotice
             loadState={loadState}
             showQuickLinks={loadState === "error" || loadState === "partial-error"}
@@ -323,231 +335,215 @@ export function HomeClient({
         </div>
       </section>
 
-      <section className="mt-12">
-        <SectionHeader eyebrow={uiLabels.homeHub} title="오늘의 업무 시작" />
-        <div className="mt-5 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-3">
-          <HomeQuickLaunchCard
-            actionLabel="보험사 찾기"
-            description="공식 전산·고객센터·팩스"
-            emphasis="primary"
+      {/* 2. 오늘 바로 쓰는 업무 */}
+      <section aria-labelledby="home-work-tiles-heading" className="mt-8">
+        <SectionHeader
+          eyebrow={uiLabels.homeHub}
+          id="home-work-tiles-heading"
+          title="오늘 바로 쓰는 업무"
+        />
+        <div className="mt-4 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3">
+          <HomeCompactWorkTile
+            description="전산·고객센터·팩스 바로가기"
             href="/directory"
             icon={Building2}
             iconToneClass={launcherIconTone.green}
-            title="보험사 바로가기"
+            onNavigate={() =>
+              trackRecent({
+                id: "directory",
+                label: "보험사 전산",
+                href: "/directory",
+                type: "shortcut",
+              })
+            }
+            title="보험사 전산"
           />
-          <HomeQuickLaunchCard
-            actionLabel="서류 찾기"
-            description="보험사별 필요서류 PDF"
+          <HomeCompactWorkTile
+            description="보험사별 필요서류 확인"
             href="/claim-documents"
             icon={FileText}
             iconToneClass={launcherIconTone.navy}
-            title="청구서류 찾기"
+            onNavigate={() =>
+              trackRecent({
+                id: "claim-documents",
+                label: "청구서류",
+                href: "/claim-documents",
+                type: "shortcut",
+              })
+            }
+            title="청구서류"
           />
-          <HomeQuickLaunchCard
-            actionLabel="도구함 열기"
+          <HomeCompactWorkTile
             description={WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION}
             href="/work-tools"
             icon={Wrench}
             iconToneClass={launcherIconTone.navy}
+            onNavigate={() =>
+              trackRecent({
+                id: "work-tools",
+                label: "업무 도구",
+                href: "/work-tools",
+                type: "tool",
+              })
+            }
             title="업무 도구"
           />
-          <HomeQuickLaunchCard
-            actionLabel="문구 복사"
-            description="상황별 카톡 안내 멘트"
+          <HomeCompactWorkTile
+            description="상황별 안내 멘트 복사"
             href="/message-templates"
             icon={MessageSquare}
             iconToneClass={launcherIconTone.gold}
-            title="고객 문구 복사"
+            onNavigate={() =>
+              trackRecent({
+                id: "message-templates",
+                label: "고객 문구",
+                href: "/message-templates",
+                type: "shortcut",
+              })
+            }
+            title="고객 문구"
           />
-          <HomeQuickLaunchCard
-            actionLabel="아카이브 열기"
-            description="상담·청구·계약 실무 기준"
-            href="/knowledge"
-            icon={Library}
-            iconToneClass={launcherIconTone.green}
-            title="지식 아카이브"
-          />
-          <HomeQuickLaunchCard
-            actionLabel="통합 검색"
-            description="도메인별 결과 탐색"
-            href="/search"
-            icon={Search}
-            iconToneClass={launcherIconTone.navy}
-            title="통합 검색"
-          />
-          <HomeQuickLaunchCard
-            actionLabel="공식자료 확인"
-            description="상품공시·통합 약관"
+          <HomeCompactWorkTile
+            description="상품공시·통합 약관 확인"
             href="/disclosure-links"
             icon={BookOpen}
             iconToneClass={launcherIconTone.gold}
-            title="공시·약관 확인"
+            onNavigate={() =>
+              trackRecent({
+                id: "disclosure-links",
+                label: "공시·약관",
+                href: "/disclosure-links",
+                type: "shortcut",
+              })
+            }
+            title="공시·약관"
+          />
+          <HomeCompactWorkTile
+            description="상담·청구 실무 참고"
+            href="/knowledge"
+            icon={Library}
+            iconToneClass={launcherIconTone.green}
+            onNavigate={() =>
+              trackRecent({
+                id: "knowledge",
+                label: "지식 아카이브",
+                href: "/knowledge",
+                type: "knowledge",
+              })
+            }
+            title="지식 아카이브"
           />
         </div>
-        <WorkHubNextSteps />
       </section>
 
-      <section className="mt-10">
-        <SectionHeader eyebrow="청구 업무" title="청구 흐름 바로가기" />
-        <p className={`mt-2 max-w-2xl ${textStyles.small}`}>
-          청구서류를 보험사별로 확인할 수 있습니다. 제출 전 보험사 공식 안내를 다시
-          확인해 주세요.
-        </p>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {CLAIM_WORK_FLOW_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="inline-flex min-h-10 items-center rounded-full border border-[#E3DED4] bg-white px-4 text-xs font-bold text-[#0F1D2E] shadow-sm transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section
-        className={`mt-10 rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 ${shadows.card}`}
-      >
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <p className={sectionEyebrow}>설계사 베타</p>
-            <h2 className="mt-1 text-lg font-bold text-[#0F1D2E]">답변 보조(베타)</h2>
-            <p className={`mt-2 max-w-xl break-keep ${textStyles.small}`}>
-              {PLANNER_ANSWER_ASSISTANT_HUB_NOTE}
-            </p>
-          </div>
-          <Link
-            href="/planner/answer-assistant"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#0F1D2E] shadow-sm transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
-          >
-            <Sparkles aria-hidden className="h-4 w-4 text-[#B9975B]" />
-            베타 화면 열기
-          </Link>
-        </div>
-      </section>
-
-      <div className="mt-12 grid gap-8 lg:grid-cols-3">
-        <section className="lg:col-span-2">
-          <SectionHeader
-            eyebrow={uiLabels.quickTools}
-            title="자주 쓰는 업무"
-          />
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <HomeMiniToolCard
-              description="보험사별 팩스·우편 접수처"
-              href="/directory"
-              onNavigate={() =>
-                trackRecent({
-                  id: "directory-fax",
-                  label: "청구 팩스",
-                  href: "/directory",
-                  type: "shortcut",
-                })
-              }
-              title="청구 팩스"
-            />
-            <HomeMiniToolCard
-              description="카톡용 안내 문구 복사"
-              href="/message-templates"
-              onNavigate={() =>
-                trackRecent({
-                  id: "message-templates",
-                  label: "고객 안내문",
-                  href: "/message-templates",
-                  type: "shortcut",
-                })
-              }
-              title="고객 안내문"
-            />
-          </div>
-        </section>
-
-        <div className="space-y-6">
-          {plannerFavoritesEnabled ? (
-            <PlannerFavoritesScope enabled>
-              <PlannerWorkFavoritesPanel
-                claimDocuments={claimDocuments}
-                insurers={insurers.map((ins) => ({ id: ins.id, name: ins.name }))}
-                knowledgeArticles={knowledgeArticles}
-              />
-            </PlannerFavoritesScope>
-          ) : (
-            <PlannerFavoritesLoginPrompt callbackPath="/" />
-          )}
-
-          {plannerFavoritesEnabled ? (
-          <section className={`rounded-xl border border-[#E3DED4] bg-white p-5 ${shadows.card}`}>
-            <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
-              <Clock className="h-3.5 w-3.5 text-[#B9975B]" />
-              최근 사용
-            </h2>
-            <p className={`mt-2 break-keep ${textStyles.small}`}>
-              {RECENT_WORK_PII_NOTICE}
-            </p>
-            {recents.length > 0 ? (
-              <ul className="mt-3 space-y-2">
-                {recents.map((rec) => (
-                  <li key={rec.id + rec.href}>
-                    <Link
-                      href={rec.href}
-                      className="flex min-h-9 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs text-[#5B6470] transition hover:bg-[#F7F4EE] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
-                    >
-                      <span className="truncate font-medium">{rec.label}</span>
-                      <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#5B6470]">
-                        {rec.type === "insurer"
-                          ? "보험사"
-                          : rec.type === "knowledge"
-                            ? "지식"
-                            : rec.type === "tool"
-                              ? "도구"
-                              : "링크"}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="mt-3">
-                <EmptyStatePanel
-                  description="보험사, 청구서류, 업무 도구를 열면 이곳에 최근 항목이 표시됩니다."
-                  title="아직 최근 사용 기록이 없습니다"
-                />
-              </div>
-            )}
-          </section>
-          ) : null}
-
-          {plannerFavoritesEnabled && plannerVerifiedWorkLinks.length > 0 ? (
-            <VerifiedWorkLinksSection
-              compact
-              links={plannerVerifiedWorkLinks}
-              mode="planner"
-            />
-          ) : null}
-
-          {plannerFavoritesEnabled ? (
-            <HomeScreenInstallNotice compact variant="planner" />
-          ) : null}
-        </div>
+      {/* 3. 공개 데이터 현황 */}
+      <div className="mt-8">
+        <HomePublicStatsStrip loadState={loadState} stats={publicStats} />
       </div>
 
-      <HomeScreenInstallNotice
-        className={`mt-12 ${shadows.card}`}
-        variant={plannerFavoritesEnabled ? "planner" : "public"}
-      />
+      {/* 4. 최근 사용·즐겨찾기 */}
+      <section aria-labelledby="home-quick-exec-heading" className="mt-8">
+        <SectionHeader
+          eyebrow="빠른 실행"
+          id="home-quick-exec-heading"
+          title="최근 사용·즐겨찾기"
+        />
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          <div className="min-w-0 lg:col-span-2">
+            {plannerFavoritesEnabled ? (
+              <PlannerFavoritesScope enabled>
+                <PlannerWorkFavoritesPanel
+                  claimDocuments={claimDocuments}
+                  insurers={insurers.map((ins) => ({ id: ins.id, name: ins.name }))}
+                  knowledgeArticles={knowledgeArticles}
+                />
+              </PlannerFavoritesScope>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-[#E3DED4] bg-[#F8F7F3] px-4 py-3">
+                <p className={`min-w-0 flex-1 break-keep ${textStyles.small}`}>
+                  즐겨찾기는 로그인 후 이 기기에 저장됩니다. 고객 개인정보는
+                  입력하지 않습니다.
+                </p>
+                <PlannerFavoritesLoginPrompt callbackPath="/" compact />
+              </div>
+            )}
 
+            {plannerFavoritesEnabled && plannerVerifiedWorkLinks.length > 0 ? (
+              <div className="mt-4">
+                <VerifiedWorkLinksSection
+                  compact
+                  links={plannerVerifiedWorkLinks}
+                  mode="planner"
+                />
+              </div>
+            ) : null}
+          </div>
+
+          <div className="min-w-0 space-y-4">
+            {plannerFavoritesEnabled ? (
+              <section
+                className={`rounded-xl border border-[#E3DED4] bg-white p-4 ${shadows.card}`}
+              >
+                <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
+                  <Clock className="h-3.5 w-3.5 text-[#B9975B]" />
+                  최근 사용
+                </h2>
+                <p className={`mt-2 break-keep ${textStyles.small}`}>
+                  {RECENT_WORK_PII_NOTICE}
+                </p>
+                {recents.length > 0 ? (
+                  <ul className="mt-3 space-y-2">
+                    {recents.map((rec) => (
+                      <li key={rec.id + rec.href}>
+                        <Link
+                          href={rec.href}
+                          className="flex min-h-9 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs text-[#5B6470] transition hover:bg-[#F7F4EE] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+                        >
+                          <span className="truncate font-medium">{rec.label}</span>
+                          <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#5B6470]">
+                            {rec.type === "insurer"
+                              ? "보험사"
+                              : rec.type === "knowledge"
+                                ? "지식"
+                                : rec.type === "tool"
+                                  ? "도구"
+                                  : "링크"}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="mt-3">
+                    <EmptyStatePanel
+                      description="보험사, 청구서류, 업무 도구를 열면 이곳에 최근 항목이 표시됩니다."
+                      title="아직 최근 사용 기록이 없습니다"
+                    />
+                  </div>
+                )}
+              </section>
+            ) : null}
+
+            {plannerFavoritesEnabled ? (
+              <HomeScreenInstallNotice compact variant="planner" />
+            ) : (
+              <HomeScreenInstallNotice compact variant="public" />
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. 안전 기준 안내 */}
       <details
-        className={`group mt-6 ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
+        className={`group mt-8 ${surfaces.card} ${spacing.cardPadding} ${shadows.card}`}
       >
         <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 rounded-lg">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className={notices.safetyTitle}>{uiLabels.safetyBoundary}</p>
               <p className={`mt-1 ${textStyles.small}`}>
-                본 자료는 설계사 실무 참고용입니다. 최종 기준은 보험사 공식 안내와
-                약관을 확인해 주세요.
+                고객 개인정보는 입력하지 않고, 공식 안내를 기준으로 확인합니다.
+                보험금 지급 판단은 제공하지 않습니다.
               </p>
             </div>
             <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">

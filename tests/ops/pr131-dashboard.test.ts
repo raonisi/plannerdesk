@@ -18,7 +18,7 @@ describe("PR131 integrated work dashboard (static)", () => {
     const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
     assert.match(home, /knowledgeArticles/);
     assert.match(home, /PUBLIC_WORK_HUB_VISIBILITY_NOTICE|work-hub-copy/);
-    assert.match(home, /WorkHubNextSteps/);
+    assert.match(home, /HomeCompactWorkTile|오늘 바로 쓰는 업무/);
     assert.doesNotMatch(home, /reviewQueue/);
     assert.doesNotMatch(home, /correctionNew/);
     assert.doesNotMatch(home, /plannerVerificationPending/);
