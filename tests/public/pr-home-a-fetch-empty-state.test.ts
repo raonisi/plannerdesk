@@ -18,10 +18,16 @@ describe("PR-HOME-A home data state helpers", () => {
       fetch: {
         insurers: "error",
         claimDocuments: "error",
+        disclosureLinks: "error",
+        messageTemplates: "error",
+        workTools: "error",
         knowledge: "error",
       },
       insurerCount: 0,
       claimDocumentCount: 0,
+      disclosureLinkCount: 0,
+      messageTemplateCount: 0,
+      workToolCount: 0,
       knowledgeArticleCount: 0,
     });
     assert.equal(state, "error");
@@ -32,10 +38,16 @@ describe("PR-HOME-A home data state helpers", () => {
       fetch: {
         insurers: "error",
         claimDocuments: "ok",
+        disclosureLinks: "ok",
+        messageTemplates: "ok",
+        workTools: "ok",
         knowledge: "ok",
       },
       insurerCount: 0,
       claimDocumentCount: 3,
+      disclosureLinkCount: 1,
+      messageTemplateCount: 1,
+      workToolCount: 50,
       knowledgeArticleCount: 2,
     });
     assert.equal(stats.insurers.kind, "unavailable");
@@ -50,10 +62,16 @@ describe("PR-HOME-A home data state helpers", () => {
       fetch: {
         insurers: "ok",
         claimDocuments: "ok",
+        disclosureLinks: "ok",
+        messageTemplates: "ok",
+        workTools: "ok",
         knowledge: "ok",
       },
       insurerCount: 0,
       claimDocumentCount: 0,
+      disclosureLinkCount: 0,
+      messageTemplateCount: 0,
+      workToolCount: 0,
       knowledgeArticleCount: 0,
     });
     assert.equal(empty, "empty");
@@ -62,10 +80,16 @@ describe("PR-HOME-A home data state helpers", () => {
       fetch: {
         insurers: "ok",
         claimDocuments: "error",
+        disclosureLinks: "ok",
+        messageTemplates: "ok",
+        workTools: "ok",
         knowledge: "ok",
       },
       insurerCount: 5,
       claimDocumentCount: 0,
+      disclosureLinkCount: 1,
+      messageTemplateCount: 1,
+      workToolCount: 50,
       knowledgeArticleCount: 1,
     });
     assert.equal(partial, "partial-error");

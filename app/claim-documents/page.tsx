@@ -1,7 +1,5 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { ExplorerLoadingPanel } from "@/components/content/explorer-loading-panel";
 import { PublicErrorReportNotice } from "@/components/content/public-error-report-notice";
 import { WorkToolsPlannerNoticeCard } from "@/components/content/work-tools-planner-notice";
 import { DataResponsibilityInlineNotice } from "@/components/content/data-responsibility-inline-notice";
@@ -11,9 +9,9 @@ import {
   PageHero,
 } from "@/components/content-page";
 import { getWorkToolsAccess } from "@/lib/auth/access";
-import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
 import { isPlannerFavoritesEnabled } from "@/lib/planner-favorites/planner-access";
 import { getPublicClaimDocuments } from "@/lib/public/claim-documents";
+import { resolveVisiblePublicClaimDocuments } from "@/lib/public/public-surface-resolvers";
 import { ClaimDocumentExplorer } from "./claim-document-explorer";
 import { VerifiedWorkLinksSection } from "@/components/work-links/VerifiedWorkLinksSection";
 import { getPublicVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
@@ -29,18 +27,26 @@ const t = {
   description: "보험사별 보험금청구서와 필요서류를 빠르게 확인하세요.",
 };
 
-export default async function ClaimDocumentsPage() {
+type ClaimDocumentsSearchParams = {
+  insurer?: string;
+  search?: string;
+};
+
+export default async function ClaimDocumentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<ClaimDocumentsSearchParams>;
+}) {
+  const resolvedSearchParams = await searchParams;
   const [result, workToolsAccess, pdfGovernanceOverlay] = await Promise.all([
     getPublicClaimDocuments(),
     getWorkToolsAccess(),
     safeGetPublicClaimPdfGovernanceOverlay(),
   ]);
   const plannerFavoritesEnabled = isPlannerFavoritesEnabled(workToolsAccess);
-  const documents = result.status === "ok" ? result.data : [];
-  const visibleDocuments =
-    documents.length > 0 ? documents : claimDocumentCandidateFallback;
-  const dbError =
-    result.status === "error" && claimDocumentCandidateFallback.length === 0;
+  const claimSurface = resolveVisiblePublicClaimDocuments(result);
+  const visibleDocuments = claimSurface.items;
+  const dbError = claimSurface.surfaceStatus === "error";
   const claimVerifiedWorkLinks = getPublicVerifiedWorkLinks().filter(
     (link) => link.infoType === "claimGuide" || link.infoType === "claimDocument",
   );
@@ -67,13 +73,13 @@ export default async function ClaimDocumentsPage() {
               title="공개된 청구서류 안내가 아직 없습니다."
             />
           ) : (
-            <Suspense fallback={<ExplorerLoadingPanel />}>
-              <ClaimDocumentExplorer
-                documents={visibleDocuments}
-                plannerFavoritesEnabled={plannerFavoritesEnabled}
-                pdfGovernanceOverlay={pdfGovernanceOverlay}
-              />
-            </Suspense>
+            <ClaimDocumentExplorer
+              documents={visibleDocuments}
+              initialInsurerKey={resolvedSearchParams.insurer ?? null}
+              initialSearchQuery={resolvedSearchParams.search ?? null}
+              plannerFavoritesEnabled={plannerFavoritesEnabled}
+              pdfGovernanceOverlay={pdfGovernanceOverlay}
+            />
           )}
 
           <VerifiedWorkLinksSection compact links={claimVerifiedWorkLinks} mode="public" />

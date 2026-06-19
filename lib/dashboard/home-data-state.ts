@@ -1,6 +1,12 @@
-/** PR-HOME-A: home data load state model and user-facing copy. */
+/** PR-FEATURE-GAP-01: Home public stats — aligned with public-surface-resolvers SSOT. */
 
-export type HomeDataDomain = "insurers" | "claimDocuments" | "knowledge";
+export type HomeDataDomain =
+  | "insurers"
+  | "claimDocuments"
+  | "disclosureLinks"
+  | "messageTemplates"
+  | "workTools"
+  | "knowledge";
 
 export type HomeDomainFetchStatus = "ok" | "error";
 
@@ -17,12 +23,18 @@ export type HomePublicStatValue =
 export type HomePublicStats = {
   insurers: HomePublicStatValue;
   claimDocuments: HomePublicStatValue;
+  disclosureLinks: HomePublicStatValue;
+  messageTemplates: HomePublicStatValue;
+  workTools: HomePublicStatValue;
   knowledge: HomePublicStatValue;
 };
 
 export type HomeDataFetchSnapshot = {
   insurers: HomeDomainFetchStatus;
   claimDocuments: HomeDomainFetchStatus;
+  disclosureLinks: HomeDomainFetchStatus;
+  messageTemplates: HomeDomainFetchStatus;
+  workTools: HomeDomainFetchStatus;
   knowledge: HomeDomainFetchStatus;
 };
 
@@ -55,30 +67,45 @@ export const HOME_DATA_STATUS_FORBIDDEN_PHRASES = [
 ] as const;
 
 export function resolveHomeDomainFetchStatus(
-  resultStatus: string,
+  surfaceStatus: "ok" | "error",
 ): HomeDomainFetchStatus {
-  return resultStatus === "ok" ? "ok" : "error";
+  return surfaceStatus === "ok" ? "ok" : "error";
+}
+
+function statFromDomain(
+  fetchStatus: HomeDomainFetchStatus,
+  count: number,
+): HomePublicStatValue {
+  return fetchStatus === "ok"
+    ? { kind: "count", value: count }
+    : { kind: "unavailable" };
 }
 
 export function buildHomePublicStats(input: {
   fetch: HomeDataFetchSnapshot;
   insurerCount: number;
   claimDocumentCount: number;
+  disclosureLinkCount: number;
+  messageTemplateCount: number;
+  workToolCount: number;
   knowledgeArticleCount: number;
 }): HomePublicStats {
   return {
-    insurers:
-      input.fetch.insurers === "ok"
-        ? { kind: "count", value: input.insurerCount }
-        : { kind: "unavailable" },
-    claimDocuments:
-      input.fetch.claimDocuments === "ok"
-        ? { kind: "count", value: input.claimDocumentCount }
-        : { kind: "unavailable" },
-    knowledge:
-      input.fetch.knowledge === "ok"
-        ? { kind: "count", value: input.knowledgeArticleCount }
-        : { kind: "unavailable" },
+    insurers: statFromDomain(input.fetch.insurers, input.insurerCount),
+    claimDocuments: statFromDomain(
+      input.fetch.claimDocuments,
+      input.claimDocumentCount,
+    ),
+    disclosureLinks: statFromDomain(
+      input.fetch.disclosureLinks,
+      input.disclosureLinkCount,
+    ),
+    messageTemplates: statFromDomain(
+      input.fetch.messageTemplates,
+      input.messageTemplateCount,
+    ),
+    workTools: statFromDomain(input.fetch.workTools, input.workToolCount),
+    knowledge: statFromDomain(input.fetch.knowledge, input.knowledgeArticleCount),
   };
 }
 
@@ -86,20 +113,24 @@ export function resolveHomeLoadState(input: {
   fetch: HomeDataFetchSnapshot;
   insurerCount: number;
   claimDocumentCount: number;
+  disclosureLinkCount: number;
+  messageTemplateCount: number;
+  workToolCount: number;
   knowledgeArticleCount: number;
 }): HomeLoadState {
-  const statuses = [
-    input.fetch.insurers,
-    input.fetch.claimDocuments,
-    input.fetch.knowledge,
-  ];
+  const statuses = Object.values(input.fetch);
   const errorCount = statuses.filter((s) => s === "error").length;
 
   if (errorCount === statuses.length) return "error";
   if (errorCount > 0) return "partial-error";
 
   const total =
-    input.insurerCount + input.claimDocumentCount + input.knowledgeArticleCount;
+    input.insurerCount +
+    input.claimDocumentCount +
+    input.disclosureLinkCount +
+    input.messageTemplateCount +
+    input.workToolCount +
+    input.knowledgeArticleCount;
   if (total === 0) return "empty";
   return "success";
 }

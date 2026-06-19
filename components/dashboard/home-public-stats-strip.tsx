@@ -56,6 +56,17 @@ export function HomePublicStatsStrip({
       label: "공개 청구서류",
       value: stats.claimDocuments,
     },
+    {
+      key: "disclosureLinks" as const,
+      label: "공시·약관",
+      value: stats.disclosureLinks,
+    },
+    {
+      key: "messageTemplates" as const,
+      label: "고객 문구",
+      value: stats.messageTemplates,
+    },
+    { key: "workTools" as const, label: "업무 도구", value: stats.workTools },
     { key: "knowledge" as const, label: "공개 지식", value: stats.knowledge },
   ];
 
@@ -65,7 +76,7 @@ export function HomePublicStatsStrip({
       aria-label="공개 콘텐츠 요약"
     >
       <p className={sectionEyebrow}>공개 콘텐츠 요약</p>
-      <div className="mt-3 grid grid-cols-1 gap-3 min-[360px]:grid-cols-3">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {items.map((item) => (
           <div
             key={item.key}
