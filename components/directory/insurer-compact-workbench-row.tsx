@@ -5,6 +5,7 @@
 import { useState } from "react";
 
 import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
+import { InsurerLogo } from "@/components/directory/insurer-logo";
 import { InsurerSystemPortalPrimaryCta } from "@/components/directory/insurer-system-portal-primary-cta";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
 
@@ -181,17 +182,16 @@ export function InsurerCompactWorkbenchRow({
       >
 
         <div className="min-w-0">
-
-          <div className="flex flex-wrap items-center gap-2">
-
-            <h2 className="break-words text-base font-bold text-slate-950">
-
-              {insurer.name}
-
-            </h2>
-
-            <span className={insurerCardCategoryBadge}>{categoryLabel}</span>
-
+          <div className="flex min-w-0 items-start gap-3">
+            <InsurerLogo insurer={insurer} size="compact" />
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="break-words text-base font-bold text-slate-950">
+                  {insurer.name}
+                </h2>
+                <span className={insurerCardCategoryBadge}>{categoryLabel}</span>
+              </div>
+            </div>
           </div>
         </div>
 

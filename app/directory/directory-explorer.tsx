@@ -15,6 +15,12 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
 import { DIRECTORY_CORRECTION_SECTION_TITLE } from "@/lib/directory/directory-workbench-copy";
 import { DIRECTORY_PUBLIC_GLOBAL_NOTICE } from "@/lib/directory/public-directory-surface";
+import { getInsurerDisplayCategory } from "@/lib/directory/insurer-display-category";
+import {
+  INSURER_SORT_OPTIONS,
+  sortPublicInsurers,
+  type InsurerSortMode,
+} from "@/lib/directory/insurer-sort";
 import {
   buildClaimLibraryItems,
   getClaimItemsForInsurer,
@@ -34,24 +40,6 @@ const tabOptions: { label: string; value: TabType }[] = [
   { label: "디지털손보사", value: "digital" },
   { label: "즐겨찾기", value: "favorites" },
 ];
-
-function getDisplayCategory(insurer: PublicInsurer): "life" | "non_life" | "mutual" | "digital" {
-  if (
-    insurer.id.endsWith("-mutual") ||
-    insurer.name.includes("공제") ||
-    insurer.name.includes("우체국")
-  ) {
-    return "mutual";
-  }
-  if (
-    insurer.id.endsWith("-digital") ||
-    insurer.name.includes("디지털") ||
-    insurer.name.includes("캐롯")
-  ) {
-    return "digital";
-  }
-  return insurer.category;
-}
 
 const FAVORITES_EMPTY_TITLE = "즐겨찾기한 보험사가 아직 없습니다.";
 const FAVORITES_EMPTY_DESC =
@@ -78,6 +66,8 @@ const CHOSUNG_LIST = [
   "ㅍ",
   "ㅎ",
 ] as const;
+
+const DEFAULT_INSURER_SORT: InsurerSortMode = "featured";
 
 function toChosung(value: string) {
   let result = "";
@@ -116,11 +106,19 @@ export function DirectoryExplorer({
   const [query, setQuery] = useState(() => searchFromQuery ?? "");
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortMode, setSortMode] = useState<InsurerSortMode>(DEFAULT_INSURER_SORT);
 
   const { isFavorite, toggle, count: favoriteCount } = useFavorites();
   const visibleTabs = plannerFavoritesEnabled
     ? tabOptions
     : tabOptions.filter((tab) => tab.value !== "favorites");
+  const visibleSortOptions = useMemo(
+    () =>
+      INSURER_SORT_OPTIONS.filter(
+        (option) => !option.plannerOnly || plannerFavoritesEnabled,
+      ),
+    [plannerFavoritesEnabled],
+  );
 
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [correctionPreselectedId, setCorrectionPreselectedId] = useState<
@@ -170,12 +168,20 @@ export function DirectoryExplorer({
       
       const tabCategory = activeTab === "favorites" ? "all" : activeTab;
       const matchesCategory =
-        tabCategory === "all" || getDisplayCategory(insurer) === tabCategory;
+        tabCategory === "all" || getInsurerDisplayCategory(insurer) === tabCategory;
       const matchesView = activeTab !== "favorites" || isFavorite(insurer.id);
 
       return matchesQuery && matchesCategory && matchesView;
     });
   }, [activeTab, insurerFromQuery, insurers, isFavorite, query]);
+
+  const displayedInsurers = useMemo(
+    () =>
+      sortPublicInsurers(filteredInsurers, sortMode, {
+        isFavorite: plannerFavoritesEnabled ? isFavorite : undefined,
+      }),
+    [filteredInsurers, isFavorite, plannerFavoritesEnabled, sortMode],
+  );
 
   const showFavoritesEmpty =
     activeTab === "favorites" && filteredInsurers.length === 0;
@@ -234,7 +240,7 @@ export function DirectoryExplorer({
           />
         </label>
         <p className="mt-3 text-sm leading-6 text-[#4f5661]">
-          {filteredInsurers.length}개 보험사
+          {displayedInsurers.length}개 보험사
           <span className="sm:hidden"> · {MOBILE_FAVORITES_NOTICE_SHORT}</span>
           <span className="hidden sm:inline">
             {" "}가 표시됩니다. {LOCAL_FAVORITES_DEVICE_NOTICE}
@@ -256,7 +262,27 @@ export function DirectoryExplorer({
             />
           ))}
         </div>
-        <div className="hidden shrink-0 rounded-full border border-[#d9c9a8] bg-white p-1 sm:inline-flex">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 lg:shrink-0">
+          <label className="block min-w-0 sm:min-w-[11rem]">
+            <span className="mb-1 block text-xs font-semibold text-[#4A5565] lg:sr-only">
+              정렬
+            </span>
+            <select
+              aria-label="보험사 정렬"
+              className="min-h-11 w-full min-w-0 rounded-full border border-[#d9c9a8] bg-white px-3 py-2 text-sm font-semibold text-[#303845] outline-none transition focus-visible:border-[#aa8137] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
+              onChange={(event) =>
+                setSortMode(event.target.value as InsurerSortMode)
+              }
+              value={sortMode}
+            >
+              {visibleSortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="hidden shrink-0 rounded-full border border-[#d9c9a8] bg-white p-1 sm:inline-flex">
           <ViewModeButton
             active={viewMode === "grid"}
             label="그리드"
@@ -268,6 +294,7 @@ export function DirectoryExplorer({
             onClick={() => setViewMode("list")}
           />
         </div>
+        </div>
       </div>
 
       {showFavoritesEmpty ? (
@@ -275,7 +302,7 @@ export function DirectoryExplorer({
           title={FAVORITES_EMPTY_TITLE}
           description={FAVORITES_EMPTY_DESC}
         />
-      ) : filteredInsurers.length > 0 ? (
+      ) : displayedInsurers.length > 0 ? (
         <div
           className={
             viewMode === "grid"
@@ -283,7 +310,7 @@ export function DirectoryExplorer({
               : "grid grid-cols-1 gap-3"
           }
         >
-          {filteredInsurers.map((insurer) => (
+          {displayedInsurers.map((insurer) => (
             <div
               id={insurer.id === insurerFromQuery ? "directory-insurer-focus" : undefined}
               key={insurer.id}
