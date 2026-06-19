@@ -84,8 +84,8 @@ describe("PR-BS-10 data freshness UI (static, no DB)", () => {
       "utf8",
     );
     assert.doesNotMatch(meta, /adminMemo|internalNote|reviewNote|sourceNote/i);
-    assert.doesNotMatch(meta, /verificationStatus|reviewStatus/);
     assert.doesNotMatch(meta, /freshnessUncertain|확인일 정보 부족|최신성 확인 필요/);
+    assert.match(meta, /FreshnessBadge/);
   });
 
   it("public directory, claim list, and search integrate freshness meta", () => {
@@ -103,6 +103,7 @@ describe("PR-BS-10 data freshness UI (static, no DB)", () => {
     );
     const search = readFileSync(join(ROOT, "app/search/search-results.tsx"), "utf8");
     assert.doesNotMatch(card, /DataFreshnessMeta/);
+    assert.match(card, /FreshnessBadge/);
     assert.match(explorer, /DIRECTORY_PUBLIC_GLOBAL_NOTICE/);
     assert.match(item, /DataFreshnessMeta/);
     assert.match(search, /DataFreshnessMeta/);

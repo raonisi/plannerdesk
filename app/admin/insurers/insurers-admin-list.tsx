@@ -8,6 +8,7 @@ import {
   VerificationStatus,
 } from "@prisma/client";
 import AdminListEmptyState from "@/components/admin/AdminListEmptyState";
+import { AdminFreshnessBadge } from "@/components/admin/admin-freshness-badge";
 import AdminBulkActionPanel, {
   BulkHeaderCheckbox,
   BulkRowCheckbox,
@@ -311,7 +312,13 @@ export default function InsurersAdminList({
                           </div>
                         </td>
                         <td className="px-4 py-4 text-[#4f5661]">
-                          {formatDate(insurer.lastVerifiedAt)}
+                          <div className="space-y-2">
+                            <p>{formatDate(insurer.lastVerifiedAt)}</p>
+                            <AdminFreshnessBadge
+                              lastVerifiedAt={insurer.lastVerifiedAt}
+                              verificationStatus={insurer.verificationStatus}
+                            />
+                          </div>
                         </td>
                         <td className="px-4 py-4 text-[#4f5661]">
                           {formatDate(insurer.updatedAt)}

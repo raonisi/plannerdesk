@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
+import { FreshnessBadge } from "@/components/content/freshness-badge";
 import { GatedFavoriteButton } from "@/components/planner-favorites/gated-favorite-button";
 import { claimLibraryFavoriteId } from "@/lib/planner-favorites/claim-favorite-id";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
@@ -174,6 +175,15 @@ export function ClaimFormListItem({
             >
               {title}
             </p>
+            {isCompactVariant ? (
+              <div className="mt-2">
+                <FreshnessBadge
+                  hasOfficialSource={Boolean(item.officialSourceUrl?.trim())}
+                  lastVerifiedAt={item.lastVerifiedAt}
+                  verificationStatus={status}
+                />
+              </div>
+            ) : null}
             {variant === "default" ? (
               <>
                 <p className="mt-1 break-all text-xs text-[#5B6470]">{item.fileName}</p>
@@ -185,6 +195,7 @@ export function ClaimFormListItem({
                   lastVerifiedAt={item.lastVerifiedAt}
                   officialSourceUrl={item.officialSourceUrl}
                   showClaimNotice
+                  verificationStatus={status}
                 />
                 <p className="mt-2 break-keep text-xs leading-5 text-[#5B6470]">
                   {item.cautionText}
@@ -276,6 +287,7 @@ export function ClaimFormListItem({
             lastVerifiedAt={doc.lastVerifiedAt}
             officialSourceUrl={doc.officialSourceUrl}
             showClaimNotice
+            verificationStatus={status}
           />
         </div>
         <div className="grid gap-2 sm:flex lg:justify-end">

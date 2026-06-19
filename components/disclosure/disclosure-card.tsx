@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { ExternalTabAnchor, formatVerifiedDate } from "@/components/content-page";
+import { ExternalTabAnchor } from "@/components/content-page";
+import { FreshnessBadge } from "@/components/content/freshness-badge";
 import {
   extractInsurerSearchTerm,
   publicDisclosureCategoryLabels,
@@ -92,11 +93,12 @@ export function DisclosureCard({
         </div>
       </div>
 
-      {entry.lastVerifiedAt ? (
-        <p className="mt-4 border-t border-[#E3DED4] pt-3 text-[10px] leading-relaxed text-[#5B6470]">
-          최근 확인일 {formatVerifiedDate(entry.lastVerifiedAt)}
-        </p>
-      ) : null}
+      <div className="mt-4 border-t border-[#E3DED4] pt-3">
+        <FreshnessBadge
+          hasOfficialSource={Boolean(entry.url?.trim())}
+          lastVerifiedAt={entry.lastVerifiedAt}
+        />
+      </div>
     </article>
   );
 }

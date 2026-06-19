@@ -1,3 +1,4 @@
+import { PUBLIC_HOME_FRESHNESS_NOTICE } from "@/lib/public/freshness";
 import { PUBLIC_WORK_HUB_VISIBILITY_NOTICE } from "@/lib/dashboard/work-hub-copy";
 import {
   HOME_DATA_STATUS_COPY,
@@ -91,6 +92,9 @@ export function HomePublicStatsStrip({
       </div>
       <p className={`mt-3 break-keep ${textStyles.small}`}>
         {PUBLIC_WORK_HUB_VISIBILITY_NOTICE}
+      </p>
+      <p className={`mt-2 break-keep text-[11px] leading-relaxed text-[#5B6470]`}>
+        {PUBLIC_HOME_FRESHNESS_NOTICE}
       </p>
     </section>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FreshnessBadge } from "@/components/content/freshness-badge";
 
 import {
   useCallback,
@@ -675,6 +676,16 @@ function CardHeader({
             <h2 className={`mt-2 ${insurerCardInsurerName}`}>
               {insurer.name}
             </h2>
+            <div className="mt-2">
+              <FreshnessBadge
+                hasOfficialSource={Boolean(
+                  insurer.officialWebsiteUrl?.trim() ||
+                    insurer.systemUrl?.trim(),
+                )}
+                lastVerifiedAt={insurer.lastVerifiedAt}
+                verificationStatus={insurer.verificationStatus}
+              />
+            </div>
           </div>
         </div>
 

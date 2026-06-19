@@ -5,6 +5,7 @@ import {
   WORK_TOOLS_PUBLIC_OPEN_SUMMARY,
   WORK_TOOLS_PUBLIC_PII_NOTICE,
   WORK_TOOLS_PUBLIC_REFERENCE_NOTICE,
+  WORK_TOOLS_PUBLIC_FRESHNESS_NOTICE,
 } from "@/lib/work-tools/work-tools-public-copy";
 import { notices, surfaces, spacing, textStyles } from "@/lib/design-system";
 
@@ -26,6 +27,7 @@ export function WorkToolsPublicNotice() {
         </li>
         <li>{WORK_TOOLS_PUBLIC_PII_NOTICE}</li>
         <li>{WORK_TOOLS_PUBLIC_REFERENCE_NOTICE}</li>
+        <li>{WORK_TOOLS_PUBLIC_FRESHNESS_NOTICE}</li>
       </ul>
     </aside>
   );

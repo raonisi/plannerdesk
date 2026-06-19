@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ClaimFormListItem } from "@/components/claim-documents/claim-form-list-item";
+import { FreshnessBadge } from "@/components/content/freshness-badge";
+import { summarizeClaimItemsFreshness } from "@/lib/claim-documents/freshness-summary";
 import { CLAIM_PDF_CAUTION_TEXT } from "@/lib/claim-documents/claim-pdf-governance";
 import { insurerMarketSegmentLabel } from "@/lib/claim-documents/insurer-category";
 import { COMMON_INSURER_KEY } from "@/lib/claim-documents/library-items";
@@ -32,6 +34,7 @@ export function InsurerClaimGroup({
     group.key === COMMON_INSURER_KEY
       ? null
       : insurerMarketSegmentLabel(group.marketSegment);
+  const groupFreshness = summarizeClaimItemsFreshness(group.items);
 
   async function handleCopyNotice(e: React.MouseEvent) {
     e.stopPropagation();
@@ -64,6 +67,9 @@ export function InsurerClaimGroup({
               <span className="mt-1 block text-sm font-semibold text-[#5B6470]">
                 청구서류 {group.items.length}건
                 {segmentLabel ? ` · ${segmentLabel}` : ""}
+              </span>
+              <span className="mt-2 inline-flex">
+                <FreshnessBadge presentation={groupFreshness} />
               </span>
             </span>
             <span

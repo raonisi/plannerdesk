@@ -17,6 +17,9 @@ export const WORK_TOOLS_PUBLIC_PII_NOTICE =
 export const WORK_TOOLS_PUBLIC_REFERENCE_NOTICE =
   "결과는 참고용이며, 최종 판단은 약관·공식 출처·보험사 기준을 함께 확인해야 합니다.";
 
+export const WORK_TOOLS_PUBLIC_FRESHNESS_NOTICE =
+  "표시된 도구는 공개 가능한 완료 기능만 노출됩니다. 준비 중·검수 필요 도구는 공개 화면에 나타나지 않습니다.";
+
 export const WORK_TOOLS_PUBLIC_FORBIDDEN_PHRASES = [
   "로그인하면 모든 도구를 사용할 수 있습니다",
   "관리자 기능도 업무도구에서 사용할 수 있습니다",

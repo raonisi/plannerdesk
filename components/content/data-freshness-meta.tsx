@@ -1,7 +1,7 @@
 import { ExternalTabAnchor } from "@/components/content-page";
+import { FreshnessBadge } from "@/components/content/freshness-badge";
 import {
   DATA_FRESHNESS_COPY,
-  getFreshnessDateLabel,
   getOfficialSourceLabel,
 } from "@/lib/public/data-freshness";
 
@@ -9,6 +9,7 @@ export type DataFreshnessMetaProps = {
   lastVerifiedAt?: string | Date | null;
   reviewedAt?: string | Date | null;
   officialSourceUrl?: string | null;
+  verificationStatus?: string | null;
   /** When true, shows claim-specific guidance (non-compact only). */
   showClaimNotice?: boolean;
   compact?: boolean;
@@ -24,19 +25,27 @@ export function DataFreshnessMeta({
   lastVerifiedAt,
   reviewedAt,
   officialSourceUrl,
+  verificationStatus,
   showClaimNotice = false,
   compact = false,
   className = "",
 }: DataFreshnessMetaProps) {
-  const date = getFreshnessDateLabel(lastVerifiedAt, reviewedAt);
   const source = getOfficialSourceLabel(officialSourceUrl);
+  const freshness = (
+    <FreshnessBadge
+      hasOfficialSource={source.kind === "link"}
+      lastVerifiedAt={lastVerifiedAt}
+      reviewedAt={reviewedAt}
+      verificationStatus={verificationStatus}
+    />
+  );
 
   if (compact) {
     return (
       <span
         className={`inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#5f6670] ${className}`}
       >
-        {date.hasDate ? <span>{date.label}</span> : null}
+        {freshness}
         {source.kind === "link" ? (
           <ExternalTabAnchor
             className={`${badgeClass} border-[#b9d5c9] bg-[#edf7f2] text-[#1f6b55] hover:bg-[#e3f2eb]`}
@@ -51,7 +60,7 @@ export function DataFreshnessMeta({
 
   return (
     <div className={`space-y-1.5 ${className}`}>
-      {date.hasDate ? <p className={metaTextClass}>{date.label}</p> : null}
+      <div className="flex flex-wrap items-center gap-2">{freshness}</div>
       <div className="flex flex-wrap items-center gap-2">
         {source.kind === "link" ? (
           <ExternalTabAnchor
@@ -60,7 +69,11 @@ export function DataFreshnessMeta({
           >
             {source.label}
           </ExternalTabAnchor>
-        ) : null}
+        ) : (
+          <span className={`${badgeClass} border-[#E3DED4] bg-[#F8F7F3] text-[#5B6470]`}>
+            {DATA_FRESHNESS_COPY.missingSource}
+          </span>
+        )}
       </div>
       {showClaimNotice ? (
         <p className={`${metaTextClass} break-keep`}>

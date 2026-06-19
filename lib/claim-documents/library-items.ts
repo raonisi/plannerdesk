@@ -70,9 +70,20 @@ export function getItemCategory(item: ClaimLibraryItem): ClaimDocumentCategory {
 export function getItemVerificationStatus(
   item: ClaimLibraryItem,
 ): VerificationStatus {
-  return item.kind === "pdf"
-    ? item.verificationStatus
-    : item.document.verificationStatus;
+  if (item.kind === "pdf") {
+    if (item.reviewStatus === "needs_review") {
+      return VerificationStatus.needs_review;
+    }
+    return item.verificationStatus;
+  }
+  return item.document.verificationStatus;
+}
+
+export function getItemLastVerifiedAt(item: ClaimLibraryItem): string | null {
+  if (item.kind === "pdf") {
+    return item.lastVerifiedAt ?? null;
+  }
+  return item.document.lastVerifiedAt ?? null;
 }
 
 export function getItemSearchText(item: ClaimLibraryItem): string {
