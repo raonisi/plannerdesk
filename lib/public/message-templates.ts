@@ -8,7 +8,11 @@ import {
   type Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { findProhibitedPhrase } from "@/lib/message-template/safety";
+import { findProhibitedPhrase, findSensitiveVariable } from "@/lib/message-template/safety";
+import {
+  getStaticMessageTemplateFallback,
+  mergePublicMessageTemplates,
+} from "@/lib/public/message-template-fallback";
 
 /**
  * Canonical public visibility for MessageTemplate (PR-76).
@@ -98,8 +102,10 @@ function toIsoDate(value: Date | null): string | null {
 }
 
 export async function getPublicMessageTemplates(): Promise<PublicMessageTemplatesResult> {
+  const fallback = getStaticMessageTemplateFallback();
+
   if (!process.env.DATABASE_URL?.trim()) {
-    return { status: "error" };
+    return { status: "ok", data: fallback };
   }
 
   try {
@@ -121,6 +127,7 @@ export async function getPublicMessageTemplates(): Promise<PublicMessageTemplate
       const safeCopy = record.safeCopy?.trim();
       if (!safeCopy) continue;
       if (findProhibitedPhrase(safeCopy)) continue;
+      if (findSensitiveVariable(safeCopy)) continue;
 
       data.push({
         id: record.id,
@@ -139,9 +146,9 @@ export async function getPublicMessageTemplates(): Promise<PublicMessageTemplate
       });
     }
 
-    return { status: "ok", data };
+    return { status: "ok", data: mergePublicMessageTemplates(data, fallback) };
   } catch {
     console.warn("[plannerdesk] getPublicMessageTemplates failed.");
-    return { status: "error" };
+    return { status: "ok", data: fallback };
   }
 }

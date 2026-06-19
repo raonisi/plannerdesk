@@ -10,6 +10,7 @@ import type { PublicDisclosureLinksResult } from "./disclosure-links";
 import type { PublicInsurer, PublicInsurersResult } from "./insurers";
 import type { PublicKnowledgeArticlesResult } from "./knowledge-articles";
 import type { PublicMessageTemplatesResult } from "./message-templates";
+import { getStaticMessageTemplateFallback } from "@/lib/public/message-template-fallback";
 import { countPublicWorkTools } from "@/lib/work-tools/work-tools-registry";
 
 export type PublicSurfaceStatus = "ok" | "error";
@@ -76,7 +77,11 @@ export function resolveVisiblePublicMessageTemplates(
   if (result.status === "ok") {
     return { count: result.data.length, surfaceStatus: "ok" };
   }
-  return { count: 0, surfaceStatus: "error" };
+  const fallback = getStaticMessageTemplateFallback();
+  return {
+    count: fallback.length,
+    surfaceStatus: fallback.length > 0 ? "ok" : "error",
+  };
 }
 
 export function resolveVisiblePublicKnowledgeArticles(

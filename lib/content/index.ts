@@ -1,6 +1,10 @@
 export { claimDocumentEntries } from "./claim-documents";
 export { contentSafetyRules } from "./safety-rules";
 export { customerMessageTemplates } from "./message-templates";
+export {
+  publicMessageTemplateCatalog,
+  publicMessageTemplateDraftSampleId,
+} from "./public-message-template-catalog";
 export { disclosureLinkEntries } from "./disclosure-links";
 export {
   buildDisclosureRoomCopy,
