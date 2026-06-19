@@ -10,6 +10,7 @@ import type { PublicDisclosureLinksResult } from "./disclosure-links";
 import type { PublicInsurer, PublicInsurersResult } from "./insurers";
 import type { PublicKnowledgeArticlesResult } from "./knowledge-articles";
 import type { PublicMessageTemplatesResult } from "./message-templates";
+import { countPublicWorkTools } from "@/lib/work-tools/work-tools-registry";
 
 export type PublicSurfaceStatus = "ok" | "error";
 
@@ -85,4 +86,12 @@ export function resolveVisiblePublicKnowledgeArticles(
     return { count: result.articles.length, surfaceStatus: "ok" };
   }
   return { count: 0, surfaceStatus: "error" };
+}
+
+/** Home + /work-tools SSOT — registry-filtered public tool count. */
+export function resolveVisiblePublicWorkTools(): {
+  count: number;
+  surfaceStatus: PublicSurfaceStatus;
+} {
+  return { count: countPublicWorkTools(), surfaceStatus: "ok" };
 }

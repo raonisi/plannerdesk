@@ -1,61 +1,10 @@
-/** Canonical Work Tools ids — keep in sync with app/work-tools/work-tools-client.tsx toolGroups. */
-export const WORK_TOOL_CATALOG_IDS = [
-  "planner-stats",
-  "disease-search",
-  "silbi-calculator",
-  "insurance-age",
-  "bmi-calculator",
-  "currency-value",
-  "loan",
-  "savings",
-  "net-salary",
-  "earned-tax",
-  "comp-tax",
-  "inheritance-tax",
-  "card-deduction",
-  "vat",
-  "surgery-code",
-  "disease-code",
-  "hospital-pharmacy",
-  "silson24",
-  "hidden-insurance",
-  "lost-health-standard",
-  "car-face-quote",
-  "car-einsmarket",
-  "car-premium-factor",
-  "car-kidi-register",
-  "car-fault-ratio",
-  "fire-special-building",
-  "building-register",
-  "elevator-info",
-  "gov-resident",
-  "hometax-income",
-  "court-family",
-  "nhis-health",
-  "nps-pension",
-  "fss-fine",
-  "efine-driver",
-  "payinfo",
-  "credit4u",
-  "knia-agent",
-  "klia-agent",
-  "iaa-product",
-  "insurance-institute",
-  "nonlife-textbook",
-  "nonlife-mock",
-  "life-textbook",
-  "life-mock",
-  "variable-textbook",
-  "variable-mock",
-  "insurer-newsletter",
-  "claim-docs-guide",
-  "claim-channel-guide",
-  "claim-msg-guide",
-  "disclosure-guide",
-  "disclosure-msg-guide",
-  "request-msg-guide",
-  "hold-msg-guide",
-  "privacy-msg-guide",
-] as const;
+/**
+ * PR-FEATURE-GAP-02: Work tool ids derived from WORK_TOOL_GROUPS — do not edit manually.
+ */
 
-export type WorkToolCatalogId = (typeof WORK_TOOL_CATALOG_IDS)[number];
+import { getAllWorkToolIds } from "@/lib/work-tools/work-tool-groups";
+
+/** All tool ids from the canonical group catalog (same source as /work-tools). */
+export const WORK_TOOL_CATALOG_IDS = getAllWorkToolIds();
+
+export type WorkToolCatalogId = ReturnType<typeof getAllWorkToolIds>[number];

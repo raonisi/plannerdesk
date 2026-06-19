@@ -18,7 +18,7 @@ import {
   resolveVisiblePublicClaimDocuments,
   resolveVisiblePublicClaimLibrarySurface,
 } from "@/lib/public/public-surface-resolvers";
-import { countPublicWorkTools } from "@/lib/work-tools/work-tools-registry";
+import { countPublicWorkTools, isWorkToolIdPublicVisible } from "@/lib/work-tools/work-tools-registry";
 import { WORK_TOOL_CATALOG_IDS } from "@/lib/work-tools/work-tool-catalog";
 
 const ROOT = process.cwd();
@@ -97,7 +97,7 @@ describe("PR-FEATURE-GAP-01 home public SSOT", () => {
     assert.match(page, /safeGetPublicClaimPdfGovernanceOverlay/);
     assert.match(page, /libraryItemCount/);
     assert.match(page, /resolveVisiblePublicDisclosureLinks/);
-    assert.match(page, /countPublicWorkTools/);
+    assert.match(page, /resolveVisiblePublicWorkTools/);
   });
 
   it("claim and directory pages share claim guide surface resolver", () => {
@@ -109,8 +109,11 @@ describe("PR-FEATURE-GAP-01 home public SSOT", () => {
 
   it("work tools count matches registry-visible catalog ids", () => {
     const count = countPublicWorkTools();
+    const publicCatalogCount = WORK_TOOL_CATALOG_IDS.filter((id) =>
+      isWorkToolIdPublicVisible(id),
+    ).length;
     assert.ok(count > 0);
-    assert.ok(count <= WORK_TOOL_CATALOG_IDS.length);
+    assert.equal(count, publicCatalogCount);
   });
 
   it("buildHomePublicStats uses library item count not guide-only count", () => {

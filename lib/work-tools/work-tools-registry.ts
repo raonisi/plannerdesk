@@ -1,9 +1,10 @@
 /**
- * PR-BS-19C: Work Tools visibility registry — complete tools only on public /work-tools.
- * Admin-only surfaces stay on /admin; unfinished tools are omitted (not disabled).
+ * PR-BS-19C / PR-FEATURE-GAP-02: Work Tools visibility registry and public selectors.
+ * Catalog SSOT: `WORK_TOOL_GROUPS` in work-tool-groups.ts.
  */
 
-import { WORK_TOOL_CATALOG_IDS } from "@/lib/work-tools/work-tool-catalog";
+import { getAllWorkToolIds, WORK_TOOL_GROUPS } from "@/lib/work-tools/work-tool-groups";
+import type { WorkToolGroup, WorkToolItem } from "@/lib/work-tools/work-tool-groups";
 
 export type WorkToolStatus =
   | "complete"
@@ -59,6 +60,10 @@ export function isWorkToolIdPublicVisible(toolId: string): boolean {
   return isWorkToolPublicVisible(getWorkToolConfig(toolId));
 }
 
+export function isPublicWorkTool(toolId: string): boolean {
+  return isWorkToolIdPublicVisible(toolId);
+}
+
 export type WorkToolGroupLike<T extends { id: string }> = {
   title: string;
   description?: string;
@@ -77,6 +82,29 @@ export function filterPublicWorkToolGroups<T extends { id: string }>(
     .filter((group) => group.tools.length > 0);
 }
 
+export function getAllWorkTools(): WorkToolItem[] {
+  return WORK_TOOL_GROUPS.flatMap((group) => group.tools);
+}
+
+export function getPublicWorkToolGroups(): WorkToolGroup[] {
+  return filterPublicWorkToolGroups(WORK_TOOL_GROUPS) as WorkToolGroup[];
+}
+
+export function getPublicWorkTools(): WorkToolItem[] {
+  return getPublicWorkToolGroups().flatMap((group) => group.tools);
+}
+
+export function getWorkToolSurface(): {
+  count: number;
+  toolIds: string[];
+} {
+  const tools = getPublicWorkTools();
+  return {
+    count: tools.length,
+    toolIds: tools.map((tool) => tool.id),
+  };
+}
+
 export function listHiddenWorkToolIds(allIds: string[]): string[] {
   return allIds.filter((id) => !isWorkToolIdPublicVisible(id));
 }
@@ -85,7 +113,9 @@ export function listPublicWorkToolIds(allIds: string[]): string[] {
   return allIds.filter((id) => isWorkToolIdPublicVisible(id));
 }
 
-/** Count of Work Tools panels visible on /work-tools (registry-filtered). */
+/** Count of Work Tools panels visible on /work-tools — same selector as the page UI. */
 export function countPublicWorkTools(): number {
-  return listPublicWorkToolIds([...WORK_TOOL_CATALOG_IDS]).length;
+  return getWorkToolSurface().count;
 }
+
+export { WORK_TOOL_GROUPS, getAllWorkToolIds };

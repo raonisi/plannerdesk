@@ -7,40 +7,11 @@ import {
   listHiddenWorkToolIds,
   listPublicWorkToolIds,
 } from "@/lib/work-tools/work-tools-registry";
+import { getAllWorkToolIds } from "@/lib/work-tools/work-tool-groups";
 
 const ROOT = process.cwd();
 
-const ALL_TOOL_IDS = [
-  "planner-stats",
-  "disease-search",
-  "silbi-calculator",
-  "insurance-age",
-  "bmi-calculator",
-  "currency-value",
-  "loan",
-  "savings",
-  "net-salary",
-  "earned-tax",
-  "comp-tax",
-  "inheritance-tax",
-  "card-deduction",
-  "vat",
-  "surgery-code",
-  "disease-code",
-  "hospital-pharmacy",
-  "silson24",
-  "hidden-insurance",
-  "lost-health-standard",
-  "car-face-quote",
-  "nonlife-textbook",
-  "life-textbook",
-  "variable-textbook",
-  "nonlife-mock",
-  "life-mock",
-  "variable-mock",
-  "insurer-newsletter",
-  "claim-docs-guide",
-] as const;
+const ALL_TOOL_IDS = getAllWorkToolIds();
 
 describe("PR-BS-19C unfinished tools hidden", () => {
   it("registry marks exam files and newsletter tools as public planner resources", () => {

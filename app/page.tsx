@@ -13,10 +13,10 @@ import {
   resolveVisiblePublicInsurers,
   resolveVisiblePublicKnowledgeArticles,
   resolveVisiblePublicMessageTemplates,
+  resolveVisiblePublicWorkTools,
 } from "@/lib/public/public-surface-resolvers";
 import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
 import { getPlannerVerifiedWorkLinks } from "@/lib/work-links/verified-catalog";
-import { countPublicWorkTools } from "@/lib/work-tools/work-tools-registry";
 import {
   buildHomePublicStats,
   resolveHomeDomainFetchStatus,
@@ -54,7 +54,7 @@ export default async function Home() {
   const messageTemplateSurface =
     resolveVisiblePublicMessageTemplates(messageTemplateResult);
   const knowledgeSurface = resolveVisiblePublicKnowledgeArticles(knowledgeResult);
-  const workToolCount = countPublicWorkTools();
+  const workToolsSurface = resolveVisiblePublicWorkTools();
 
   const fetchStatus: HomeDataFetchSnapshot = {
     insurers: resolveHomeDomainFetchStatus(insurerSurface.surfaceStatus),
@@ -72,7 +72,7 @@ export default async function Home() {
     claimDocumentCount: claimSurface.libraryItemCount,
     disclosureLinkCount: disclosureSurface.count,
     messageTemplateCount: messageTemplateSurface.count,
-    workToolCount,
+    workToolCount: workToolsSurface.count,
     knowledgeArticleCount: knowledgeSurface.count,
   };
 
