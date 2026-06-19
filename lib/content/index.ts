@@ -5,6 +5,7 @@ export {
   publicMessageTemplateCatalog,
   publicMessageTemplateDraftSampleId,
 } from "./public-message-template-catalog";
+export { knowledgeFallbackCatalog } from "./knowledge-fallback-catalog";
 export { disclosureLinkEntries } from "./disclosure-links";
 export {
   buildDisclosureRoomCopy,

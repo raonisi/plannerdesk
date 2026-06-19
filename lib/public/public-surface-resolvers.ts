@@ -11,6 +11,7 @@ import type { PublicInsurer, PublicInsurersResult } from "./insurers";
 import type { PublicKnowledgeArticlesResult } from "./knowledge-articles";
 import type { PublicMessageTemplatesResult } from "./message-templates";
 import { getStaticMessageTemplateFallback } from "@/lib/public/message-template-fallback";
+import { getStaticKnowledgeFallback } from "@/lib/public/knowledge-fallback";
 import { countPublicWorkTools } from "@/lib/work-tools/work-tools-registry";
 
 export type PublicSurfaceStatus = "ok" | "error";
@@ -90,7 +91,11 @@ export function resolveVisiblePublicKnowledgeArticles(
   if (result.status === "ok") {
     return { count: result.articles.length, surfaceStatus: "ok" };
   }
-  return { count: 0, surfaceStatus: "error" };
+  const fallback = getStaticKnowledgeFallback();
+  return {
+    count: fallback.length,
+    surfaceStatus: fallback.length > 0 ? "ok" : "error",
+  };
 }
 
 /** Home + /work-tools SSOT — registry-filtered public tool count. */

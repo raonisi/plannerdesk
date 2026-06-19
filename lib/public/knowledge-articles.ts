@@ -1,6 +1,11 @@
 import { KnowledgeArticleStatus, type Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
+  getStaticKnowledgeFallback,
+  getStaticKnowledgeFallbackBySlug,
+  mergePublicKnowledgeArticles,
+} from "@/lib/public/knowledge-fallback";
+import {
   PUBLIC_CATEGORY_LABEL,
   PUBLIC_RISK_LABEL,
   PUBLIC_SOURCE_TYPE_LABEL,
@@ -226,8 +231,10 @@ function mapDetail(record: PublicDetailRecord): PublicKnowledgeArticleDetail {
 }
 
 export async function getPublicKnowledgeArticles(): Promise<PublicKnowledgeArticlesResult> {
+  const fallback = getStaticKnowledgeFallback();
+
   if (!process.env.DATABASE_URL?.trim()) {
-    return { status: "unavailable" };
+    return { status: "ok", articles: fallback };
   }
 
   try {
@@ -237,13 +244,18 @@ export async function getPublicKnowledgeArticles(): Promise<PublicKnowledgeArtic
       select: publicListSelect,
     });
 
+    const articles = mergePublicKnowledgeArticles(
+      records.map(mapListItem),
+      fallback,
+    );
+
     return {
       status: "ok",
-      articles: records.map(mapListItem),
+      articles,
     };
   } catch {
     console.warn("[plannerdesk] getPublicKnowledgeArticles failed.");
-    return { status: "unavailable" };
+    return { status: "ok", articles: fallback };
   }
 }
 
@@ -254,13 +266,17 @@ export async function getPublicKnowledgeArticles(): Promise<PublicKnowledgeArtic
 export async function getPublicKnowledgeArticleBySlug(
   slug: string,
 ): Promise<PublicKnowledgeArticleBySlugResult> {
-  if (!process.env.DATABASE_URL?.trim()) {
-    return { status: "unavailable" };
-  }
-
   const normalizedSlug = slug.trim();
   if (!normalizedSlug) {
     return { status: "not_found" };
+  }
+
+  const fallbackArticle = getStaticKnowledgeFallbackBySlug(normalizedSlug);
+
+  if (!process.env.DATABASE_URL?.trim()) {
+    return fallbackArticle
+      ? { status: "ok", article: fallbackArticle }
+      : { status: "not_found" };
   }
 
   try {
@@ -272,13 +288,19 @@ export async function getPublicKnowledgeArticleBySlug(
       select: publicDetailSelect,
     });
 
-    if (!record) {
-      return { status: "not_found" };
+    if (record) {
+      return { status: "ok", article: mapDetail(record) };
     }
 
-    return { status: "ok", article: mapDetail(record) };
+    if (fallbackArticle) {
+      return { status: "ok", article: fallbackArticle };
+    }
+
+    return { status: "not_found" };
   } catch {
     console.warn("[plannerdesk] getPublicKnowledgeArticleBySlug failed.");
-    return { status: "unavailable" };
+    return fallbackArticle
+      ? { status: "ok", article: fallbackArticle }
+      : { status: "not_found" };
   }
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { KnowledgeArticleCategory } from "@prisma/client";
 import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -126,7 +127,7 @@ function KnowledgeWorkflows() {
       title: "2. 고지·심사 전 확인",
       description: "청약서 질문, 진단·투약 기간, 최근 병원 이력 등 확인 순서를 정리합니다.\n가입 가능 여부, 할증, 부담보, 거절 여부는 보험사 심사 후 결정됩니다.",
       links: [
-        { href: "/knowledge", label: "고지 관련 지식 보기" },
+        { href: `/knowledge?category=${KnowledgeArticleCategory.underwriting}`, label: "고지 관련 지식 보기" },
         { href: "/message-templates", label: "고객 안내문 확인" }
       ]
     },
@@ -134,7 +135,7 @@ function KnowledgeWorkflows() {
       title: "3. 해지·유지 상담 전 확인",
       description: "보장 공백, 환급금, 감액, 납입유예, 재가입 조건을 먼저 확인합니다.\n해지 또는 유지를 무조건 권유하지 않고, 선택지를 비교할 수 있도록 돕습니다.",
       links: [
-        { href: "/knowledge", label: "해지 전 기준 보기" },
+        { href: `/knowledge?category=${KnowledgeArticleCategory.cancellation}`, label: "해지 전 기준 보기" },
         { href: "/message-templates", label: "고객 안내문 확인" }
       ]
     },
@@ -157,7 +158,7 @@ function KnowledgeWorkflows() {
     {
       title: "6. 운영 안전 기준",
       description: "개인정보, 의료자료, 보험금 판단, 손해사정 오인 위험을 차단하기 위한 기준입니다.\nPlannerDesk 안에는 주민등록번호, 진단서, 처방전, 검사결과지, 청구서류 원본을 입력하지 않습니다.",
-      links: [{ href: "/knowledge", label: "안전 기준 보기" }]
+      links: [{ href: `/knowledge?category=${KnowledgeArticleCategory.operation_safety}`, label: "안전 기준 보기" }]
     }
   ];
 
