@@ -98,10 +98,8 @@ describe("PR-BS-21 claim documents accordion UX", () => {
       "utf8",
     );
     assert.match(explorer, /CLAIM_PDF_ACCORDION_NOTICE/);
-    assert.match(
-      explorer,
-      /검색 결과가 없습니다\. 보험사명 또는 서류명을 다시 확인해 주세요\./,
-    );
+    assert.match(explorer, /CLAIM_SEARCH_EMPTY_DESCRIPTION/);
+    assert.match(explorer, /EMPTY_STATE_RESET_SEARCH_LABEL/);
   });
 
   it("filters expose life and non-life segment options", () => {

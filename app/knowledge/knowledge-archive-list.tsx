@@ -9,6 +9,10 @@ import {
   KnowledgeRiskLevel,
 } from "@prisma/client";
 import { EmptyState } from "@/components/content-page";
+import {
+  EMPTY_STATE_VIEW_ALL_KNOWLEDGE_LABEL,
+  KNOWLEDGE_SEARCH_EMPTY_TITLE,
+} from "@/lib/public/empty-state-copy";
 import { PUBLIC_EMPTY_CONTENT_UPDATING } from "@/lib/public/public-surface-terminology";
 import { GatedFavoriteButton } from "@/components/planner-favorites/gated-favorite-button";
 import { KnowledgeFavoritesStrip } from "@/components/planner-favorites/knowledge-favorites-strip";
@@ -363,8 +367,19 @@ export function KnowledgeArchiveList({
       {!blockedMessage && filteredItems.length === 0 ? (
         <div className="space-y-5">
           <EmptyState
+            actions={[
+              {
+                label: EMPTY_STATE_VIEW_ALL_KNOWLEDGE_LABEL,
+                onClick: () =>
+                  router.push(
+                    buildKnowledgeArchiveHref(defaultKnowledgeArchiveFilterState()),
+                  ),
+                variant: "primary",
+                ariaLabel: "지식 아카이브 검색 및 필터 초기화",
+              },
+            ]}
             description={KNOWLEDGE_ARCHIVE_EMPTY_MESSAGE}
-            title="조건에 맞는 지식 문서가 없습니다."
+            title={KNOWLEDGE_SEARCH_EMPTY_TITLE}
           />
           <BrowseNextSteps title="다른 공개 정보 찾기" />
         </div>

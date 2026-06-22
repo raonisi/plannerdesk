@@ -1,5 +1,7 @@
-import Link from "next/link";
-import { buttons } from "@/lib/design-system";
+import {
+  EmptyState,
+  type EmptyStateAction,
+} from "@/components/public/empty-state";
 
 export function EmptyStatePanel({
   title,
@@ -10,29 +12,18 @@ export function EmptyStatePanel({
   description: string;
   actions?: Array<{ href: string; label: string; variant?: "primary" | "outline" }>;
 }) {
+  const mappedActions: EmptyStateAction[] | undefined = actions?.map((action) => ({
+    href: action.href,
+    label: action.label,
+    variant: action.variant,
+  }));
+
   return (
-    <div className="rounded-xl border border-dashed border-[#E3DED4] bg-[#F7F4EE] p-5">
-      <p className="text-sm font-bold text-[#0F1D2E]">{title}</p>
-      <p className="mt-2 text-xs leading-relaxed text-[#4A5565] break-keep">
-        {description}
-      </p>
-      {actions && actions.length > 0 ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {actions.map((action) => (
-            <Link
-              key={action.href + action.label}
-              className={`${buttons.base} px-4 ${
-                action.variant === "primary"
-                  ? buttons.primary
-                  : buttons.outline
-              }`}
-              href={action.href}
-            >
-              {action.label}
-            </Link>
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <EmptyState
+      actions={mappedActions}
+      description={description}
+      title={title}
+      variant="compact"
+    />
   );
 }

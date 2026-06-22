@@ -26,6 +26,11 @@ import {
   matchesWorkToolCategory,
 } from "@/lib/tool-display";
 import { EmptyState, SearchBar } from "@/components/content-page";
+import {
+  EMPTY_STATE_VIEW_ALL_TOOLS_LABEL,
+  WORK_TOOLS_SEARCH_EMPTY_DESCRIPTION,
+  WORK_TOOLS_SEARCH_EMPTY_TITLE,
+} from "@/lib/public/empty-state-copy";
 import { touchTargets } from "@/lib/design-system";
 import { FavoriteButton } from "@/components/launcher/favorite-button";
 import {
@@ -934,8 +939,16 @@ export function WorkToolsClient() {
           </div>
         ) : (
           <EmptyState
-            description="검색어를 줄이거나 다른 카테고리를 선택해 주세요."
-            title="조건에 맞는 업무 도구가 없습니다."
+            actions={[
+              {
+                label: EMPTY_STATE_VIEW_ALL_TOOLS_LABEL,
+                onClick: resetWorkToolFilters,
+                variant: "primary",
+                ariaLabel: "업무 도구 검색 및 카테고리 필터 초기화",
+              },
+            ]}
+            description={WORK_TOOLS_SEARCH_EMPTY_DESCRIPTION}
+            title={WORK_TOOLS_SEARCH_EMPTY_TITLE}
           />
         )}
       </section>

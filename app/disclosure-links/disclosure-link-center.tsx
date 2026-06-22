@@ -21,6 +21,11 @@ import {
 import type { PublicDisclosureLink } from "@/lib/public/disclosure-links";
 import { sectionEyebrow } from "@/lib/design-system";
 import {
+  DISCLOSURE_SEARCH_EMPTY_DESCRIPTION,
+  DISCLOSURE_SEARCH_EMPTY_TITLE,
+  EMPTY_STATE_RESET_FILTERS_LABEL,
+} from "@/lib/public/empty-state-copy";
+import {
   isInsurerDisclosureRoomCategory,
   matchesDisclosureRoomSearchQuery,
 } from "@/lib/content/disclosure-room";
@@ -113,6 +118,14 @@ export function DisclosureLinkCenter({
       );
     });
   }, [category, entries, insurerFilter, official, query, targetType]);
+
+  const resetDisclosureFilters = () => {
+    setQuery("");
+    setCategory("all");
+    setTargetType("all");
+    setOfficial("all");
+    setInsurerFilter("all");
+  };
 
   const groups = publicDisclosureCategoryOrder
     .map((categoryKey) => ({
@@ -233,8 +246,16 @@ export function DisclosureLinkCenter({
         </div>
       ) : (
         <EmptyState
-          description="검색어를 줄이거나 자료 분류·고급 필터를 변경해 주세요."
-          title="조건에 맞는 공식 자료가 없습니다."
+          actions={[
+            {
+              label: EMPTY_STATE_RESET_FILTERS_LABEL,
+              onClick: resetDisclosureFilters,
+              variant: "primary",
+              ariaLabel: "공시·약관 검색 및 필터 초기화",
+            },
+          ]}
+          description={DISCLOSURE_SEARCH_EMPTY_DESCRIPTION}
+          title={DISCLOSURE_SEARCH_EMPTY_TITLE}
         />
       )}
     </div>

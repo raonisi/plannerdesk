@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
@@ -28,6 +28,13 @@ import {
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicInsurer } from "@/lib/public/insurers";
 import type { PublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/governance-repository";
+import {
+  DIRECTORY_FAVORITES_EMPTY_DESCRIPTION,
+  DIRECTORY_FAVORITES_EMPTY_TITLE,
+  DIRECTORY_SEARCH_EMPTY_DESCRIPTION,
+  DIRECTORY_SEARCH_EMPTY_TITLE,
+  EMPTY_STATE_RESET_FILTERS_LABEL,
+} from "@/lib/public/empty-state-copy";
 
 type TabType = "all" | "life" | "non_life" | "mutual" | "digital" | "favorites";
 type ViewMode = "grid" | "list";
@@ -40,10 +47,6 @@ const tabOptions: { label: string; value: TabType }[] = [
   { label: "디지털손보사", value: "digital" },
   { label: "즐겨찾기", value: "favorites" },
 ];
-
-const FAVORITES_EMPTY_TITLE = "즐겨찾기한 보험사가 아직 없습니다.";
-const FAVORITES_EMPTY_DESC =
-  "보험사 행 오른쪽 별표 버튼을 눌러 자주 쓰는 보험사를 이 화면에 고정해 보세요.";
 
 const CHOSUNG_LIST = [
   "ㄱ",
@@ -186,6 +189,12 @@ export function DirectoryExplorer({
   const showFavoritesEmpty =
     activeTab === "favorites" && filteredInsurers.length === 0;
 
+  const resetDirectoryFilters = useCallback(() => {
+    setQuery("");
+    setActiveTab("all");
+    setSortMode(DEFAULT_INSURER_SORT);
+  }, []);
+
   return (
     <PlannerFavoritesScope enabled={plannerFavoritesEnabled}>
     <div className="space-y-6">
@@ -299,8 +308,8 @@ export function DirectoryExplorer({
 
       {showFavoritesEmpty ? (
         <EmptyState
-          title={FAVORITES_EMPTY_TITLE}
-          description={FAVORITES_EMPTY_DESC}
+          description={DIRECTORY_FAVORITES_EMPTY_DESCRIPTION}
+          title={DIRECTORY_FAVORITES_EMPTY_TITLE}
         />
       ) : displayedInsurers.length > 0 ? (
         <div
@@ -342,8 +351,16 @@ export function DirectoryExplorer({
       ) : (
         <div className="space-y-5">
           <EmptyState
-            description="보험사명·초성을 다르게 입력하거나, 통합 검색에서 청구서류·지식을 찾아보세요."
-            title="조건에 맞는 보험사가 없습니다."
+            actions={[
+              {
+                label: EMPTY_STATE_RESET_FILTERS_LABEL,
+                onClick: resetDirectoryFilters,
+                variant: "primary",
+                ariaLabel: "보험사 검색 및 필터 초기화",
+              },
+            ]}
+            description={DIRECTORY_SEARCH_EMPTY_DESCRIPTION}
+            title={DIRECTORY_SEARCH_EMPTY_TITLE}
           />
           <BrowseNextSteps title="다른 메뉴에서 찾기" />
         </div>

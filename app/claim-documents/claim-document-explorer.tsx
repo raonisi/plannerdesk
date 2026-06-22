@@ -20,9 +20,11 @@ import { ClaimDocumentFavoritesStrip } from "@/components/planner-favorites/clai
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
 import { ClaimFormsFilters } from "./claim-forms-filters";
 import { InsurerClaimGroup as InsurerClaimGroupPanel } from "./insurer-claim-group";
-
-const EMPTY_SEARCH_MESSAGE =
-  "검색 결과가 없습니다. 보험사명 또는 서류명을 다시 확인해 주세요.";
+import {
+  CLAIM_SEARCH_EMPTY_DESCRIPTION,
+  CLAIM_SEARCH_EMPTY_TITLE,
+  EMPTY_STATE_RESET_SEARCH_LABEL,
+} from "@/lib/public/empty-state-copy";
 
 export function ClaimDocumentExplorer({
   documents,
@@ -231,34 +233,18 @@ export function ClaimDocumentExplorer({
         ) : (
           <div className="space-y-5">
             <EmptyState
-              description={EMPTY_SEARCH_MESSAGE}
-              title="조건에 맞는 청구서류가 없습니다."
+              actions={[
+                {
+                  label: EMPTY_STATE_RESET_SEARCH_LABEL,
+                  onClick: resetFilters,
+                  variant: "primary",
+                  ariaLabel: "청구서류 검색어 및 필터 초기화",
+                },
+              ]}
+              description={CLAIM_SEARCH_EMPTY_DESCRIPTION}
+              title={CLAIM_SEARCH_EMPTY_TITLE}
             />
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
-                href="/directory"
-              >
-                보험사 디렉터리
-              </Link>
-              <Link
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#d9c9a8] bg-white px-5 text-sm font-bold text-[#0F1D2E] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
-                href="/search"
-              >
-                통합 검색
-              </Link>
-            </div>
             <BrowseNextSteps className="mt-2" title="관련 메뉴" />
-            <div className="flex justify-center">
-              <button
-                aria-label="검색어 및 필터 초기화"
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#0F1D2E] bg-[#0F1D2E] px-5 text-sm font-bold text-white transition hover:bg-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
-                onClick={resetFilters}
-                type="button"
-              >
-                필터 초기화
-              </button>
-            </div>
           </div>
         )}
       </div>

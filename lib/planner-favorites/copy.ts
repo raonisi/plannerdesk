@@ -9,9 +9,9 @@ export const LOCAL_FAVORITES_PUBLISHED_NOTICE =
 export const FAVORITE_TOGGLE_ADD_LABEL = "자주 쓰는 항목으로 저장";
 export const FAVORITE_TOGGLE_REMOVE_LABEL = "즐겨찾기 해제";
 
-export const HOME_FAVORITES_EMPTY_TITLE = "아직 즐겨찾기가 없습니다.";
+export const HOME_FAVORITES_EMPTY_TITLE = "즐겨찾기한 업무가 없습니다.";
 export const HOME_FAVORITES_EMPTY_DESCRIPTION =
-  "자주 쓰는 공개 업무를 즐겨찾기에 추가해보세요. 저장 내용은 이 브라우저에서만 관리되며 고객정보는 저장하지 않습니다.";
+  "자주 쓰는 공개 업무를 즐겨찾기에 추가해보세요. 고객정보는 저장하지 않습니다.";
 
 export const HOME_RECENTS_EMPTY_TITLE = "아직 최근 사용한 업무가 없습니다.";
 export const HOME_RECENTS_EMPTY_DESCRIPTION =

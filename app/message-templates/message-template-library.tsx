@@ -36,6 +36,11 @@ import {
   MessageTemplateRiskLevel,
   MessageTemplateTone,
 } from "@prisma/client";
+import {
+  EMPTY_STATE_RESET_FILTERS_LABEL,
+  MESSAGE_TEMPLATE_SEARCH_EMPTY_DESCRIPTION,
+  MESSAGE_TEMPLATE_SEARCH_EMPTY_TITLE,
+} from "@/lib/public/empty-state-copy";
 import { sectionEyebrow, shadows } from "@/lib/design-system";
 import {
   mobileCardBadgeRow,
@@ -480,8 +485,16 @@ export function MessageTemplateLibrary({
         </div>
       ) : (
         <EmptyState
-          description="검색어를 줄이거나 필터를 변경해 주세요."
-          title="조건에 맞는 안내 문구가 없습니다."
+          actions={[
+            {
+              label: EMPTY_STATE_RESET_FILTERS_LABEL,
+              onClick: resetMessageFilters,
+              variant: "primary",
+              ariaLabel: "고객문구 검색 및 필터 초기화",
+            },
+          ]}
+          description={MESSAGE_TEMPLATE_SEARCH_EMPTY_DESCRIPTION}
+          title={MESSAGE_TEMPLATE_SEARCH_EMPTY_TITLE}
         />
       )}
     </div>

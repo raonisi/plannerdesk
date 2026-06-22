@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { EmptyState as PublicEmptyState } from "@/components/public/empty-state";
 import {
   formatVerifiedDate as formatVerifiedDateValue,
 } from "@/lib/public/data-freshness";
@@ -219,21 +220,22 @@ export function MissingFieldText({ label = uiText.missing }: { label?: string })
 
 export function EmptyState({
   title = uiText.emptyTitle,
-  description = uiText.emptyDescription
+  description = uiText.emptyDescription,
+  ...rest
 }: {
   title?: string;
   description?: string;
-}) {
+} & Omit<import("@/components/public/empty-state").EmptyStateProps, "title" | "description">) {
   return (
-    <div
-      className={`rounded-xl border border-dashed border-[#E3DED4] bg-[#F7F4EE] p-8 text-center sm:p-10`}
-      role="status"
-    >
-      <p className="break-keep text-lg font-bold text-[#0F1D2E] sm:text-xl">{title}</p>
-      <p className={`mt-3 break-keep ${textStyles.small}`}>{description}</p>
-    </div>
+    <PublicEmptyState
+      description={description}
+      title={title}
+      {...rest}
+    />
   );
 }
+
+export type { EmptyStateAction } from "@/components/public/empty-state";
 
 export function ExternalSourceLink({
   href,
