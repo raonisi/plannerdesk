@@ -30,7 +30,7 @@ describe("PR173-A / PR-BS-19C work-tools access policy", () => {
   it("read-only work-tools api routes use public read guard", () => {
     for (const route of WORK_TOOLS_API_ROUTES) {
       const src = readFileSync(join(ROOT, route), "utf8");
-      assert.match(src, /workToolsPublicReadRouteGuard/, route);
+      assert.match(src, /workToolsPublicReadRouteGuard\("/, route);
     }
   });
 
@@ -41,6 +41,7 @@ describe("PR173-A / PR-BS-19C work-tools access policy", () => {
     );
     assert.match(guard, /workToolsPublicReadRouteGuard/);
     assert.match(guard, /workToolsRouteGuard/);
+    assert.match(guard, /isWorkToolsApiPublicReadAllowed/);
     assert.match(guard, /Unauthorized/);
     assert.match(guard, /Forbidden/);
     assert.doesNotMatch(guard, /stack|secret|allowlist|supabase|render\.com/i);

@@ -19,7 +19,7 @@ export const CODE_SEARCH_HIGH_RISK_TYPES = [
 
 export type CodeSearchHighRiskType = (typeof CODE_SEARCH_HIGH_RISK_TYPES)[number];
 
-/** Work Tools panel ids wired to code search APIs (planner-only). */
+/** Work Tools panel ids wired to code search APIs (registry-governed server_read). */
 export const CODE_SEARCH_WORK_TOOLS_TOOL_IDS = [
   "disease-code",
   "surgery-code",

@@ -58,7 +58,7 @@ function storageListResponse(
 }
 
 export async function GET(request: NextRequest) {
-  const denied = await workToolsPublicReadRouteGuard();
+  const denied = await workToolsPublicReadRouteGuard("storage");
   if (denied) return denied;
 
   const { searchParams } = new URL(request.url);

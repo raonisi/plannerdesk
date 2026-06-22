@@ -74,6 +74,6 @@ describe("PR173-C work-tools claim boundary (static)", () => {
       join(ROOT, "app/api/work-tools/storage/route.ts"),
       "utf8",
     );
-    assert.match(storage, /workToolsPublicReadRouteGuard/);
+    assert.match(storage, /workToolsPublicReadRouteGuard\("storage"\)/);
   });
 });

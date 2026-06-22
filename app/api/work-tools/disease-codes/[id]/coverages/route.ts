@@ -5,7 +5,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const denied = await workToolsPublicReadRouteGuard();
+  const denied = await workToolsPublicReadRouteGuard("disease-codes/coverages");
   if (denied) return denied;
 
   const { id } = await params;

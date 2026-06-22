@@ -27,7 +27,7 @@ describe("PR173-B work-tools storage hardcoded key removal (static)", () => {
     assert.match(route, /getWorkToolsFirebaseConfig/);
     assert.match(route, /getWorkToolsSupabaseConfig/);
     assert.match(route, /WORK_TOOLS_STORAGE_NOT_CONFIGURED_ERROR/);
-    assert.match(route, /workToolsPublicReadRouteGuard/);
+    assert.match(route, /workToolsPublicReadRouteGuard\("storage"\)/);
   });
 
   it("storage route does not log secrets or provider details", () => {

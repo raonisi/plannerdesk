@@ -20,7 +20,7 @@ describe("PR-BS-19C work-tools open access", () => {
     assert.doesNotMatch(page, /검증 설계사 전용/);
   });
 
-  it("public read APIs use workToolsPublicReadRouteGuard", () => {
+  it("public read APIs use registry-backed public read guard", () => {
     for (const route of [
       "app/api/work-tools/disease-codes/route.ts",
       "app/api/work-tools/surgery-codes/route.ts",
@@ -28,7 +28,7 @@ describe("PR-BS-19C work-tools open access", () => {
       "app/api/work-tools/storage/route.ts",
     ]) {
       const src = readFileSync(join(ROOT, route), "utf8");
-      assert.match(src, /workToolsPublicReadRouteGuard/, route);
+      assert.match(src, /workToolsPublicReadRouteGuard\("/, route);
     }
   });
 

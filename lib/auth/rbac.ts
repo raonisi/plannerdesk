@@ -135,7 +135,9 @@ export function canManageUsers(userOrSession: UserSessionLike | null | undefined
 }
 
 /**
- * Work tools (/work-tools, /api/work-tools/*): verified_planner or admin roles only.
+ * Protected work-tools execution (server write and verified_planner-only server read).
+ * Public /work-tools catalog and registry-approved public server_read routes are governed
+ * separately via work-tools-registry + workToolsPublicReadRouteGuard — not this helper alone.
  */
 export function canAccessWorkTools(
   userOrSession: UserSessionLike | null | undefined,

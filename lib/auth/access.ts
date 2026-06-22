@@ -99,10 +99,12 @@ export type WorkToolsAccessState =
   | { status: "denied"; session: AdminSession };
 
 /**
- * Resolves /work-tools and /api/work-tools/* access.
+ * Resolves protected work-tools session access for planner favorites and server execution.
  * - locked: no session
  * - denied: session without verified_planner or admin role
  * - authenticated: verified_planner or admin
+ *
+ * Public /work-tools catalog rendering does not call this helper.
  */
 export async function getWorkToolsAccess(): Promise<WorkToolsAccessState> {
   const session = await auth();

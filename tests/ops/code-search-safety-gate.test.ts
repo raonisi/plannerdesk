@@ -52,7 +52,7 @@ describe("PR-BS-18 code search safety gate", () => {
     assert.doesNotMatch(page, /getWorkToolsAccess/);
     for (const route of CODE_API_ROUTES) {
       const src = readFileSync(join(ROOT, route), "utf8");
-      assert.match(src, /workToolsPublicReadRouteGuard/, route);
+      assert.match(src, /workToolsPublicReadRouteGuard\("/, route);
     }
     const guard = readFileSync(
       join(ROOT, "lib/api/work-tools-route-guard.ts"),
@@ -60,6 +60,7 @@ describe("PR-BS-18 code search safety gate", () => {
     );
     assert.match(guard, /workToolsPublicReadRouteGuard/);
     assert.match(guard, /workToolsRouteGuard/);
+    assert.match(guard, /isWorkToolsApiPublicReadAllowed/);
     assert.match(guard, /getWorkToolsAccess/);
     assert.match(guard, /401/);
     assert.match(guard, /403/);

@@ -30,5 +30,8 @@ export const WORK_TOOLS_PUBLIC_FORBIDDEN_PHRASES = [
   "AI가 최종 판단합니다",
 ] as const;
 
+export const WORK_TOOLS_PUBLIC_SCOPE_NOTICE =
+  "현재 공개 범위에서 제공되는 참고 도구입니다. 설계사 전용 실행 기능은 로그인 후 권한이 있는 경우에만 사용할 수 있습니다.";
+
 export const WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION =
   "보험나이, 상병코드, 공식 링크 등 로그인 없이 쓸 수 있는 참고 도구입니다.";

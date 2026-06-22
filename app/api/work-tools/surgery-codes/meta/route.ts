@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { workToolsPublicReadRouteGuard } from "@/lib/api/work-tools-route-guard";
 
 export async function GET() {
-  const denied = await workToolsPublicReadRouteGuard();
+  const denied = await workToolsPublicReadRouteGuard("surgery-codes/meta");
   if (denied) return denied;
 
   try {
