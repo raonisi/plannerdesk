@@ -184,7 +184,7 @@ describe("PR-UX-07 message template expansion", () => {
 
   it("message template library keeps search, filter, and copy wiring", () => {
     const library = readSource("app/message-templates/message-template-library.tsx");
-    assert.match(library, /handleCopySafeCopy/);
+    assert.match(library, /CopyActionButton/);
     assert.match(library, /applySafeCopyPlaceholders/);
     assert.match(library, /publicMessageCategoryFilterTabs/);
     assert.match(library, /안전 문구 복사/);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Star, Copy, ChevronDown } from "lucide-react";
+import { Star, ChevronDown } from "lucide-react";
 import {
   EmptyState,
   SearchBar,
@@ -10,6 +10,8 @@ import {
 import { ResponsiveCategoryFilter } from "@/components/launcher/responsive-category-filter";
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { CopyToast } from "@/components/ui/copy-toast";
+import { CopyActionButton } from "@/components/ui/copy-action-button";
+import { useCopyFeedback } from "@/hooks/useCopyFeedback";
 import type { PublicMessageTemplate } from "@/lib/public/message-templates";
 import {
   applySafeCopyPlaceholders,
@@ -34,7 +36,7 @@ import {
   MessageTemplateRiskLevel,
   MessageTemplateTone,
 } from "@prisma/client";
-import { buttons, sectionEyebrow, shadows } from "@/lib/design-system";
+import { sectionEyebrow, shadows } from "@/lib/design-system";
 
 const channelFilterOptions: Array<{ id: PublicMessageChannelFilter; label: string }> =
   [
@@ -86,6 +88,7 @@ export function MessageTemplateLibrary({
   const [plannerName, setPlannerName] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const { feedback: copyFeedback, copyWithFeedback } = useCopyFeedback();
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
@@ -191,7 +194,10 @@ export function MessageTemplateLibrary({
 
   return (
     <div className="space-y-8">
-      <CopyToast message={toastMessage} />
+      <CopyToast
+        message={copyFeedback?.message ?? toastMessage}
+        variant={copyFeedback?.variant ?? "success"}
+      />
 
       <section
         className={`rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 ${shadows.card}`}
@@ -435,7 +441,7 @@ export function MessageTemplateLibrary({
                 plannerName={plannerName}
                 isFav
                 onToggleFav={toggleFavorite}
-                onToast={showToast}
+                onCopyWithFeedback={copyWithFeedback}
               />
             ))}
           </div>
@@ -458,7 +464,7 @@ export function MessageTemplateLibrary({
                     plannerName={plannerName}
                     isFav={favorites.includes(template.id)}
                     onToggleFav={toggleFavorite}
-                    onToast={showToast}
+                    onCopyWithFeedback={copyWithFeedback}
                   />
                 ))}
               </div>
@@ -481,25 +487,20 @@ function TemplateCard({
   plannerName,
   isFav,
   onToggleFav,
-  onToast,
+  onCopyWithFeedback,
 }: {
   template: PublicMessageTemplate;
   customerName: string;
   plannerName: string;
   isFav: boolean;
   onToggleFav: (id: string) => void;
-  onToast: (msg: string) => void;
+  onCopyWithFeedback: ReturnType<typeof useCopyFeedback>["copyWithFeedback"];
 }) {
   const previewText = useMemo(
     () =>
       applySafeCopyPlaceholders(template.safeCopy, customerName, plannerName),
     [template.safeCopy, customerName, plannerName],
   );
-
-  async function handleCopySafeCopy() {
-    await copyTextToClipboard(previewText);
-    onToast("고객 안내 문구가 복사되었습니다.");
-  }
 
   return (
     <article
@@ -559,15 +560,16 @@ function TemplateCard({
       </div>
 
       <div className="mt-4">
-        <button
-          type="button"
-          onClick={handleCopySafeCopy}
-          className={`${buttons.base} ${buttons.primary} w-full gap-2`}
-          aria-label={`${template.title} 안전 문구 복사`}
-        >
-          <Copy aria-hidden className="h-4 w-4 shrink-0" />
-          안전 문구 복사
-        </button>
+        <CopyActionButton
+          ariaLabel={`${template.title} 안전 문구 복사`}
+          className="w-full"
+          copyOptions={{
+            text: previewText,
+            source: "message-template",
+          }}
+          label="안전 문구 복사"
+          onCopy={onCopyWithFeedback}
+        />
       </div>
 
       {(template.publishedAt ?? template.updatedAt) ? (
@@ -577,32 +579,4 @@ function TemplateCard({
       ) : null}
     </article>
   );
-}
-
-async function copyTextToClipboard(text: string): Promise<void> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
-  } catch {
-    // fall through
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.focus();
-  textarea.select();
-
-  try {
-    document.execCommand("copy");
-  } catch {
-    // ignore
-  } finally {
-    document.body.removeChild(textarea);
-  }
 }

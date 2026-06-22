@@ -14,6 +14,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
+import { CopyToast } from "@/components/ui/copy-toast";
+import { useCopyFeedback } from "@/hooks/useCopyFeedback";
 import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
 import { InsurerCardContactStrip } from "@/components/directory/insurer-card-contact-strip";
 import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
@@ -695,18 +697,23 @@ function MailAddressDialog({
   onClose: () => void;
   open: boolean;
 }) {
-  const [copied, setCopied] = useState(false);
+  const { feedback, copyWithFeedback } = useCopyFeedback();
+  const [copying, setCopying] = useState(false);
+  const copyButtonRef = useRef<HTMLButtonElement>(null);
   const copyAddress = useCallback(async () => {
     if (!address) return;
 
+    setCopying(true);
     try {
-      await navigator.clipboard.writeText(address);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setCopied(false);
+      await copyWithFeedback({
+        text: address,
+        source: "directory",
+      });
+    } finally {
+      setCopying(false);
+      copyButtonRef.current?.focus();
     }
-  }, [address]);
+  }, [address, copyWithFeedback]);
 
   return (
     <DialogFrame
@@ -720,16 +727,17 @@ function MailAddressDialog({
             {address}
           </div>
           <button
-            className={`inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
-              copied
-                ? "bg-emerald-600 shadow-emerald-600/10 hover:bg-emerald-700 hover:shadow-emerald-600/20"
-                : "bg-indigo-600 shadow-indigo-600/10 hover:bg-indigo-700 hover:shadow-indigo-600/20"
-            }`}
+            ref={copyButtonRef}
+            aria-busy={copying || undefined}
+            aria-label={`${insurerName} 등기우편 주소 연락 안내 복사`}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-indigo-600 px-5 text-sm font-bold text-white shadow-md shadow-indigo-600/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-indigo-600/20 active:translate-y-0"
+            disabled={copying}
             onClick={copyAddress}
             type="button"
           >
-            {copied ? "주소 복사 완료!" : "주소 복사하기"}
+            {copying ? "복사 중…" : "연락 안내 복사"}
           </button>
+          <CopyToast message={feedback?.message ?? null} variant={feedback?.variant} />
         </div>
       ) : (
         <p className="break-keep text-sm leading-relaxed text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-xl bg-slate-50/30">

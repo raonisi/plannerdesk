@@ -53,7 +53,7 @@ describe("PR-PUBLIC-SAFETY-A public forbidden copy guard", () => {
     for (const phrase of ["safeCopy", "reviewStatus", "adminMemo"]) {
       assert.doesNotMatch(combined, new RegExp(phrase), `message-templates: ${phrase}`);
     }
-    assert.match(library, /handleCopySafeCopy/);
+    assert.match(library, /CopyActionButton/);
     assert.match(library, /안전 문구 복사/);
   });
 

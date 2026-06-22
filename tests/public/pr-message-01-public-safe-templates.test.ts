@@ -157,7 +157,8 @@ describe("PR-MESSAGE-01 public safe message templates", () => {
       join(ROOT, "app/message-templates/message-template-library.tsx"),
       "utf8",
     );
-    assert.match(library, /handleCopySafeCopy/);
+    assert.match(library, /CopyActionButton/);
+    assert.match(library, /copyWithFeedback/);
     assert.match(library, /CopyToast/);
     assert.match(library, /안전 문구 복사/);
   });

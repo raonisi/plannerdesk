@@ -35,7 +35,8 @@ describe("PR-COPY-A public internal terminology cleanup", () => {
 
   it("message-templates keeps copy action wiring", () => {
     const library = readRouteSource("app/message-templates/message-template-library.tsx");
-    assert.match(library, /handleCopySafeCopy/);
+    assert.match(library, /CopyActionButton/);
+    assert.match(library, /copyWithFeedback/);
     assert.match(library, /CopyToast/);
     assert.match(library, /안전 문구 복사/);
     assert.match(library, /template\.safeCopy/);

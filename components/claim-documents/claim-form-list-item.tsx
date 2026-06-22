@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { DataFreshnessMeta } from "@/components/content/data-freshness-meta";
 import { FreshnessBadge } from "@/components/content/freshness-badge";
+import { CopyToast } from "@/components/ui/copy-toast";
 import { GatedFavoriteButton } from "@/components/planner-favorites/gated-favorite-button";
 import { claimLibraryFavoriteId } from "@/lib/planner-favorites/claim-favorite-id";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
 import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
+import { useCopyFeedback } from "@/hooks/useCopyFeedback";
 import { categoryLabels } from "@/lib/claim-documents/category-labels";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
-import { publicClaimTrustHint } from "@/lib/directory/formatting";
-import {
+import { publicClaimTrustHint } from "@/lib/directory/formatting";import {
   insurerCardClaimDocumentActions,
   insurerCardClaimDocumentCard,
   insurerCardClaimDocumentTitle,
@@ -74,12 +75,11 @@ export function ClaimFormListItem({
   const { isFavorite, toggle } = useLocalIdFavorites(
     PLANNER_FAVORITE_STORAGE_KEYS.claimDocuments,
   );
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
-    "idle",
-  );
-  const [linkCopyState, setLinkCopyState] = useState<
-    "idle" | "copied" | "failed"
-  >("idle");
+  const { feedback, copyWithFeedback } = useCopyFeedback();
+  const [copyingGuide, setCopyingGuide] = useState(false);
+  const [copyingLink, setCopyingLink] = useState(false);
+  const guideCopyButtonRef = useRef<HTMLButtonElement>(null);
+  const linkCopyButtonRef = useRef<HTMLButtonElement>(null);
   const title = item.kind === "pdf" ? item.title : item.document.title;
   const insurerName =
     item.kind === "pdf" ? item.insurerName : (item.document.insurerName ?? "공통 기준");
@@ -90,18 +90,16 @@ export function ClaimFormListItem({
   const trustHint = publicClaimTrustHint(status);
 
   async function handleCopyRequest() {
-    const doc = item.kind === "pdf" ? null : item.document;
-    const requiredText = doc?.requiredDocuments
-      ? `\n\n필요서류\n${doc.requiredDocuments}`
-      : "";
-    const optionalText = doc?.optionalDocuments
-      ? `\n\n상황별 추가 확인서류\n${doc.optionalDocuments}`
-      : "";
-    const noticeText = `안녕하세요 고객님. ${insurerName} ${categoryLabel} 청구 관련 서류를 안내드립니다.\n\n- ${title}${requiredText}${optionalText}\n\n최종 제출 기준은 보험사 공식 안내와 약관에 따라 달라질 수 있습니다. 보험금 지급 여부와 금액은 보험사 심사 후 결정됩니다.`;
-
-    await copyTextToClipboard(noticeText);
-    setCopyState("copied");
-    window.setTimeout(() => setCopyState("idle"), 2000);
+    setCopyingGuide(true);
+    try {
+      await copyWithFeedback({
+        text: buildClaimNoticeText(item, title, insurerName, categoryLabel),
+        source: "claim-guide",
+      });
+    } finally {
+      setCopyingGuide(false);
+      guideCopyButtonRef.current?.focus();
+    }
   }
 
   async function handleCopyPdfLink(href: string) {
@@ -109,9 +107,17 @@ export function ClaimFormListItem({
       typeof window !== "undefined"
         ? new URL(href, window.location.origin).toString()
         : href;
-    await copyTextToClipboard(absolute);
-    setLinkCopyState("copied");
-    window.setTimeout(() => setLinkCopyState("idle"), 2000);
+    setCopyingLink(true);
+    try {
+      await copyWithFeedback({
+        text: absolute,
+        source: "claim-guide",
+        successMessage: "링크를 복사했습니다.",
+      });
+    } finally {
+      setCopyingLink(false);
+      linkCopyButtonRef.current?.focus();
+    }
   }
 
   if (item.kind === "pdf") {
@@ -155,7 +161,8 @@ export function ClaimFormListItem({
     }
 
     return (
-      <li className="border-t border-slate-200 first:border-t-0">
+      <>
+        <li className="border-t border-slate-200 first:border-t-0">
         <div className="grid min-h-11 gap-4 py-4 lg:grid-cols-[1fr_auto] lg:items-start">
           <div className="min-w-0 flex-1">
             {variant === "default" ? (
@@ -229,26 +236,34 @@ export function ClaimFormListItem({
             {variant === "default" ? (
               <>
                 <button
+                  ref={linkCopyButtonRef}
+                  aria-busy={copyingLink || undefined}
                   aria-label={`${title} PDF 링크 복사`}
                   className={secondaryButtonClass}
+                  disabled={copyingLink}
                   onClick={() => handleCopyPdfLink(item.href)}
                   type="button"
                 >
-                  {getLinkCopyButtonLabel(linkCopyState)}
+                  {copyingLink ? "복사 중…" : "PDF 링크 복사"}
                 </button>
                 <button
-                  aria-label={`${title} 고객 요청 문구 복사`}
+                  ref={guideCopyButtonRef}
+                  aria-busy={copyingGuide || undefined}
+                  aria-label={`${title} 청구 안내 복사`}
                   className={secondaryButtonClass}
+                  disabled={copyingGuide}
                   onClick={handleCopyRequest}
                   type="button"
                 >
-                  {getCopyButtonLabel(copyState)}
+                  {copyingGuide ? "복사 중…" : "안내 문구 복사"}
                 </button>
               </>
             ) : null}
           </div>
         </div>
       </li>
+        <CopyToast message={feedback?.message ?? null} variant={feedback?.variant} />
+      </>
     );
   }
 
@@ -257,7 +272,8 @@ export function ClaimFormListItem({
   const primaryLabel = doc.claimFormUrl ? "PDF 열기" : "청구안내 보기";
 
   return (
-    <li className="border-t border-slate-200 first:border-t-0">
+    <>
+      <li className="border-t border-slate-200 first:border-t-0">
       <div className="grid min-h-11 gap-3 py-4 lg:grid-cols-[1fr_auto] lg:items-start">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -308,56 +324,36 @@ export function ClaimFormListItem({
             </Link>
           )}
           <button
-            aria-label={`${title} 고객 요청 문구 복사`}
+            ref={guideCopyButtonRef}
+            aria-busy={copyingGuide || undefined}
+            aria-label={`${title} 청구 안내 복사`}
             className={secondaryButtonClass}
+            disabled={copyingGuide}
             onClick={handleCopyRequest}
             type="button"
           >
-            {getCopyButtonLabel(copyState)}
+            {copyingGuide ? "복사 중…" : "안내 문구 복사"}
           </button>
         </div>
       </div>
     </li>
+      <CopyToast message={feedback?.message ?? null} variant={feedback?.variant} />
+    </>
   );
 }
 
-function getCopyButtonLabel(state: "idle" | "copied" | "failed"): string {
-  if (state === "copied") return "복사되었습니다";
-  if (state === "failed") return "복사 실패";
-  return "안내문 복사";
-}
-
-function getLinkCopyButtonLabel(state: "idle" | "copied" | "failed"): string {
-  if (state === "copied") return "링크 복사됨";
-  if (state === "failed") return "복사 실패";
-  return "PDF 링크 복사";
-}
-
-async function copyTextToClipboard(text: string): Promise<void> {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.focus();
-  textarea.select();
-
-  try {
-    document.execCommand("copy");
-    return;
-  } catch {
-    // Fall through to Clipboard API for browsers where execCommand is blocked.
-  } finally {
-    document.body.removeChild(textarea);
-  }
-
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
-  } catch {
-    return;
-  }
+function buildClaimNoticeText(
+  item: ClaimLibraryItem,
+  title: string,
+  insurerName: string,
+  categoryLabel: string,
+): string {
+  const doc = item.kind === "pdf" ? null : item.document;
+  const requiredText = doc?.requiredDocuments
+    ? `\n\n필요서류\n${doc.requiredDocuments}`
+    : "";
+  const optionalText = doc?.optionalDocuments
+    ? `\n\n상황별 추가 확인서류\n${doc.optionalDocuments}`
+    : "";
+  return `안녕하세요 고객님. ${insurerName} ${categoryLabel} 청구 관련 서류를 안내드립니다.\n\n- ${title}${requiredText}${optionalText}\n\n최종 제출 기준은 보험사 공식 안내와 약관에 따라 달라질 수 있습니다. 보험금 지급 여부와 금액은 보험사 심사 후 결정됩니다.`;
 }
