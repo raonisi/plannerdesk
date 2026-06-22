@@ -1,5 +1,6 @@
 import { claimFormFiles } from "@/lib/content/claim-form-files";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import type { ClaimLibraryItem, ClaimLibraryPdfItem } from "./library-items";
 import {
   claimFormToLibraryItem,
   COMMON_INSURER_KEY,
@@ -9,8 +10,8 @@ import {
   getItemSearchText,
   getItemVerificationStatus,
   insurerGroupKey,
-  type ClaimLibraryItem,
 } from "./library-items";
+import { applyClaimPdfGovernanceOverlay } from "./governance-public";
 import { categoryLabels, categoryOrder } from "./category-labels";
 import {
   getClaimSlugsForInsurerId,
@@ -21,7 +22,9 @@ import { groupClaimItemsByInsurer } from "./group-by-insurer";
 import {
   resolveInsurerMarketSegmentForItem,
 } from "./insurer-category";
-import { applyClaimPdfGovernanceOverlay } from "./governance-public";
+import {
+  countClaimLibraryDispositions,
+} from "@/lib/public/public-asset-policy";
 import type { PublicClaimPdfGovernanceOverlay } from "./governance-repository";
 
 export type ClaimLibraryFilters = {
@@ -33,12 +36,22 @@ export type ClaimLibraryFilters = {
   marketSegment: string;
 };
 
+export type ClaimLibraryCounts = {
+  publicGuideCount: number;
+  downloadableAssetCount: number;
+};
+
+export { countClaimLibraryDispositions };
+
 export function buildClaimLibraryItems(
   guideDocuments: PublicClaimDocument[],
   pdfGovernanceOverlay?: PublicClaimPdfGovernanceOverlay | null,
 ): ClaimLibraryItem[] {
+  const pdfItems = claimFormFiles
+    .map(claimFormToLibraryItem)
+    .filter((item): item is ClaimLibraryPdfItem => item !== null);
   const items = [
-    ...claimFormFiles.map(claimFormToLibraryItem),
+    ...pdfItems,
     ...guideDocuments.map(documentToLibraryItem),
   ];
   if (!pdfGovernanceOverlay || Object.keys(pdfGovernanceOverlay).length === 0) {

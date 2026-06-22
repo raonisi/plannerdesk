@@ -126,17 +126,13 @@ describe("PR-BS-27 DB-backed claim document governance", () => {
   });
 
   it("hides isVisible false documents on public overlay", () => {
-    const sample = claimFormFiles[0];
+    const sample = claimFormFiles.find((form) => form.insurerSlug === "samsung-fire");
+    assert.ok(sample);
     const items = buildClaimLibraryItemsWithGovernance([], {});
-    const pdfItem = items.find((item) => item.kind === "pdf" && item.href === sample.href);
+    const pdfItem = items.find((item) => item.kind === "pdf" && item.id === sample.id);
     assert.ok(pdfItem && pdfItem.kind === "pdf");
 
-    const key = buildClaimDocumentKey({
-      filePath: sample.href,
-      fileName: pdfItem.fileName,
-      insurerName: pdfItem.insurerName,
-      documentTitle: pdfItem.title,
-    });
+    const key = pdfItem.governanceDocumentKey;
 
     const filtered = applyClaimPdfGovernanceOverlay(items, {
       [key]: {
@@ -146,23 +142,19 @@ describe("PR-BS-27 DB-backed claim document governance", () => {
     });
 
     assert.equal(
-      filtered.some((item) => item.kind === "pdf" && item.href === sample.href),
+      filtered.some((item) => item.kind === "pdf" && item.id === sample.id),
       false,
     );
   });
 
   it("disables download when isDownloadEnabled is false", () => {
-    const sample = claimFormFiles[0];
+    const sample = claimFormFiles.find((form) => form.insurerSlug === "samsung-fire");
+    assert.ok(sample);
     const items = buildClaimLibraryItemsWithGovernance([], {});
-    const pdfItem = items.find((item) => item.kind === "pdf" && item.href === sample.href);
+    const pdfItem = items.find((item) => item.kind === "pdf" && item.id === sample.id);
     assert.ok(pdfItem && pdfItem.kind === "pdf");
 
-    const key = buildClaimDocumentKey({
-      filePath: sample.href,
-      fileName: pdfItem.fileName,
-      insurerName: pdfItem.insurerName,
-      documentTitle: pdfItem.title,
-    });
+    const key = pdfItem.governanceDocumentKey;
 
     const overlaid = applyClaimPdfGovernanceOverlay(items, {
       [key]: {
@@ -171,19 +163,19 @@ describe("PR-BS-27 DB-backed claim document governance", () => {
       },
     });
     const updated = overlaid.find(
-      (item) => item.kind === "pdf" && item.href === sample.href,
+      (item) => item.kind === "pdf" && item.id === sample.id,
     );
     assert.ok(updated && updated.kind === "pdf");
     assert.equal(updated.downloadEnabled, false);
   });
 
-  it("keeps PDF download UI on public list item", () => {
+  it("keeps asset-policy PDF actions on public list item", () => {
     const listItem = readFileSync(
       join(ROOT, "components/claim-documents/claim-form-list-item.tsx"),
       "utf8",
     );
-    assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
+    assert.match(listItem, /renderPdfAssetActions/);
+    assert.match(listItem, /publicAssetView/);
     assert.doesNotMatch(listItem, /adminMemo/);
   });
 
@@ -244,9 +236,9 @@ describe("PR-BS-27 DB-backed claim document governance", () => {
     assert.equal(pdfDeletes.length, 0);
   });
 
-  it("preserves stored PDF paths on disk", () => {
+  it("preserves legacy PDF copies under private review storage", () => {
     for (const form of claimFormFiles.slice(0, 5)) {
-      const diskPath = join(ROOT, "public", form.href.replace(/^\//, ""));
+      const diskPath = join(ROOT, "private-asset-review", form.href.replace(/^\//, ""));
       assert.equal(existsSync(diskPath), true, `missing ${diskPath}`);
     }
   });

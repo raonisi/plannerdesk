@@ -104,17 +104,16 @@ describe("PR-BS-24 insurer card claim documents compact mode", () => {
     assert.match(section, /CLAIM_INSURER_CARD_COMPACT_NOTICE/);
     assert.match(section, /CLAIM_INSURER_CARD_SEARCH_EMPTY_MESSAGE/);
     assert.match(section, /variant="card"/);
-    assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /download=\{item\.fileName\}/);
-    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
+    assert.match(listItem, /renderPdfAssetActions/);
+    assert.match(listItem, /publicAssetView/);
     assert.equal(CLAIM_INSURER_CARD_COMPACT_NOTICE.length > 0, true);
     assert.equal(CLAIM_INSURER_CARD_SEARCH_EMPTY_MESSAGE.length > 0, true);
   });
 
-  it("preserves stored PDF assets and claim-documents route", () => {
+  it("legacy PDF assets remain in private review storage", () => {
     for (const form of claimFormFiles) {
       assert.match(form.href, /^\/claim-forms\/bohumschool\/.+\.pdf$/);
-      const diskPath = join(ROOT, "public", form.href.replace(/^\//, ""));
+      const diskPath = join(ROOT, "private-asset-review", form.href.replace(/^\//, ""));
       assert.equal(existsSync(diskPath), true, `missing ${diskPath}`);
     }
     assert.equal(existsSync(join(ROOT, "app/claim-documents/page.tsx")), true);

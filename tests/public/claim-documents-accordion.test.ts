@@ -62,11 +62,19 @@ describe("PR-BS-21 claim documents accordion UX", () => {
     );
   });
 
-  it("preserves stored PDF hrefs (no path changes)", () => {
+  it("legacy catalog hrefs are not publicly served as static assets", () => {
     for (const form of claimFormFiles) {
       assert.match(form.href, /^\/claim-forms\/bohumschool\/.+\.pdf$/);
-      const diskPath = join(ROOT, "public", form.href.replace(/^\//, ""));
+      const diskPath = join(
+        ROOT,
+        "private-asset-review",
+        form.href.replace(/^\//, ""),
+      );
       assert.equal(existsSync(diskPath), true, `missing ${diskPath}`);
+      assert.equal(
+        existsSync(join(ROOT, "public", form.href.replace(/^\//, ""))),
+        false,
+      );
     }
   });
 
@@ -81,15 +89,14 @@ describe("PR-BS-21 claim documents accordion UX", () => {
     assert.match(source, /variant="accordion"/);
   });
 
-  it("accordion list item keeps PDF download and open actions", () => {
+  it("accordion list item uses asset-policy actions", () => {
     const source = readFileSync(
       join(ROOT, "components/claim-documents/claim-form-list-item.tsx"),
       "utf8",
     );
-    assert.match(source, /PDF 다운로드/);
-    assert.match(source, /PUBLIC_CTA_PDF_OPEN/);
-    assert.match(source, /download=\{item\.fileName\}/);
-    assert.match(source, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
+    assert.match(source, /renderPdfAssetActions/);
+    assert.match(source, /publicAssetView/);
+    assert.match(source, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK|PUBLIC_CTA_OFFICIAL_GUIDE_OPEN/);
   });
 
   it("explorer shows accordion notice and empty search copy", () => {

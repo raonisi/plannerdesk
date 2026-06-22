@@ -22,10 +22,9 @@ describe("hotfix claim document card fixed layout", () => {
     assert.doesNotMatch(cardBlock, /sm:flex-row/);
     assert.doesNotMatch(cardBlock, /sm:items-center/);
     assert.doesNotMatch(cardBlock, /sm:justify-between/);
-    assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /download=\{item\.fileName\}/);
-    assert.match(cardBlock, /PUBLIC_CTA_PDF_OPEN/);
-    assert.match(cardBlock, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
+    assert.match(listItem, /renderPdfAssetActions/);
+    assert.match(listItem, /publicAssetView/);
+    assert.match(listItem, /official_external/);
   });
 
   it("stabilizes claim panel list wrappers", () => {

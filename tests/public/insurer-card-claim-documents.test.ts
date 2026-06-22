@@ -33,10 +33,10 @@ describe("PR-BS-22 insurer card claim documents integration", () => {
     );
   });
 
-  it("preserves PDF hrefs used by card and claim-documents page", () => {
+  it("legacy PDF catalog remains in private review storage only", () => {
     for (const form of claimFormFiles) {
       assert.match(form.href, /^\/claim-forms\/bohumschool\/.+\.pdf$/);
-      const diskPath = join(ROOT, "public", form.href.replace(/^\//, ""));
+      const diskPath = join(ROOT, "private-asset-review", form.href.replace(/^\//, ""));
       assert.equal(existsSync(diskPath), true, `missing ${diskPath}`);
     }
   });

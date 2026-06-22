@@ -1,4 +1,5 @@
 import type { PublicInsurer } from "@/lib/public/insurers";
+import { resolveInsurerLogoPublicSrc } from "@/lib/public/public-asset-policy";
 
 export const INSURER_LOGO_SOURCES: Array<{ tokens: string[]; src: string }> = [
   {
@@ -213,10 +214,11 @@ export function insurerLogoMatchKey(insurer: PublicInsurer) {
 export function insurerLogoSrc(insurer: PublicInsurer) {
   const matchKey = insurerLogoMatchKey(insurer);
 
-  return (
+  const candidate =
     INSURER_LOGO_SOURCES.find(({ tokens }) =>
       tokens.some((token) => matchKey.includes(token)),
-    )?.src ?? null
-  );
+    )?.src ?? null;
+
+  return resolveInsurerLogoPublicSrc(insurer, candidate);
 }
 

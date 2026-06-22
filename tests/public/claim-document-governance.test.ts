@@ -60,12 +60,12 @@ describe("PR-BS-25 claim document governance helpers", () => {
     );
   });
 
-  it("preserves stored PDF paths", () => {
+  it("legacy PDF catalog remains in private review storage only", () => {
     for (const form of claimFormFiles) {
       const merged = mergeClaimFormWithGovernance(form);
       assert.equal(merged.href, form.href);
       assert.match(form.href, /^\/claim-forms\/bohumschool\/.+\.pdf$/);
-      const diskPath = join(ROOT, "public", form.href.replace(/^\//, ""));
+      const diskPath = join(ROOT, "private-asset-review", form.href.replace(/^\//, ""));
       assert.equal(existsSync(diskPath), true, `missing ${diskPath}`);
     }
   });

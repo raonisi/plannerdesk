@@ -7,7 +7,6 @@ import {
   buildClaimLibraryItems,
   countPublicClaimLibraryItems,
 } from "@/lib/claim-documents/claim-library";
-import { buildClaimDocumentKey } from "@/lib/claim-documents/document-key";
 import { claimFormFiles } from "@/lib/content/claim-form-files";
 import { claimDocumentCandidateFallback } from "@/lib/content/claim-document-candidates";
 import {
@@ -71,12 +70,7 @@ describe("PR-FEATURE-GAP-01 home public SSOT", () => {
     const baseline = buildClaimLibraryItems(guides, {});
     const firstPdf = baseline.find((item) => item.kind === "pdf");
     assert.ok(firstPdf);
-    const documentKey = buildClaimDocumentKey({
-      href: firstPdf.href,
-      fileName: firstPdf.title,
-      insurerName: firstPdf.insurerName,
-      documentTitle: firstPdf.title,
-    });
+    const documentKey = firstPdf.governanceDocumentKey;
     const overlay = {
       [documentKey]: { isVisible: false, isDownloadEnabled: true },
     };

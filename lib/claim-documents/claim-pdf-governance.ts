@@ -90,5 +90,9 @@ export function enrichStoredClaimPdfMetadata(
 }
 
 export function isStoredClaimPdfPath(href: string): boolean {
-  return href.startsWith("/claim-forms/bohumschool/") && href.endsWith(".pdf");
+  return (
+    href.startsWith("/approved-claim-forms/") &&
+    href.endsWith(".pdf") &&
+    !href.includes("bohumschool")
+  );
 }

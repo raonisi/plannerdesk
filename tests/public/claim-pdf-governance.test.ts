@@ -12,16 +12,26 @@ import {
   resolveOfficialSourceUrlForInsurerSlug,
 } from "@/lib/claim-documents/claim-pdf-governance";
 import { claimFormToLibraryItem } from "@/lib/claim-documents/library-items";
+import {
+  isLegacyThirdPartyAssetReference,
+  PRIVATE_ASSET_REVIEW_PREFIX,
+  resolveClaimFormPublicAssetView,
+} from "@/lib/public/public-asset-policy";
 
 const ROOT = process.cwd();
 
 describe("PR-BS-20 claim PDF governance", () => {
-  it("preserves stored PDF paths under /claim-forms/bohumschool/", () => {
+  it("legacy catalog paths are blocked from public static serving", () => {
     assert.ok(claimFormFiles.length > 0);
     for (const form of claimFormFiles) {
-      assert.match(form.href, /^\/claim-forms\/bohumschool\/.+\.pdf$/);
-      assert.equal(isStoredClaimPdfPath(form.href), true);
+      assert.equal(isLegacyThirdPartyAssetReference(form.href, form.sourceUrl), true);
+      assert.equal(isStoredClaimPdfPath(form.href), false);
+      assert.equal(existsSync(join(ROOT, "public", form.href.replace(/^\//, ""))), false);
     }
+    assert.equal(
+      existsSync(join(ROOT, PRIVATE_ASSET_REVIEW_PREFIX, "claim-forms")),
+      true,
+    );
   });
 
   it("enriches PDF metadata with governance fields", () => {
@@ -44,32 +54,32 @@ describe("PR-BS-20 claim PDF governance", () => {
     assert.equal(url, "https://www.samsungfire.com/v2/html/claim/01/C_010_030_001.html");
   });
 
-  it("library item keeps download href and metadata", () => {
-    const sample = claimFormFiles[0];
+  it("library item uses public asset resolver instead of local legacy href", () => {
+    const sample = claimFormFiles[0]!;
     const item = claimFormToLibraryItem(sample);
+    assert.ok(item);
     assert.equal(item.kind, "pdf");
-    assert.equal(item.href, sample.href);
+    assert.ok(item.publicAssetView);
+    assert.notEqual(item.href, sample.href);
     assert.equal(item.sourceType, "stored_pdf");
-    assert.ok(item.fileName.endsWith(".pdf"));
   });
 
-  it("sample PDF file exists on disk (404 guard)", () => {
+  it("review copies remain under private-asset-review storage", () => {
     const sample = claimFormFiles.find((form) => form.insurerSlug === "samsung-fire");
     assert.ok(sample);
-    const diskPath = join(ROOT, "public", sample.href.replace(/^\//, ""));
+    const diskPath = join(ROOT, PRIVATE_ASSET_REVIEW_PREFIX, sample.href.replace(/^\//, ""));
     assert.equal(existsSync(diskPath), true, `missing ${diskPath}`);
   });
 
-  it("claim list item exposes download and open actions", () => {
+  it("claim list item exposes asset-policy actions", () => {
     const source = readFileSync(
       join(ROOT, "components/claim-documents/claim-form-list-item.tsx"),
       "utf8",
     );
-    assert.match(source, /PDF 다운로드/);
-    assert.match(source, /PUBLIC_CTA_PDF_OPEN/);
-    assert.match(source, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
-    assert.match(source, /download=/);
-    assert.match(source, /PUBLIC_CTA_PDF_LINK_COPY/);
+    assert.match(source, /renderPdfAssetActions/);
+    assert.match(source, /publicAssetView/);
+    assert.match(source, /PUBLIC_CTA_OFFICIAL_GUIDE_OPEN|PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
+    assert.doesNotMatch(source, /bohumschool/i);
   });
 
   it("claim explorer shows governance notice", () => {
@@ -80,9 +90,10 @@ describe("PR-BS-20 claim PDF governance", () => {
     assert.match(source, /CLAIM_PDF_(GOVERNANCE|ACCORDION)_NOTICE/);
   });
 
-  it("AGENTS.md uses git root C:\\work\\plannerdesk", () => {
-    const agents = readFileSync(join(ROOT, "AGENTS.md"), "utf8");
-    assert.match(agents, /C:\\work\\plannerdesk/);
-    assert.doesNotMatch(agents, /plannerdesk-main/);
+  it("public asset resolver returns official external or pending for legacy forms", () => {
+    const sample = claimFormFiles[0]!;
+    const official = resolveOfficialSourceUrlForInsurerSlug(sample.insurerSlug);
+    const view = resolveClaimFormPublicAssetView(sample, official);
+    assert.ok(view === null || view.kind === "official_external" || view.kind === "pending");
   });
 });

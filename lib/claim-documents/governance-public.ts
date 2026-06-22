@@ -20,12 +20,14 @@ export function applyClaimPdfGovernanceOverlay(
       continue;
     }
 
-    const documentKey = buildClaimDocumentKey({
-      filePath: item.href,
-      fileName: item.fileName,
-      insurerName: item.insurerName,
-      documentTitle: item.title,
-    });
+    const documentKey =
+      item.governanceDocumentKey ??
+      buildClaimDocumentKey({
+        filePath: item.filePath || item.href,
+        fileName: item.fileName,
+        insurerName: item.insurerName,
+        documentTitle: item.title,
+      });
     const governance = overlay[documentKey];
     if (!governance) {
       result.push(item);

@@ -1,10 +1,16 @@
 import { VerificationStatus, type ClaimDocumentCategory } from "@prisma/client";
 import type { ClaimFormFile } from "@/lib/content/claim-form-files";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
+import { buildClaimDocumentKey } from "./document-key";
 import {
   enrichStoredClaimPdfMetadata,
   type StoredClaimPdfMetadata,
 } from "./claim-pdf-governance";
+import {
+  resolveClaimFormOfficialUrl,
+  resolveClaimFormPublicAssetView,
+  type PublicAssetView,
+} from "@/lib/public/public-asset-policy";
 
 export type ClaimLibraryPdfItem = {
   kind: "pdf";
@@ -16,9 +22,15 @@ export type ClaimLibraryPdfItem = {
   categoryLabel: string;
   href: string;
   verificationStatus: typeof VerificationStatus.verified;
-  /** When false, download button is disabled. Defaults to enabled. */
+  /** When false, download button is disabled. Defaults to enabled for approved local only. */
   downloadEnabled?: boolean;
-} & StoredClaimPdfMetadata;
+  publicAssetView: PublicAssetView;
+  /** Stable DB/admin overlay key from catalog identity, not public href. */
+  governanceDocumentKey: string;
+} & Omit<StoredClaimPdfMetadata, "filePath" | "fileName"> & {
+  filePath: string;
+  fileName: string;
+};
 export type ClaimLibraryGuideItem = {
   kind: "guide";
   document: PublicClaimDocument;
@@ -36,18 +48,41 @@ export function insurerGroupLabel(key: string): string {
   return key === COMMON_INSURER_KEY ? "공통 기준" : key;
 }
 
-export function claimFormToLibraryItem(form: ClaimFormFile): ClaimLibraryPdfItem {
+export function claimFormToLibraryItem(
+  form: ClaimFormFile,
+): ClaimLibraryPdfItem | null {
+  const officialSourceUrl = resolveClaimFormOfficialUrl(form);
+  const publicAssetView = resolveClaimFormPublicAssetView(form, officialSourceUrl);
+  if (!publicAssetView) {
+    return null;
+  }
+
   const metadata = enrichStoredClaimPdfMetadata(form);
+  const exposeLocalFile = publicAssetView.kind === "approved_local";
+  const governanceDocumentKey = buildClaimDocumentKey({
+    filePath: metadata.filePath,
+    fileName: metadata.fileName,
+    insurerName: metadata.insurerName,
+    documentTitle: metadata.documentTitle,
+  });
+
   return {
     kind: "pdf",
+    ...metadata,
+    governanceDocumentKey,
     id: form.id,
     insurerSlug: form.insurerSlug,
+    insurerName: form.insurerName,
     title: form.label,
     category: form.category,
     categoryLabel: form.categoryLabel,
-    href: form.href,
+    href: exposeLocalFile ? publicAssetView.href : "",
     verificationStatus: VerificationStatus.verified,
-    ...metadata,
+    publicAssetView,
+    downloadEnabled: exposeLocalFile,
+    officialSourceUrl: officialSourceUrl ?? metadata.officialSourceUrl,
+    filePath: exposeLocalFile ? metadata.filePath : "",
+    fileName: exposeLocalFile ? metadata.fileName : form.label,
   };
 }
 export function documentToLibraryItem(

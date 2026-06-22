@@ -19,6 +19,7 @@ const GATE_TEST_PATHS = [
   "tests/ops/pr155-admin-access-regression.test.ts",
   "tests/ops/pr173a-work-tools-access.test.ts",
   "tests/ops/pr-sec-01-work-tools-access-policy.test.ts",
+  "tests/public/pr-asset-01-public-asset-governance.test.ts",
   "tests/ops/pr173b-work-tools-storage-config.test.ts",
   "tests/ops/pr173c-claim-boundary.test.ts",
 ] as const;

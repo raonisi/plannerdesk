@@ -80,6 +80,61 @@ function renderPdfDownloadButton(
   );
 }
 
+function renderPdfAssetActions(
+  title: string,
+  insurerName: string,
+  item: Extract<ClaimLibraryItem, { kind: "pdf" }>,
+  primaryClass: string,
+  secondaryClass: string,
+  gridSpanClass = "",
+) {
+  const view = item.publicAssetView;
+
+  if (view.kind === "pending") {
+    return (
+      <span
+        className={`${secondaryClass} ${gridSpanClass} cursor-default text-[#4A5565]`}
+      >
+        {view.label}
+      </span>
+    );
+  }
+
+  if (view.kind === "official_external") {
+    return (
+      <ExternalTabAnchor
+        aria-label={`${title} ${view.label}`}
+        className={`${primaryClass} ${gridSpanClass}`}
+        href={view.href}
+      >
+        {view.label}
+      </ExternalTabAnchor>
+    );
+  }
+
+  return (
+    <>
+      {renderPdfDownloadButton(title, item, primaryClass, gridSpanClass)}
+      <ExternalTabAnchor
+        aria-label={`${title} ${PUBLIC_CTA_PDF_OPEN}`}
+        className={secondaryClass}
+        href={item.href}
+      >
+        {PUBLIC_CTA_PDF_OPEN}
+      </ExternalTabAnchor>
+      {item.officialSourceUrl ? (
+        <ExternalTabAnchor
+          aria-label={`${insurerName} ${PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}`}
+          className={secondaryClass}
+          href={item.officialSourceUrl}
+        >
+          {PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}
+        </ExternalTabAnchor>
+      ) : null}
+    </>
+  );
+}
+
 export function ClaimFormListItem({
   item,
   variant = "default",
@@ -149,27 +204,13 @@ export function ClaimFormListItem({
           <article className={`${insurerCardClaimDocumentCard} space-y-3`}>
             <div className={insurerCardClaimDocumentTitle}>{title}</div>
             <div className={insurerCardClaimDocumentActions}>
-              {renderPdfDownloadButton(
+              {renderPdfAssetActions(
                 title,
+                insurerName,
                 item,
                 insurerCardPdfDownloadButton,
+                insurerCardPdfSecondaryButton,
               )}
-              <ExternalTabAnchor
-                aria-label={`${title} ${PUBLIC_CTA_PDF_OPEN}`}
-                className={insurerCardPdfSecondaryButton}
-                href={item.href}
-              >
-                {PUBLIC_CTA_PDF_OPEN}
-              </ExternalTabAnchor>
-              {item.officialSourceUrl ? (
-                <ExternalTabAnchor
-                  aria-label={`${insurerName} ${PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}`}
-                  className={insurerCardPdfSecondaryButton}
-                  href={item.officialSourceUrl}
-                >
-                  {PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}
-                </ExternalTabAnchor>
-              ) : null}
             </div>
           </article>
         </li>
@@ -209,7 +250,9 @@ export function ClaimFormListItem({
             ) : null}
             {variant === "default" ? (
               <>
-                <p className="mt-1 break-all text-xs text-[#4A5565]">{item.fileName}</p>
+                {item.publicAssetView.kind === "approved_local" ? (
+                  <p className="mt-1 break-all text-xs text-[#4A5565]">{item.fileName}</p>
+                ) : null}
                 {trustHint ? (
                   <p className="mt-2 text-xs font-medium text-[#4A5565]">{trustHint}</p>
                 ) : null}
@@ -227,41 +270,29 @@ export function ClaimFormListItem({
             ) : null}
           </div>
           <div className={actionGridClass}>
-            {renderPdfDownloadButton(
+            {renderPdfAssetActions(
               title,
+              insurerName,
               item,
               primaryButtonClass,
+              secondaryButtonClass,
               variant === "accordion" ? "sm:col-span-2 lg:col-span-3" : "",
             )}
-            <ExternalTabAnchor
-                aria-label={`${title} ${PUBLIC_CTA_PDF_OPEN}`}
-                className={secondaryButtonClass}
-                href={item.href}
-              >
-                {PUBLIC_CTA_PDF_OPEN}
-              </ExternalTabAnchor>
-              {item.officialSourceUrl ? (
-                <ExternalTabAnchor
-                  aria-label={`${insurerName} ${PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}`}
-                  className={secondaryButtonClass}
-                  href={item.officialSourceUrl}
-                >
-                  {PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}
-              </ExternalTabAnchor>
-            ) : null}
             {variant === "default" ? (
               <>
-                <button
-                  ref={linkCopyButtonRef}
-                  aria-busy={copyingLink || undefined}
-                  aria-label={`${title} ${PUBLIC_CTA_PDF_LINK_COPY}`}
-                  className={secondaryButtonClass}
-                  disabled={copyingLink}
-                  onClick={() => handleCopyPdfLink(item.href)}
-                  type="button"
-                >
-                  {copyingLink ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_PDF_LINK_COPY}
-                </button>
+                {item.publicAssetView.kind === "approved_local" ? (
+                  <button
+                    ref={linkCopyButtonRef}
+                    aria-busy={copyingLink || undefined}
+                    aria-label={`${title} ${PUBLIC_CTA_PDF_LINK_COPY}`}
+                    className={secondaryButtonClass}
+                    disabled={copyingLink}
+                    onClick={() => handleCopyPdfLink(item.href)}
+                    type="button"
+                  >
+                    {copyingLink ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_PDF_LINK_COPY}
+                  </button>
+                ) : null}
                 <button
                   ref={guideCopyButtonRef}
                   aria-busy={copyingGuide || undefined}

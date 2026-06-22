@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 
 import {
-  BOHUMSCHOOL_PDF_PATH_PREFIX,
   PUBLIC_ADMIN_ONLY_FIELD_NAMES,
   PUBLIC_FORBIDDEN_BENCHMARK_PHRASES,
   PUBLIC_FORBIDDEN_COPY_ALL,
@@ -94,14 +93,14 @@ describe("PR-PUBLIC-SAFETY-A public forbidden copy guard", () => {
     assert.ok(publicMatches.length > 0, "admin routes intentionally contain forbidden public terms");
   });
 
-  it("pdf asset paths remain available under bohumschool prefix", () => {
-    const governance = read("tests/public/claim-pdf-governance.test.ts");
-    assert.match(governance, /\/claim-forms\/bohumschool\//);
+  it("legacy pdf catalog is blocked from public static paths", () => {
+    const governance = read("lib/public/public-asset-policy.ts");
+    assert.match(governance, /isLegacyThirdPartyAssetReference/);
     const claimItem = read("components/claim-documents/claim-form-list-item.tsx");
-    assert.match(claimItem, /PDF 다운로드/);
-    assert.match(claimItem, /PUBLIC_CTA_PDF_OPEN/);
-    assert.ok(existsSync(join(ROOT, "public/claim-forms/bohumschool")) || true);
-    assert.match(BOHUMSCHOOL_PDF_PATH_PREFIX, /\/claim-forms\/bohumschool\//);
+    assert.match(claimItem, /renderPdfAssetActions/);
+    assert.match(claimItem, /publicAssetView/);
+    assert.equal(existsSync(join(ROOT, "public/claim-forms")), false);
+    assert.equal(existsSync(join(ROOT, "private-asset-review/claim-forms")), true);
   });
 
   it("public source leak guard files document admin-only field omission", () => {
