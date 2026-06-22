@@ -114,6 +114,11 @@ export function MessageTemplateLibrary({
       "plannerdesk.messages.favorites",
       JSON.stringify(next),
     );
+    try {
+      window.dispatchEvent(new Event("plannerdesk.messages.favorites:update"));
+    } catch {
+      // defensive
+    }
     showToast(
       favorites.includes(id)
         ? "즐겨찾기에서 제거되었습니다."

@@ -11,7 +11,14 @@ export const FAVORITE_TOGGLE_REMOVE_LABEL = "즐겨찾기 해제";
 
 export const HOME_FAVORITES_EMPTY_TITLE = "아직 즐겨찾기가 없습니다.";
 export const HOME_FAVORITES_EMPTY_DESCRIPTION =
-  "자주 쓰는 보험사, 청구서류, 업무 링크를 추가해두면 빠르게 다시 열 수 있습니다. 고객정보가 포함된 화면은 저장하지 마세요.";
+  "자주 쓰는 공개 업무를 즐겨찾기에 추가해보세요. 저장 내용은 이 브라우저에서만 관리되며 고객정보는 저장하지 않습니다.";
+
+export const HOME_RECENTS_EMPTY_TITLE = "아직 최근 사용한 업무가 없습니다.";
+export const HOME_RECENTS_EMPTY_DESCRIPTION =
+  "업무도구나 자료를 열면 이곳에 바로가기가 표시됩니다.";
+
+export const HOME_RECENTS_FAVORITES_UNIFIED_NOTICE =
+  "최근 사용·즐겨찾기는 이 브라우저의 공개 업무 바로가기만 저장합니다.";
 
 export const CLAIM_FAVORITES_SECTION_TITLE = "자주 보는 청구서류";
 export const KNOWLEDGE_FAVORITES_SECTION_TITLE = "자주 보는 지식";
@@ -24,7 +31,6 @@ export const SEARCH_QUERY_FAVORITES_DEFERRED_REASON =
 export const PLANNER_FAVORITES_LOGIN_PROMPT =
   "즐겨찾기와 최근 사용 업무는 로그인 후 이 기기에서만 이용할 수 있습니다. 고객정보는 저장하지 않습니다.";
 
-export const RECENT_WORK_PII_NOTICE =
-  "최근 사용에는 업무 페이지 바로가기만 기록됩니다. 고객명·계약번호·상담 원문 등은 저장되지 않습니다.";
+export const RECENT_WORK_PII_NOTICE = HOME_RECENTS_FAVORITES_UNIFIED_NOTICE;
 
 export { PLANNER_FAVORITES_PII_NOTICE } from "./pii-guard";

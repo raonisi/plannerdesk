@@ -93,6 +93,9 @@ export default async function Home() {
           knowledgeResult.status === "ok" ? knowledgeResult.articles : []
         }
         loadState={loadState}
+        messageTemplates={
+          messageTemplateResult.status === "ok" ? messageTemplateResult.data : []
+        }
         plannerFavoritesEnabled={plannerFavoritesEnabled}
         plannerVerifiedWorkLinks={plannerVerifiedWorkLinks}
         publicStats={publicStats}

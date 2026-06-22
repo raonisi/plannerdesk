@@ -31,6 +31,7 @@ import {
 } from "@/lib/public/knowledge-display";
 import { publicKnowledgeTrustHint } from "@/lib/knowledge/workflow-labels";
 import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
+import { recordRecentWorkVisit } from "@/lib/planner-favorites/recent-work-client";
 
 const categoryOptions: Array<{
   label: string;
@@ -438,6 +439,15 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
   if (item.updatedAt) dateParts.push(`업데이트 ${item.updatedAt}`);
   const trustHint = publicKnowledgeTrustHint(item.status);
 
+  const recordVisit = () => {
+    recordRecentWorkVisit({
+      id: item.id,
+      label: item.title,
+      href: `/knowledge/${item.slug}`,
+      type: "knowledge",
+    });
+  };
+
   return (
     <article className="flex h-full flex-col rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
       <div className="flex flex-wrap items-center gap-2">
@@ -459,6 +469,7 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
         <Link
           className="hover:text-[#7a612d] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
           href={`/knowledge/${item.slug}`}
+          onClick={recordVisit}
         >
           {item.title}
         </Link>
@@ -487,6 +498,7 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
       <Link
         className="mt-4 inline-flex min-h-11 w-fit items-center justify-center rounded-lg bg-[#102235] px-4 text-sm font-semibold text-white hover:bg-[#1b344e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
         href={`/knowledge/${item.slug}`}
+        onClick={recordVisit}
       >
         자세히 보기
       </Link>

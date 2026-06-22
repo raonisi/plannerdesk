@@ -47,6 +47,7 @@ import {
   WORK_TOOLS_STORAGE_EMPTY_MESSAGE,
   WORK_TOOLS_STORAGE_LOAD_ERROR,
 } from "@/lib/work-tools/storage-public-copy";
+import { recordRecentWorkVisit } from "@/lib/planner-favorites/recent-work-client";
 
 type ToolKind = WorkToolKind;
 type ToolItem = WorkToolItem;
@@ -555,6 +556,12 @@ export function WorkToolsClient() {
       setIsFolderOpen(true);
     } else {
       setActiveTool(tool.id);
+      recordRecentWorkVisit({
+        id: tool.id,
+        label: tool.label,
+        href: `/work-tools?tool=${tool.id}`,
+        type: "tool",
+      });
     }
   }
 

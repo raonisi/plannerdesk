@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Star } from "lucide-react";
 import { EmptyStatePanel } from "@/components/launcher/empty-state-panel";
 import { claimLibraryFavoriteId } from "@/lib/planner-favorites/claim-favorite-id";
@@ -10,12 +10,16 @@ import {
   HOME_FAVORITES_EMPTY_TITLE,
   LOCAL_FAVORITES_DEVICE_NOTICE,
   LOCAL_FAVORITES_PUBLISHED_NOTICE,
-  PLANNER_FAVORITES_PII_NOTICE,
 } from "@/lib/planner-favorites/copy";
 import {
   buildAllowedIdSet,
   filterFavoriteIdsToCatalog,
 } from "@/lib/planner-favorites/filter-ids";
+import {
+  HOME_FAVORITES_DISPLAY_LIMIT,
+  publicWorkspaceKindLabel,
+  type PublicWorkspaceKind,
+} from "@/lib/planner-favorites/recent-work";
 import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-keys";
 import { buildClaimLibraryItems } from "@/lib/claim-documents/claim-library";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
@@ -35,25 +39,58 @@ const WORK_TOOL_LABELS: Record<string, string> = {
   "hidden-insurance": "숨은보험금",
 };
 
+type FavoriteChipKind =
+  | "directory"
+  | "work-tool"
+  | "claim-document"
+  | "knowledge"
+  | "message-template";
+
 type FavoriteChip = {
   key: string;
   label: string;
   href: string;
-  kind: "insurer" | "tool" | "claim" | "knowledge";
+  kind: FavoriteChipKind;
+  removeId: string;
 };
 
 interface PlannerWorkFavoritesPanelProps {
   insurers: Array<{ id: string; name: string }>;
   claimDocuments: PublicClaimDocument[];
   knowledgeArticles: PublicKnowledgeArticleListItem[];
+  messageTemplates: Array<{ id: string; title: string }>;
+}
+
+function readStringArrayFromStorage(key: string): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((value): value is string => typeof value === "string");
+  } catch {
+    return [];
+  }
+}
+
+function writeStringArrayToStorage(key: string, ids: string[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(ids));
+  } catch {
+    // ignore quota / private mode
+  }
 }
 
 export function PlannerWorkFavoritesPanel({
   insurers,
   claimDocuments,
   knowledgeArticles,
+  messageTemplates,
 }: PlannerWorkFavoritesPanelProps) {
-  const { favorites: insurerFavoriteIds } = useFavorites();
+  const { favorites: insurerFavoriteIds, toggle: toggleInsurerFavorite } =
+    useFavorites();
   const claimFavorites = useLocalIdFavorites(
     PLANNER_FAVORITE_STORAGE_KEYS.claimDocuments,
   );
@@ -62,43 +99,79 @@ export function PlannerWorkFavoritesPanel({
   );
 
   const [workToolIds, setWorkToolIds] = useState<string[]>([]);
+  const [messageTemplateIds, setMessageTemplateIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const syncWorkTools = () => {
-      try {
-        const raw = window.localStorage.getItem(
-          PLANNER_FAVORITE_STORAGE_KEYS.workTools,
-        );
-        if (!raw) {
-          setWorkToolIds([]);
-          return;
-        }
-        const parsed = JSON.parse(raw) as unknown;
-        if (!Array.isArray(parsed)) {
-          setWorkToolIds([]);
-          return;
-        }
-        setWorkToolIds(parsed.filter((s): s is string => typeof s === "string"));
-      } catch {
-        setWorkToolIds([]);
-      }
+      setWorkToolIds(
+        readStringArrayFromStorage(PLANNER_FAVORITE_STORAGE_KEYS.workTools),
+      );
+    };
+    const syncMessageTemplates = () => {
+      setMessageTemplateIds(
+        readStringArrayFromStorage(PLANNER_FAVORITE_STORAGE_KEYS.messageTemplates),
+      );
     };
 
     syncWorkTools();
+    syncMessageTemplates();
+
     const onStorage = (event: StorageEvent) => {
       if (event.key === PLANNER_FAVORITE_STORAGE_KEYS.workTools) syncWorkTools();
+      if (event.key === PLANNER_FAVORITE_STORAGE_KEYS.messageTemplates) {
+        syncMessageTemplates();
+      }
     };
+
     window.addEventListener("storage", onStorage);
     window.addEventListener("plannerdesk.workTools.favorites:update", syncWorkTools);
+    window.addEventListener(
+      "plannerdesk.messages.favorites:update",
+      syncMessageTemplates,
+    );
+
     return () => {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener(
         "plannerdesk.workTools.favorites:update",
         syncWorkTools,
       );
+      window.removeEventListener(
+        "plannerdesk.messages.favorites:update",
+        syncMessageTemplates,
+      );
     };
+  }, []);
+
+  const removeWorkToolFavorite = useCallback((toolId: string) => {
+    const next = readStringArrayFromStorage(
+      PLANNER_FAVORITE_STORAGE_KEYS.workTools,
+    ).filter((id) => id !== toolId);
+    writeStringArrayToStorage(PLANNER_FAVORITE_STORAGE_KEYS.workTools, next);
+    setWorkToolIds(next);
+    try {
+      window.dispatchEvent(new Event("plannerdesk.workTools.favorites:update"));
+    } catch {
+      // defensive
+    }
+  }, []);
+
+  const removeMessageTemplateFavorite = useCallback((templateId: string) => {
+    const next = readStringArrayFromStorage(
+      PLANNER_FAVORITE_STORAGE_KEYS.messageTemplates,
+    ).filter((id) => id !== templateId);
+    writeStringArrayToStorage(
+      PLANNER_FAVORITE_STORAGE_KEYS.messageTemplates,
+      next,
+    );
+    setMessageTemplateIds(next);
+    try {
+      window.dispatchEvent(new Event("plannerdesk.messages.favorites:update"));
+    } catch {
+      // defensive
+    }
   }, []);
 
   const insurerById = useMemo(() => {
@@ -106,6 +179,12 @@ export function PlannerWorkFavoritesPanel({
     for (const ins of insurers) map.set(ins.id, ins.name);
     return map;
   }, [insurers]);
+
+  const messageTemplateById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const template of messageTemplates) map.set(template.id, template.title);
+    return map;
+  }, [messageTemplates]);
 
   const claimItems = useMemo(
     () => buildClaimLibraryItems(claimDocuments),
@@ -146,20 +225,22 @@ export function PlannerWorkFavoritesPanel({
       const name = insurerById.get(id);
       if (!name) continue;
       list.push({
-        key: `insurer-${id}`,
+        key: `directory-${id}`,
         label: name,
         href: `/directory?search=${encodeURIComponent(name)}`,
-        kind: "insurer",
+        kind: "directory",
+        removeId: id,
       });
     }
 
     for (const toolId of workToolIds) {
       if (!WORK_TOOL_LABELS[toolId]) continue;
       list.push({
-        key: `tool-${toolId}`,
+        key: `work-tool-${toolId}`,
         label: WORK_TOOL_LABELS[toolId],
         href: `/work-tools?tool=${toolId}`,
-        kind: "tool",
+        kind: "work-tool",
+        removeId: toolId,
       });
     }
 
@@ -171,10 +252,11 @@ export function PlannerWorkFavoritesPanel({
       const meta = claimMetaByFavoriteId.get(favId);
       if (!meta) continue;
       list.push({
-        key: `claim-${favId}`,
+        key: `claim-document-${favId}`,
         label: meta.label,
         href: meta.href,
-        kind: "claim",
+        kind: "claim-document",
+        removeId: favId,
       });
     }
 
@@ -190,6 +272,20 @@ export function PlannerWorkFavoritesPanel({
         label: meta.label,
         href: meta.href,
         kind: "knowledge",
+        removeId: id,
+      });
+    }
+
+    const allowedMessageIds = buildAllowedIdSet(messageTemplateById.keys());
+    for (const id of filterFavoriteIdsToCatalog(messageTemplateIds, allowedMessageIds)) {
+      const title = messageTemplateById.get(id);
+      if (!title) continue;
+      list.push({
+        key: `message-template-${id}`,
+        label: title,
+        href: "/message-templates",
+        kind: "message-template",
+        removeId: id,
       });
     }
 
@@ -203,14 +299,36 @@ export function PlannerWorkFavoritesPanel({
     claimMetaByFavoriteId,
     knowledgeFavorites.favorites,
     knowledgeMetaById,
+    messageTemplateIds,
+    messageTemplateById,
   ]);
 
-  const kindLabel: Record<FavoriteChip["kind"], string> = {
-    insurer: "보험사",
-    tool: "도구",
-    claim: "청구",
-    knowledge: "지식",
+  const visibleChips = chips.slice(0, HOME_FAVORITES_DISPLAY_LIMIT);
+
+  const handleRemove = (chip: FavoriteChip) => {
+    switch (chip.kind) {
+      case "directory":
+        toggleInsurerFavorite(chip.removeId);
+        break;
+      case "work-tool":
+        removeWorkToolFavorite(chip.removeId);
+        break;
+      case "claim-document":
+        claimFavorites.toggle(chip.removeId);
+        break;
+      case "knowledge":
+        knowledgeFavorites.toggle(chip.removeId);
+        break;
+      case "message-template":
+        removeMessageTemplateFavorite(chip.removeId);
+        break;
+      default:
+        break;
+    }
   };
+
+  const chipKindLabel = (kind: FavoriteChipKind): string =>
+    publicWorkspaceKindLabel(kind as PublicWorkspaceKind);
 
   return (
     <section
@@ -223,23 +341,32 @@ export function PlannerWorkFavoritesPanel({
       <p className={`mt-2 break-keep ${textStyles.small}`}>
         {LOCAL_FAVORITES_PUBLISHED_NOTICE}
       </p>
-      <p className={`mt-2 break-keep ${textStyles.small}`}>
-        {PLANNER_FAVORITES_PII_NOTICE}
-      </p>
 
-      {chips.length > 0 ? (
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {chips.map((chip) => (
-            <li key={chip.key}>
+      {visibleChips.length > 0 ? (
+        <ul className="mt-3 space-y-2">
+          {visibleChips.map((chip) => (
+            <li
+              key={chip.key}
+              className="flex min-w-0 items-center gap-2 rounded-lg border border-[#E3DED4] bg-white px-2 py-1.5"
+            >
               <Link
                 href={chip.href}
-                className="inline-flex min-h-9 max-w-full items-center gap-2 rounded-lg border border-[#E3DED4] bg-white px-3 py-1.5 text-xs font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+                className="min-w-0 flex-1 rounded-md px-1 py-1 text-xs font-bold text-[#0F1D2E] transition hover:text-[#16382C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
               >
-                <span className="truncate">{chip.label}</span>
-                <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A5565]">
-                  {kindLabel[chip.kind]}
+                <span className="line-clamp-2 break-keep">{chip.label}</span>
+                <span className="mt-0.5 block text-[10px] font-semibold text-[#4A5565]">
+                  {chipKindLabel(chip.kind)}
                 </span>
               </Link>
+              <button
+                type="button"
+                aria-label={`${chip.label} 즐겨찾기에서 제거`}
+                aria-pressed={true}
+                onClick={() => handleRemove(chip)}
+                className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-[#B9975B] transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
+              >
+                <Star className="h-4 w-4 fill-[#B9975B]" aria-hidden />
+              </button>
             </li>
           ))}
         </ul>

@@ -45,21 +45,32 @@ import {
   spacing,
   textStyles,
 } from "@/lib/design-system";
-import { RECENT_WORK_PII_NOTICE } from "@/lib/planner-favorites/copy";
 import {
+  HOME_RECENTS_EMPTY_DESCRIPTION,
+  HOME_RECENTS_EMPTY_TITLE,
+  HOME_RECENTS_FAVORITES_UNIFIED_NOTICE,
+} from "@/lib/planner-favorites/copy";
+import {
+  HOME_RECENT_DISPLAY_LIMIT,
+  publicWorkspaceKindLabel,
   pushRecentWorkItem,
   readRecentWorkFromStorage,
   recentWorkStorageKey,
+  RECENT_WORK_STORAGE_UPDATE_EVENT,
+  writeRecentWorkToStorage,
+  type RecentWorkInput,
   type RecentWorkItem,
 } from "@/lib/planner-favorites/recent-work";
 import { WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION } from "@/lib/work-tools/work-tools-public-copy";
 import { uiLabels } from "@/lib/ui-labels";
 import type { HomeLoadState } from "@/lib/dashboard/home-data-state";
+import type { PublicMessageTemplate } from "@/lib/public/message-templates";
 
 interface HomeClientProps {
   insurers: PublicInsurer[];
   claimDocuments: PublicClaimDocument[];
   knowledgeArticles: PublicKnowledgeArticleListItem[];
+  messageTemplates: PublicMessageTemplate[];
   publicStats: HomePublicStats;
   loadState: HomeLoadState;
   plannerFavoritesEnabled: boolean;
@@ -72,6 +83,7 @@ export function HomeClient({
   insurers,
   claimDocuments,
   knowledgeArticles,
+  messageTemplates,
   publicStats,
   loadState,
   plannerFavoritesEnabled,
@@ -83,8 +95,23 @@ export function HomeClient({
 
   useEffect(() => {
     if (typeof window === "undefined" || !plannerFavoritesEnabled) return;
-    const savedRecents = window.localStorage.getItem(recentWorkStorageKey());
-    setTimeout(() => setRecents(readRecentWorkFromStorage(savedRecents)), 0);
+
+    const syncRecents = () => {
+      const savedRecents = window.localStorage.getItem(recentWorkStorageKey());
+      setRecents(readRecentWorkFromStorage(savedRecents));
+    };
+
+    syncRecents();
+    window.addEventListener(RECENT_WORK_STORAGE_UPDATE_EVENT, syncRecents);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === recentWorkStorageKey()) syncRecents();
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.removeEventListener(RECENT_WORK_STORAGE_UPDATE_EVENT, syncRecents);
+      window.removeEventListener("storage", onStorage);
+    };
   }, [plannerFavoritesEnabled]);
 
   const searchResults = (() => {
@@ -162,14 +189,19 @@ export function HomeClient({
     return items.slice(0, 8);
   })();
 
-  const trackRecent = (item: RecentWorkItem) => {
+  const trackRecent = (item: RecentWorkInput) => {
     if (!plannerFavoritesEnabled || typeof window === "undefined") return;
     const updated = pushRecentWorkItem(recents, item);
     setRecents(updated);
-    window.localStorage.setItem(
-      recentWorkStorageKey(),
-      JSON.stringify(updated),
-    );
+    try {
+      window.localStorage.setItem(
+        recentWorkStorageKey(),
+        writeRecentWorkToStorage(updated),
+      );
+      window.dispatchEvent(new Event(RECENT_WORK_STORAGE_UPDATE_EVENT));
+    } catch {
+      // localStorage unavailable
+    }
   };
 
   return (
@@ -448,14 +480,21 @@ export function HomeClient({
           id="home-quick-exec-heading"
           title="최근 사용·즐겨찾기"
         />
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <div className="min-w-0 lg:col-span-2">
+        <p className={`mt-2 break-keep ${textStyles.small}`}>
+          {HOME_RECENTS_FAVORITES_UNIFIED_NOTICE}
+        </p>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="min-w-0 lg:col-span-1">
             {plannerFavoritesEnabled ? (
               <PlannerFavoritesScope enabled>
                 <PlannerWorkFavoritesPanel
                   claimDocuments={claimDocuments}
                   insurers={insurers.map((ins) => ({ id: ins.id, name: ins.name }))}
                   knowledgeArticles={knowledgeArticles}
+                  messageTemplates={messageTemplates.map((template) => ({
+                    id: template.id,
+                    title: template.title,
+                  }))}
                 />
               </PlannerFavoritesScope>
             ) : (
@@ -479,7 +518,7 @@ export function HomeClient({
             ) : null}
           </div>
 
-          <div className="min-w-0 space-y-4">
+          <div className="min-w-0 space-y-4 lg:col-span-1">
             {plannerFavoritesEnabled ? (
               <section
                 className={`rounded-xl border border-[#E3DED4] bg-white p-4 ${shadows.card}`}
@@ -488,26 +527,20 @@ export function HomeClient({
                   <Clock className="h-3.5 w-3.5 text-[#B9975B]" />
                   최근 사용
                 </h2>
-                <p className={`mt-2 break-keep ${textStyles.small}`}>
-                  {RECENT_WORK_PII_NOTICE}
-                </p>
                 {recents.length > 0 ? (
                   <ul className="mt-3 space-y-2">
-                    {recents.map((rec) => (
-                      <li key={rec.id + rec.href}>
+                    {recents.slice(0, HOME_RECENT_DISPLAY_LIMIT).map((rec) => (
+                      <li key={`${rec.kind}:${rec.id}`}>
                         <Link
                           href={rec.href}
+                          aria-label={`${rec.label} ${publicWorkspaceKindLabel(rec.kind)} 바로가기`}
                           className="flex min-h-9 items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs text-[#4A5565] transition hover:bg-[#F7F4EE] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
                         >
-                          <span className="truncate font-medium">{rec.label}</span>
+                          <span className="line-clamp-2 min-w-0 flex-1 break-keep font-medium">
+                            {rec.label}
+                          </span>
                           <span className="shrink-0 rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-1.5 py-0.5 text-[10px] font-semibold text-[#4A5565]">
-                            {rec.type === "insurer"
-                              ? "보험사"
-                              : rec.type === "knowledge"
-                                ? "지식"
-                                : rec.type === "tool"
-                                  ? "도구"
-                                  : "링크"}
+                            {publicWorkspaceKindLabel(rec.kind)}
                           </span>
                         </Link>
                       </li>
@@ -516,8 +549,8 @@ export function HomeClient({
                 ) : (
                   <div className="mt-3">
                     <EmptyStatePanel
-                      description="보험사, 청구서류, 업무 도구를 열면 이곳에 최근 항목이 표시됩니다."
-                      title="아직 최근 사용 기록이 없습니다"
+                      description={HOME_RECENTS_EMPTY_DESCRIPTION}
+                      title={HOME_RECENTS_EMPTY_TITLE}
                     />
                   </div>
                 )}

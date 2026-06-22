@@ -63,7 +63,9 @@ describe("PR-BS-06 planner favorites PII guard", () => {
       blocked,
       { id: "aa", label: "AA", href: "/planner/answer-assistant", type: "tool" },
     ]);
-    assert.deepEqual(sanitized, [safe]);
+    assert.equal(sanitized.length, 1);
+    assert.equal(sanitized[0]?.id, safe.id);
+    assert.equal(sanitized[0]?.kind, "directory");
   });
 
   it("pushRecentWorkItem ignores prohibited items", () => {
