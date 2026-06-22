@@ -48,10 +48,9 @@ const PR_MESSAGE_01_FORBIDDEN_PHRASES = [
 ] as const;
 
 describe("PR-MESSAGE-01 public safe message templates", () => {
-  it("static fallback exposes at least nine public templates", () => {
+  it("static fallback exposes public templates via selector", () => {
     const fallback = getStaticMessageTemplateFallback();
-    assert.ok(fallback.length >= 9);
-    assert.ok(fallback.length <= 18);
+    assert.ok(fallback.length >= 30);
     assert.equal(fallback.length, countStaticMessageTemplateFallback());
     assert.equal(fallback.length, publicMessageTemplateCatalog.length);
   });
@@ -138,6 +137,7 @@ describe("PR-MESSAGE-01 public safe message templates", () => {
       MessageTemplateCategory.appointment,
       MessageTemplateCategory.policy_review,
       MessageTemplateCategory.claim_guide,
+      MessageTemplateCategory.contract_maintenance,
       MessageTemplateCategory.customer_care,
       MessageTemplateCategory.notice,
       MessageTemplateCategory.cancellation_defense,
