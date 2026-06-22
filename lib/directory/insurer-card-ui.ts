@@ -2,7 +2,7 @@ const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2";
 
 export const insurerCardShell =
-  "group/insurer relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md sm:p-6";
+  "group/insurer relative min-w-0 max-w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md sm:p-6";
 
 export const insurerCardFeaturedBar =
   "absolute inset-x-0 top-0 h-1 bg-slate-900";
@@ -14,7 +14,7 @@ export const insurerCardCategoryBadge =
   "inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600";
 
 export const insurerCardInsurerName =
-  "break-words text-lg font-bold tracking-tight text-slate-950 sm:text-xl";
+  "line-clamp-2 break-words text-lg font-bold tracking-tight text-slate-950 sm:text-xl";
 
 export const insurerCardPrimaryButton = `inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 ${focusRing}`;
 
@@ -38,7 +38,7 @@ export const insurerCardClaimPanel =
   "mt-4 min-w-0 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4";
 
 export const insurerCardClaimDocumentTitle =
-  "min-w-0 w-full text-left text-sm font-semibold text-slate-900 leading-snug whitespace-normal break-words [word-break:keep-all]";
+  "min-w-0 w-full text-left text-sm font-semibold text-slate-900 leading-snug line-clamp-2 break-words [word-break:keep-all]";
 
 export const insurerCardClaimDocumentCard =
   "w-full min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm";

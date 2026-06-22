@@ -37,6 +37,13 @@ import {
   MessageTemplateTone,
 } from "@prisma/client";
 import { sectionEyebrow, shadows } from "@/lib/design-system";
+import {
+  mobileCardBadgeRow,
+  mobileCardDescription,
+  mobileCardPadding,
+  mobileCardShell,
+  mobileCardTitle,
+} from "@/lib/mobile/card-density";
 
 const channelFilterOptions: Array<{ id: PublicMessageChannelFilter; label: string }> =
   [
@@ -504,11 +511,11 @@ function TemplateCard({
 
   return (
     <article
-      className={`flex h-full flex-col rounded-xl border border-[#E3DED4] bg-white p-5 ${shadows.card}`}
+      className={`flex h-full flex-col ${mobileCardShell} ${mobileCardPadding} rounded-xl border border-[#E3DED4] bg-white ${shadows.card}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="min-w-0 flex-1">
+          <div className={mobileCardBadgeRow}>
             <span className="rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-2 py-0.5 text-[10px] font-bold text-[#16382C]">
               {publicMessageCategoryLabels[template.category]}
             </span>
@@ -524,9 +531,7 @@ function TemplateCard({
               </span>
             ) : null}
           </div>
-          <h4 className="mt-2 break-keep text-lg font-bold leading-snug text-[#0F1D2E]">
-            {template.title}
-          </h4>
+          <h4 className={`mt-2 ${mobileCardTitle}`}>{template.title}</h4>
         </div>
         <button
           type="button"
@@ -545,7 +550,7 @@ function TemplateCard({
         </button>
       </div>
 
-      <p className="mt-2 break-keep text-xs leading-relaxed text-[#4A5565]">
+      <p className={`mt-2 ${mobileCardDescription}`}>
         {template.useCase}
       </p>
       <p className="mt-1 text-xs text-[#4A5565]/90">

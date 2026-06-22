@@ -8,6 +8,13 @@ import {
 } from "@/lib/tool-display";
 import { externalLinkAriaLabel } from "@/lib/ui/external-link";
 import { shadows } from "@/lib/design-system";
+import {
+  mobileCardBadgeRow,
+  mobileCardDescription,
+  mobileCardPadding,
+  mobileCardShell,
+  mobileCardTitleSm,
+} from "@/lib/mobile/card-density";
 import { FavoriteButton } from "./favorite-button";
 
 export function ToolCard({
@@ -37,12 +44,13 @@ export function ToolCard({
 }) {
   const typeLabel = getToolTypeLabel(kind);
   const actionLabel = getToolActionLabel(kind, source);
-  const padding = size === "featured" ? "p-6" : "p-5";
-  const minHeight = size === "featured" ? "min-h-[220px]" : "min-h-[200px]";
+  const padding = size === "featured" ? "p-4 sm:p-6" : mobileCardPadding;
+  const minHeight =
+    size === "featured" ? "min-h-0 sm:min-h-[220px]" : "min-h-0 sm:min-h-[200px]";
 
   return (
     <article
-      className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white ${padding} ${minHeight} ${shadows.card} transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-[0_10px_30px_rgba(15,29,46,0.08)] focus-within:ring-2 focus-within:ring-[#B9975B]/30 ${
+      className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white ${padding} ${minHeight} ${mobileCardShell} ${shadows.card} transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-[0_10px_30px_rgba(15,29,46,0.08)] focus-within:ring-2 focus-within:ring-[#B9975B]/30 ${
         isActive ? "ring-2 ring-[#B9975B]" : ""
       }`}
     >
@@ -57,15 +65,13 @@ export function ToolCard({
             onToggle={onToggleFavorite}
           />
         </div>
-        <h3
-          className={`mt-4 font-bold text-[#0F1D2E] ${size === "featured" ? "text-base" : "text-sm"}`}
-        >
+        <h3 className={`mt-4 ${mobileCardTitleSm}`}>
           {title}
         </h3>
-        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#4A5565] break-keep">
+        <p className={`mt-1.5 ${mobileCardDescription}`}>
           {description}
         </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className={`mt-3 ${mobileCardBadgeRow}`}>
           <span className="rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-2 py-0.5 text-[10px] font-bold text-[#16382C]">
             {typeLabel}
           </span>

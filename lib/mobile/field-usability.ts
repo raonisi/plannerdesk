@@ -1,5 +1,16 @@
 /** Mobile field usability copy and layout tokens (PR-BS-30). */
 
+export {
+  mobileCardActions,
+  mobileCardBadgeRow,
+  mobileCardDescription,
+  mobileCardPadding,
+  mobileCardShell,
+  mobileCardTitle,
+  mobileCardTitleSm,
+  mobileCardTokens,
+} from "./card-density";
+
 export const MOBILE_FAVORITES_NOTICE_SHORT =
   "즐겨찾기는 이 기기에만 저장됩니다.";
 

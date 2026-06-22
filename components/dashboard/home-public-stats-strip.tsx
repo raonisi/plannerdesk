@@ -6,25 +6,9 @@ import {
   type HomePublicStats,
 } from "@/lib/dashboard/home-data-state";
 import { sectionEyebrow, textStyles } from "@/lib/design-system";
+import { mobileCardShell, mobileCardTabular } from "@/lib/mobile/card-density";
 
 export type { HomePublicStats } from "@/lib/dashboard/home-data-state";
-
-function renderStatValue(value: HomePublicStats["insurers"]) {
-  if (value.kind === "unavailable") {
-    return (
-      <p className="mt-0.5 text-sm font-semibold leading-snug text-[#4A5565]">
-        {HOME_DATA_STATUS_COPY.statUnavailable}
-      </p>
-    );
-  }
-
-  return (
-    <p className="mt-0.5 text-xl font-bold tabular-nums text-[#0F1D2E]">
-      {value.value}
-      <span className="ml-1 text-xs font-semibold text-[#4A5565]">건</span>
-    </p>
-  );
-}
 
 export function HomePublicStatsStrip({
   stats,
@@ -77,16 +61,25 @@ export function HomePublicStatsStrip({
       aria-label="공개 콘텐츠 요약"
     >
       <p className={sectionEyebrow}>공개 콘텐츠 요약</p>
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
         {items.map((item) => (
           <div
             key={item.key}
-            className="rounded-lg border border-[#E3DED4]/80 bg-[#F7F4EE] px-3 py-2.5"
+            className={`${mobileCardShell} rounded-lg border border-[#E3DED4]/80 bg-[#F7F4EE] px-3 py-2.5`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wide text-[#4A5565]">
+            <p className="line-clamp-2 break-keep text-[10px] font-bold uppercase tracking-wide text-[#4A5565]">
               {item.label}
             </p>
-            {renderStatValue(item.value)}
+            {item.value.kind === "unavailable" ? (
+              <p className="mt-0.5 text-xs font-semibold leading-snug text-[#4A5565]">
+                {HOME_DATA_STATUS_COPY.statUnavailable}
+              </p>
+            ) : (
+              <p className={`mt-0.5 text-lg font-bold text-[#0F1D2E] sm:text-xl ${mobileCardTabular}`}>
+                {item.value.value}
+                <span className="ml-1 text-xs font-semibold text-[#4A5565]">건</span>
+              </p>
+            )}
           </div>
         ))}
       </div>

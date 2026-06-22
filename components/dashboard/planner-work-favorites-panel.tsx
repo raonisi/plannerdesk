@@ -25,6 +25,11 @@ import { buildClaimLibraryItems } from "@/lib/claim-documents/claim-library";
 import type { PublicClaimDocument } from "@/lib/public/claim-documents";
 import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 import { sectionEyebrow, shadows, textStyles } from "@/lib/design-system";
+import {
+  mobileCardListGap,
+  mobileCardPadding,
+  mobileCardShell,
+} from "@/lib/mobile/card-density";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
 
@@ -332,7 +337,7 @@ export function PlannerWorkFavoritesPanel({
 
   return (
     <section
-      className={`rounded-xl border border-[#E3DED4] bg-[#F7F4EE] p-5 ${shadows.card}`}
+      className={`${mobileCardShell} rounded-xl border border-[#E3DED4] bg-[#F7F4EE] ${mobileCardPadding} ${shadows.card}`}
     >
       <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
         <Star className="h-3.5 w-3.5 fill-[#B9975B] text-[#B9975B]" />
@@ -343,11 +348,11 @@ export function PlannerWorkFavoritesPanel({
       </p>
 
       {visibleChips.length > 0 ? (
-        <ul className="mt-3 space-y-2">
+        <ul className={`mt-3 ${mobileCardListGap}`}>
           {visibleChips.map((chip) => (
             <li
               key={chip.key}
-              className="flex min-w-0 items-center gap-2 rounded-lg border border-[#E3DED4] bg-white px-2 py-1.5"
+              className={`flex min-w-0 items-center gap-2 rounded-lg border border-[#E3DED4] bg-white px-2.5 py-2 ${mobileCardShell}`}
             >
               <Link
                 href={chip.href}

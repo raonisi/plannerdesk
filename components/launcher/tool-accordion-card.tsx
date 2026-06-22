@@ -6,6 +6,13 @@ import {
   type ToolKind,
 } from "@/lib/tool-display";
 import { shadows } from "@/lib/design-system";
+import {
+  mobileCardBadgeRow,
+  mobileCardDescription,
+  mobileCardPadding,
+  mobileCardShell,
+  mobileCardTitleSm,
+} from "@/lib/mobile/card-density";
 import { FavoriteButton } from "./favorite-button";
 
 export function ToolAccordionCard({
@@ -34,7 +41,7 @@ export function ToolAccordionCard({
 
   return (
     <article
-      className={`relative flex flex-col justify-between rounded-xl border border-[#E3DED4] bg-white p-5 min-h-[200px] ${shadows.card} transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-[0_10px_30px_rgba(15,29,46,0.08)]`}
+      className={`relative flex min-h-0 flex-col justify-between rounded-xl border border-[#E3DED4] bg-white sm:min-h-[200px] ${mobileCardPadding} ${mobileCardShell} ${shadows.card} transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-[0_10px_30px_rgba(15,29,46,0.08)]`}
     >
       <div>
         <div className="flex items-start justify-between gap-3">
@@ -47,13 +54,13 @@ export function ToolAccordionCard({
             onToggle={onToggleFavorite}
           />
         </div>
-        <h3 className="mt-4 font-bold text-[#0F1D2E] text-sm">
+        <h3 className={`mt-4 ${mobileCardTitleSm}`}>
           {title}
         </h3>
-        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#4A5565] break-keep">
+        <p className={`mt-1.5 ${mobileCardDescription}`}>
           {description}
         </p>
-        <div className="mt-3 flex flex-wrap gap-1.5 mb-4">
+        <div className={`mt-3 mb-4 ${mobileCardBadgeRow}`}>
           <span className="rounded-md border border-[#E3DED4] bg-[#F7F4EE] px-2 py-0.5 text-[10px] font-bold text-[#16382C]">
             {typeLabel}
           </span>

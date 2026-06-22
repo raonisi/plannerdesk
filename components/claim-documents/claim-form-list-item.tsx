@@ -12,8 +12,15 @@ import { PLANNER_FAVORITE_STORAGE_KEYS } from "@/lib/planner-favorites/storage-k
 import { useLocalIdFavorites } from "@/hooks/useLocalIdFavorites";
 import { useCopyFeedback } from "@/hooks/useCopyFeedback";
 import { categoryLabels } from "@/lib/claim-documents/category-labels";
+import {
+  mobileCardActionsTight,
+  mobileCardDescription,
+  mobileCardShell,
+  mobileCardTitle,
+} from "@/lib/mobile/card-density";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
-import { publicClaimTrustHint } from "@/lib/directory/formatting";import {
+import { publicClaimTrustHint } from "@/lib/directory/formatting";
+import {
   insurerCardClaimDocumentActions,
   insurerCardClaimDocumentCard,
   insurerCardClaimDocumentTitle,
@@ -162,7 +169,7 @@ export function ClaimFormListItem({
 
     return (
       <>
-        <li className="border-t border-slate-200 first:border-t-0">
+        <li className={`border-t border-slate-200 first:border-t-0 ${mobileCardShell}`}>
         <div className="grid min-h-11 gap-4 py-4 lg:grid-cols-[1fr_auto] lg:items-start">
           <div className="min-w-0 flex-1">
             {variant === "default" ? (
@@ -176,7 +183,7 @@ export function ClaimFormListItem({
               </div>
             ) : null}
             <p
-              className={`break-words text-base font-bold leading-6 text-slate-900 ${
+              className={`${mobileCardTitle} ${
                 isCompactVariant ? "" : "mt-2"
               }`}
             >
@@ -273,8 +280,8 @@ export function ClaimFormListItem({
 
   return (
     <>
-      <li className="border-t border-slate-200 first:border-t-0">
-      <div className="grid min-h-11 gap-3 py-4 lg:grid-cols-[1fr_auto] lg:items-start">
+      <li className={`border-t border-slate-200 first:border-t-0 ${mobileCardShell}`}>
+        <div className="grid min-w-0 gap-3 py-4 lg:grid-cols-[1fr_auto] lg:items-start">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-md border border-indigo-100 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
@@ -287,13 +294,9 @@ export function ClaimFormListItem({
               onToggle={() => toggle(favoriteId)}
             />
           </div>
-          <p className="mt-2 break-keep text-base font-bold leading-6 text-slate-900">
-            {title}
-          </p>
+          <p className={`mt-2 ${mobileCardTitle}`}>{title}</p>
           {doc.summary ? (
-            <p className="mt-1 break-keep text-sm leading-6 text-slate-600">
-              {doc.summary}
-            </p>
+            <p className={`mt-1 ${mobileCardDescription}`}>{doc.summary}</p>
           ) : null}
           {trustHint ? (
             <p className="mt-2 text-xs font-medium text-[#4A5565]">{trustHint}</p>
@@ -306,7 +309,7 @@ export function ClaimFormListItem({
             verificationStatus={status}
           />
         </div>
-        <div className="grid gap-2 sm:flex lg:justify-end">
+        <div className={`${mobileCardActionsTight} lg:justify-end`}>
           {primaryHref ? (
             <ExternalTabAnchor
               aria-label={`${title} ${primaryLabel}`}

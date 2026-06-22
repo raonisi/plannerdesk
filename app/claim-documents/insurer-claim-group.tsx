@@ -10,6 +10,12 @@ import { summarizeClaimItemsFreshness } from "@/lib/claim-documents/freshness-su
 import { CLAIM_PDF_CAUTION_TEXT } from "@/lib/claim-documents/claim-pdf-governance";
 import { insurerMarketSegmentLabel } from "@/lib/claim-documents/insurer-category";
 import { COMMON_INSURER_KEY } from "@/lib/claim-documents/library-items";
+import {
+  mobileCardActionsTight,
+  mobileCardBadgeRow,
+  mobileCardShell,
+  mobileCardTitle,
+} from "@/lib/mobile/card-density";
 import type { InsurerClaimGroup } from "@/lib/claim-documents/group-by-insurer";
 
 export function InsurerClaimGroup({
@@ -62,8 +68,8 @@ export function InsurerClaimGroup({
 
   return (
     <>
-      <section className="rounded-xl border border-[#E3DED4] bg-white shadow-sm">
-        <div className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section className={`${mobileCardShell} rounded-xl border border-[#E3DED4] bg-white shadow-sm`}>
+        <div className="grid min-w-0 gap-3 px-3.5 py-3.5 sm:px-5 sm:py-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="min-w-0">
             <button
               aria-controls={panelId}
@@ -74,14 +80,12 @@ export function InsurerClaimGroup({
               type="button"
             >
               <span className="min-w-0 flex-1">
-                <span className="block break-keep text-lg font-bold leading-snug text-[#0F1D2E]">
-                  {group.label}
-                </span>
+                <span className={`block ${mobileCardTitle}`}>{group.label}</span>
                 <span className="mt-1 block text-sm font-semibold text-[#4A5565]">
                   청구서류 {group.items.length}건
                   {segmentLabel ? ` · ${segmentLabel}` : ""}
                 </span>
-                <span className="mt-2 inline-flex">
+                <span className={`mt-2 inline-flex ${mobileCardBadgeRow}`}>
                   <FreshnessBadge presentation={groupFreshness} />
                 </span>
               </span>
@@ -96,7 +100,7 @@ export function InsurerClaimGroup({
             </button>
           </div>
 
-          <div className="grid gap-2 sm:flex sm:justify-end">
+          <div className={`${mobileCardActionsTight} sm:justify-end`}>
             <button
               ref={copyButtonRef}
               aria-busy={copying || undefined}

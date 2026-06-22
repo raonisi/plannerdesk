@@ -32,6 +32,14 @@ import {
 import { publicKnowledgeTrustHint } from "@/lib/knowledge/workflow-labels";
 import type { PublicKnowledgeArticleListItem } from "@/lib/public/knowledge-articles";
 import { recordRecentWorkVisit } from "@/lib/planner-favorites/recent-work-client";
+import {
+  mobileCardActions,
+  mobileCardBadgeRow,
+  mobileCardDescription,
+  mobileCardPaddingRoomy,
+  mobileCardShell,
+  mobileCardTitle,
+} from "@/lib/mobile/card-density";
 
 const categoryOptions: Array<{
   label: string;
@@ -449,8 +457,18 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
   };
 
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] p-5 shadow-[0_14px_30px_rgba(16,34,53,0.04)] sm:p-6">
-      <div className="flex flex-wrap items-center gap-2">
+    <article className={`flex h-full flex-col ${mobileCardShell} ${mobileCardPaddingRoomy} rounded-2xl border border-[#d9c9a8] bg-[#fbf7ee] shadow-[0_14px_30px_rgba(16,34,53,0.04)]`}>
+      <h3 className={mobileCardTitle}>
+        <Link
+          className="hover:text-[#7a612d] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+          href={`/knowledge/${item.slug}`}
+          onClick={recordVisit}
+        >
+          {item.title}
+        </Link>
+      </h3>
+
+      <div className={`mt-2 ${mobileCardBadgeRow}`}>
         <span className="rounded-full border border-[#d9c9a8] bg-white px-3 py-1 text-xs font-semibold text-[#7a612d]">
           {item.categoryLabel}
         </span>
@@ -465,16 +483,7 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
         />
       </div>
 
-      <h3 className="mt-3 break-words text-lg font-semibold leading-snug text-[#102235] sm:text-xl">
-        <Link
-          className="hover:text-[#7a612d] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
-          href={`/knowledge/${item.slug}`}
-          onClick={recordVisit}
-        >
-          {item.title}
-        </Link>
-      </h3>
-      <p className="mt-2 line-clamp-3 break-words text-sm leading-6 text-[#4f5661]">
+      <p className={`mt-2 ${mobileCardDescription}`}>
         {item.summary}
       </p>
 
@@ -495,13 +504,15 @@ function KnowledgeCard({ item }: { item: PublicKnowledgeArticleListItem }) {
         <p className="mt-3 text-xs text-[#5f6670]">{dateParts.join(" · ")}</p>
       ) : null}
 
-      <Link
-        className="mt-4 inline-flex min-h-11 w-fit items-center justify-center rounded-lg bg-[#102235] px-4 text-sm font-semibold text-white hover:bg-[#1b344e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137]"
+      <div className={mobileCardActions}>
+        <Link
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#102235] px-4 text-sm font-semibold text-white hover:bg-[#1b344e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#aa8137] sm:w-fit"
         href={`/knowledge/${item.slug}`}
         onClick={recordVisit}
       >
-        자세히 보기
-      </Link>
+          자세히 보기
+        </Link>
+      </div>
 
       {item.tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">

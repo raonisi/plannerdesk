@@ -50,7 +50,7 @@ describe("PR-BS-30 mobile field usability polish", () => {
     assert.match(explorer, /CollapsibleNotice/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /PDF 바로 열기/);
-    assert.match(listItem, /break-words/);
+    assert.match(listItem, /mobileCardTitle|break-words/);
   });
 
   it("admin claim documents keeps mobile card list and pagination patterns", () => {

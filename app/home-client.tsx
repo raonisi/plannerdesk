@@ -61,6 +61,11 @@ import {
   type RecentWorkInput,
   type RecentWorkItem,
 } from "@/lib/planner-favorites/recent-work";
+import {
+  mobileCardDescription,
+  mobileCardTitleSm,
+  mobileCardShell,
+} from "@/lib/mobile/card-density";
 import { WORK_TOOLS_PUBLIC_HOME_CARD_DESCRIPTION } from "@/lib/work-tools/work-tools-public-copy";
 import { uiLabels } from "@/lib/ui-labels";
 import type { HomeLoadState } from "@/lib/dashboard/home-data-state";
@@ -282,11 +287,9 @@ export function HomeClient({
                         className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 transition hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20"
                         role="option"
                       >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-[#0F1D2E]">
-                            {res.label}
-                          </p>
-                          <p className="mt-0.5 truncate text-xs text-[#4A5565]">
+                        <div className={`min-w-0 ${mobileCardShell}`}>
+                          <p className={mobileCardTitleSm}>{res.label}</p>
+                          <p className={`mt-0.5 ${mobileCardDescription}`}>
                             {res.sub}
                           </p>
                         </div>
@@ -521,7 +524,7 @@ export function HomeClient({
           <div className="min-w-0 space-y-4 lg:col-span-1">
             {plannerFavoritesEnabled ? (
               <section
-                className={`rounded-xl border border-[#E3DED4] bg-white p-4 ${shadows.card}`}
+                className={`${mobileCardShell} rounded-xl border border-[#E3DED4] bg-white p-3.5 sm:p-4 ${shadows.card}`}
               >
                 <h2 className={`flex items-center gap-1.5 ${sectionEyebrow}`}>
                   <Clock className="h-3.5 w-3.5 text-[#B9975B]" />
