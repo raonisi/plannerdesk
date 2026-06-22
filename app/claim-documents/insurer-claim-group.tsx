@@ -17,6 +17,10 @@ import {
   mobileCardTitle,
 } from "@/lib/mobile/card-density";
 import type { InsurerClaimGroup } from "@/lib/claim-documents/group-by-insurer";
+import {
+  PUBLIC_CTA_COPYING_LABEL,
+  PUBLIC_CTA_COPY_CLAIM_GUIDE,
+} from "@/lib/public/public-cta-labels";
 
 export function InsurerClaimGroup({
   group,
@@ -104,14 +108,14 @@ export function InsurerClaimGroup({
             <button
               ref={copyButtonRef}
               aria-busy={copying || undefined}
-              aria-label={`${group.label} 청구 안내 복사`}
+              aria-label={`${group.label} ${PUBLIC_CTA_COPY_CLAIM_GUIDE}`}
               className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#16382C] bg-[#16382C] px-4 text-sm font-bold text-white transition hover:bg-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
               disabled={copying}
               onClick={handleCopyNotice}
               title="고객에게 보낼 서류 목록 텍스트를 복사합니다"
               type="button"
             >
-              {copying ? "복사 중…" : "안내 문구 복사"}
+              {copying ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_COPY_CLAIM_GUIDE}
             </button>
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#E3DED4] bg-white px-4 text-sm font-bold text-[#0F1D2E] transition hover:border-[#B9975B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"

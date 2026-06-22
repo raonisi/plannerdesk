@@ -17,12 +17,12 @@ export const mobileCardPaddingRoomy = "p-3.5 sm:p-6";
 /** Internal vertical rhythm (8–12px). */
 export const mobileCardStack = "flex flex-col gap-2.5 sm:gap-3";
 
-/** Title hierarchy — 2 lines max on narrow viewports. */
+/** Title hierarchy — 2 lines max on narrow viewports; full title on sm+ */
 export const mobileCardTitle =
-  "line-clamp-2 break-words text-base font-bold leading-snug text-[#0F1D2E] sm:text-lg";
+  "line-clamp-2 break-words text-base font-bold leading-snug text-[#0F1D2E] sm:line-clamp-none sm:text-lg";
 
 export const mobileCardTitleSm =
-  "line-clamp-2 break-words text-sm font-bold leading-snug text-[#0F1D2E] sm:text-base";
+  "line-clamp-2 break-words text-sm font-bold leading-snug text-[#0F1D2E] sm:line-clamp-none sm:text-base";
 
 /** Secondary copy — 2 lines max. */
 export const mobileCardDescription =

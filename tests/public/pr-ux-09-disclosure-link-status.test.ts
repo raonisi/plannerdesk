@@ -101,7 +101,7 @@ describe("PR-UX-09 disclosure link registration status", () => {
   it("keeps external link security and new-tab accessible naming", () => {
     const card = readSource("components/disclosure/disclosure-card.tsx");
     assert.match(card, /ExternalTabAnchor/);
-    assert.match(card, /공식 출처 열기/);
+    assert.match(card, /PUBLIC_CTA_OFFICIAL_SOURCE_OPEN/);
 
     const external = readSource("lib/ui/external-link.ts");
     assert.match(external, /noopener noreferrer/);

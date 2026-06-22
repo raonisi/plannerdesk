@@ -4,6 +4,7 @@ import { Copy } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { buttons } from "@/lib/design-system";
+import { PUBLIC_CTA_COPYING_LABEL } from "@/lib/public/public-cta-labels";
 import type { CopyActionOptions, CopyActionResult } from "@/lib/public/copy-action";
 
 type CopyActionButtonProps = {
@@ -20,7 +21,7 @@ type CopyActionButtonProps = {
 
 export function CopyActionButton({
   label,
-  copyingLabel = "복사 중…",
+  copyingLabel = PUBLIC_CTA_COPYING_LABEL,
   ariaLabel,
   className = "",
   disabled = false,

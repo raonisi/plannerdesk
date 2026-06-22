@@ -68,7 +68,7 @@ describe("PR-UX-14 copy UX unification", () => {
     assert.match(library, /useCopyFeedback/);
     assert.match(library, /CopyActionButton/);
     assert.match(library, /source: "message-template"/);
-    assert.match(library, /안전 문구 복사/);
+    assert.match(library, /PUBLIC_CTA_COPY_SAFE/);
     assert.doesNotMatch(library, /async function copyTextToClipboard/);
   });
 
@@ -78,9 +78,9 @@ describe("PR-UX-14 copy UX unification", () => {
     assert.match(item, /useCopyFeedback/);
     assert.match(item, /CopyToast/);
     assert.match(item, /source: "claim-guide"/);
-    assert.match(item, /안내 문구 복사/);
+    assert.match(item, /PUBLIC_CTA_COPY_CLAIM_GUIDE/);
     assert.match(group, /useCopyFeedback/);
-    assert.match(group, /안내 문구 복사/);
+    assert.match(group, /PUBLIC_CTA_COPY_CLAIM_GUIDE/);
     assert.doesNotMatch(item, /async function copyTextToClipboard/);
     assert.doesNotMatch(group, /async function copyTextToClipboard/);
   });
@@ -93,7 +93,7 @@ describe("PR-UX-14 copy UX unification", () => {
 
   it("CopyActionButton keeps visible labels, busy state, and focus ref", () => {
     const button = readSource("components/ui/copy-action-button.tsx");
-    assert.match(button, /복사 중…/);
+    assert.match(button, /PUBLIC_CTA_COPYING_LABEL/);
     assert.match(button, /aria-busy/);
     assert.match(button, /buttonRef\.current\?\.focus/);
     assert.match(button, /aria-label/);
@@ -102,7 +102,7 @@ describe("PR-UX-14 copy UX unification", () => {
   it("directory mail address copy uses directory source", () => {
     const card = readSource("components/directory/insurer-action-card.tsx");
     assert.match(card, /source: "directory"/);
-    assert.match(card, /연락 안내 복사/);
+    assert.match(card, /PUBLIC_CTA_COPY_DIRECTORY/);
     assert.doesNotMatch(card, /navigator\.clipboard\.writeText/);
   });
 

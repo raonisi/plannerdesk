@@ -66,10 +66,10 @@ describe("PR-BS-20 claim PDF governance", () => {
       "utf8",
     );
     assert.match(source, /PDF 다운로드/);
-    assert.match(source, /PDF 바로 열기/);
-    assert.match(source, /보험사 공식 안내 확인/);
+    assert.match(source, /PUBLIC_CTA_PDF_OPEN/);
+    assert.match(source, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
     assert.match(source, /download=/);
-    assert.match(source, /PDF 링크 복사/);
+    assert.match(source, /PUBLIC_CTA_PDF_LINK_COPY/);
   });
 
   it("claim explorer shows governance notice", () => {

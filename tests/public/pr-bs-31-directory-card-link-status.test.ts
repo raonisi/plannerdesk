@@ -89,7 +89,7 @@ describe("PR-BS-31 directory card restore and status cleanup", () => {
 
     assert.match(actionCard, /InsurerCardClaimDocumentsSection|InsurerCardDeskActions/);
     assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
     assert.match(adminActions, /saveClaimDocumentGovernance/);
     assert.match(claimPage, /claim-documents/);
   });

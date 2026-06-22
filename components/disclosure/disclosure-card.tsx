@@ -10,6 +10,9 @@ import {
   publicDisclosureCategoryLabels,
 } from "@/lib/public/disclosure-display";
 import { resolvePublicDisclosureLinkStatus } from "@/lib/public/disclosure-link-status";
+import {
+  PUBLIC_CTA_OFFICIAL_SOURCE_OPEN,
+} from "@/lib/public/public-cta-labels";
 import type { PublicDisclosureLink } from "@/lib/public/disclosure-links";
 import { buttons, shadows } from "@/lib/design-system";
 import {
@@ -82,12 +85,12 @@ export function DisclosureCard({
       <div className={mobileCardActions}>
         {linkStatus.hasAnyOfficialLink && entry.url ? (
           <ExternalTabAnchor
-            aria-label={`${entry.title} 공식 출처 열기`}
+            aria-label={`${entry.title} ${PUBLIC_CTA_OFFICIAL_SOURCE_OPEN}`}
             className={`${buttons.base} ${buttons.primary} w-full gap-2`}
             href={entry.url}
           >
             <ExternalLink aria-hidden className="h-4 w-4" />
-            공식 출처 열기
+            {PUBLIC_CTA_OFFICIAL_SOURCE_OPEN}
           </ExternalTabAnchor>
         ) : (
           <p

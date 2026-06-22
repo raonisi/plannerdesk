@@ -160,7 +160,7 @@ describe("PR-MESSAGE-01 public safe message templates", () => {
     assert.match(library, /CopyActionButton/);
     assert.match(library, /copyWithFeedback/);
     assert.match(library, /CopyToast/);
-    assert.match(library, /안전 문구 복사/);
+    assert.match(library, /PUBLIC_CTA_COPY_SAFE/);
   });
 
   it("does not hardcode message template count in source", () => {

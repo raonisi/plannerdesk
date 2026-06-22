@@ -94,12 +94,12 @@ describe("PR-UX-15 mobile card density", () => {
 
     assert.match(group, /mobileCardTitle/);
     assert.match(group, /mobileCardActionsTight/);
-    assert.match(group, /안내 문구 복사/);
+    assert.match(group, /PUBLIC_CTA_COPY_CLAIM_GUIDE/);
     assert.match(item, /mobileCardShell/);
     assert.match(item, /mobileCardActionsTight/);
     assert.match(item, /mobileCardTitle/);
-    assert.match(item, /안내 문구 복사/);
-    assert.match(item, /PDF 바로 열기/);
+    assert.match(item, /PUBLIC_CTA_COPY_CLAIM_GUIDE/);
+    assert.match(item, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("work-tools and message-templates cards use shared density tokens", () => {
@@ -113,7 +113,7 @@ describe("PR-UX-15 mobile card density", () => {
     assert.match(accordion, /mobileCardDescription/);
     assert.match(library, /mobileCardShell/);
     assert.match(library, /mobileCardBadgeRow/);
-    assert.match(library, /안전 문구 복사/);
+    assert.match(library, /PUBLIC_CTA_COPY_SAFE/);
     assert.match(library, /CopyActionButton/);
   });
 

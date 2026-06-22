@@ -2,6 +2,7 @@
 
 import { CategoryPillBar } from "@/components/launcher/category-pill-bar";
 import { buttons } from "@/lib/design-system";
+import { PUBLIC_CTA_FILTER_RESET } from "@/lib/public/public-cta-labels";
 
 export type CategoryFilterOption = {
   id: string;
@@ -82,11 +83,12 @@ export function ResponsiveCategoryFilter({
           {showReset ? (
             <button
               type="button"
+              aria-label={`${ariaLabel} ${PUBLIC_CTA_FILTER_RESET}`}
               disabled={resetDisabled}
               onClick={onReset}
               className={`${buttons.base} ${buttons.outline} min-h-11 shrink-0 px-3 text-xs`}
             >
-              필터 초기화
+              {PUBLIC_CTA_FILTER_RESET}
             </button>
           ) : null}
         </div>
@@ -117,11 +119,12 @@ export function ResponsiveCategoryFilter({
           {showReset ? (
             <button
               type="button"
+              aria-label={`${ariaLabel} ${PUBLIC_CTA_FILTER_RESET}`}
               disabled={resetDisabled}
               onClick={onReset}
-              className={`${buttons.base} ${buttons.outline} min-h-10 px-3 text-xs`}
+              className={`${buttons.base} ${buttons.outline} min-h-11 px-3 text-xs`}
             >
-              필터 초기화
+              {PUBLIC_CTA_FILTER_RESET}
             </button>
           ) : null}
         </div>

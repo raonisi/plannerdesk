@@ -93,7 +93,7 @@ describe("PR-BS-26 admin claim documents summary board polish", () => {
       "utf8",
     );
 
-    assert.match(row, /PDF 다운로드/);
+    assert.match(row, /PUBLIC_CTA_PDF_DOWNLOAD/);
     assert.match(row, /download=\{governance\.fileName\}/);
     assert.match(detail, /CLAIM_DOCUMENT_GOVERNANCE_ADMIN_SCOPE_NOTICE/);
     assert.match(detail, /검수 정보 저장/);

@@ -41,6 +41,7 @@ import {
   MESSAGE_TEMPLATE_SEARCH_EMPTY_DESCRIPTION,
   MESSAGE_TEMPLATE_SEARCH_EMPTY_TITLE,
 } from "@/lib/public/empty-state-copy";
+import { PUBLIC_CTA_COPY_SAFE } from "@/lib/public/public-cta-labels";
 import { sectionEyebrow, shadows } from "@/lib/design-system";
 import {
   mobileCardBadgeRow,
@@ -579,13 +580,13 @@ function TemplateCard({
 
       <div className="mt-4">
         <CopyActionButton
-          ariaLabel={`${template.title} 안전 문구 복사`}
+          ariaLabel={`${template.title} ${PUBLIC_CTA_COPY_SAFE}`}
           className="w-full"
           copyOptions={{
             text: previewText,
             source: "message-template",
           }}
-          label="안전 문구 복사"
+          label={PUBLIC_CTA_COPY_SAFE}
           onCopy={onCopyWithFeedback}
         />
       </div>

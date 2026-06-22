@@ -42,8 +42,8 @@ describe("PR-BS-23 insurer card financial report UI polish", () => {
     assert.match(listItem, /variant === "card"/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /download=\{item\.fileName\}/);
-    assert.match(listItem, /PDF 바로 열기/);
-    assert.match(listItem, /보험사 공식 안내 확인/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
+    assert.match(listItem, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
   });
 
   it("keeps quick claim actions and standalone claim-documents route", () => {

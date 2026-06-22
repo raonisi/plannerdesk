@@ -53,7 +53,7 @@ describe("PR-DIR-A directory primary system CTA and claim consolidation", () => 
 
     assert.match(desk, /InsurerCardClaimDocumentsSection/);
     assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("matches resolveSystemLinks primary count to published registry", () => {

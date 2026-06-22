@@ -38,7 +38,7 @@ describe("PR-COPY-A public internal terminology cleanup", () => {
     assert.match(library, /CopyActionButton/);
     assert.match(library, /copyWithFeedback/);
     assert.match(library, /CopyToast/);
-    assert.match(library, /안전 문구 복사/);
+    assert.match(library, /PUBLIC_CTA_COPY_SAFE/);
     assert.match(library, /template\.safeCopy/);
   });
 
@@ -60,13 +60,13 @@ describe("PR-COPY-A public internal terminology cleanup", () => {
     assert.match(systemCta, /insurerWorkbenchSystemPrimaryCta/);
     assert.match(systemCta, /전산 바로가기/);
     assert.match(claimSection, /PDF 다운로드/);
-    assert.match(claimItem, /PDF 바로 열기/);
+    assert.match(claimItem, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("claim-documents keeps PDF download on public explorer", () => {
     const item = readRouteSource("components/claim-documents/claim-form-list-item.tsx");
     assert.match(item, /PDF 다운로드/);
-    assert.match(item, /PDF 바로 열기/);
+    assert.match(item, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("admin claim-documents routes are excluded from public scan list", () => {

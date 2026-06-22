@@ -187,7 +187,7 @@ describe("PR-UX-07 message template expansion", () => {
     assert.match(library, /CopyActionButton/);
     assert.match(library, /applySafeCopyPlaceholders/);
     assert.match(library, /publicMessageCategoryFilterTabs/);
-    assert.match(library, /안전 문구 복사/);
+    assert.match(library, /PUBLIC_CTA_COPY_SAFE/);
   });
 
   it("preserves claim library 220 count and avoids schema changes", () => {

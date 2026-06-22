@@ -16,6 +16,10 @@ import type {
   ClaimDocumentGovernanceAuditLogEntry,
   ClaimDocumentWithGovernance,
 } from "@/lib/claim-documents/governance-types";
+import {
+  PUBLIC_CTA_PDF_DOWNLOAD,
+  PUBLIC_CTA_PDF_OPEN,
+} from "@/lib/public/public-cta-labels";
 import { ClaimDocumentGovernanceStatusBadge } from "./claim-document-governance-status-badge";
 
 const actionButtonClass =
@@ -373,19 +377,19 @@ export function ClaimDocumentGovernanceDetail({
 
           <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <a
-              aria-label={`${governance.documentTitle} PDF 다운로드`}
+              aria-label={`${governance.documentTitle} ${PUBLIC_CTA_PDF_DOWNLOAD}`}
               className={`${actionButtonClass} bg-slate-900 text-white hover:bg-slate-800`}
               download={governance.fileName}
               href={href}
             >
-              PDF 다운로드
+              {PUBLIC_CTA_PDF_DOWNLOAD}
             </a>
             <ExternalTabAnchor
-              aria-label={`${governance.documentTitle} PDF 바로 열기`}
+              aria-label={`${governance.documentTitle} ${PUBLIC_CTA_PDF_OPEN}`}
               className={actionButtonClass}
               href={href}
             >
-              PDF 바로 열기
+              {PUBLIC_CTA_PDF_OPEN}
             </ExternalTabAnchor>
           </div>
         </div>

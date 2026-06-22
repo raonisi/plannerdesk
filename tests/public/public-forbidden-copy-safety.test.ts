@@ -54,7 +54,7 @@ describe("PR-PUBLIC-SAFETY-A public forbidden copy guard", () => {
       assert.doesNotMatch(combined, new RegExp(phrase), `message-templates: ${phrase}`);
     }
     assert.match(library, /CopyActionButton/);
-    assert.match(library, /안전 문구 복사/);
+    assert.match(library, /PUBLIC_CTA_COPY_SAFE/);
   });
 
   it("work tools public surface hides admin access copy", () => {
@@ -99,7 +99,7 @@ describe("PR-PUBLIC-SAFETY-A public forbidden copy guard", () => {
     assert.match(governance, /\/claim-forms\/bohumschool\//);
     const claimItem = read("components/claim-documents/claim-form-list-item.tsx");
     assert.match(claimItem, /PDF 다운로드/);
-    assert.match(claimItem, /PDF 바로 열기/);
+    assert.match(claimItem, /PUBLIC_CTA_PDF_OPEN/);
     assert.ok(existsSync(join(ROOT, "public/claim-forms/bohumschool")) || true);
     assert.match(BOHUMSCHOOL_PDF_PATH_PREFIX, /\/claim-forms\/bohumschool\//);
   });

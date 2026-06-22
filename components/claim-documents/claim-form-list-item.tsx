@@ -21,6 +21,15 @@ import {
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { publicClaimTrustHint } from "@/lib/directory/formatting";
 import {
+  PUBLIC_CTA_CLAIM_GUIDE_VIEW,
+  PUBLIC_CTA_COPYING_LABEL,
+  PUBLIC_CTA_COPY_CLAIM_GUIDE,
+  PUBLIC_CTA_OFFICIAL_GUIDE_CHECK,
+  PUBLIC_CTA_PDF_DOWNLOAD,
+  PUBLIC_CTA_PDF_LINK_COPY,
+  PUBLIC_CTA_PDF_OPEN,
+} from "@/lib/public/public-cta-labels";
+import {
   insurerCardClaimDocumentActions,
   insurerCardClaimDocumentCard,
   insurerCardClaimDocumentTitle,
@@ -61,12 +70,12 @@ function renderPdfDownloadButton(
 
   return (
     <a
-      aria-label={`${title} PDF 다운로드`}
+      aria-label={`${title} ${PUBLIC_CTA_PDF_DOWNLOAD}`}
       className={`${className} ${gridSpanClass}`}
       download={item.fileName}
       href={item.href}
     >
-      PDF 다운로드
+      {PUBLIC_CTA_PDF_DOWNLOAD}
     </a>
   );
 }
@@ -146,19 +155,19 @@ export function ClaimFormListItem({
                 insurerCardPdfDownloadButton,
               )}
               <ExternalTabAnchor
-                aria-label={`${title} PDF 바로 열기`}
+                aria-label={`${title} ${PUBLIC_CTA_PDF_OPEN}`}
                 className={insurerCardPdfSecondaryButton}
                 href={item.href}
               >
-                PDF 바로 열기
+                {PUBLIC_CTA_PDF_OPEN}
               </ExternalTabAnchor>
               {item.officialSourceUrl ? (
                 <ExternalTabAnchor
-                  aria-label={`${insurerName} 보험사 공식 안내 확인`}
+                  aria-label={`${insurerName} ${PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}`}
                   className={insurerCardPdfSecondaryButton}
                   href={item.officialSourceUrl}
                 >
-                  보험사 공식 안내 확인
+                  {PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}
                 </ExternalTabAnchor>
               ) : null}
             </div>
@@ -225,19 +234,19 @@ export function ClaimFormListItem({
               variant === "accordion" ? "sm:col-span-2 lg:col-span-3" : "",
             )}
             <ExternalTabAnchor
-              aria-label={`${title} PDF 바로 열기`}
-              className={secondaryButtonClass}
-              href={item.href}
-            >
-              PDF 바로 열기
-            </ExternalTabAnchor>
-            {item.officialSourceUrl ? (
-              <ExternalTabAnchor
-                aria-label={`${insurerName} 보험사 공식 안내 확인`}
+                aria-label={`${title} ${PUBLIC_CTA_PDF_OPEN}`}
                 className={secondaryButtonClass}
-                href={item.officialSourceUrl}
+                href={item.href}
               >
-                보험사 공식 안내 확인
+                {PUBLIC_CTA_PDF_OPEN}
+              </ExternalTabAnchor>
+              {item.officialSourceUrl ? (
+                <ExternalTabAnchor
+                  aria-label={`${insurerName} ${PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}`}
+                  className={secondaryButtonClass}
+                  href={item.officialSourceUrl}
+                >
+                  {PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}
               </ExternalTabAnchor>
             ) : null}
             {variant === "default" ? (
@@ -245,24 +254,24 @@ export function ClaimFormListItem({
                 <button
                   ref={linkCopyButtonRef}
                   aria-busy={copyingLink || undefined}
-                  aria-label={`${title} PDF 링크 복사`}
+                  aria-label={`${title} ${PUBLIC_CTA_PDF_LINK_COPY}`}
                   className={secondaryButtonClass}
                   disabled={copyingLink}
                   onClick={() => handleCopyPdfLink(item.href)}
                   type="button"
                 >
-                  {copyingLink ? "복사 중…" : "PDF 링크 복사"}
+                  {copyingLink ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_PDF_LINK_COPY}
                 </button>
                 <button
                   ref={guideCopyButtonRef}
                   aria-busy={copyingGuide || undefined}
-                  aria-label={`${title} 청구 안내 복사`}
+                  aria-label={`${title} ${PUBLIC_CTA_COPY_CLAIM_GUIDE}`}
                   className={secondaryButtonClass}
                   disabled={copyingGuide}
                   onClick={handleCopyRequest}
                   type="button"
                 >
-                  {copyingGuide ? "복사 중…" : "안내 문구 복사"}
+                  {copyingGuide ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_COPY_CLAIM_GUIDE}
                 </button>
               </>
             ) : null}
@@ -276,7 +285,9 @@ export function ClaimFormListItem({
 
   const doc = item.document;
   const primaryHref = doc.claimFormUrl ?? doc.officialSourceUrl;
-  const primaryLabel = doc.claimFormUrl ? "PDF 열기" : "청구안내 보기";
+  const primaryLabel = doc.claimFormUrl
+    ? PUBLIC_CTA_PDF_OPEN
+    : PUBLIC_CTA_CLAIM_GUIDE_VIEW;
 
   return (
     <>
@@ -329,13 +340,13 @@ export function ClaimFormListItem({
           <button
             ref={guideCopyButtonRef}
             aria-busy={copyingGuide || undefined}
-            aria-label={`${title} 청구 안내 복사`}
+            aria-label={`${title} ${PUBLIC_CTA_COPY_CLAIM_GUIDE}`}
             className={secondaryButtonClass}
             disabled={copyingGuide}
             onClick={handleCopyRequest}
             type="button"
           >
-            {copyingGuide ? "복사 중…" : "안내 문구 복사"}
+            {copyingGuide ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_COPY_CLAIM_GUIDE}
           </button>
         </div>
       </div>

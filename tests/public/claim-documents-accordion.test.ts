@@ -87,9 +87,9 @@ describe("PR-BS-21 claim documents accordion UX", () => {
       "utf8",
     );
     assert.match(source, /PDF 다운로드/);
-    assert.match(source, /PDF 바로 열기/);
+    assert.match(source, /PUBLIC_CTA_PDF_OPEN/);
     assert.match(source, /download=\{item\.fileName\}/);
-    assert.match(source, /보험사 공식 안내 확인/);
+    assert.match(source, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
   });
 
   it("explorer shows accordion notice and empty search copy", () => {

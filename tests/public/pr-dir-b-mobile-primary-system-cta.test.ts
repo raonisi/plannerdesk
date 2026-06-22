@@ -84,7 +84,7 @@ describe("PR-DIR-B mobile primary system CTA enhancement", () => {
     const listItem = read("components/claim-documents/claim-form-list-item.tsx");
     assert.match(desk, /InsurerCardClaimDocumentsSection/);
     assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("does not expose forbidden copy on directory mobile CTA surfaces", () => {
@@ -117,7 +117,7 @@ describe("PR-DIR-B mobile primary system CTA enhancement", () => {
       "components/admin/claim-documents/claim-document-governance-detail.tsx",
     );
     assert.match(claimItem, /PDF 다운로드/);
-    assert.match(claimItem, /PDF 바로 열기/);
+    assert.match(claimItem, /PUBLIC_CTA_PDF_OPEN/);
     assert.match(governance, /저장/);
   });
 });

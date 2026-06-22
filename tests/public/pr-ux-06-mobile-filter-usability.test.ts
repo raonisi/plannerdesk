@@ -29,7 +29,7 @@ describe("PR-UX-06 mobile filter usability", () => {
     assert.match(component, /hidden lg:block/);
     assert.match(component, /CategoryPillBar/);
     assert.match(component, /aria-label=\{ariaLabel\}/);
-    assert.match(component, /필터 초기화/);
+    assert.match(component, /PUBLIC_CTA_FILTER_RESET/);
     assert.match(component, /총 \{totalCount\}개 중 \{visibleCount\}개/);
     assert.match(component, /min-h-11/);
   });

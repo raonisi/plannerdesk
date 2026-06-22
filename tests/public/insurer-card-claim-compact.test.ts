@@ -106,7 +106,7 @@ describe("PR-BS-24 insurer card claim documents compact mode", () => {
     assert.match(section, /variant="card"/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /download=\{item\.fileName\}/);
-    assert.match(listItem, /PDF 바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
     assert.equal(CLAIM_INSURER_CARD_COMPACT_NOTICE.length > 0, true);
     assert.equal(CLAIM_INSURER_CARD_SEARCH_EMPTY_MESSAGE.length > 0, true);
   });

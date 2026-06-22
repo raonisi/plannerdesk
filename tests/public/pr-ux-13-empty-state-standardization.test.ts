@@ -61,7 +61,7 @@ describe("PR-UX-13 empty state standardization", () => {
     assert.match(explorer, /CLAIM_SEARCH_EMPTY_DESCRIPTION/);
     assert.match(explorer, /resetFilters/);
     assert.match(explorer, /EMPTY_STATE_RESET_SEARCH_LABEL/);
-    assert.match(readSource("components/claim-documents/claim-form-list-item.tsx"), /PDF 바로 열기/);
+    assert.match(readSource("components/claim-documents/claim-form-list-item.tsx"), /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("disclosure, work-tools, message-templates, and knowledge wire filter reset CTAs", () => {

@@ -100,9 +100,9 @@ describe("hotfix admin claim documents list density", () => {
       "utf8",
     );
 
-    assert.match(row, /PDF 다운로드/);
+    assert.match(row, /PUBLIC_CTA_PDF_DOWNLOAD/);
     assert.match(row, /download=\{governance\.fileName\}/);
-    assert.match(row, /PDF 바로 열기/);
+    assert.match(row, /PUBLIC_CTA_PDF_OPEN/);
     assert.match(pagination, /전체 .*개 중/);
     assert.match(pagination, /이전/);
     assert.match(pagination, /다음/);

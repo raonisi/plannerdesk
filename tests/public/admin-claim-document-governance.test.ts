@@ -51,9 +51,9 @@ describe("PR-BS-25 admin claim document governance board", () => {
       "utf8",
     );
 
-    assert.match(row, /PDF 다운로드/);
+    assert.match(row, /PUBLIC_CTA_PDF_DOWNLOAD/);
     assert.match(row, /download=\{governance\.fileName\}/);
-    assert.match(row, /PDF 바로 열기/);
+    assert.match(row, /PUBLIC_CTA_PDF_OPEN/);
     assert.match(table, /ClaimDocumentGovernancePdfActions/);
     assert.match(detail, /CLAIM_DOCUMENT_GOVERNANCE_ADMIN_SCOPE_NOTICE/);
     assert.match(detail, /상세 보기/);

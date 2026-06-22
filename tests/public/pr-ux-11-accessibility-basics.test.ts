@@ -109,9 +109,9 @@ describe("PR-UX-11 accessibility basics", () => {
     );
 
     assert.match(favorite, /aria-label=\{active \? `\$\{label\} 즐겨찾기 해제` : `\$\{label\} 즐겨찾기 추가`\}/);
-    assert.match(claimItem, /청구 안내 복사/);
-    assert.match(claimItem, /aria-label=\{`\$\{title\} PDF 링크 복사`\}/);
-    assert.match(messageLibrary, /ariaLabel=\{`\$\{template\.title\} 안전 문구 복사`\}/);
+    assert.match(claimItem, /PUBLIC_CTA_COPY_CLAIM_GUIDE/);
+    assert.match(claimItem, /aria-label=\{`\$\{title\} \$\{PUBLIC_CTA_PDF_LINK_COPY\}`\}/);
+    assert.match(messageLibrary, /ariaLabel=\{`\$\{template\.title\} \$\{PUBLIC_CTA_COPY_SAFE\}`\}/);
   });
 
   it("preserves home public SSOT count wiring", () => {

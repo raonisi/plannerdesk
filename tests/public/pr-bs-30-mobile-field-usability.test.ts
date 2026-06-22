@@ -49,7 +49,7 @@ describe("PR-BS-30 mobile field usability polish", () => {
 
     assert.match(explorer, /CollapsibleNotice/);
     assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /PDF 바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
     assert.match(listItem, /mobileCardTitle|break-words/);
   });
 
@@ -81,7 +81,7 @@ describe("PR-BS-30 mobile field usability polish", () => {
       "utf8",
     );
 
-    assert.match(templates, /안전 문구 복사/);
+    assert.match(templates, /PUBLIC_CTA_COPY_SAFE/);
     assert.match(templates, /min-h-11 min-w-11/);
     assert.match(workTools, /touchTargets\.paginationButton/);
     assert.match(workTools, /ExternalLink/);

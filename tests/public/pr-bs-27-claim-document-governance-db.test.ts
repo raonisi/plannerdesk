@@ -183,7 +183,7 @@ describe("PR-BS-27 DB-backed claim document governance", () => {
       "utf8",
     );
     assert.match(listItem, /PDF 다운로드/);
-    assert.match(listItem, /PDF 바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
     assert.doesNotMatch(listItem, /adminMemo/);
   });
 

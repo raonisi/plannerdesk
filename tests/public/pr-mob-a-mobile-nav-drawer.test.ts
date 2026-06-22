@@ -127,7 +127,7 @@ describe("PR-MOB-A global mobile nav drawer", () => {
     assert.match(directoryActions, /전산 바로가기/);
     const claimItem = read("components/claim-documents/claim-form-list-item.tsx");
     assert.match(claimItem, /PDF 다운로드/);
-    assert.match(claimItem, /PDF 바로 열기/);
+    assert.match(claimItem, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("forbidden dictionary still covers drawer guard phrases", () => {

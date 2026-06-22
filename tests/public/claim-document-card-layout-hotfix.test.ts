@@ -24,8 +24,8 @@ describe("hotfix claim document card fixed layout", () => {
     assert.doesNotMatch(cardBlock, /sm:justify-between/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /download=\{item\.fileName\}/);
-    assert.match(cardBlock, /PDF 바로 열기/);
-    assert.match(cardBlock, /보험사 공식 안내 확인/);
+    assert.match(cardBlock, /PUBLIC_CTA_PDF_OPEN/);
+    assert.match(cardBlock, /PUBLIC_CTA_OFFICIAL_GUIDE_CHECK/);
   });
 
   it("stabilizes claim panel list wrappers", () => {

@@ -70,7 +70,7 @@ describe("PR-BS-29 directory compact workbench list", () => {
     assert.match(desk, /claimOpen/);
     assert.match(listItem, /PDF 다운로드/);
     assert.match(listItem, /download=\{item\.fileName\}/);
-    assert.match(listItem, /바로 열기/);
+    assert.match(listItem, /PUBLIC_CTA_PDF_OPEN/);
   });
 
   it("avoids mock and admin review wording on directory surfaces", () => {

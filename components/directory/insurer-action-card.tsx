@@ -16,6 +16,10 @@ import { createPortal } from "react-dom";
 import { ExternalTabAnchor } from "@/components/content-page";
 import { CopyToast } from "@/components/ui/copy-toast";
 import { useCopyFeedback } from "@/hooks/useCopyFeedback";
+import {
+  PUBLIC_CTA_COPYING_LABEL,
+  PUBLIC_CTA_COPY_DIRECTORY,
+} from "@/lib/public/public-cta-labels";
 import { InsurerCardClaimDocumentsSection } from "@/components/directory/insurer-card-claim-documents-section";
 import { InsurerCardContactStrip } from "@/components/directory/insurer-card-contact-strip";
 import { InsurerCardDeskActions } from "@/components/directory/insurer-card-desk-actions";
@@ -729,13 +733,13 @@ function MailAddressDialog({
           <button
             ref={copyButtonRef}
             aria-busy={copying || undefined}
-            aria-label={`${insurerName} 등기우편 주소 연락 안내 복사`}
+            aria-label={`${insurerName} 등기우편 주소 ${PUBLIC_CTA_COPY_DIRECTORY}`}
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-indigo-600 px-5 text-sm font-bold text-white shadow-md shadow-indigo-600/10 transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-indigo-600/20 active:translate-y-0"
             disabled={copying}
             onClick={copyAddress}
             type="button"
           >
-            {copying ? "복사 중…" : "연락 안내 복사"}
+            {copying ? PUBLIC_CTA_COPYING_LABEL : PUBLIC_CTA_COPY_DIRECTORY}
           </button>
           <CopyToast message={feedback?.message ?? null} variant={feedback?.variant} />
         </div>
