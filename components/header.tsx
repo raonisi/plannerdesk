@@ -19,7 +19,7 @@ export function Header() {
       <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8 lg:px-10">
         <Link
           aria-label={`${uiLabels.brand} 홈`}
-          className="flex min-w-0 shrink-0 items-center gap-3 transition-transform hover:scale-[1.02]"
+          className="flex min-w-0 shrink-0 items-center gap-3 rounded-lg transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
           href="/"
         >
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#0F1D2E] text-sm font-black tracking-[0.02em] text-white shadow-md shadow-[#0F1D2E]/15">

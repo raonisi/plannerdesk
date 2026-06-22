@@ -3,6 +3,10 @@ import { KnowledgeArticleCategory } from "@prisma/client";
 import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import {
+  publicMainLandmarkProps,
+  SkipToContent,
+} from "@/components/skip-to-content";
 import { getWorkToolsAccess } from "@/lib/auth/access";
 import {
   filterAndSortKnowledgeArchive,
@@ -63,50 +67,53 @@ export default async function KnowledgeArchivePage({
 
   return (
     <PageFrame>
+      <SkipToContent />
       <Header />
-      <PageHero
-        eyebrow={t.eyebrow}
-        title={t.title}
-        description={t.description}
-      />
+      <main {...publicMainLandmarkProps} className="outline-none">
+        <PageHero
+          eyebrow={t.eyebrow}
+          title={t.title}
+          description={t.description}
+        />
 
-      <ContentSection>
-        <div className="space-y-8">
-          <p className="break-keep text-sm leading-6 text-[#5f6670]">{t.subcopy}</p>
+        <ContentSection>
+          <div className="space-y-8">
+            <p className="break-keep text-sm leading-6 text-[#5f6670]">{t.subcopy}</p>
 
-          <DataResponsibilityInlineNotice variant="knowledge" />
+            <DataResponsibilityInlineNotice variant="knowledge" />
 
-          <aside
-            className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5 sm:p-6"
-            role="note"
-          >
-            <details className="group">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 [&::-webkit-details-marker]:hidden">
-                <h2 className="text-sm font-semibold text-[#102235]">{t.safetyTitle}</h2>
-                <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
-                  펼치기
-                </span>
-              </summary>
-              <p className="mt-3 break-keep whitespace-pre-line text-sm leading-6 text-[#5f6670]">
-                {t.safetyBody}
-              </p>
-            </details>
-          </aside>
+            <aside
+              className="rounded-xl border border-[#d9c9a8] border-l-4 border-l-[#aa8137] bg-[#fbf7ee] p-5 sm:p-6"
+              role="note"
+            >
+              <details className="group">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
+                  <h2 className="text-sm font-semibold text-[#102235]">{t.safetyTitle}</h2>
+                  <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
+                    펼치기
+                  </span>
+                </summary>
+                <p className="mt-3 break-keep whitespace-pre-line text-sm leading-6 text-[#5f6670]">
+                  {t.safetyBody}
+                </p>
+              </details>
+            </aside>
 
-          <KnowledgeWorkflows />
+            <KnowledgeWorkflows />
 
-          <KnowledgeArchiveList
-            blockedMessage={blockedMessage}
-            filterState={filterState}
-            filteredItems={filteredItems}
-            isCatalogEmpty={isCatalogEmpty}
-            items={articles}
-            plannerFavoritesEnabled={plannerFavoritesEnabled}
-          />
+            <KnowledgeArchiveList
+              blockedMessage={blockedMessage}
+              filterState={filterState}
+              filteredItems={filteredItems}
+              isCatalogEmpty={isCatalogEmpty}
+              items={articles}
+              plannerFavoritesEnabled={plannerFavoritesEnabled}
+            />
 
-          <PublicErrorReportNotice />
-        </div>
-      </ContentSection>
+            <PublicErrorReportNotice />
+          </div>
+        </ContentSection>
+      </main>
       <Footer />
     </PageFrame>
   );
@@ -177,7 +184,7 @@ function KnowledgeWorkflows() {
                 <Link
                   key={idx}
                   href={link.href}
-                  className="inline-flex items-center rounded-lg bg-[#fbf7ee] px-3 py-1.5 text-[11px] font-semibold text-[#7a612d] hover:bg-[#f7f1e5] transition"
+                  className="inline-flex items-center rounded-lg bg-[#fbf7ee] px-3 py-1.5 text-[11px] font-semibold text-[#7a612d] transition hover:bg-[#f7f1e5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
                 >
                   {link.label}
                 </Link>

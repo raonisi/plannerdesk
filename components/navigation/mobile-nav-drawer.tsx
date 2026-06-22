@@ -193,7 +193,7 @@ function DrawerHeader({
       <button
         ref={closeButtonRef}
         aria-label={uiLabels.mobileMenuClose}
-        className={`${touchTargets.iconButton} shrink-0 text-[#4A5565] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]`}
+        className={`${touchTargets.iconButton} shrink-0 border border-transparent text-[#4A5565] hover:border-[#E3DED4] hover:bg-[#F7F4EE] hover:text-[#0F1D2E]`}
         onClick={onClose}
         type="button"
       >

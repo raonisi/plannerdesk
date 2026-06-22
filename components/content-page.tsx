@@ -74,7 +74,11 @@ export function PageHero({
 }
 
 export function PageFrame({ children }: { children: ReactNode }) {
-  return <div className={`min-h-screen overflow-x-hidden ${surfaces.page}`}>{children}</div>;
+  return (
+    <div className={`relative min-h-screen overflow-x-hidden ${surfaces.page}`}>
+      {children}
+    </div>
+  );
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
@@ -433,7 +437,7 @@ export function QuickActionCard({
 }) {
   return (
     <Link
-      className={`flex flex-col rounded-xl border border-[#E3DED4] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-md ${shadows.card}`}
+      className={`flex flex-col rounded-xl border border-[#E3DED4] bg-white p-5 transition hover:-translate-y-0.5 hover:border-[#B9975B] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2 ${shadows.card}`}
       href={href}
     >
       <span

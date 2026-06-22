@@ -5,6 +5,10 @@ import {
 } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import {
+  publicMainLandmarkProps,
+  SkipToContent,
+} from "@/components/skip-to-content";
 import { SearchDomainFilter } from "@/components/search/search-domain-filter";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
 import { SearchIdlePanel } from "@/components/search/search-idle-panel";
@@ -75,14 +79,16 @@ export default async function SearchPage({
 
   return (
     <PageFrame>
+      <SkipToContent />
       <Header />
-      <PageHero
-        description="공개된 보험사·청구서류·공시·약관·고객문구·지식 문서의 위치를 찾습니다. 보험금 지급 판단이나 개인 상담은 제공하지 않습니다."
-        eyebrow="통합 검색"
-        title="통합 검색"
-      />
+      <main {...publicMainLandmarkProps} className="outline-none">
+        <PageHero
+          description="공개된 보험사·청구서류·공시·약관·고객문구·지식 문서의 위치를 찾습니다. 보험금 지급 판단이나 개인 상담은 제공하지 않습니다."
+          eyebrow="통합 검색"
+          title="통합 검색"
+        />
 
-      <ContentSection>
+        <ContentSection>
         <div className="mx-auto max-w-3xl space-y-6">
           <DataResponsibilityInlineNotice variant="search" />
 
@@ -97,7 +103,8 @@ export default async function SearchPage({
             </label>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
               <input
-                className="min-h-11 flex-1 rounded-md border border-[#d9c9a8] px-3 text-sm text-[#102235] outline-none focus:border-[#aa8137] focus:ring-2 focus:ring-[#aa8137]/15"
+                aria-label="검색어"
+                className="min-h-11 flex-1 rounded-md border border-[#d9c9a8] px-3 text-sm text-[#102235] outline-none focus-visible:border-[#aa8137] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
                 defaultValue={rawQuery}
                 maxLength={60}
                 name="q"
@@ -110,7 +117,7 @@ export default async function SearchPage({
                 value={domainToQueryParam(domain)}
               />
               <button
-                className="min-h-11 rounded-md bg-[#102235] px-5 text-sm font-semibold text-white hover:bg-[#1b344e]"
+                className="min-h-11 rounded-md bg-[#102235] px-5 text-sm font-semibold text-white hover:bg-[#1b344e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
                 type="submit"
               >
                 검색
@@ -162,6 +169,7 @@ export default async function SearchPage({
           <PublicErrorReportNotice />
         </div>
       </ContentSection>
+      </main>
       <Footer />
     </PageFrame>
   );

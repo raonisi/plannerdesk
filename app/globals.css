@@ -60,6 +60,35 @@ select {
   display: none;
 }
 
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0.75rem;
+  z-index: 100;
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid #0f1d2e;
+  border-radius: 0.5rem;
+  background: #f8f7f3;
+  color: #0f1d2e;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(15, 29, 46, 0.18);
+}
+
+.skip-to-content:focus,
+.skip-to-content:focus-visible {
+  left: 50%;
+  transform: translateX(-50%);
+  outline: none;
+  box-shadow:
+    0 0 0 3px #f8f7f3,
+    0 0 0 5px rgba(15, 29, 46, 0.45),
+    0 4px 16px rgba(15, 29, 46, 0.18);
+}
+
 @media print {
   header,
   footer,

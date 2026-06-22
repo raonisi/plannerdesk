@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { ContentSection, PageFrame } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import {
+  publicMainLandmarkProps,
+  SkipToContent,
+} from "@/components/skip-to-content";
 import { getPublicKnowledgeArticleBySlug } from "@/lib/public/knowledge-articles";
 import { PUBLIC_RISK_GUIDANCE_LABEL } from "@/lib/knowledge/archive-filter";
 import { publicKnowledgeTrustHint } from "@/lib/knowledge/workflow-labels";
@@ -57,7 +61,9 @@ export default async function KnowledgeDetailPage({
 
   return (
     <PageFrame>
+      <SkipToContent />
       <Header />
+      <main {...publicMainLandmarkProps} className="outline-none">
       <ContentSection>
         <div className="space-y-8">
           <div className="flex flex-wrap gap-3">
@@ -212,6 +218,7 @@ export default async function KnowledgeDetailPage({
           ) : null}
         </div>
       </ContentSection>
+      </main>
       <Footer />
     </PageFrame>
   );
