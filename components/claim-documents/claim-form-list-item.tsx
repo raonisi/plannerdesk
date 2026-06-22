@@ -89,11 +89,12 @@ function renderPdfAssetActions(
   gridSpanClass = "",
 ) {
   const view = item.publicAssetView;
+  const actionWrapClass = `flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap ${gridSpanClass}`;
 
-  if (view.kind === "pending") {
+  if (view.kind === "needs_confirmation") {
     return (
       <span
-        className={`${secondaryClass} ${gridSpanClass} cursor-default text-[#4A5565]`}
+        className={`${secondaryClass} cursor-default text-[#4A5565]`}
       >
         {view.label}
       </span>
@@ -112,26 +113,37 @@ function renderPdfAssetActions(
     );
   }
 
-  return (
-    <>
-      {renderPdfDownloadButton(title, item, primaryClass, gridSpanClass)}
-      <ExternalTabAnchor
-        aria-label={`${title} ${PUBLIC_CTA_PDF_OPEN}`}
-        className={secondaryClass}
-        href={item.href}
-      >
-        {PUBLIC_CTA_PDF_OPEN}
-      </ExternalTabAnchor>
-      {item.officialSourceUrl ? (
-        <ExternalTabAnchor
-          aria-label={`${insurerName} ${PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}`}
-          className={secondaryClass}
-          href={item.officialSourceUrl}
+  if (view.kind === "approved_local_with_official") {
+    return (
+      <div className={actionWrapClass}>
+        <a
+          aria-label={`${title} ${view.localLabel}`}
+          className={primaryClass}
+          download={view.downloadFileName}
+          href={view.localHref}
         >
-          {PUBLIC_CTA_OFFICIAL_GUIDE_CHECK}
+          {view.localLabel}
+        </a>
+        <ExternalTabAnchor
+          aria-label={`${title} ${view.officialLabel}`}
+          className={secondaryClass}
+          href={view.officialHref}
+        >
+          {view.officialLabel}
         </ExternalTabAnchor>
-      ) : null}
-    </>
+      </div>
+    );
+  }
+
+  return (
+    <a
+      aria-label={`${title} ${view.label}`}
+      className={`${primaryClass} ${gridSpanClass}`}
+      download={view.downloadFileName}
+      href={view.href}
+    >
+      {view.label}
+    </a>
   );
 }
 

@@ -90,10 +90,10 @@ describe("PR-BS-20 claim PDF governance", () => {
     assert.match(source, /CLAIM_PDF_(GOVERNANCE|ACCORDION)_NOTICE/);
   });
 
-  it("public asset resolver returns official external or pending for legacy forms", () => {
+  it("public asset resolver returns authorized local with official for manifest forms", () => {
     const sample = claimFormFiles[0]!;
     const official = resolveOfficialSourceUrlForInsurerSlug(sample.insurerSlug);
     const view = resolveClaimFormPublicAssetView(sample, official);
-    assert.ok(view === null || view.kind === "official_external" || view.kind === "pending");
+    assert.equal(view?.kind, "approved_local_with_official");
   });
 });

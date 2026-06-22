@@ -22,4 +22,5 @@ export const PUBLIC_CTA_OFFICIAL_SOURCE_OPEN = "공식 출처 열기";
 
 /** Verified work links and general official pages */
 export const PUBLIC_CTA_OFFICIAL_GUIDE_OPEN = "공식 안내 열기";
+export const PUBLIC_CTA_OFFICIAL_CLAIM_GUIDE_OPEN = "보험사 공식 청구 안내 열기";
 export const PUBLIC_CTA_SOURCE_VERIFY = "출처 확인";

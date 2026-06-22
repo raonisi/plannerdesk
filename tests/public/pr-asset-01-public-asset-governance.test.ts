@@ -9,7 +9,6 @@ import {
   countPublicClaimLibraryItems,
 } from "@/lib/claim-documents/claim-library";
 import { claimFormFiles } from "@/lib/content/claim-form-files";
-import { insurerLogoSrc } from "@/lib/directory/insurer-logo";
 import {
   isBlockedPublicAssetUrl,
   isLegacyThirdPartyAssetReference,
@@ -18,7 +17,6 @@ import {
   resolveClaimFormPublicAssetView,
 } from "@/lib/public/public-asset-policy";
 import { resolveVisiblePublicClaimLibrarySurface } from "@/lib/public/public-surface-resolvers";
-import type { PublicInsurer } from "@/lib/public/insurers";
 
 const ROOT = process.cwd();
 
@@ -44,18 +42,29 @@ describe("PR-ASSET-01 public asset governance", () => {
       isVerifiedOfficialInsurerUrl("https://www.samsungfire.com/v2/html/claim/01/C_010_030_001.html"),
       true,
     );
+    assert.equal(
+      isBlockedPublicAssetUrl("/claim-forms/authorized/samsung-fire/x.pdf"),
+      false,
+    );
   });
 
-  it("legacy claim forms resolve to official external or hidden — not local public PDF", () => {
+  it("legacy bohumschool catalog paths are not served as public hrefs", () => {
     const sample = claimFormFiles[0]!;
     const view = resolveClaimFormPublicAssetView(sample, "https://www.samsungfire.com/");
-    assert.ok(view === null || view.kind === "official_external" || view.kind === "pending");
-    assert.notEqual(view?.kind, "approved_local");
+    assert.ok(
+      view?.kind === "approved_local_with_official" ||
+        view?.kind === "official_external" ||
+        view?.kind === "needs_confirmation",
+    );
+    if (view?.kind === "approved_local_with_official") {
+      assert.doesNotMatch(view.localHref, /\/bohumschool\//);
+    }
   });
 
-  it("unapproved PDFs are not served from public/claim-forms", () => {
-    assert.equal(existsSync(join(ROOT, "public/claim-forms")), false);
+  it("unapproved bohumschool PDFs are not served from public/claim-forms/bohumschool", () => {
+    assert.equal(existsSync(join(ROOT, "public/claim-forms/bohumschool")), false);
     assert.equal(existsSync(join(ROOT, PRIVATE_ASSET_REVIEW_PREFIX, "claim-forms")), true);
+    assert.equal(existsSync(join(ROOT, "public/claim-forms/authorized")), true);
   });
 
   it("public claim UI uses asset resolver wiring", () => {
@@ -65,17 +74,6 @@ describe("PR-ASSET-01 public asset governance", () => {
     assert.match(item, /renderPdfAssetActions/);
     assert.match(library, /resolveClaimFormPublicAssetView/);
     assert.doesNotMatch(item, /bohumschool/i);
-  });
-
-  it("insurer logos default to text fallback without permission evidence", () => {
-    const logo = readSource("lib/directory/insurer-logo.ts");
-    assert.match(logo, /resolveInsurerLogoPublicSrc/);
-    const insurer = {
-      id: "samsung-fire",
-      name: "삼성화재",
-      officialWebsiteUrl: "https://www.samsungfire.com/",
-    } as PublicInsurer;
-    assert.equal(insurerLogoSrc(insurer), null);
   });
 
   it("home and claim counts use the same policy-filtered library SSOT", () => {

@@ -24,7 +24,8 @@ describe("hotfix claim document card fixed layout", () => {
     assert.doesNotMatch(cardBlock, /sm:justify-between/);
     assert.match(listItem, /renderPdfAssetActions/);
     assert.match(listItem, /publicAssetView/);
-    assert.match(listItem, /official_external/);
+    assert.match(listItem, /approved_local_with_official/);
+    assert.match(listItem, /downloadFileName/);
   });
 
   it("stabilizes claim panel list wrappers", () => {

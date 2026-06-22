@@ -58,7 +58,20 @@ export function claimFormToLibraryItem(
   }
 
   const metadata = enrichStoredClaimPdfMetadata(form);
-  const exposeLocalFile = publicAssetView.kind === "approved_local";
+  const exposeLocalFile =
+    publicAssetView.kind === "approved_local" ||
+    publicAssetView.kind === "approved_local_with_official";
+  const localHref =
+    publicAssetView.kind === "approved_local"
+      ? publicAssetView.href
+      : publicAssetView.kind === "approved_local_with_official"
+        ? publicAssetView.localHref
+        : "";
+  const downloadFileName =
+    publicAssetView.kind === "approved_local" ||
+    publicAssetView.kind === "approved_local_with_official"
+      ? publicAssetView.downloadFileName
+      : form.label;
   const governanceDocumentKey = buildClaimDocumentKey({
     filePath: metadata.filePath,
     fileName: metadata.fileName,
@@ -76,13 +89,13 @@ export function claimFormToLibraryItem(
     title: form.label,
     category: form.category,
     categoryLabel: form.categoryLabel,
-    href: exposeLocalFile ? publicAssetView.href : "",
+    href: exposeLocalFile ? localHref : "",
     verificationStatus: VerificationStatus.verified,
     publicAssetView,
     downloadEnabled: exposeLocalFile,
     officialSourceUrl: officialSourceUrl ?? metadata.officialSourceUrl,
-    filePath: exposeLocalFile ? metadata.filePath : "",
-    fileName: exposeLocalFile ? metadata.fileName : form.label,
+    filePath: exposeLocalFile ? localHref : "",
+    fileName: exposeLocalFile ? downloadFileName : form.label,
   };
 }
 export function documentToLibraryItem(

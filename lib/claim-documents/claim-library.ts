@@ -23,6 +23,7 @@ import {
   resolveInsurerMarketSegmentForItem,
 } from "./insurer-category";
 import {
+  countClaimGuideDispositions,
   countClaimLibraryDispositions,
 } from "@/lib/public/public-asset-policy";
 import type { PublicClaimPdfGovernanceOverlay } from "./governance-repository";
@@ -36,12 +37,19 @@ export type ClaimLibraryFilters = {
   marketSegment: string;
 };
 
+export type ClaimGuideCounts = {
+  publicGuideCount: number;
+  downloadablePdfCount: number;
+  officialGuideLinkCount: number;
+  needsConfirmationCount: number;
+};
+
 export type ClaimLibraryCounts = {
   publicGuideCount: number;
   downloadableAssetCount: number;
 };
 
-export { countClaimLibraryDispositions };
+export { countClaimGuideDispositions, countClaimLibraryDispositions };
 
 export function buildClaimLibraryItems(
   guideDocuments: PublicClaimDocument[],

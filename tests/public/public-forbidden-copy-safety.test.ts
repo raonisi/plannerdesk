@@ -99,7 +99,8 @@ describe("PR-PUBLIC-SAFETY-A public forbidden copy guard", () => {
     const claimItem = read("components/claim-documents/claim-form-list-item.tsx");
     assert.match(claimItem, /renderPdfAssetActions/);
     assert.match(claimItem, /publicAssetView/);
-    assert.equal(existsSync(join(ROOT, "public/claim-forms")), false);
+    assert.equal(existsSync(join(ROOT, "public/claim-forms/bohumschool")), false);
+    assert.equal(existsSync(join(ROOT, "public/claim-forms/authorized")), true);
     assert.equal(existsSync(join(ROOT, "private-asset-review/claim-forms")), true);
   });
 
