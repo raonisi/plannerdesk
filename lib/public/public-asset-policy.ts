@@ -9,6 +9,10 @@ import {
   findAuthorizedInsurerLogo,
   isAuthorizedPublicPath,
 } from "@/lib/content/authorized-third-party-assets";
+import {
+  buildAuthorizedLogoHref,
+  buildAuthorizedPdfDownloadHref,
+} from "@/lib/public/authorized-asset-delivery-mode";
 import { insurerDirectoryEntries } from "@/lib/content/insurers";
 import type { ClaimLibraryItem } from "@/lib/claim-documents/library-items";
 import { resolveOfficialSourceUrlForInsurerSlug } from "@/lib/claim-documents/claim-pdf-governance";
@@ -125,6 +129,7 @@ export function isBlockedPublicAssetUrl(url: string | null | undefined): boolean
   if (!normalized) return true;
   if (normalized.startsWith("/")) {
     if (isAuthorizedPublicPath(normalized)) return false;
+    if (normalized.startsWith("/api/authorized-assets/")) return false;
     if (isLegacyThirdPartyAssetReference(normalized)) return true;
     return false;
   }
@@ -184,7 +189,7 @@ function resolveAuthorizedLocalClaimPdf(
   if (!authorized?.permissionReference.trim()) return null;
   if (!isApprovedLocalPublicPath(authorized.publicPath)) return null;
   return {
-    href: authorized.publicPath,
+    href: buildAuthorizedPdfDownloadHref(form.id, authorized.publicPath),
     downloadFileName: buildClaimPdfDownloadFileName(form.label),
   };
 }
@@ -248,7 +253,7 @@ export function resolveInsurerLogoPublicSrc(insurerId: string): string | null {
   if (!authorized?.permissionReference.trim()) return null;
   if (!isApprovedLocalPublicPath(authorized.publicPath)) return null;
   if (isBlockedPublicAssetUrl(authorized.publicPath)) return null;
-  return authorized.publicPath;
+  return buildAuthorizedLogoHref(insurerId, authorized.publicPath);
 }
 
 export type ClaimGuideCounts = {
