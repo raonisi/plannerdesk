@@ -1,18 +1,25 @@
 /**
- * Client-safe authorized asset delivery mode (static | firebase).
+ * Client-safe authorized asset delivery mode.
  * Value is injected via next.config env from AUTHORIZED_ASSET_DELIVERY_MODE.
  */
 
-export type AuthorizedAssetDeliveryMode = "static" | "firebase";
+export type AuthorizedAssetDeliveryMode =
+  | "static"
+  | "firebase"
+  | "firebase_with_static_fallback";
 
 export function getAuthorizedAssetDeliveryMode(): AuthorizedAssetDeliveryMode {
   const raw = process.env.AUTHORIZED_ASSET_DELIVERY_MODE?.trim().toLowerCase();
   if (raw === "firebase") return "firebase";
+  if (raw === "firebase_with_static_fallback") {
+    return "firebase_with_static_fallback";
+  }
   return "static";
 }
 
 export function isFirebaseAuthorizedAssetDelivery(): boolean {
-  return getAuthorizedAssetDeliveryMode() === "firebase";
+  const mode = getAuthorizedAssetDeliveryMode();
+  return mode === "firebase" || mode === "firebase_with_static_fallback";
 }
 
 export function buildAuthorizedPdfDownloadHref(

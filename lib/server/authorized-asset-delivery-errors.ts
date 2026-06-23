@@ -57,7 +57,7 @@ export function logAuthorizedAssetDeliveryFailure(input: {
   code: AuthorizedAssetDeliveryErrorCode;
   kind: "claim_pdf" | "insurer_logo" | "learning_resource";
   assetId: string;
-  deliveryMode: "firebase";
+  deliveryMode: "firebase" | "firebase_with_static_fallback";
   status: 403 | 404 | 503;
 }): void {
   console.error(

@@ -5,9 +5,9 @@ import {
   getServerAuthorizedAssetDeliveryMode,
 } from "@/lib/server/authorized-asset-delivery-config";
 import {
-  classifyAuthorizedAssetDeliveryError,
-  logAuthorizedAssetDeliveryFailure,
-} from "@/lib/server/authorized-asset-delivery-errors";
+  respondAuthorizedAssetFirebaseCatchFailure,
+  respondAuthorizedAssetFirebaseFailure,
+} from "@/lib/server/authorized-asset-firebase-fallback";
 import { redirectToApprovedStaticPath } from "@/lib/server/authorized-asset-static-redirect";
 import { findAuthorizedStaticLogoByInsurerId } from "@/lib/server/authorized-static-assets-manifest";
 import {
@@ -29,25 +29,27 @@ function notFound() {
 export async function GET(_request: Request, context: RouteContext) {
   const { insurerId } = await context.params;
   const asset = findAuthorizedStaticLogoByInsurerId(insurerId);
+  const deliveryMode = getServerAuthorizedAssetDeliveryMode();
 
   if (!asset || !asset.enabled) {
     return notFound();
   }
 
-  if (getServerAuthorizedAssetDeliveryMode() !== "firebase") {
+  if (deliveryMode === "static") {
     return redirectToApprovedStaticPath(asset.staticPublicPath);
   }
 
   const config = getFirebaseServiceAccountConfig();
   if (!config) {
-    logAuthorizedAssetDeliveryFailure({
+    return respondAuthorizedAssetFirebaseFailure({
       code: "asset_delivery_config_missing",
       kind: asset.kind,
       assetId: asset.assetId,
-      deliveryMode: "firebase",
+      deliveryMode,
       status: 503,
+      staticPublicPath: asset.staticPublicPath,
+      unavailableError: "storage_unavailable",
     });
-    return NextResponse.json({ error: "storage_unavailable" }, { status: 503 });
   }
 
   try {
@@ -56,24 +58,26 @@ export async function GET(_request: Request, context: RouteContext) {
       asset.firebaseObjectPath,
     );
     if (!remoteMeta) {
-      logAuthorizedAssetDeliveryFailure({
+      return respondAuthorizedAssetFirebaseFailure({
         code: "asset_delivery_object_missing",
         kind: asset.kind,
         assetId: asset.assetId,
-        deliveryMode: "firebase",
+        deliveryMode,
         status: 404,
+        staticPublicPath: asset.staticPublicPath,
+        unavailableError: "logo_unavailable",
       });
-      return notFound();
     }
     if (remoteMeta.insurerId !== asset.insurerId) {
-      logAuthorizedAssetDeliveryFailure({
+      return respondAuthorizedAssetFirebaseFailure({
         code: "asset_delivery_metadata_invalid",
         kind: asset.kind,
         assetId: asset.assetId,
-        deliveryMode: "firebase",
+        deliveryMode,
         status: 404,
+        staticPublicPath: asset.staticPublicPath,
+        unavailableError: "logo_unavailable",
       });
-      return notFound();
     }
 
     const signedUrl = buildAuthorizedAssetSignedLogoUrl(
@@ -89,18 +93,12 @@ export async function GET(_request: Request, context: RouteContext) {
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error: unknown) {
-    const failure = classifyAuthorizedAssetDeliveryError(error);
-    logAuthorizedAssetDeliveryFailure({
-      code: failure.code,
+    return respondAuthorizedAssetFirebaseCatchFailure(error, {
       kind: asset.kind,
       assetId: asset.assetId,
-      deliveryMode: "firebase",
-      status: failure.status,
+      deliveryMode,
+      staticPublicPath: asset.staticPublicPath,
+      unavailableError: "logo_unavailable",
     });
-
-    return NextResponse.json(
-      { error: "logo_unavailable" },
-      { status: failure.status },
-    );
   }
 }

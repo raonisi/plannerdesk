@@ -249,8 +249,6 @@ describe("PR-ASSET-05 GCS V4 signer and static fallback", () => {
     assert.doesNotMatch(logoRoute, /catch \(error: any\)/);
     assert.match(downloadRoute, /NextResponse\.redirect\(signedUrl, 307\)/);
     assert.match(logoRoute, /NextResponse\.redirect\(signedUrl, 307\)/);
-    assert.doesNotMatch(downloadRoute, /firebase_with_static_fallback/);
-    assert.doesNotMatch(logoRoute, /firebase_with_static_fallback/);
   });
 
   it("classifies delivery errors without any and without secret fields", () => {

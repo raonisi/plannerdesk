@@ -54,6 +54,14 @@ describe("PR-ASSET-04 static to Firebase migration", () => {
       process.env.AUTHORIZED_ASSET_DELIVERY_MODE = "firebase";
       assert.equal(getAuthorizedAssetDeliveryMode(), "firebase");
 
+      process.env.AUTHORIZED_ASSET_DELIVERY_MODE =
+        "firebase_with_static_fallback";
+      assert.equal(
+        getAuthorizedAssetDeliveryMode(),
+        "firebase_with_static_fallback",
+      );
+      assert.equal(isFirebaseAuthorizedAssetDelivery(), true);
+
       process.env.AUTHORIZED_ASSET_DELIVERY_MODE = "invalid";
       assert.equal(getAuthorizedAssetDeliveryMode(), "static");
     } finally {
