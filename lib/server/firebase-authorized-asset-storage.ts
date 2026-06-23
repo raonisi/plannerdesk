@@ -6,6 +6,10 @@ import { createHash } from "node:crypto";
 
 import type { FirebaseServiceAccountConfig } from "@/lib/server/firebase-service-account";
 import { getGoogleAccessToken } from "@/lib/server/firebase-service-account";
+import {
+  AuthorizedAssetFirebaseUploadError,
+  isRetryableHttpStatus,
+} from "@/lib/server/authorized-asset-firebase-errors";
 import { generateGcsV4SignedUrl } from "@/lib/server/gcs-v4-signed-url";
 
 export type FirebaseObjectMetadata = {
@@ -102,7 +106,13 @@ export async function uploadFirebaseAuthorizedAsset(
   });
 
   if (!response.ok) {
-    throw new Error("FIREBASE_UPLOAD_FAILED");
+    const body = await response.text().catch(() => "");
+    throw new AuthorizedAssetFirebaseUploadError({
+      httpStatus: response.status,
+      errorCode: `firebase_upload_http_${response.status}`,
+      messageSummary: body || `Firebase upload failed with HTTP ${response.status}`,
+      retryable: isRetryableHttpStatus(response.status),
+    });
   }
 }
 

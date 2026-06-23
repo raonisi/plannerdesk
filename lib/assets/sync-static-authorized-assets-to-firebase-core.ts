@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
 
+import {
+  formatUploadFailureDiagnostic,
+  type UploadFailureDiagnostic,
+} from "@/lib/assets/authorized-asset-upload-diagnostics";
 import type { AuthorizedStaticAsset } from "@/lib/server/authorized-static-assets-manifest";
 import {
   getFirebaseObjectMetadata,
@@ -7,12 +11,16 @@ import {
   uploadFirebaseAuthorizedAsset,
   type FirebaseObjectMetadata,
 } from "@/lib/server/firebase-authorized-asset-storage";
+import { AuthorizedAssetFirebaseUploadError } from "@/lib/server/authorized-asset-firebase-errors";
+import { isAuthorizedAssetsFirebaseObjectPath } from "@/lib/server/authorized-asset-firebase-paths";
 import type { FirebaseServiceAccountConfig } from "@/lib/server/firebase-service-account";
-import { readStaticAssetBytes } from "@/lib/server/authorized-static-assets-manifest";
+import {
+  readStaticAssetBytes,
+  validateAuthorizedStaticAsset,
+} from "@/lib/server/authorized-static-assets-manifest";
 
 const PDF_MAGIC = Buffer.from("%PDF-");
 const ALLOWED_IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "webp", "svg"]);
-const PDF_MAX_BYTES = 40 * 1024 * 1024;
 const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 const LEARNING_MAX_BYTES = 40 * 1024 * 1024;
 
@@ -31,9 +39,89 @@ export type SyncAuthorizedAssetsOptions = {
   assets: AuthorizedStaticAsset[];
   config: FirebaseServiceAccountConfig;
   apply: boolean;
+  emitUploadDiagnostics?: boolean;
   uploadImpl?: typeof uploadFirebaseAuthorizedAsset;
   metadataImpl?: typeof getFirebaseObjectMetadata;
 };
+
+export type SelectSyncAssetsResult =
+  | { ok: true; assets: AuthorizedStaticAsset[]; singleAssetMode: boolean }
+  | { ok: false; error: string };
+
+export function selectSyncAssetsForRun(
+  manifest: AuthorizedStaticAsset[],
+  options: {
+    trial?: boolean;
+    trialAssetIds?: readonly string[];
+    assetId?: string;
+  },
+): SelectSyncAssetsResult {
+  if (options.assetId) {
+    const asset = manifest.find((entry) => entry.assetId === options.assetId);
+    if (!asset) {
+      return { ok: false, error: `asset_not_found:${options.assetId}` };
+    }
+    if (!asset.enabled) {
+      return { ok: false, error: `asset_disabled:${options.assetId}` };
+    }
+    const issue = validateAuthorizedStaticAsset(asset);
+    if (issue) {
+      return { ok: false, error: `asset_invalid:${issue.reason}` };
+    }
+    if (!isAuthorizedAssetsFirebaseObjectPath(asset.firebaseObjectPath)) {
+      return { ok: false, error: "firebase_path_out_of_scope" };
+    }
+    return { ok: true, assets: [asset], singleAssetMode: true };
+  }
+
+  let assets = manifest;
+  if (options.trial && options.trialAssetIds) {
+    const trialIds = new Set(options.trialAssetIds);
+    assets = assets.filter((entry) => trialIds.has(entry.assetId));
+  }
+
+  return { ok: true, assets, singleAssetMode: false };
+}
+
+export function buildUploadFailureDiagnostic(
+  assetId: string,
+  operation: UploadFailureDiagnostic["operation"],
+  error: unknown,
+): UploadFailureDiagnostic {
+  if (error instanceof AuthorizedAssetFirebaseUploadError) {
+    return {
+      assetId,
+      operation,
+      errorCode: error.errorCode,
+      httpStatus: error.httpStatus,
+      messageSummary: error.messageSummary,
+      causeName: error.name,
+      retryable: error.retryable,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      assetId,
+      operation,
+      errorCode: error.message || "upload_failed",
+      httpStatus: null,
+      messageSummary: error.message.slice(0, 300),
+      causeName: error.name || "Error",
+      retryable: "unknown",
+    };
+  }
+
+  return {
+    assetId,
+    operation,
+    errorCode: "upload_failed",
+    httpStatus: null,
+    messageSummary: "Unknown upload failure",
+    causeName: "unknown",
+    retryable: "unknown",
+  };
+}
 
 function isPdfBuffer(buffer: Buffer): boolean {
   return buffer.subarray(0, PDF_MAGIC.length).equals(PDF_MAGIC);
@@ -48,9 +136,7 @@ function validateAssetBytes(
   buffer: Buffer,
 ): string | null {
   const maxBytes =
-    asset.kind === "insurer_logo"
-      ? LOGO_MAX_BYTES
-      : LEARNING_MAX_BYTES;
+    asset.kind === "insurer_logo" ? LOGO_MAX_BYTES : LEARNING_MAX_BYTES;
 
   if (buffer.byteLength > maxBytes) {
     return "size_limit";
@@ -96,6 +182,11 @@ export async function syncAuthorizedStaticAssetsToFirebase(
       continue;
     }
 
+    if (!isAuthorizedAssetsFirebaseObjectPath(asset.firebaseObjectPath)) {
+      results.push({ ...base, status: "failed", reason: "firebase_path_out_of_scope" });
+      continue;
+    }
+
     let buffer: Buffer;
     try {
       buffer = readStaticAssetBytes(options.rootDir, asset);
@@ -127,28 +218,42 @@ export async function syncAuthorizedStaticAssetsToFirebase(
       continue;
     }
 
+    let existing;
     try {
-      const existing = await getMetadata(options.config, asset.firebaseObjectPath);
-      if (existing?.sha256 === sha256) {
-        results.push({
-          ...base,
-          status: "skipped",
-          sha256,
-          bytes: buffer.byteLength,
-          reason: "unchanged",
-        });
-        continue;
+      existing = await getMetadata(options.config, asset.firebaseObjectPath);
+    } catch (error: unknown) {
+      if (options.emitUploadDiagnostics) {
+        console.error(
+          formatUploadFailureDiagnostic(
+            buildUploadFailureDiagnostic(asset.assetId, "metadata_get", error),
+          ),
+        );
       }
+      results.push({ ...base, status: "failed", reason: "upload_failed" });
+      continue;
+    }
 
-      const metadata: FirebaseObjectMetadata = {
-        assetId: asset.assetId,
-        insurerId: asset.insurerId,
+    if (existing?.sha256 === sha256) {
+      results.push({
+        ...base,
+        status: "skipped",
         sha256,
-        contentType: asset.contentType,
-        reviewedAt: asset.reviewedAt,
-        permissionRecordKey: asset.permissionRecordKey,
-      };
+        bytes: buffer.byteLength,
+        reason: "unchanged",
+      });
+      continue;
+    }
 
+    const metadata: FirebaseObjectMetadata = {
+      assetId: asset.assetId,
+      insurerId: asset.insurerId,
+      sha256,
+      contentType: asset.contentType,
+      reviewedAt: asset.reviewedAt,
+      permissionRecordKey: asset.permissionRecordKey,
+    };
+
+    try {
       await upload(options.config, asset.firebaseObjectPath, buffer, metadata);
       results.push({
         ...base,
@@ -156,7 +261,14 @@ export async function syncAuthorizedStaticAssetsToFirebase(
         sha256,
         bytes: buffer.byteLength,
       });
-    } catch {
+    } catch (error: unknown) {
+      if (options.emitUploadDiagnostics) {
+        console.error(
+          formatUploadFailureDiagnostic(
+            buildUploadFailureDiagnostic(asset.assetId, "upload", error),
+          ),
+        );
+      }
       results.push({ ...base, status: "failed", reason: "upload_failed" });
     }
   }
