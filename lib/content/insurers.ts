@@ -993,7 +993,7 @@ export const insurerDirectoryEntries: InsurerDirectoryEntry[] = [
     category: "life",
     officialWebsiteUrl: "https://www.lina.co.kr/",
     plannerPortalUrl: null,
-    systemUrl: null,
+    systemUrl: "https://ga.lina.co.kr/html/gap/GA/GAZ911M0.html",
     claimPageUrl: null,
     claimFormUrl: null,
     termsUrl:
