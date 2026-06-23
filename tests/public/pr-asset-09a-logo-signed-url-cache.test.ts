@@ -180,6 +180,107 @@ describe("PR-ASSET-09A logo signed URL cache", () => {
     assert.equal(getAuthorizedLogoSignedUrlCacheSizeForTests(), 0);
   });
 
+  it("does not cache signing failures and retries signing on next request", async () => {
+    resetAuthorizedLogoSignedUrlCacheForTests();
+    const asset = sampleLogoAsset();
+    let signCalls = 0;
+    let shouldFail = true;
+
+    await assert.rejects(
+      resolveAuthorizedLogoSignedUrl(
+        { config: sampleConfig, asset, expiresInSeconds: 300 },
+        {
+          now: () => 1_700_000_000_000,
+          getMetadata: async () => sampleMetadata,
+          buildSignedUrl: () => {
+            signCalls += 1;
+            if (shouldFail) {
+              throw new Error("signing_failed_for_test");
+            }
+            return "https://storage.googleapis.com/bucket.test/object?sig=ok";
+          },
+        },
+      ),
+      /signing_failed_for_test/,
+    );
+    assert.equal(signCalls, 1);
+    assert.equal(getAuthorizedLogoSignedUrlCacheSizeForTests(), 0);
+
+    shouldFail = false;
+    const second = await resolveAuthorizedLogoSignedUrl(
+      { config: sampleConfig, asset, expiresInSeconds: 300 },
+      {
+        now: () => 1_700_000_000_000,
+        getMetadata: async () => sampleMetadata,
+        buildSignedUrl: () => {
+          signCalls += 1;
+          return "https://storage.googleapis.com/bucket.test/object?sig=ok";
+        },
+      },
+    );
+
+    assert.equal(second.ok, true);
+    if (!second.ok) return;
+    assert.equal(second.cacheHit, false);
+    assert.equal(signCalls, 2);
+    assert.equal(getAuthorizedLogoSignedUrlCacheSizeForTests(), 1);
+  });
+
+  it("does not cache metadata mismatch failures and allows normal recovery", async () => {
+    resetAuthorizedLogoSignedUrlCacheForTests();
+    const asset = sampleLogoAsset();
+    let metadataCalls = 0;
+    let signCalls = 0;
+    let mismatch = true;
+
+    const first = await resolveAuthorizedLogoSignedUrl(
+      { config: sampleConfig, asset, expiresInSeconds: 300 },
+      {
+        now: () => 1_700_000_000_000,
+        getMetadata: async () => {
+          metadataCalls += 1;
+          if (mismatch) {
+            return { ...sampleMetadata, insurerId: "wrong-insurer" };
+          }
+          return sampleMetadata;
+        },
+        buildSignedUrl: () => {
+          signCalls += 1;
+          return "https://storage.googleapis.com/bucket.test/object?sig=ok";
+        },
+      },
+    );
+    assert.equal(first.ok, false);
+    if (first.ok) return;
+    assert.equal(first.failure.kind, "metadata_invalid");
+    assert.equal(metadataCalls, 1);
+    assert.equal(signCalls, 0);
+    assert.equal(getAuthorizedLogoSignedUrlCacheSizeForTests(), 0);
+
+    mismatch = false;
+    const second = await resolveAuthorizedLogoSignedUrl(
+      { config: sampleConfig, asset, expiresInSeconds: 300 },
+      {
+        now: () => 1_700_000_000_000,
+        getMetadata: async () => {
+          metadataCalls += 1;
+          return sampleMetadata;
+        },
+        buildSignedUrl: () => {
+          signCalls += 1;
+          return "https://storage.googleapis.com/bucket.test/object?sig=ok";
+        },
+      },
+    );
+
+    assert.equal(second.ok, true);
+    if (!second.ok) return;
+    assert.equal(second.cacheHit, false);
+    assert.equal(metadataCalls, 2);
+    assert.equal(signCalls, 1);
+    assert.equal(getAuthorizedLogoSignedUrlCacheSizeForTests(), 1);
+  });
+
   it("evicts oldest entries when max cache size is exceeded", async () => {
     resetAuthorizedLogoSignedUrlCacheForTests();
     const asset = sampleLogoAsset();
