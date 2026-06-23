@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 
 import { buildClaimPdfDownloadFileName } from "@/lib/public/public-asset-policy";
-import { AUTHORIZED_ASSET_SIGNED_URL_TTL_SECONDS } from "@/lib/server/authorized-asset-delivery-config";
-import { getServerAuthorizedAssetDeliveryMode } from "@/lib/server/authorized-asset-delivery-config";
+import {
+  AUTHORIZED_ASSET_SIGNED_URL_TTL_SECONDS,
+  getServerAuthorizedAssetDeliveryMode,
+} from "@/lib/server/authorized-asset-delivery-config";
+import {
+  classifyAuthorizedAssetDeliveryError,
+  logAuthorizedAssetDeliveryFailure,
+} from "@/lib/server/authorized-asset-delivery-errors";
+import { redirectToApprovedStaticPath } from "@/lib/server/authorized-asset-static-redirect";
 import { findAuthorizedStaticAssetById } from "@/lib/server/authorized-static-assets-manifest";
 import {
   buildAuthorizedAssetSignedDownloadUrl,
@@ -33,11 +40,18 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   if (getServerAuthorizedAssetDeliveryMode() !== "firebase") {
-    return NextResponse.redirect(new URL(asset.staticPublicPath, _request.url), 307);
+    return redirectToApprovedStaticPath(asset.staticPublicPath);
   }
 
   const config = getFirebaseServiceAccountConfig();
   if (!config) {
+    logAuthorizedAssetDeliveryFailure({
+      code: "asset_delivery_config_missing",
+      kind: asset.kind,
+      assetId: asset.assetId,
+      deliveryMode: "firebase",
+      status: 503,
+    });
     return NextResponse.json({ error: "storage_unavailable" }, { status: 503 });
   }
 
@@ -46,7 +60,24 @@ export async function GET(_request: Request, context: RouteContext) {
       config,
       asset.firebaseObjectPath,
     );
-    if (!remoteMeta || remoteMeta.assetId !== asset.assetId) {
+    if (!remoteMeta) {
+      logAuthorizedAssetDeliveryFailure({
+        code: "asset_delivery_object_missing",
+        kind: asset.kind,
+        assetId: asset.assetId,
+        deliveryMode: "firebase",
+        status: 404,
+      });
+      return notFound();
+    }
+    if (remoteMeta.assetId !== asset.assetId) {
+      logAuthorizedAssetDeliveryFailure({
+        code: "asset_delivery_metadata_invalid",
+        kind: asset.kind,
+        assetId: asset.assetId,
+        deliveryMode: "firebase",
+        status: 404,
+      });
       return notFound();
     }
 
@@ -54,6 +85,13 @@ export async function GET(_request: Request, context: RouteContext) {
       asset.contentType === "application/pdf" &&
       remoteMeta.contentType !== "application/pdf"
     ) {
+      logAuthorizedAssetDeliveryFailure({
+        code: "asset_delivery_content_type_invalid",
+        kind: asset.kind,
+        assetId: asset.assetId,
+        deliveryMode: "firebase",
+        status: 404,
+      });
       return notFound();
     }
 
@@ -75,7 +113,19 @@ export async function GET(_request: Request, context: RouteContext) {
     const response = NextResponse.redirect(signedUrl, 307);
     response.headers.set("Cache-Control", "private, no-store");
     return response;
-  } catch {
-    return NextResponse.json({ error: "download_unavailable" }, { status: 503 });
+  } catch (error: unknown) {
+    const failure = classifyAuthorizedAssetDeliveryError(error);
+    logAuthorizedAssetDeliveryFailure({
+      code: failure.code,
+      kind: asset.kind,
+      assetId: asset.assetId,
+      deliveryMode: "firebase",
+      status: failure.status,
+    });
+
+    return NextResponse.json(
+      { error: "download_unavailable" },
+      { status: failure.status },
+    );
   }
 }

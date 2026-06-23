@@ -33,6 +33,9 @@ export async function getFirebaseObjectMetadata(
   });
 
   if (response.status === 404) return null;
+  if (response.status === 403) {
+    throw new Error("FIREBASE_STORAGE_FORBIDDEN");
+  }
   if (!response.ok) {
     throw new Error("FIREBASE_METADATA_FAILED");
   }

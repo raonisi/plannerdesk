@@ -22,6 +22,7 @@ const GATE_TEST_PATHS = [
   "tests/public/pr-asset-01-public-asset-governance.test.ts",
   "tests/public/pr-asset-02-authorized-pdf-logo-restore.test.ts",
   "tests/public/pr-asset-04-static-to-firebase-migration.test.ts",
+  "tests/public/pr-asset-05-gcs-v4-signer-and-fallback.test.ts",
   "tests/ops/pr173b-work-tools-storage-config.test.ts",
   "tests/ops/pr173c-claim-boundary.test.ts",
 ] as const;
