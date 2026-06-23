@@ -43,6 +43,10 @@ export type InsurerCompactWorkbenchRowProps = {
 
   onRequestCorrection?: (id: string) => void;
 
+  logoLoading?: "lazy" | "eager";
+
+  logoFetchPriority?: "high" | "low" | "auto";
+
   layout?: "list" | "grid";
 
 };
@@ -157,6 +161,10 @@ export function InsurerCompactWorkbenchRow({
 
   onRequestCorrection,
 
+  logoLoading,
+
+  logoFetchPriority,
+
   layout = "list",
 
 }: InsurerCompactWorkbenchRowProps) {
@@ -183,7 +191,12 @@ export function InsurerCompactWorkbenchRow({
 
         <div className="min-w-0">
           <div className="flex min-w-0 items-start gap-3">
-            <InsurerLogo insurer={insurer} size="compact" />
+            <InsurerLogo
+              fetchPriority={logoFetchPriority}
+              insurer={insurer}
+              loading={logoLoading}
+              size="compact"
+            />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="break-words text-base font-bold text-slate-950">

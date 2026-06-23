@@ -23,9 +23,13 @@ const SIZE_CLASS = {
 export function InsurerLogo({
   insurer,
   size = "card",
+  loading = "lazy",
+  fetchPriority,
 }: {
   insurer: PublicInsurer;
   size?: keyof typeof SIZE_CLASS;
+  loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const logoSrc = insurerLogoSrc(insurer);
@@ -48,7 +52,8 @@ export function InsurerLogo({
               ? "h-full max-h-8 w-full object-contain"
               : "h-full max-h-11 w-full object-contain"
           }
-          loading="lazy"
+          fetchPriority={fetchPriority}
+          loading={loading}
           onError={() => setImageFailed(true)}
           referrerPolicy="no-referrer"
           src={logoSrc}

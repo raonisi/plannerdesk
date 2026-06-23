@@ -79,7 +79,9 @@ describe("PR-UX-10 directory logo and sort", () => {
     assert.match(logo, /aria-hidden="true"/);
     assert.match(actionCard, /from "@\/components\/directory\/insurer-logo"/);
     assert.doesNotMatch(actionCard, /const INSURER_LOGO_SOURCES/);
-    assert.match(compactRow, /<InsurerLogo insurer=\{insurer\} size="compact"/);
+    assert.match(compactRow, /<InsurerLogo/);
+    assert.match(compactRow, /insurer=\{insurer\}/);
+    assert.match(compactRow, /size="compact"/);
   });
 
   it("sorts insurers by Korean name", () => {
