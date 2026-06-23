@@ -76,7 +76,7 @@ describe("PR-DIR-B mobile primary system CTA enhancement", () => {
     for (const insurer of published) {
       if (resolveSystemLinks(insurer).primary) primaryCount += 1;
     }
-    assert.equal(primaryCount, 37);
+    assert.equal(primaryCount, 38);
   });
 
   it("keeps PDF download and open inside claim panel", () => {

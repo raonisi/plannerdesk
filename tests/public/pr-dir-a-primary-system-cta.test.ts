@@ -62,7 +62,7 @@ describe("PR-DIR-A directory primary system CTA and claim consolidation", () => 
     for (const insurer of published) {
       if (resolveSystemLinks(insurer).primary) primaryCount += 1;
     }
-    assert.equal(primaryCount, 37);
+    assert.equal(primaryCount, 38);
     assert.ok(
       published.filter((i) => isUsableExternalHref(i.systemUrl)).length <=
         primaryCount,
