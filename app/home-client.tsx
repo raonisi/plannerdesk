@@ -320,7 +320,7 @@ export function HomeClient({
               href="/directory"
               className={`${PRIMARY_CTA_CLASS} ${buttons.primary}`}
             >
-              보험사 찾기
+              보험사 전산 찾기
             </Link>
             <Link
               href="/claim-documents"

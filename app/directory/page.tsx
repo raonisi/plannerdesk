@@ -20,8 +20,8 @@ import { safeGetPublicClaimPdfGovernanceOverlay } from "@/lib/claim-documents/go
 export const dynamic = "force-dynamic";
 
 const t = {
-  eyebrow: "보험사 디렉토리",
-  title: "보험사 디렉토리",
+  eyebrow: "보험사 전산",
+  title: "보험사 전산",
   description:
     "전산 바로가기, 청구안내, 공식 홈페이지, 공시·헬프데스크를 목적별로 확인하세요.",
   subcopy: DIRECTORY_PUBLIC_GLOBAL_NOTICE,

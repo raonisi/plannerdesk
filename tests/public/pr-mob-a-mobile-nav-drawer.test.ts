@@ -13,11 +13,13 @@ const ROOT = process.cwd();
 
 const PUBLIC_DRAWER_ROUTES = [
   { label: "홈", href: "/" },
-  { label: "보험사 바로가기", href: "/directory" },
+  { label: "보험사 전산", href: "/directory" },
   { label: "청구서류", href: "/claim-documents" },
   { label: "업무 도구", href: "/work-tools" },
   { label: "공시·약관", href: "/disclosure-links" },
   { label: "고객 문구", href: "/message-templates" },
+  { label: "지식 아카이브", href: "/knowledge" },
+  { label: "통합 검색", href: "/search" },
 ] as const;
 
 const FORBIDDEN_DRAWER_PHRASES = [
@@ -60,9 +62,12 @@ describe("PR-MOB-A global mobile nav drawer", () => {
   it("lists required public routes in the mobile drawer config", () => {
     const config = read("lib/navigation/public-nav.ts");
     const labelPatterns: Record<string, RegExp> = {
+      "/directory": /uiLabels\.insurerPortal/,
       "/work-tools": /uiLabels\.workTools/,
       "/disclosure-links": /uiLabels\.disclosure/,
-      "/message-templates": /(uiLabels\.customerMessages|"고객 문구")/,
+      "/message-templates": /uiLabels\.customerMessages/,
+      "/knowledge": /uiLabels\.knowledgeArchive/,
+      "/search": /uiLabels\.unifiedSearch/,
     };
     for (const route of PUBLIC_DRAWER_ROUTES) {
       assert.match(config, new RegExp(`href:\\s*"${route.href.replace("/", "\\/")}"`));

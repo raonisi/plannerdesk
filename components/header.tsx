@@ -42,7 +42,7 @@ export function Header() {
             className={`hidden min-h-10 sm:inline-flex ${buttons.base} ${buttons.primary} rounded-full px-5`}
             href="/message-templates"
           >
-            {uiLabels.findMessage}
+            {uiLabels.customerMessages}
           </Link>
           <MobileNavigation pathname={pathname} />
         </div>

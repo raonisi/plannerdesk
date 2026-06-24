@@ -44,7 +44,7 @@ describe("PR-UX-03 home workflow simplify", () => {
 
   it("hero exposes three primary CTAs and required route links", () => {
     const home = readFileSync(join(ROOT, "app/home-client.tsx"), "utf8");
-    assert.match(home, /보험사 찾기/);
+    assert.match(home, /보험사 전산 찾기/);
     assert.match(home, /청구서류 찾기/);
     assert.match(home, /업무 도구 열기/);
     for (const href of REQUIRED_HOME_ROUTES) {

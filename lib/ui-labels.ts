@@ -5,10 +5,12 @@ export const uiLabels = {
   footerTagline: "보험설계사를 위한 실무 지원 플랫폼",
   homeHub: "오늘의 업무 진입점",
   quickTools: "자주 쓰는 업무 도구",
-  insurerPortal: "보험사 업무 포털",
+  insurerPortal: "보험사 전산",
   workTools: "업무 도구",
   disclosure: "공시·약관",
   customerMessages: "고객 문구",
+  knowledgeArchive: "지식 아카이브",
+  unifiedSearch: "통합 검색",
   referenceCategory: "자료 분류",
   workflowLinks: "다음 업무로 이동",
   safetyBoundary: "실무 참고 기준",
@@ -17,5 +19,6 @@ export const uiLabels = {
   mobileMenu: "모바일 주요 메뉴",
   mobileMenuOpen: "메뉴 열기",
   mobileMenuClose: "메뉴 닫기",
-  findMessage: "문구 찾기",
+  /** @deprecated Prefer customerMessages for global nav and header CTA. */
+  findMessage: "고객 문구",
 } as const;

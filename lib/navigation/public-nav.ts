@@ -5,22 +5,25 @@ export type PublicNavItem = {
   href: string;
 };
 
-/** Desktop horizontal nav (lg+). Includes integrated search. */
+/** Desktop horizontal nav (lg+). */
 export const desktopNavItems: readonly PublicNavItem[] = [
-  { label: "통합 검색", href: "/search" },
-  { label: "보험사 바로가기", href: "/directory" },
-  { label: uiLabels.workTools, href: "/work-tools" },
+  { label: uiLabels.insurerPortal, href: "/directory" },
   { label: "청구서류", href: "/claim-documents" },
+  { label: uiLabels.workTools, href: "/work-tools" },
   { label: uiLabels.disclosure, href: "/disclosure-links" },
   { label: uiLabels.customerMessages, href: "/message-templates" },
+  { label: uiLabels.knowledgeArchive, href: "/knowledge" },
+  { label: uiLabels.unifiedSearch, href: "/search" },
 ];
 
 /** Mobile drawer quick-action chips. */
 export const mobileDrawerQuickActions: readonly PublicNavItem[] = [
-  { label: "보험사 바로가기", href: "/directory" },
+  { label: uiLabels.insurerPortal, href: "/directory" },
   { label: "청구서류", href: "/claim-documents" },
-  { label: "고객 문구", href: "/message-templates" },
   { label: uiLabels.workTools, href: "/work-tools" },
+  { label: uiLabels.customerMessages, href: "/message-templates" },
+  { label: uiLabels.knowledgeArchive, href: "/knowledge" },
+  { label: uiLabels.unifiedSearch, href: "/search" },
 ];
 
 export type MobileNavGroup = {
@@ -34,8 +37,9 @@ export const mobileDrawerGroups: readonly MobileNavGroup[] = [
     title: "주요 업무",
     items: [
       { label: "홈", href: "/" },
-      { label: "보험사 바로가기", href: "/directory" },
+      { label: uiLabels.insurerPortal, href: "/directory" },
       { label: uiLabels.workTools, href: "/work-tools" },
+      { label: uiLabels.unifiedSearch, href: "/search" },
     ],
   },
   {
@@ -43,11 +47,12 @@ export const mobileDrawerGroups: readonly MobileNavGroup[] = [
     items: [
       { label: "청구서류", href: "/claim-documents" },
       { label: uiLabels.disclosure, href: "/disclosure-links" },
+      { label: uiLabels.knowledgeArchive, href: "/knowledge" },
     ],
   },
   {
     title: "고객 응대",
-    items: [{ label: "고객 문구", href: "/message-templates" }],
+    items: [{ label: uiLabels.customerMessages, href: "/message-templates" }],
   },
 ];
 

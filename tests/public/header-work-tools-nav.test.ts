@@ -25,6 +25,7 @@ describe("Header work-tools nav entry (PR-UI-NAV-01)", () => {
       "/claim-documents",
       "/disclosure-links",
       "/message-templates",
+      "/knowledge",
     ]) {
       assert.match(navConfig, new RegExp(`href:\\s*"${href}"`));
     }
