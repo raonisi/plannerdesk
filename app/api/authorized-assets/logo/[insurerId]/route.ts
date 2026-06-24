@@ -10,10 +10,7 @@ import {
 } from "@/lib/server/authorized-asset-firebase-fallback";
 import { redirectToApprovedStaticPath } from "@/lib/server/authorized-asset-static-redirect";
 import { findAuthorizedStaticLogoByInsurerId } from "@/lib/server/authorized-static-assets-manifest";
-import {
-  buildAuthorizedAssetSignedLogoUrl,
-  getFirebaseObjectMetadata,
-} from "@/lib/server/firebase-authorized-asset-storage";
+import { resolveAuthorizedLogoSignedUrl } from "@/lib/server/authorized-asset-logo-signed-url-cache";
 import { getFirebaseServiceAccountConfig } from "@/lib/server/firebase-service-account";
 
 export const runtime = "nodejs";
@@ -53,24 +50,17 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   try {
-    const remoteMeta = await getFirebaseObjectMetadata(
+    const resolved = await resolveAuthorizedLogoSignedUrl({
       config,
-      asset.firebaseObjectPath,
-    );
-    if (!remoteMeta) {
+      asset,
+      expiresInSeconds: AUTHORIZED_ASSET_SIGNED_URL_TTL_SECONDS,
+    });
+    if (!resolved.ok) {
       return respondAuthorizedAssetFirebaseFailure({
-        code: "asset_delivery_object_missing",
-        kind: asset.kind,
-        assetId: asset.assetId,
-        deliveryMode,
-        status: 404,
-        staticPublicPath: asset.staticPublicPath,
-        unavailableError: "logo_unavailable",
-      });
-    }
-    if (remoteMeta.insurerId !== asset.insurerId) {
-      return respondAuthorizedAssetFirebaseFailure({
-        code: "asset_delivery_metadata_invalid",
+        code:
+          resolved.failure.kind === "object_missing"
+            ? "asset_delivery_object_missing"
+            : "asset_delivery_metadata_invalid",
         kind: asset.kind,
         assetId: asset.assetId,
         deliveryMode,
@@ -80,16 +70,7 @@ export async function GET(_request: Request, context: RouteContext) {
       });
     }
 
-    const signedUrl = buildAuthorizedAssetSignedLogoUrl(
-      config,
-      asset.firebaseObjectPath,
-      {
-        expiresInSeconds: AUTHORIZED_ASSET_SIGNED_URL_TTL_SECONDS,
-        contentType: asset.contentType,
-      },
-    );
-
-    const response = NextResponse.redirect(signedUrl, 307);
+    const response = NextResponse.redirect(resolved.signedUrl, 307);
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error: unknown) {

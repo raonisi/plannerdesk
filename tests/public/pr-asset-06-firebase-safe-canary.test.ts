@@ -315,7 +315,8 @@ describe("PR-ASSET-06 Firebase safe canary mode", () => {
     assert.match(downloadRoute, /deliveryMode === "static"/);
     assert.match(logoRoute, /deliveryMode === "static"/);
     assert.match(downloadRoute, /NextResponse\.redirect\(signedUrl, 307\)/);
-    assert.match(logoRoute, /NextResponse\.redirect\(signedUrl, 307\)/);
+    assert.match(logoRoute, /NextResponse\.redirect\(resolved\.signedUrl, 307\)/);
+    assert.match(logoRoute, /resolveAuthorizedLogoSignedUrl/);
     assert.doesNotMatch(downloadRoute, /new URL\(asset\.staticPublicPath/);
     assert.doesNotMatch(logoRoute, /new URL\(asset\.staticPublicPath/);
   });

@@ -65,6 +65,8 @@ export interface InsurerActionCardProps {
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
   onRequestCorrection?: (id: string) => void;
+  logoLoading?: "lazy" | "eager";
+  logoFetchPriority?: "high" | "low" | "auto";
   /** Workbench detail panel: expanded sections only (no compact card shell). */
   workbenchDetailOnly?: boolean;
 }
@@ -75,6 +77,8 @@ export function InsurerActionCard({
   isFavorite = false,
   onToggleFavorite,
   onRequestCorrection,
+  logoLoading,
+  logoFetchPriority,
   workbenchDetailOnly = false,
 }: InsurerActionCardProps) {
   const [detailedOpen, setDetailedOpen] = useState(workbenchDetailOnly);
@@ -100,6 +104,8 @@ export function InsurerActionCard({
           <CardHeader
             insurer={insurer}
             isFavorite={isFavorite}
+            logoFetchPriority={logoFetchPriority}
+            logoLoading={logoLoading}
             onToggleFavorite={onToggleFavorite}
           />
         ) : null}
@@ -443,17 +449,25 @@ export function InsurerActionCard({
 function CardHeader({
   insurer,
   isFavorite,
+  logoLoading,
+  logoFetchPriority,
   onToggleFavorite,
 }: {
   insurer: PublicInsurer;
   isFavorite: boolean;
+  logoLoading?: "lazy" | "eager";
+  logoFetchPriority?: "high" | "low" | "auto";
   onToggleFavorite?: (id: string) => void;
 }) {
   return (
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-4">
-          <InsurerLogo insurer={insurer} />
+          <InsurerLogo
+            fetchPriority={logoFetchPriority}
+            insurer={insurer}
+            loading={logoLoading}
+          />
           <div className="min-w-0 pt-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className={insurerCardCategoryBadge}>

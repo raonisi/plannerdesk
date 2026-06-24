@@ -248,7 +248,8 @@ describe("PR-ASSET-05 GCS V4 signer and static fallback", () => {
     assert.doesNotMatch(downloadRoute, /catch \(error: any\)/);
     assert.doesNotMatch(logoRoute, /catch \(error: any\)/);
     assert.match(downloadRoute, /NextResponse\.redirect\(signedUrl, 307\)/);
-    assert.match(logoRoute, /NextResponse\.redirect\(signedUrl, 307\)/);
+    assert.match(logoRoute, /NextResponse\.redirect\(resolved\.signedUrl, 307\)/);
+    assert.match(logoRoute, /resolveAuthorizedLogoSignedUrl/);
   });
 
   it("classifies delivery errors without any and without secret fields", () => {

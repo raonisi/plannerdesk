@@ -15,6 +15,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { CORRECTION_REQUEST_COPY } from "@/lib/directory/correction-request";
 import { DIRECTORY_CORRECTION_SECTION_TITLE } from "@/lib/directory/directory-workbench-copy";
 import { DIRECTORY_PUBLIC_GLOBAL_NOTICE } from "@/lib/directory/public-directory-surface";
+import { directoryLogoLoadingProps } from "@/lib/directory/directory-logo-loading";
 import { getInsurerDisplayCategory } from "@/lib/directory/insurer-display-category";
 import {
   INSURER_SORT_OPTIONS,
@@ -319,7 +320,9 @@ export function DirectoryExplorer({
               : "grid grid-cols-1 gap-3"
           }
         >
-          {displayedInsurers.map((insurer) => (
+          {displayedInsurers.map((insurer, index) => {
+            const logoLoading = directoryLogoLoadingProps(index);
+            return (
             <div
               id={insurer.id === insurerFromQuery ? "directory-insurer-focus" : undefined}
               key={insurer.id}
@@ -333,6 +336,8 @@ export function DirectoryExplorer({
                   insurer={insurer}
                   isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
                   layout="list"
+                  logoFetchPriority={logoLoading.fetchPriority}
+                  logoLoading={logoLoading.loading}
                   onRequestCorrection={openCorrectionRequest}
                   onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
                 />
@@ -341,12 +346,15 @@ export function DirectoryExplorer({
                   claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
                   insurer={insurer}
                   isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
+                  logoFetchPriority={logoLoading.fetchPriority}
+                  logoLoading={logoLoading.loading}
                   onRequestCorrection={openCorrectionRequest}
                   onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
                 />
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="space-y-5">
