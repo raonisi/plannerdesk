@@ -3,10 +3,12 @@ import { KnowledgeArticleCategory } from "@prisma/client";
 import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
 import {
   publicMainLandmarkProps,
   SkipToContent,
 } from "@/components/skip-to-content";
+import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
 import { getWorkToolsAccess } from "@/lib/auth/access";
 import {
   filterAndSortKnowledgeArchive,
@@ -67,9 +69,10 @@ export default async function KnowledgeArchivePage({
 
   return (
     <PageFrame>
-      <SkipToContent />
-      <Header />
-      <main {...publicMainLandmarkProps} className="outline-none">
+      <div className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset}`}>
+        <SkipToContent />
+        <Header />
+        <main {...publicMainLandmarkProps} className="outline-none">
         <PageHero
           eyebrow={t.eyebrow}
           title={t.title}
@@ -115,6 +118,8 @@ export default async function KnowledgeArchivePage({
         </ContentSection>
       </main>
       <Footer />
+      </div>
+      <PublicMobileQuickTabs />
     </PageFrame>
   );
 }

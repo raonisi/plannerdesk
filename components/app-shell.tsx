@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import { PageFrame } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
 import {
   publicMainLandmarkProps,
   SkipToContent,
 } from "@/components/skip-to-content";
+import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
 
 /** 공개 페이지 공통 레이아웃: Header + 본문 + Footer */
 export function AppShell({
@@ -18,7 +20,9 @@ export function AppShell({
   return (
     <PageFrame>
       <SkipToContent />
-      <div className={`flex min-h-screen flex-col ${className}`.trim()}>
+      <div
+        className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset} ${className}`.trim()}
+      >
         <Header />
         <main
           {...publicMainLandmarkProps}
@@ -28,6 +32,7 @@ export function AppShell({
         </main>
         <Footer />
       </div>
+      <PublicMobileQuickTabs />
     </PageFrame>
   );
 }
