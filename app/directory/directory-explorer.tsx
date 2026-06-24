@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { EmptyState } from "@/components/content-page";
 import { BrowseNextSteps } from "@/components/search/browse-next-steps";
 import { InsurerActionCard } from "@/components/directory/insurer-action-card";
+import { InsurerCompactMobileRow } from "@/components/directory/insurer-compact-mobile-row";
 import { InsurerCompactWorkbenchRow } from "@/components/directory/insurer-compact-workbench-row";
 import { CorrectionRequestDialog } from "@/components/directory/correction-request-dialog";
 import { PlannerFavoritesScope } from "@/components/planner-favorites/planner-favorites-scope";
@@ -128,6 +129,10 @@ export function DirectoryExplorer({
   const [correctionPreselectedId, setCorrectionPreselectedId] = useState<
     string | null
   >(null);
+  const [expandedMobileInsurer, setExpandedMobileInsurer] = useState<{
+    filterKey: string;
+    insurerId: string | null;
+  }>({ filterKey: "", insurerId: null });
   const highlightedInsurerRef = useRef<HTMLDivElement | null>(null);
 
   const insurerFromQueryMatch = useMemo(() => {
@@ -142,6 +147,16 @@ export function DirectoryExplorer({
       block: "nearest",
     });
   }, [insurerFromQueryMatch]);
+
+  const mobileListResetKey = `${query}|${activeTab}|${sortMode}|${insurerFromQuery ?? ""}`;
+  const expandedInsurerId =
+    expandedMobileInsurer.filterKey === mobileListResetKey
+      ? expandedMobileInsurer.insurerId
+      : null;
+
+  const setExpandedInsurerId = useCallback((insurerId: string | null) => {
+    setExpandedMobileInsurer({ filterKey: mobileListResetKey, insurerId });
+  }, [mobileListResetKey]);
 
   const openCorrectionRequest = (insurerId?: string) => {
     setCorrectionPreselectedId(insurerId ?? null);
@@ -313,49 +328,88 @@ export function DirectoryExplorer({
           title={DIRECTORY_FAVORITES_EMPTY_TITLE}
         />
       ) : displayedInsurers.length > 0 ? (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 gap-3 lg:grid-cols-2"
-              : "grid grid-cols-1 gap-3"
-          }
-        >
-          {displayedInsurers.map((insurer, index) => {
-            const logoLoading = directoryLogoLoadingProps(index);
-            return (
-            <div
-              id={insurer.id === insurerFromQuery ? "directory-insurer-focus" : undefined}
-              key={insurer.id}
-              ref={
-                insurer.id === insurerFromQuery ? highlightedInsurerRef : undefined
-              }
-            >
-              {viewMode === "list" ? (
-                <InsurerCompactWorkbenchRow
-                  claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
-                  insurer={insurer}
-                  isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
-                  layout="list"
-                  logoFetchPriority={logoLoading.fetchPriority}
-                  logoLoading={logoLoading.loading}
-                  onRequestCorrection={openCorrectionRequest}
-                  onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
-                />
-              ) : (
-                <InsurerActionCard
-                  claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
-                  insurer={insurer}
-                  isFavorite={plannerFavoritesEnabled ? isFavorite(insurer.id) : false}
-                  logoFetchPriority={logoLoading.fetchPriority}
-                  logoLoading={logoLoading.loading}
-                  onRequestCorrection={openCorrectionRequest}
-                  onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
-                />
-              )}
-            </div>
-            );
-          })}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-2 lg:hidden">
+            {displayedInsurers.map((insurer, index) => {
+              const logoLoading = directoryLogoLoadingProps(index);
+              return (
+                <div
+                  id={
+                    insurer.id === insurerFromQuery ? "directory-insurer-focus" : undefined
+                  }
+                  key={insurer.id}
+                  ref={
+                    insurer.id === insurerFromQuery ? highlightedInsurerRef : undefined
+                  }
+                >
+                  <InsurerCompactMobileRow
+                    claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
+                    expanded={expandedInsurerId === insurer.id}
+                    insurer={insurer}
+                    isFavorite={
+                      plannerFavoritesEnabled ? isFavorite(insurer.id) : false
+                    }
+                    logoFetchPriority={logoLoading.fetchPriority}
+                    logoLoading={logoLoading.loading}
+                    onExpandedChange={(open) =>
+                      setExpandedInsurerId(open ? insurer.id : null)
+                    }
+                    onRequestCorrection={openCorrectionRequest}
+                    onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            className={`hidden lg:grid ${
+              viewMode === "grid" ? "grid-cols-2" : "grid-cols-1"
+            } gap-3`}
+          >
+            {displayedInsurers.map((insurer, index) => {
+              const logoLoading = directoryLogoLoadingProps(index);
+              return (
+                <div
+                  id={
+                    insurer.id === insurerFromQuery ? "directory-insurer-focus" : undefined
+                  }
+                  key={insurer.id}
+                  ref={
+                    insurer.id === insurerFromQuery ? highlightedInsurerRef : undefined
+                  }
+                >
+                  {viewMode === "list" ? (
+                    <InsurerCompactWorkbenchRow
+                      claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
+                      insurer={insurer}
+                      isFavorite={
+                        plannerFavoritesEnabled ? isFavorite(insurer.id) : false
+                      }
+                      layout="list"
+                      logoFetchPriority={logoLoading.fetchPriority}
+                      logoLoading={logoLoading.loading}
+                      onRequestCorrection={openCorrectionRequest}
+                      onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
+                    />
+                  ) : (
+                    <InsurerActionCard
+                      claimItems={getClaimItemsForInsurer(insurer, allClaimItems)}
+                      insurer={insurer}
+                      isFavorite={
+                        plannerFavoritesEnabled ? isFavorite(insurer.id) : false
+                      }
+                      logoFetchPriority={logoLoading.fetchPriority}
+                      logoLoading={logoLoading.loading}
+                      onRequestCorrection={openCorrectionRequest}
+                      onToggleFavorite={plannerFavoritesEnabled ? toggle : undefined}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
       ) : (
         <div className="space-y-5">
           <EmptyState
