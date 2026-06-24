@@ -5,10 +5,12 @@ import {
 } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
 import {
   publicMainLandmarkProps,
   SkipToContent,
 } from "@/components/skip-to-content";
+import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
 import { SearchDomainFilter } from "@/components/search/search-domain-filter";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
 import { SearchIdlePanel } from "@/components/search/search-idle-panel";
@@ -79,9 +81,10 @@ export default async function SearchPage({
 
   return (
     <PageFrame>
-      <SkipToContent />
-      <Header />
-      <main {...publicMainLandmarkProps} className="outline-none">
+      <div className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset}`}>
+        <SkipToContent />
+        <Header />
+        <main {...publicMainLandmarkProps} className="outline-none">
         <PageHero
           description="공개된 보험사·청구서류·공시·약관·고객문구·지식 문서의 위치를 찾습니다. 보험금 지급 판단이나 개인 상담은 제공하지 않습니다."
           eyebrow="통합 검색"
@@ -171,6 +174,8 @@ export default async function SearchPage({
       </ContentSection>
       </main>
       <Footer />
+      </div>
+      <PublicMobileQuickTabs />
     </PageFrame>
   );
 }
