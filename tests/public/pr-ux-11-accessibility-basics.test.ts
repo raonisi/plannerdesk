@@ -22,13 +22,12 @@ const PUBLIC_PAGES_USING_APP_SHELL = [
   "app/disclosure-links/page.tsx",
   "app/work-tools/page.tsx",
   "app/message-templates/page.tsx",
-] as const;
-
-const PUBLIC_PAGES_WITH_MANUAL_MAIN = [
   "app/knowledge/page.tsx",
   "app/knowledge/[slug]/page.tsx",
   "app/search/page.tsx",
 ] as const;
+
+const PUBLIC_PAGES_WITH_MANUAL_MAIN = [] as const;
 
 function readSource(relativePath: string): string {
   return readFileSync(join(ROOT, relativePath), "utf8");

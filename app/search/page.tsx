@@ -1,16 +1,8 @@
+import { AppShell } from "@/components/app-shell";
 import {
   ContentSection,
-  PageFrame,
   PageHero,
 } from "@/components/content-page";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
-import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
-import {
-  publicMainLandmarkProps,
-  SkipToContent,
-} from "@/components/skip-to-content";
-import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
 import { SearchDomainFilter } from "@/components/search/search-domain-filter";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
 import { SearchIdlePanel } from "@/components/search/search-idle-panel";
@@ -80,18 +72,14 @@ export default async function SearchPage({
       : [];
 
   return (
-    <PageFrame>
-      <div className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset}`}>
-        <SkipToContent />
-        <Header />
-        <main {...publicMainLandmarkProps} className="outline-none">
-        <PageHero
-          description="공개된 보험사·청구서류·공시·약관·고객문구·지식 문서의 위치를 찾습니다. 보험금 지급 판단이나 개인 상담은 제공하지 않습니다."
-          eyebrow="통합 검색"
-          title="통합 검색"
-        />
+    <AppShell>
+      <PageHero
+        description="공개된 보험사·청구서류·공시·약관·고객문구·지식 문서의 위치를 찾습니다. 보험금 지급 판단이나 개인 상담은 제공하지 않습니다."
+        eyebrow="통합 검색"
+        title="통합 검색"
+      />
 
-        <ContentSection>
+      <ContentSection>
         <div className="mx-auto max-w-3xl space-y-6">
           <DataResponsibilityInlineNotice variant="search" />
 
@@ -172,10 +160,6 @@ export default async function SearchPage({
           <PublicErrorReportNotice />
         </div>
       </ContentSection>
-      </main>
-      <Footer />
-      </div>
-      <PublicMobileQuickTabs />
-    </PageFrame>
+    </AppShell>
   );
 }

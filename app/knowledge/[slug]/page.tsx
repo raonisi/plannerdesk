@@ -1,14 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ContentSection, PageFrame } from "@/components/content-page";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
-import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
-import {
-  publicMainLandmarkProps,
-  SkipToContent,
-} from "@/components/skip-to-content";
-import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
+import { AppShell } from "@/components/app-shell";
+import { ContentSection } from "@/components/content-page";
 import { getPublicKnowledgeArticleBySlug } from "@/lib/public/knowledge-articles";
 import { PUBLIC_RISK_GUIDANCE_LABEL } from "@/lib/knowledge/archive-filter";
 import { publicKnowledgeTrustHint } from "@/lib/knowledge/workflow-labels";
@@ -62,11 +55,7 @@ export default async function KnowledgeDetailPage({
   ].filter(Boolean);
 
   return (
-    <PageFrame>
-      <div className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset}`}>
-        <SkipToContent />
-        <Header />
-        <main {...publicMainLandmarkProps} className="outline-none">
+    <AppShell>
       <ContentSection>
         <div className="space-y-8">
           <div className="flex flex-wrap gap-3">
@@ -221,10 +210,6 @@ export default async function KnowledgeDetailPage({
           ) : null}
         </div>
       </ContentSection>
-      </main>
-      <Footer />
-      </div>
-      <PublicMobileQuickTabs />
-    </PageFrame>
+    </AppShell>
   );
 }

@@ -107,15 +107,22 @@ describe("PR-UX-17 mobile quick tabs", () => {
     assert.doesNotMatch(read("app/admin/layout.tsx"), /publicMobileQuickTabsContentInset/);
   });
 
-  it("wires quick tabs into public pages outside AppShell that use Header", () => {
+  it("uses AppShell as the single quick-tab inset owner for knowledge and search", () => {
     for (const page of [
       "app/search/page.tsx",
       "app/knowledge/page.tsx",
       "app/knowledge/[slug]/page.tsx",
     ]) {
       const source = read(page);
-      assert.match(source, /PublicMobileQuickTabs/);
-      assert.match(source, /publicMobileQuickTabsContentInset/);
+      assert.match(source, /AppShell/);
+      assert.doesNotMatch(source, /publicMobileQuickTabsContentInset/);
+    }
+
+    const insetOwners = [
+      read("components/app-shell.tsx"),
+    ];
+    for (const owner of insetOwners) {
+      assert.match(owner, /publicMobileQuickTabsContentInset/);
     }
   });
 

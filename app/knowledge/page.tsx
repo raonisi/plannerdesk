@@ -1,14 +1,7 @@
 import Link from "next/link";
 import { KnowledgeArticleCategory } from "@prisma/client";
-import { ContentSection, PageFrame, PageHero } from "@/components/content-page";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
-import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
-import {
-  publicMainLandmarkProps,
-  SkipToContent,
-} from "@/components/skip-to-content";
-import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
+import { AppShell } from "@/components/app-shell";
+import { ContentSection, PageHero } from "@/components/content-page";
 import { getWorkToolsAccess } from "@/lib/auth/access";
 import {
   filterAndSortKnowledgeArchive,
@@ -68,18 +61,14 @@ export default async function KnowledgeArchivePage({
   );
 
   return (
-    <PageFrame>
-      <div className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset}`}>
-        <SkipToContent />
-        <Header />
-        <main {...publicMainLandmarkProps} className="outline-none">
-        <PageHero
-          eyebrow={t.eyebrow}
-          title={t.title}
-          description={t.description}
-        />
+    <AppShell>
+      <PageHero
+        eyebrow={t.eyebrow}
+        title={t.title}
+        description={t.description}
+      />
 
-        <ContentSection>
+      <ContentSection>
           <div className="space-y-8">
             <p className="break-keep text-sm leading-6 text-[#5f6670]">{t.subcopy}</p>
 
@@ -115,12 +104,8 @@ export default async function KnowledgeArchivePage({
 
             <PublicErrorReportNotice />
           </div>
-        </ContentSection>
-      </main>
-      <Footer />
-      </div>
-      <PublicMobileQuickTabs />
-    </PageFrame>
+      </ContentSection>
+    </AppShell>
   );
 }
 
