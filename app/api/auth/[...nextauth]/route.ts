@@ -9,5 +9,16 @@
  */
 
 import { handlers } from "@/auth";
+import { sanitizeAuthCallbackUrl } from "@/lib/auth/oauth-callback-guard";
+import { NextRequest } from "next/server";
 
-export const { GET, POST } = handlers;
+export function GET(request: NextRequest) {
+  const safeUrl = sanitizeAuthCallbackUrl(request.url);
+  if (safeUrl === request.url) {
+    return handlers.GET(request);
+  }
+
+  return handlers.GET(new NextRequest(safeUrl, request));
+}
+
+export const { POST } = handlers;

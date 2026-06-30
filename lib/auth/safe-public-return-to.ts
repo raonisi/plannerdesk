@@ -54,7 +54,7 @@ export function safePublicReturnTo(input?: string | null): string {
     return "/";
   }
 
-  return pathOnly;
+  return trimmed;
 }
 
 export const PUBLIC_FAVORITES_RETURN_PATHS = ALLOWED_PUBLIC_RETURN_PATHS;

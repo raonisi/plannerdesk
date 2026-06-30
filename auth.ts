@@ -27,6 +27,7 @@ import {
   isAuthProviderConfigured,
   isAuthSecretConfigured,
 } from "@/lib/auth/env";
+import { safeAuthRedirectUrl } from "@/lib/auth/oauth-callback-guard";
 
 declare module "next-auth" {
   interface Session {
@@ -82,6 +83,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
    * from the database to the session user object securely.
    */
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      return safeAuthRedirectUrl(url, baseUrl);
+    },
     async jwt({ token, user }) {
       const roleToken = token as typeof token & {
         id?: string | null;
