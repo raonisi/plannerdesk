@@ -447,6 +447,8 @@ export const WORK_TOOL_GROUPS: WorkToolGroup[] = [
         description: "보험사별 소식지/소책자/교육자료 모음 월별 다운로드 목록을 제공합니다.",
         kind: "accordion",
         items: [
+          { label: "2026년 07월 (손해보험)", href: "quick-link-files/newsletters/general/202607" },
+          { label: "2026년 07월 (생명보험)", href: "quick-link-files/newsletters/life/202607" },
           { label: "2026년 06월 (손해보험)", href: "quick-link-files/newsletters/general/202606" },
           { label: "2026년 06월 (생명보험)", href: "quick-link-files/newsletters/life/202606" },
           { label: "2026년 05월 (손해보험)", href: "quick-link-files/newsletters/general/202605" },
