@@ -12,6 +12,7 @@ const ALLOWED_PUBLIC_RETURN_PATHS = [
   "/knowledge",
   "/message-templates",
   "/search",
+  "/favorites",
 ] as const;
 
 function isBlockedReturnPath(pathOnly: string): boolean {
