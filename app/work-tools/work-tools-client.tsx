@@ -15,6 +15,8 @@ import {
   ArrowRight,
   Sparkles,
   Wrench,
+  ShieldCheck,
+  MessageCircle,
 } from "lucide-react";
 import { ResponsiveCategoryFilter } from "@/components/launcher/responsive-category-filter";
 import { SectionHeader } from "@/components/launcher/section-header";
@@ -455,12 +457,12 @@ const toolToCategoryId: Record<ToolId, string> = {
   "credit4u": "docs",
   "claim-docs-guide": "claim",
   "claim-channel-guide": "claim",
-  "claim-msg-guide": "claim",
+  "claim-msg-guide": "guide",
   "disclosure-guide": "search",
-  "disclosure-msg-guide": "search",
-  "request-msg-guide": "docs",
-  "hold-msg-guide": "docs",
-  "privacy-msg-guide": "docs",
+  "disclosure-msg-guide": "guide",
+  "request-msg-guide": "guide",
+  "hold-msg-guide": "guide",
+  "privacy-msg-guide": "guide",
 };
 
 const PRIMARY_WORK_DESK_SECTIONS: Array<{
@@ -683,6 +685,45 @@ export function WorkToolsClient() {
 
   return (
     <div className="space-y-10 pb-6">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <button
+          type="button"
+          aria-pressed={selectedCategory === "all"}
+          onClick={() => { setSelectedCategory("all"); setSearchQuery(""); }}
+          className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border bg-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1 ${selectedCategory === "all" ? "border-slate-800 ring-2 ring-slate-800" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}
+        >
+          <SearchIcon className="w-6 h-6 text-slate-700" />
+          <span className="text-sm font-bold text-slate-800">전체 도구 보기</span>
+        </button>
+        <button
+          type="button"
+          aria-pressed={selectedCategory === "favorites"}
+          onClick={() => { setSelectedCategory("favorites"); setSearchQuery(""); }}
+          className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border bg-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1 ${selectedCategory === "favorites" ? "border-slate-800 ring-2 ring-slate-800" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}
+        >
+          <Sparkles className="w-6 h-6 text-amber-500" />
+          <span className="text-sm font-bold text-slate-800">내 즐겨찾기</span>
+        </button>
+        <button
+          type="button"
+          aria-pressed={selectedCategory === "insurance"}
+          onClick={() => { setSelectedCategory("insurance"); setSearchQuery(""); }}
+          className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border bg-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1 ${selectedCategory === "insurance" ? "border-slate-800 ring-2 ring-slate-800" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}
+        >
+          <ShieldCheck className="w-6 h-6 text-emerald-600" />
+          <span className="text-sm font-bold text-slate-800">보험 업무 도구</span>
+        </button>
+        <button
+          type="button"
+          aria-pressed={selectedCategory === "guide"}
+          onClick={() => { setSelectedCategory("guide"); setSearchQuery(""); }}
+          className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border bg-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1 ${selectedCategory === "guide" ? "border-slate-800 ring-2 ring-slate-800" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}
+        >
+          <MessageCircle className="w-6 h-6 text-blue-500" />
+          <span className="text-sm font-bold text-slate-800">고객 안내 도구</span>
+        </button>
+      </section>
+
       <section className="space-y-5">
         <label className="block max-w-xl" htmlFor="work-tools-search">
           <span className="sr-only">업무 도구 검색</span>

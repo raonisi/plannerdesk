@@ -25,9 +25,9 @@ export const DISCLOSURE_SEARCH_EMPTY_TITLE =
 export const DISCLOSURE_SEARCH_EMPTY_DESCRIPTION =
   "보험사명이나 자료 종류를 다시 선택해 보세요. 자료는 보험사 공식 홈페이지에서도 한 번 더 확인하는 것이 좋습니다.";
 
-export const WORK_TOOLS_SEARCH_EMPTY_TITLE = "조건에 맞는 업무도구가 없습니다.";
+export const WORK_TOOLS_SEARCH_EMPTY_TITLE = "조건에 맞는 업무 도구를 찾지 못했습니다.";
 export const WORK_TOOLS_SEARCH_EMPTY_DESCRIPTION =
-  "검색어를 줄이거나 다른 카테고리를 선택해 보세요.";
+  "검색어를 줄이거나 다른 분류를 선택해 보세요.";
 
 export const MESSAGE_TEMPLATE_SEARCH_EMPTY_TITLE =
   "조건에 맞는 고객문구가 없습니다.";

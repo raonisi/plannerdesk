@@ -22,7 +22,7 @@ export default function WorkToolsPage() {
       <PageHero
         eyebrow="업무 도구"
         title="업무 도구"
-        description="보험나이, 실손 자기부담 참고, 상병코드, 수술분류표 등 설계사 업무 보조 참고 도구입니다."
+        description="설계사가 자주 사용하는 계산, 조회, 서류, 고객 안내 도구를 한곳에서 확인하세요."
       />
       <ContentSection>
         <div className="space-y-6">

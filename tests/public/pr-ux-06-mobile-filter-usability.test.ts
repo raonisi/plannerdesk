@@ -87,7 +87,7 @@ describe("PR-UX-06 mobile filter usability", () => {
       matchesWorkToolCategory("search", "favorites", "disease-search", favoriteIds),
       false,
     );
-    assert.ok(WORK_TOOL_CATEGORIES.length >= 8);
+    assert.ok(WORK_TOOL_CATEGORIES.length >= 6);
   });
 
   it("category filter composes for message templates", () => {

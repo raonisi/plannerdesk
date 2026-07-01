@@ -23,7 +23,7 @@ describe("PR-BS-19C work-tools copy safety", () => {
     assert.match(notice, /WORK_TOOLS_PUBLIC_ADMIN_NOTICE/);
     assert.match(notice, /WORK_TOOLS_PUBLIC_PII_NOTICE/);
     assert.match(notice, /WORK_TOOLS_PUBLIC_REFERENCE_NOTICE/);
-    assert.match(notice, /href="\/admin"/);
+    assert.doesNotMatch(notice, /href="\/admin"/);
     assert.equal(WORK_TOOLS_PUBLIC_OPEN_SUMMARY.includes("로그인 없이"), true);
     assert.equal(WORK_TOOLS_PUBLIC_REFERENCE_NOTICE.includes("참고용"), true);
   });

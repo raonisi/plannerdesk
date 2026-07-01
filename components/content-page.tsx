@@ -530,10 +530,10 @@ export function CollapsibleNotice({
             <p className={`mt-1 ${textStyles.small}`}>{summary}</p>
           </div>
           <span className="shrink-0 text-xs font-bold text-[#B9975B] group-open:hidden">
-            ???
+            자세히 보기
           </span>
           <span className="hidden shrink-0 text-xs font-bold text-[#B9975B] group-open:inline">
-            ??
+            간단히 보기
           </span>
         </div>
       </summary>

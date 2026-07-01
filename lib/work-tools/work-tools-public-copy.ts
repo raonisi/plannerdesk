@@ -9,7 +9,7 @@ export const WORK_TOOLS_PUBLIC_COMPLETION_NOTICE =
   "현재 화면에는 개발이 완료된 기능만 표시됩니다.";
 
 export const WORK_TOOLS_PUBLIC_ADMIN_NOTICE =
-  "관리자 기능은 로그인 후 Admin 화면에서만 사용할 수 있습니다.";
+  "관리자 전용 기능은 권한이 있는 계정에서만 사용할 수 있습니다.";
 
 export const WORK_TOOLS_PUBLIC_PII_NOTICE =
   "고객정보, 주민번호, 계약번호, 진단서, 상담 원문은 입력하지 마세요.";

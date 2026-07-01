@@ -36,31 +36,23 @@ export function getToolActionLabel(
 }
 
 export const WORK_TOOL_CATEGORIES = [
-  { id: "all", label: "전체" },
-  { id: "favorites", label: "자주 쓰는 도구" },
-  { id: "insure-calc", label: "보험 계산" },
-  { id: "finance-calc", label: "금융 계산" },
-  { id: "claim-silbi", label: "청구·실손" },
-  { id: "search", label: "인수·질병" },
-  { id: "car-fire", label: "자동차·화재" },
-  { id: "docs", label: "공문서" },
-  { id: "assoc-edu", label: "협회·교육" },
-  { id: "exam-mock", label: "시험·모의고사" },
-  { id: "newsletter", label: "소식지" },
+  { id: "all", label: "전체 도구 보기" },
+  { id: "favorites", label: "내 즐겨찾기" },
+  { id: "insurance", label: "보험 업무 도구" },
+  { id: "guide", label: "고객 안내 도구" },
+  { id: "calc", label: "계산·조회" },
+  { id: "docs", label: "서류·양식" },
+  { id: "etc", label: "기타" },
 ] as const;
 
 export type WorkToolCategoryId = (typeof WORK_TOOL_CATEGORIES)[number]["id"];
 
 const CATEGORY_GROUP: Record<string, readonly string[]> = {
-  "insure-calc": ["insure-calc"],
-  "finance-calc": ["finance-calc"],
-  "claim-silbi": ["claim", "silbi"],
-  search: ["search"],
-  "car-fire": ["car", "fire"],
+  insurance: ["claim", "silbi", "car", "fire", "search"],
+  guide: ["guide"],
+  calc: ["insure-calc", "finance-calc"],
   docs: ["docs"],
-  "assoc-edu": ["stats", "recruits"],
-  "exam-mock": ["exam"],
-  "newsletter": ["news"],
+  etc: ["stats", "recruits", "exam", "news"],
 };
 
 export function matchesWorkToolCategory(
@@ -89,6 +81,7 @@ const CATEGORY_LABEL_BY_TOOL_CAT: Record<string, string> = {
   recruits: "협회·교육",
   exam: "시험·모의고사",
   news: "소식지",
+  guide: "고객 안내",
 };
 
 export function getCategoryLabelForTool(toolCategoryId: string): string {
