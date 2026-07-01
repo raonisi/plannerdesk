@@ -156,9 +156,9 @@ describe("PR-UX-01 knowledge static fallback", () => {
 
   it("knowledge page wires category filters instead of self-loop links", () => {
     const page = readFileSync(join(ROOT, "app/knowledge/page.tsx"), "utf8");
+    assert.match(page, /category=\$\{KnowledgeArticleCategory\.claim\}/);
     assert.match(page, /category=\$\{KnowledgeArticleCategory\.underwriting\}/);
-    assert.match(page, /category=\$\{KnowledgeArticleCategory\.cancellation\}/);
-    assert.match(page, /category=\$\{KnowledgeArticleCategory\.operation_safety\}/);
+    assert.match(page, /category=\$\{KnowledgeArticleCategory\.customer_message\}/);
     assert.doesNotMatch(page, /href: "\/knowledge", label: "고지 관련/);
   });
 });
