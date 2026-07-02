@@ -76,14 +76,14 @@ export function PageHero({
 
 export function PageFrame({ children }: { children: ReactNode }) {
   return (
-    <div className={`relative min-h-screen overflow-x-hidden ${surfaces.page}`}>
+    <div className={`relative min-h-[100dvh] overflow-x-hidden ${surfaces.page}`}>
       {children}
     </div>
   );
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
-  return <main className={`min-h-screen ${surfaces.page}`}>{children}</main>;
+  return <main className={`min-h-[100dvh] ${surfaces.page}`}>{children}</main>;
 }
 
 export function ContentSection({ children }: { children: ReactNode }) {

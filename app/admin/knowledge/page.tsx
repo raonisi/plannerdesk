@@ -155,7 +155,7 @@ export default async function AdminKnowledgePage({
 
   if (tableProbe.status === "missing_table") {
     return (
-      <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+      <main className={`min-h-[100dvh] ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
         <div className="mx-auto max-w-3xl">
           <AdminPageStateNotice
             kind="setupRequired"
@@ -168,7 +168,7 @@ export default async function AdminKnowledgePage({
 
   if (tableProbe.status === "unavailable") {
     return (
-      <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+      <main className={`min-h-[100dvh] ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
         <div className="mx-auto max-w-3xl">
           <AdminPageStateNotice kind="error" />
         </div>
@@ -184,7 +184,7 @@ export default async function AdminKnowledgePage({
     });
   } catch {
     return (
-      <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+      <main className={`min-h-[100dvh] ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
         <div className="mx-auto max-w-3xl">
           <AdminPageStateNotice kind="error" />
         </div>
@@ -193,7 +193,7 @@ export default async function AdminKnowledgePage({
   }
 
   return (
-    <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+    <main className={`min-h-[100dvh] ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

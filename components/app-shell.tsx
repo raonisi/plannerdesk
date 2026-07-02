@@ -21,7 +21,7 @@ export function AppShell({
     <PageFrame>
       <SkipToContent />
       <div
-        className={`flex min-h-screen flex-col ${publicMobileQuickTabsContentInset} ${className}`.trim()}
+        className={`flex min-h-[100dvh] flex-col ${publicMobileQuickTabsContentInset} ${className}`.trim()}
       >
         <Header />
         <main

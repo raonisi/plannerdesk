@@ -41,7 +41,7 @@ export default async function AdminMessageTemplateEditPage({
 
   if (!template) {
     return (
-      <main className={`min-h-screen ${surfaces.page} px-4 py-8`}>
+      <main className={`min-h-[100dvh] ${surfaces.page} px-4 py-8`}>
         <p className="text-sm text-[#4f5661]">
           {ADMIN_MESSAGE_TEMPLATE_COPY.notFound}
         </p>
@@ -52,7 +52,7 @@ export default async function AdminMessageTemplateEditPage({
   const boundUpdate = updateMessageTemplate.bind(null, id);
 
   return (
-    <main className={`min-h-screen ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
+    <main className={`min-h-[100dvh] ${surfaces.page} px-4 py-8 sm:px-6 lg:px-8`}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-6">
           <p className={textStyles.eyebrow}>PlannerDesk Admin</p>

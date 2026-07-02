@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
+import { RouteTransitionProgress } from "@/components/navigation/route-transition-progress";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,6 +37,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${inter.variable} ${notoSansKr.variable}`}>
+        <Suspense fallback={null}>
+          <RouteTransitionProgress />
+        </Suspense>
         {children}
       </body>
     </html>
