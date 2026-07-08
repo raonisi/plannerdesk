@@ -27,7 +27,7 @@ export const mobileQuickTabItems: readonly PublicNavItem[] = [
 
 /** Bottom inset for public pages when mobile quick tabs are shown (lg+ resets to 0). */
 export const publicMobileQuickTabsContentInset =
-  "pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0";
+  "pb-[calc(8rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-0";
 
 /** Mobile drawer quick-action chips. */
 export const mobileDrawerQuickActions: readonly PublicNavItem[] = [
