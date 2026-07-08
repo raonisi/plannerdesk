@@ -10,7 +10,7 @@ export default function AdminAccessDeniedState({
   email = null,
 }: AdminAccessDeniedStateProps) {
   return (
-    <div className={`min-h-screen flex items-center justify-center ${surfaces.page} px-4`}>
+    <div className={`min-h-[100dvh] flex items-center justify-center ${surfaces.page} px-4`}>
       <div className={`max-w-md w-full ${surfaces.card} ${borders.default} ${shadows.elevated} rounded-lg overflow-hidden`}>
         <div className="h-1.5 bg-red-700" />
 

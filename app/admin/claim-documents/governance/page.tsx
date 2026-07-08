@@ -35,7 +35,7 @@ export default async function AdminClaimDocumentGovernancePage() {
   const items = await buildClaimDocumentGovernanceListWithDb();
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+    <main className="min-h-[100dvh] bg-slate-50 px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <header className="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:max-w-3xl">

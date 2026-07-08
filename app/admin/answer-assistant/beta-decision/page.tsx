@@ -51,7 +51,7 @@ export default async function AdminAnswerAssistantBetaDecisionPage({
   const banner = getBetaExpansionOperationalBanner();
 
   return (
-    <div className={`min-h-screen ${surfaces.page}`}>
+    <div className={`min-h-[100dvh] ${surfaces.page}`}>
       <header
         className={`${surfaces.hero} border-b ${borders.divider} px-6 py-4 sm:px-8`}
       >
