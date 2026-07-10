@@ -1,6 +1,9 @@
 // Public global search (PR-83). Uses canonical visibility from lib/public/*.
 
-import { PUBLIC_VERIFICATION_STATUSES } from "@/lib/public/insurers";
+import {
+  getCanonicalPublicInsurerId,
+  PUBLIC_VERIFICATION_STATUSES,
+} from "@/lib/public/insurers";
 import { PUBLIC_KNOWLEDGE_WHERE } from "@/lib/public/knowledge-articles";
 import { PUBLIC_DISCLOSURE_LINK_WHERE } from "@/lib/public/disclosure-links";
 import { DISCLOSURE_ROOM_SEARCH_ALIASES } from "@/lib/content/disclosure-room";
@@ -22,6 +25,7 @@ import {
 } from "./constants";
 import { validatePublicSearchQuery } from "./query-validation";
 import { rankSearchResults } from "./ranking";
+import { dedupeSearchResultsByLinkIdentity } from "./search-url-canonicalization";
 import { searchWorkLinks } from "./work-links-search";
 import {
   SEARCH_DOMAIN_LABEL,
@@ -104,7 +108,7 @@ async function searchInsurers(
     },
   });
 
-  return records.map((row) => ({
+  const results: GlobalSearchResult[] = records.map((row) => ({
     id: row.id,
     type: "insurer",
     title: row.name,
@@ -113,6 +117,12 @@ async function searchInsurers(
     categoryLabel: insurerCategoryLabels[row.category],
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.lastVerifiedAt),
+  }));
+
+  return dedupeSearchResultsByLinkIdentity(results, (result) => ({
+    insurerKey: getCanonicalPublicInsurerId(result.id),
+    action: "insurer",
+    url: result.url,
   }));
 }
 

@@ -1,6 +1,9 @@
 // Public work-link search hits from published insurers only (PR-132). No visibility rule changes.
 
-import { PUBLIC_VERIFICATION_STATUSES } from "@/lib/public/insurers";
+import {
+  getCanonicalPublicInsurerId,
+  PUBLIC_VERIFICATION_STATUSES,
+} from "@/lib/public/insurers";
 import {
   WORK_LINK_ACTION_LABELS,
   WORK_LINK_COPY,
@@ -8,6 +11,8 @@ import {
   plannerSystemAccessNote,
 } from "@/lib/directory/work-links";
 import { prisma } from "@/lib/prisma";
+import { rankSearchResults } from "./ranking";
+import { dedupeSearchResultsByLinkIdentity } from "./search-url-canonicalization";
 import type { GlobalSearchResult } from "./types";
 
 type WorkLinkKind =
@@ -19,6 +24,21 @@ type WorkLinkKind =
   | "terms"
   | "helpdesk"
   | "customer_center";
+
+type WorkLinkAction =
+  | "system"
+  | "homepage"
+  | "claim"
+  | "terms"
+  | "helpdesk"
+  | "customer_center";
+
+type WorkLinkSearchCandidate = {
+  result: GlobalSearchResult;
+  insurerKey: string;
+  action: WorkLinkAction;
+  href: string;
+};
 
 const LINK_TYPE_KEYWORDS: Record<WorkLinkKind, readonly string[]> = {
   system: ["전산", "시스템", "포털"],
@@ -40,6 +60,17 @@ const LINK_GROUP: Record<WorkLinkKind, keyof typeof WORK_LINK_GROUP_LABELS> = {
   terms: "official",
   helpdesk: "support",
   customer_center: "support",
+};
+
+const LINK_ACTION: Record<WorkLinkKind, WorkLinkAction> = {
+  system: "system",
+  planner_portal: "system",
+  homepage: "homepage",
+  claim_guide: "claim",
+  claim_form: "claim",
+  terms: "terms",
+  helpdesk: "helpdesk",
+  customer_center: "customer_center",
 };
 
 function normalizeForMatch(text: string): string {
@@ -80,7 +111,7 @@ function buildWorkLinkResult(
   label: string,
   href: string | null,
   summaryExtra?: string | null,
-): GlobalSearchResult | null {
+): WorkLinkSearchCandidate | null {
   if (!href?.trim()) return null;
 
   const accessNote = plannerSystemAccessNote(href);
@@ -94,26 +125,31 @@ function buildWorkLinkResult(
   ].filter(Boolean);
 
   return {
-    id: `${row.id}:${kind}`,
-    type: "work_link",
-    title: `${row.name} · ${label}`,
-    summary: summaryParts.join(" · "),
-    url: `/directory?search=${encodeURIComponent(row.name)}`,
-    externalHref: href.startsWith("tel:") ? href : href,
-    linkTypeLabel: label,
-    categoryLabel: WORK_LINK_GROUP_LABELS[LINK_GROUP[kind]],
-    sourceLabel: row.name,
-    updatedAt: row.updatedAt.toISOString().slice(0, 10),
-    publishedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
-    lastVerifiedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
-    officialSourceUrl: href.startsWith("http") ? href : undefined,
+    result: {
+      id: `${row.id}:${kind}`,
+      type: "work_link",
+      title: `${row.name} · ${label}`,
+      summary: summaryParts.join(" · "),
+      url: `/directory?search=${encodeURIComponent(row.name)}`,
+      externalHref: href,
+      linkTypeLabel: label,
+      categoryLabel: WORK_LINK_GROUP_LABELS[LINK_GROUP[kind]],
+      sourceLabel: row.name,
+      updatedAt: row.updatedAt.toISOString().slice(0, 10),
+      publishedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
+      lastVerifiedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
+      officialSourceUrl: href.startsWith("http") ? href : undefined,
+    },
+    insurerKey: getCanonicalPublicInsurerId(row.id),
+    action: LINK_ACTION[kind],
+    href,
   };
 }
 
 function linksForInsurer(
   row: InsurerLinkRow,
   query: string,
-): GlobalSearchResult[] {
+): WorkLinkSearchCandidate[] {
   const nameMatch = queryMatchesText(query, row.name);
   const systemPrimary = row.systemUrl ?? row.plannerPortalUrl;
   const systemSecondary =
@@ -126,7 +162,7 @@ function linksForInsurer(
     ? WORK_LINK_ACTION_LABELS.system
     : WORK_LINK_ACTION_LABELS.plannerPortal;
 
-  const candidates: Array<GlobalSearchResult | null> = [];
+  const candidates: Array<WorkLinkSearchCandidate | null> = [];
 
   const maybePush = (
     kind: WorkLinkKind,
@@ -165,7 +201,9 @@ function linksForInsurer(
     );
   }
 
-  return candidates.filter((item): item is GlobalSearchResult => item !== null);
+  return candidates.filter(
+    (item): item is WorkLinkSearchCandidate => item !== null,
+  );
 }
 
 /**
@@ -240,13 +278,31 @@ export async function searchWorkLinks(
     });
   }
 
-  const results: GlobalSearchResult[] = [];
+  const candidates: WorkLinkSearchCandidate[] = [];
   for (const row of pool) {
-    for (const hit of linksForInsurer(row, query)) {
-      results.push(hit);
-      if (results.length >= limit) return results;
-    }
+    candidates.push(...linksForInsurer(row, query));
   }
 
-  return results;
+  const candidateByResult = new Map(
+    candidates.map((candidate) => [candidate.result, candidate] as const),
+  );
+  const rankedCandidates = rankSearchResults(
+    candidates.map((candidate) => candidate.result),
+    query,
+  )
+    .map((result) => candidateByResult.get(result))
+    .filter(
+      (candidate): candidate is WorkLinkSearchCandidate =>
+        candidate !== undefined,
+    );
+  const deduped = dedupeSearchResultsByLinkIdentity(
+    rankedCandidates,
+    (candidate) => ({
+      insurerKey: candidate.insurerKey,
+      action: candidate.action,
+      url: candidate.href,
+    }),
+  );
+
+  return deduped.slice(0, limit).map((candidate) => candidate.result);
 }

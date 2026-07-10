@@ -127,11 +127,15 @@ const CANONICAL_MAPPING: Record<string, string> = {
   "yebyeol-insurance": "yebyeol-general",
 };
 
+export function getCanonicalPublicInsurerId(id: string): string {
+  return CANONICAL_MAPPING[id] ?? id;
+}
+
 export function dedupePublicInsurers(rawInsurers: PublicInsurer[]): PublicInsurer[] {
   const map = new Map<string, PublicInsurer>();
   
   for (const item of rawInsurers) {
-    const canonicalId = CANONICAL_MAPPING[item.id] ?? item.id;
+    const canonicalId = getCanonicalPublicInsurerId(item.id);
     const existing = map.get(canonicalId);
     
     if (!existing) {

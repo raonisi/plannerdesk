@@ -59,7 +59,7 @@ describe("PR-WC-01 public fixture exclusion", () => {
     }
   });
 
-  it("preserves DB-backed operational work-link search without adding dedupe", () => {
+  it("preserves DB-backed operational work-link search with scoped dedupe", () => {
     const search = readFileSync(
       join(ROOT, "lib/search/work-links-search.ts"),
       "utf8",
@@ -67,7 +67,7 @@ describe("PR-WC-01 public fixture exclusion", () => {
 
     assert.match(search, /prisma\.insurer\.findMany/);
     assert.match(search, /isPublished:\s*true/);
-    assert.match(search, /results\.push\(hit\)/);
-    assert.doesNotMatch(search, /canonical|dedupe/i);
+    assert.match(search, /dedupeSearchResultsByLinkIdentity/);
+    assert.match(search, /rankSearchResults/);
   });
 });
