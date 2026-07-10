@@ -106,10 +106,10 @@ describe("PR-BS-28 admin desk dashboard UX refactor", () => {
 
   it("public verified link titles use user-facing wording", () => {
     const links = getPublicVerifiedWorkLinks();
-    assert.ok(links.length > 0);
     for (const link of links) {
       assert.doesNotMatch(link.title, /mock 공개/i);
       assert.doesNotMatch(link.title, /mock/i);
+      assert.doesNotMatch(link.officialSourceUrl, /example\.invalid/);
     }
   });
 

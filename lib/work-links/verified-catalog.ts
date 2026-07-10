@@ -1,25 +1,29 @@
-import { WORK_LINK_REVIEW_MOCK_CANDIDATES } from "./review-mock-candidates";
-import { VERIFIED_WORK_LINK_DISPLAY_FIXTURES } from "./verified-fixtures";
 import {
   listPlannerVerifiedWorkLinks,
   listPublicVerifiedWorkLinks,
 } from "./verified-projection";
+import type { WorkLinkReviewCandidate } from "./review-types";
 
-const ALL_CANDIDATES = [
-  ...WORK_LINK_REVIEW_MOCK_CANDIDATES,
-  ...VERIFIED_WORK_LINK_DISPLAY_FIXTURES,
-] as const;
+// Public/planner runtime catalogs must contain reviewed operational sources only.
+// Test and admin mock candidates are injected directly by their own callers.
+const RUNTIME_VERIFIED_WORK_LINK_CANDIDATES: readonly WorkLinkReviewCandidate[] = [];
 
 export function getPublicVerifiedWorkLinks(options?: {
   insurerName?: string;
   query?: string;
 }) {
-  return listPublicVerifiedWorkLinks(ALL_CANDIDATES, options);
+  return listPublicVerifiedWorkLinks(
+    RUNTIME_VERIFIED_WORK_LINK_CANDIDATES,
+    options,
+  );
 }
 
 export function getPlannerVerifiedWorkLinks(options?: {
   insurerName?: string;
   query?: string;
 }) {
-  return listPlannerVerifiedWorkLinks(ALL_CANDIDATES, options);
+  return listPlannerVerifiedWorkLinks(
+    RUNTIME_VERIFIED_WORK_LINK_CANDIDATES,
+    options,
+  );
 }
