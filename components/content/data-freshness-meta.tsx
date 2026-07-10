@@ -4,12 +4,14 @@ import {
   DATA_FRESHNESS_COPY,
   getOfficialSourceLabel,
 } from "@/lib/public/data-freshness";
+import type { FreshnessPresentation } from "@/lib/public/freshness";
 
 export type DataFreshnessMetaProps = {
   lastVerifiedAt?: string | Date | null;
   reviewedAt?: string | Date | null;
   officialSourceUrl?: string | null;
   verificationStatus?: string | null;
+  presentation?: FreshnessPresentation;
   /** When true, shows claim-specific guidance (non-compact only). */
   showClaimNotice?: boolean;
   compact?: boolean;
@@ -26,6 +28,7 @@ export function DataFreshnessMeta({
   reviewedAt,
   officialSourceUrl,
   verificationStatus,
+  presentation,
   showClaimNotice = false,
   compact = false,
   className = "",
@@ -37,6 +40,7 @@ export function DataFreshnessMeta({
       lastVerifiedAt={lastVerifiedAt}
       reviewedAt={reviewedAt}
       verificationStatus={verificationStatus}
+      presentation={presentation}
     />
   );
 

@@ -13,6 +13,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { rankSearchResults } from "./ranking";
 import { dedupeSearchResultsByLinkIdentity } from "./search-url-canonicalization";
+import { withSearchVerification } from "./search-verification-status";
 import type { GlobalSearchResult } from "./types";
 
 type WorkLinkKind =
@@ -125,7 +126,7 @@ function buildWorkLinkResult(
   ].filter(Boolean);
 
   return {
-    result: {
+    result: withSearchVerification({
       id: `${row.id}:${kind}`,
       type: "work_link",
       title: `${row.name} · ${label}`,
@@ -139,7 +140,7 @@ function buildWorkLinkResult(
       publishedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
       lastVerifiedAt: row.lastVerifiedAt?.toISOString().slice(0, 10),
       officialSourceUrl: href.startsWith("http") ? href : undefined,
-    },
+    }, row.lastVerifiedAt),
     insurerKey: getCanonicalPublicInsurerId(row.id),
     action: LINK_ACTION[kind],
     href,

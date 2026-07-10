@@ -27,6 +27,7 @@ import { validatePublicSearchQuery } from "./query-validation";
 import { rankSearchResults } from "./ranking";
 import { dedupeSearchResultsByLinkIdentity } from "./search-url-canonicalization";
 import { searchWorkLinks } from "./work-links-search";
+import { withSearchVerification } from "./search-verification-status";
 import {
   SEARCH_DOMAIN_LABEL,
 } from "./labels";
@@ -108,7 +109,7 @@ async function searchInsurers(
     },
   });
 
-  const results: GlobalSearchResult[] = records.map((row) => ({
+  const results: GlobalSearchResult[] = records.map((row) => withSearchVerification({
     id: row.id,
     type: "insurer",
     title: row.name,
@@ -117,7 +118,8 @@ async function searchInsurers(
     categoryLabel: insurerCategoryLabels[row.category],
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.lastVerifiedAt),
-  }));
+    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
+  }, row.lastVerifiedAt));
 
   return dedupeSearchResultsByLinkIdentity(results, (result) => ({
     insurerKey: getCanonicalPublicInsurerId(result.id),
@@ -158,7 +160,7 @@ async function searchClaimDocuments(
     },
   });
 
-  return records.map((row) => ({
+  return records.map((row) => withSearchVerification({
     id: row.id,
     type: "claim_document",
     title: row.title,
@@ -170,7 +172,8 @@ async function searchClaimDocuments(
     sourceLabel: row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.lastVerifiedAt),
-  }));
+    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
+  }, row.lastVerifiedAt));
 }
 
 async function searchKnowledgeArticles(
@@ -197,10 +200,11 @@ async function searchKnowledgeArticles(
       category: true,
       updatedAt: true,
       publishedAt: true,
+      sourceCheckedAt: true,
     },
   });
 
-  return records.map((row) => ({
+  return records.map((row) => withSearchVerification({
     id: row.id,
     type: "knowledge_article",
     title: row.title,
@@ -209,7 +213,8 @@ async function searchKnowledgeArticles(
     categoryLabel: PUBLIC_CATEGORY_LABEL[row.category],
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.publishedAt),
-  }));
+    lastVerifiedAt: toIsoDate(row.sourceCheckedAt),
+  }, row.sourceCheckedAt));
 }
 
 async function searchDisclosureLinks(
@@ -244,11 +249,12 @@ async function searchDisclosureLinks(
       sourceName: true,
       updatedAt: true,
       publishedAt: true,
+      lastVerifiedAt: true,
       insurer: { select: { name: true } },
     },
   });
 
-  return records.map((row) => ({
+  return records.map((row) => withSearchVerification({
     id: row.id,
     type: "disclosure_link",
     title: row.title,
@@ -258,7 +264,8 @@ async function searchDisclosureLinks(
     sourceLabel: row.sourceName ?? row.insurer?.name ?? undefined,
     updatedAt: toIsoDate(row.updatedAt),
     publishedAt: toIsoDate(row.publishedAt),
-  }));
+    lastVerifiedAt: toIsoDate(row.lastVerifiedAt),
+  }, row.lastVerifiedAt));
 }
 
 async function searchMessageTemplates(
@@ -287,6 +294,7 @@ async function searchMessageTemplates(
       audienceType: true,
       updatedAt: true,
       publishedAt: true,
+      reviewedAt: true,
     },
   });
 
@@ -296,7 +304,7 @@ async function searchMessageTemplates(
     const safeCopy = row.safeCopy?.trim();
     if (!safeCopy || findProhibitedPhrase(safeCopy)) continue;
 
-    results.push({
+    results.push(withSearchVerification({
       id: row.id,
       type: "message_template",
       title: row.title,
@@ -309,7 +317,8 @@ async function searchMessageTemplates(
       ].join(" · "),
       updatedAt: toIsoDate(row.updatedAt),
       publishedAt: toIsoDate(row.publishedAt),
-    });
+      lastVerifiedAt: toIsoDate(row.reviewedAt),
+    }, row.reviewedAt));
 
     if (results.length >= limit) break;
   }

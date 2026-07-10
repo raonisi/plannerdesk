@@ -7,6 +7,7 @@ import {
   SEARCH_GROUP_PREVIEW_LIMIT,
 } from "@/lib/search/constants";
 import { buildPublicSearchHref } from "@/lib/search/search-href";
+import { getSearchVerificationPresentation } from "@/lib/search/search-verification-status";
 import {
   SEARCH_DOMAIN_BADGE_CLASS,
   SEARCH_DOMAIN_DISPLAY_ORDER,
@@ -53,13 +54,6 @@ function isExternalResult(result: GlobalSearchResult): boolean {
     result.externalHref.startsWith("http") || result.externalHref.startsWith("tel:")
   );
 }
-
-const FRESHNESS_RESULT_TYPES = new Set<GlobalSearchResultType>([
-  "insurer",
-  "claim_document",
-  "disclosure_link",
-  "work_link",
-]);
 
 function SearchResultCard({
   result,
@@ -119,22 +113,12 @@ function SearchResultCard({
         </p>
       ) : null}
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        {FRESHNESS_RESULT_TYPES.has(result.type) ? (
-          <DataFreshnessMeta
-            compact
-            lastVerifiedAt={result.lastVerifiedAt}
-            officialSourceUrl={result.officialSourceUrl}
-          />
-        ) : (
-          <span className="text-xs text-[#5f6670]">
-            {result.sourceLabel ? `${result.sourceLabel} · ` : ""}
-            {result.updatedAt
-              ? `업데이트 ${result.updatedAt}`
-              : result.publishedAt
-                ? `기준일 ${result.publishedAt}`
-                : ""}
-          </span>
-        )}
+        <DataFreshnessMeta
+          compact
+          lastVerifiedAt={result.lastVerifiedAt}
+          officialSourceUrl={result.officialSourceUrl}
+          presentation={getSearchVerificationPresentation(result.verification)}
+        />
         <div className="flex flex-wrap gap-2">
           {secondaryLabel && result.type === "insurer" ? (
             <Link

@@ -50,6 +50,7 @@ export function FreshnessBadge({
 
   return (
     <span
+      aria-label={`확인 상태: ${resolved.label}`}
       className={`inline-flex min-h-6 max-w-full items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-tight ${TONE_CLASS[resolved.tone]} ${className}`}
       title={resolved.label}
     >

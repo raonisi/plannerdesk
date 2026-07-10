@@ -1,6 +1,8 @@
 // Global Search IA contracts (PR-82 design only). No query/runtime in this PR.
 // Implementation: public search PR-83, admin search PR-85.
 
+import type { SearchVerificationState } from "./search-verification-status";
+
 /** Public global search domains (CorrectionRequest excluded). */
 export type PublicSearchDomain =
   | "all"
@@ -34,6 +36,8 @@ export interface GlobalSearchResult {
   publishedAt?: string;
   /** PR-BS-10: public-safe freshness metadata from existing fields. */
   lastVerifiedAt?: string;
+  /** PR-WC-03: normalized public search verification state. */
+  verification: SearchVerificationState;
   officialSourceUrl?: string;
 }
 
@@ -47,7 +51,7 @@ export type AdminSearchDomain =
   | "all";
 
 export interface AdminSearchResult
-  extends Omit<GlobalSearchResult, "type" | "url"> {
+  extends Omit<GlobalSearchResult, "type" | "url" | "verification"> {
   type: AdminSearchResultType;
   status?: string;
   isPublished?: boolean;

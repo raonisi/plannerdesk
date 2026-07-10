@@ -29,28 +29,81 @@ export const DATA_FRESHNESS_COPY = {
   customerCheckNotice: "고객 안내 전 공식 출처를 확인하세요.",
 } as const;
 
-function toIsoDateString(value: string | Date): string | null {
-  if (value instanceof Date) {
-    if (Number.isNaN(value.getTime())) return null;
-    return value.toISOString().slice(0, 10);
+export type VerificationDateResolution =
+  | { status: "valid"; isoDate: string; formattedDate: string }
+  | { status: "missing" | "invalid"; isoDate: null; formattedDate: null };
+
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const ISO_DATETIME_PATTERN =
+  /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+function isValidCalendarDate(value: string): boolean {
+  const match = DATE_ONLY_PATTERN.exec(value);
+  if (!match) return false;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (year < 1 || month < 1 || month > 12 || day < 1) return false;
+
+  const candidate = new Date(0);
+  candidate.setUTCHours(0, 0, 0, 0);
+  candidate.setUTCFullYear(year, month - 1, day);
+  return (
+    candidate.getUTCFullYear() === year &&
+    candidate.getUTCMonth() === month - 1 &&
+    candidate.getUTCDate() === day
+  );
+}
+
+export function resolveVerificationDate(
+  value: string | Date | null | undefined,
+): VerificationDateResolution {
+  if (value == null) {
+    return { status: "missing", isoDate: null, formattedDate: null };
   }
+
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) {
+      return { status: "invalid", isoDate: null, formattedDate: null };
+    }
+    const isoDate = value.toISOString().slice(0, 10);
+    return {
+      status: "valid",
+      isoDate,
+      formattedDate: isoDate.replaceAll("-", "."),
+    };
+  }
+
   const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-  const parsed = new Date(trimmed);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toISOString().slice(0, 10);
+  if (!trimmed) {
+    return { status: "missing", isoDate: null, formattedDate: null };
+  }
+
+  const isoDate = DATE_ONLY_PATTERN.test(trimmed)
+    ? trimmed
+    : ISO_DATETIME_PATTERN.exec(trimmed)?.[1] ?? null;
+  if (
+    !isoDate ||
+    !isValidCalendarDate(isoDate) ||
+    (isoDate !== trimmed && Number.isNaN(Date.parse(trimmed)))
+  ) {
+    return { status: "invalid", isoDate: null, formattedDate: null };
+  }
+
+  return {
+    status: "valid",
+    isoDate,
+    formattedDate: isoDate.replaceAll("-", "."),
+  };
 }
 
 /** YYYY.MM.DD or null when value is missing/invalid. */
 export function formatVerifiedDateShort(
   value: string | Date | null | undefined,
 ): string | null {
-  if (value == null) return null;
-  const iso = toIsoDateString(value);
-  if (!iso) return null;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  return match ? `${match[1]}.${match[2]}.${match[3]}` : null;
+  const resolution = resolveVerificationDate(value);
+  return resolution.status === "valid" ? resolution.formattedDate : null;
 }
 
 /** Date-only label for legacy surfaces (e.g. disclosure cards). */
