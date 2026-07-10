@@ -31,16 +31,18 @@ describe("PR-BS-15 verified work links public surfaces", () => {
     assert.match(home, /mode="planner"/);
   });
 
-  it("public catalog excludes draft and paymentInfo published rows", () => {
+  it("public catalog excludes fixture, draft, and paymentInfo rows", () => {
     const links = getPublicVerifiedWorkLinks();
     for (const link of links) {
       assert.notEqual(link.infoType, "paymentInfo");
       assert.notEqual(link.infoType, "insurerSystem");
       assert.ok(link.officialSourceUrl);
       assert.ok(link.lastVerifiedAt);
+      assert.doesNotMatch(link.officialSourceUrl, /example\.invalid/);
+      assert.doesNotMatch(link.id, /^mock-/);
     }
     const ids = links.map((l) => l.id);
-    assert.ok(ids.includes("mock-wl-pub-claim-005"));
+    assert.ok(!ids.includes("mock-wl-pub-claim-005"));
     assert.ok(!ids.includes("mock-wl-pub-payment-blocked-009"));
     assert.ok(!ids.includes("mock-wl-draft-001"));
   });
