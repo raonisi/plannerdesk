@@ -1,8 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import {
-  getPlannerSignInHref,
-  isPlannerSignInAvailable,
-} from "@/lib/auth/planner-sign-in";
+import { usePlannerSignInPath } from "@/components/planner-favorites/planner-favorites-scope";
+import { buildPlannerSignInHref } from "@/lib/auth/planner-sign-in-url";
 import {
   PLANNER_FAVORITES_COMPACT_UNAVAILABLE_LABEL,
   PLANNER_FAVORITES_LOGIN_BODY_AVAILABLE,
@@ -23,9 +23,8 @@ export function PlannerFavoritesLoginPrompt({
   compact?: boolean;
   className?: string;
 }) {
-  const signInHref = isPlannerSignInAvailable()
-    ? getPlannerSignInHref(callbackPath)
-    : null;
+  const signInPath = usePlannerSignInPath();
+  const signInHref = buildPlannerSignInHref(signInPath, callbackPath);
 
   if (compact) {
     if (signInHref) {

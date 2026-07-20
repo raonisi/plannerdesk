@@ -3,10 +3,12 @@ import { PageFrame } from "@/components/content-page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { PublicMobileQuickTabs } from "@/components/navigation/mobile-quick-tabs";
+import { PlannerSignInPathProvider } from "@/components/planner-favorites/planner-favorites-scope";
 import {
   publicMainLandmarkProps,
   SkipToContent,
 } from "@/components/skip-to-content";
+import { getPlannerSignInPath } from "@/lib/auth/planner-sign-in";
 import { publicMobileQuickTabsContentInset } from "@/lib/navigation/public-nav";
 
 /** 공개 페이지 공통 레이아웃: Header + 본문 + Footer */
@@ -17,22 +19,26 @@ export function AppShell({
   children: ReactNode;
   className?: string;
 }) {
+  const plannerSignInPath = getPlannerSignInPath();
+
   return (
-    <PageFrame>
-      <SkipToContent />
-      <div
-        className={`flex min-h-[100dvh] flex-col ${publicMobileQuickTabsContentInset} ${className}`.trim()}
-      >
-        <Header />
-        <main
-          {...publicMainLandmarkProps}
-          className="flex min-w-0 flex-1 flex-col outline-none"
+    <PlannerSignInPathProvider signInPath={plannerSignInPath}>
+      <PageFrame>
+        <SkipToContent />
+        <div
+          className={`flex min-h-[100dvh] flex-col ${publicMobileQuickTabsContentInset} ${className}`.trim()}
         >
-          {children}
-        </main>
-        <Footer />
-      </div>
-      <PublicMobileQuickTabs />
-    </PageFrame>
+          <Header />
+          <main
+            {...publicMainLandmarkProps}
+            className="flex min-w-0 flex-1 flex-col outline-none"
+          >
+            {children}
+          </main>
+          <Footer />
+        </div>
+        <PublicMobileQuickTabs />
+      </PageFrame>
+    </PlannerSignInPathProvider>
   );
 }
