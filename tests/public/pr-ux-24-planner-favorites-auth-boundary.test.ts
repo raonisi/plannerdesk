@@ -5,8 +5,13 @@ import { describe, it } from "node:test";
 
 import {
   getPlannerSignInHref,
+  getPlannerSignInPath,
   isPlannerSignInAvailable,
 } from "@/lib/auth/planner-sign-in";
+import {
+  buildPlannerSignInHref,
+  PLANNER_SIGN_IN_PATHS,
+} from "@/lib/auth/planner-sign-in-url";
 import { safePublicReturnTo } from "@/lib/auth/safe-public-return-to";
 import {
   PLANNER_FAVORITES_LOGIN_CTA,
@@ -23,11 +28,28 @@ describe("PR-UX-24 planner favorites auth boundary", () => {
   it("public favorites login prompt does not use admin sign-in helper", () => {
     const prompt = read("components/planner-favorites/planner-favorites-login-prompt.tsx");
     assert.doesNotMatch(prompt, /getAdminSignInHref/);
-    assert.match(prompt, /getPlannerSignInHref/);
-    assert.match(prompt, /isPlannerSignInAvailable/);
+    assert.doesNotMatch(prompt, /getPlannerSignInHref|isPlannerSignInAvailable/);
+    assert.match(prompt, /buildPlannerSignInHref/);
+    assert.match(prompt, /usePlannerSignInPath/);
     assert.doesNotMatch(prompt, /\/admin/);
     assert.doesNotMatch(prompt, /관리자/);
     assert.doesNotMatch(prompt, /운영자/);
+
+    const appShell = read("components/app-shell.tsx");
+    assert.match(appShell, /getPlannerSignInPath/);
+    assert.match(appShell, /PlannerSignInPathProvider/);
+  });
+
+  it("builds a sanitized href from the server-selected sign-in path", () => {
+    assert.equal(
+      buildPlannerSignInHref(PLANNER_SIGN_IN_PATHS.google, "/directory"),
+      "/api/auth/signin/google?callbackUrl=%2Fdirectory",
+    );
+    assert.equal(buildPlannerSignInHref(null, "/directory"), null);
+    assert.equal(
+      buildPlannerSignInHref(PLANNER_SIGN_IN_PATHS.google, "https://evil.test"),
+      "/api/auth/signin/google?callbackUrl=%2F",
+    );
   });
 
   it("gated favorite button still routes unauthenticated users to planner login prompt", () => {
@@ -56,6 +78,7 @@ describe("PR-UX-24 planner favorites auth boundary", () => {
 
   it("planner sign-in href never targets admin callback paths", () => {
     if (!isPlannerSignInAvailable()) {
+      assert.equal(getPlannerSignInPath(), null);
       assert.equal(getPlannerSignInHref("/directory"), null);
       return;
     }

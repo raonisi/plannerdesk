@@ -1,8 +1,7 @@
-import Link from "next/link";
-import {
-  getPlannerSignInHref,
-  isPlannerSignInAvailable,
-} from "@/lib/auth/planner-sign-in";
+"use client";
+
+import { usePlannerSignInPath } from "@/components/planner-favorites/planner-favorites-scope";
+import { buildPlannerSignInHref } from "@/lib/auth/planner-sign-in-url";
 import {
   PLANNER_FAVORITES_COMPACT_UNAVAILABLE_LABEL,
   PLANNER_FAVORITES_LOGIN_BODY_AVAILABLE,
@@ -23,19 +22,18 @@ export function PlannerFavoritesLoginPrompt({
   compact?: boolean;
   className?: string;
 }) {
-  const signInHref = isPlannerSignInAvailable()
-    ? getPlannerSignInHref(callbackPath)
-    : null;
+  const signInPath = usePlannerSignInPath();
+  const signInHref = buildPlannerSignInHref(signInPath, callbackPath);
 
   if (compact) {
     if (signInHref) {
       return (
-        <Link
+        <a
           className={`inline-flex min-h-9 items-center rounded-md border border-[#E3DED4] bg-white px-2.5 text-[11px] font-semibold text-[#4A5565] transition hover:border-[#B9975B] hover:text-[#0F1D2E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/20 ${className}`}
           href={signInHref}
         >
           {PLANNER_FAVORITES_LOGIN_CTA}
-        </Link>
+        </a>
       );
     }
 
@@ -74,12 +72,12 @@ export function PlannerFavoritesLoginPrompt({
       <p className={`mt-1 break-keep ${textStyles.small}`}>
         {PLANNER_FAVORITES_LOGIN_BODY_AVAILABLE}
       </p>
-      <Link
+      <a
         className="mt-3 inline-flex min-h-10 items-center rounded-lg bg-[#0F1D2E] px-4 text-sm font-semibold text-white transition hover:bg-[#1b344e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35"
         href={signInHref}
       >
         {PLANNER_FAVORITES_LOGIN_CTA}
-      </Link>
+      </a>
       <p className={`mt-2 break-keep text-[#4A5565] ${textStyles.small}`}>
         {PLANNER_FAVORITES_LOGIN_RETURN_NOTE}
       </p>
