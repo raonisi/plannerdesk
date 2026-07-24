@@ -54,9 +54,57 @@ describe("PR-MOB-A global mobile nav drawer", () => {
     assert.match(drawer, /setOpen\(false\)|closeDrawer/);
     assert.match(drawer, /aria-label=\{uiLabels\.mobileMenuClose\}/);
     assert.match(drawer, /event\.key === "Escape"/);
-    assert.match(drawer, /document\.body\.style\.overflow = "hidden"/);
+    assert.match(drawer, /body\.style\.overflow = "hidden"/);
     assert.match(drawer, /role="dialog"/);
     assert.match(drawer, /aria-modal="true"/);
+  });
+
+  it("portals only the open drawer layer to document.body", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /import \{ createPortal \} from "react-dom"/);
+    assert.match(drawer, /open\s*\? createPortal\(/);
+    assert.match(drawer, /document\.body/);
+    assert.match(drawer, /<div[\s\S]*aria-hidden="true"[\s\S]*<aside/);
+    assert.doesNotMatch(drawer, /suppressHydrationWarning|ssr:\s*false/);
+  });
+
+  it("uses viewport-sized dialog layout with nav-only scrolling", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /h-\[100dvh\]/);
+    assert.match(drawer, /max-h-\[100dvh\]/);
+    assert.match(drawer, /w-\[min\(360px,100dvw\)\]/);
+    assert.match(drawer, /min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain/);
+    assert.match(drawer, /<footer className="shrink-0/);
+  });
+
+  it("traps focus and restores focus only for dismiss actions", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /const dialogRef = useRef<HTMLElement>/);
+    assert.match(drawer, /event\.key !== "Tab"/);
+    assert.match(drawer, /event\.shiftKey/);
+    assert.match(drawer, /lastElement\.focus\(\)/);
+    assert.match(drawer, /firstElement\.focus\(\)/);
+    assert.match(drawer, /shouldRestoreFocusRef\.current/);
+    assert.match(drawer, /closeDrawerForNavigation/);
+    assert.match(drawer, /menuButtonRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
+  });
+
+  it("restores the previous body overflow value during cleanup", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /const previousOverflow = document\.body\.style\.overflow/);
+    assert.match(drawer, /const previousRootOverflow = root\.style\.overflow/);
+    assert.match(drawer, /const previousPaddingRight = body\.style\.paddingRight/);
+    assert.match(drawer, /body\.style\.overflow = "hidden"/);
+    assert.match(drawer, /root\.style\.overflow = "hidden"/);
+    assert.match(drawer, /body\.style\.position = "fixed"/);
+    assert.match(drawer, /body\.style\.top = `-\$\{scrollY\}px`/);
+    assert.match(drawer, /body\.style\.overflow = previousOverflow/);
+    assert.match(drawer, /body\.style\.paddingRight = previousPaddingRight/);
+    assert.match(drawer, /body\.style\.position = previousPosition/);
+    assert.match(drawer, /body\.style\.top = previousTop/);
+    assert.match(drawer, /root\.style\.overflow = previousRootOverflow/);
+    assert.match(drawer, /window\.scrollTo\(scrollX, scrollY\)/);
+    assert.match(drawer, /removeEventListener\("keydown", onKeyDown\)/);
   });
 
   it("lists required public routes in the mobile drawer config", () => {
@@ -86,7 +134,7 @@ describe("PR-MOB-A global mobile nav drawer", () => {
 
   it("closes the drawer when a route link is selected", () => {
     const drawer = read("components/navigation/mobile-nav-drawer.tsx");
-    assert.match(drawer, /onNavigate=\{closeDrawer\}/);
+    assert.match(drawer, /onNavigate=\{closeDrawerForNavigation\}/);
     assert.match(drawer, /onClick=\{onNavigate\}/);
   });
 
@@ -123,7 +171,7 @@ describe("PR-MOB-A global mobile nav drawer", () => {
 
   it("drawer width and touch targets meet mobile usability baseline", () => {
     const drawer = read("components/navigation/mobile-nav-drawer.tsx");
-    assert.match(drawer, /w-\[min\(360px,100vw\)\]/);
+    assert.match(drawer, /w-\[min\(360px,100dvw\)\]/);
     assert.match(drawer, /min-h-11/);
   });
 
