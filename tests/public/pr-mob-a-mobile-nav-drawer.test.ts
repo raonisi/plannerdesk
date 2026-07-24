@@ -132,10 +132,26 @@ describe("PR-MOB-A global mobile nav drawer", () => {
     assert.match(drawer, /isNavItemActive/);
   });
 
-  it("closes the drawer when a route link is selected", () => {
+  it("restores focus for the exact current route and preserves navigation focus otherwise", () => {
     const drawer = read("components/navigation/mobile-nav-drawer.tsx");
-    assert.match(drawer, /onNavigate=\{closeDrawerForNavigation\}/);
+    assert.match(drawer, /function normalizeDrawerPath\(path: string\)/);
+    assert.match(drawer, /path\.replace\(\/\\\/\+\$\/, ""\)/);
+    assert.match(drawer, /function isSameDrawerDestination/);
+    assert.match(drawer, /isSameDrawerDestination\(pathname, href\)/);
+    assert.match(drawer, /\? closeDrawer\s*:\s*closeDrawerForNavigation/);
+    assert.match(drawer, /onNavigate=\{getDrawerNavigationHandler\(item\.href\)\}/);
     assert.match(drawer, /onClick=\{onNavigate\}/);
+  });
+
+  it("lets the brand shrink while preserving the mobile trigger touch target", () => {
+    const header = read("components/header.tsx");
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(header, /flex min-w-0 items-center gap-3 overflow-hidden rounded-lg/);
+    assert.doesNotMatch(header, /flex min-w-0 shrink-0 items-center gap-3/);
+    assert.match(header, /flex shrink-0 items-center gap-2/);
+    assert.match(header, /max-sm:hidden min-h-10 sm:inline-flex/);
+    assert.match(header, /block truncate text-xs font-semibold/);
+    assert.match(drawer, /touchTargets\.iconButton/);
   });
 
   it("does not expose forbidden copy or admin links in the public drawer", () => {

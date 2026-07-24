@@ -19,17 +19,17 @@ export function Header() {
       <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8 lg:px-10">
         <Link
           aria-label={`${uiLabels.brand} 홈`}
-          className="flex min-w-0 shrink-0 items-center gap-3 rounded-lg transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
+          className="flex min-w-0 items-center gap-3 overflow-hidden rounded-lg transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
           href="/"
         >
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#0F1D2E] text-sm font-black tracking-[0.02em] text-white shadow-md shadow-[#0F1D2E]/15">
             PD
           </span>
-          <span className="min-w-0">
-            <span className="block text-lg font-bold leading-tight text-[#0F1D2E] sm:text-xl tracking-tight">
+          <span className="min-w-0 overflow-hidden">
+            <span className="block truncate text-lg font-bold leading-tight tracking-tight text-[#0F1D2E] sm:text-xl">
               {uiLabels.brand}
             </span>
-            <span className="block break-keep text-xs font-semibold leading-5 text-[#4A5565]">
+            <span className="block truncate text-xs font-semibold leading-5 text-[#4A5565]">
               {uiLabels.brandTagline}
             </span>
           </span>
@@ -39,7 +39,7 @@ export function Header() {
 
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            className={`hidden min-h-10 sm:inline-flex ${buttons.base} ${buttons.primary} rounded-full px-5`}
+            className={`max-sm:hidden min-h-10 sm:inline-flex ${buttons.base} ${buttons.primary} rounded-full px-5`}
             href="/message-templates"
           >
             {uiLabels.customerMessages}

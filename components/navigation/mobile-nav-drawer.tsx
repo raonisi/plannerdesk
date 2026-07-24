@@ -28,6 +28,15 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
+function normalizeDrawerPath(path: string): string {
+  if (path === "/") return "/";
+  return path.replace(/\/+$/, "");
+}
+
+function isSameDrawerDestination(pathname: string, href: string): boolean {
+  return normalizeDrawerPath(pathname) === normalizeDrawerPath(href);
+}
+
 const drawerFooterNotices = [
   "개인정보와 의료자료는 입력하지 마세요.",
   "보험금 지급 판단·금액 산정 기능을 제공하지 않습니다.",
@@ -56,6 +65,14 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
     shouldRestoreFocusRef.current = true;
     setOpen(true);
   }, []);
+
+  const getDrawerNavigationHandler = useCallback(
+    (href: string) =>
+      isSameDrawerDestination(pathname, href)
+        ? closeDrawer
+        : closeDrawerForNavigation,
+    [closeDrawer, closeDrawerForNavigation, pathname],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -212,7 +229,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
                           href={item.href}
                           isActive={isNavItemActive(pathname, item.href)}
                           key={item.href}
-                          onNavigate={closeDrawerForNavigation}
+                          onNavigate={getDrawerNavigationHandler(item.href)}
                         >
                           {item.label}
                         </QuickActionLink>
@@ -231,7 +248,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
                             <DrawerNavLink
                               href={item.href}
                               isActive={isNavItemActive(pathname, item.href)}
-                              onNavigate={closeDrawerForNavigation}
+                              onNavigate={getDrawerNavigationHandler(item.href)}
                             >
                               {item.label}
                             </DrawerNavLink>
