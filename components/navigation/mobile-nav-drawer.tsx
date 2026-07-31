@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -28,6 +29,20 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
+type DrawerScrollLockSnapshot = {
+  scrollX: number;
+  scrollY: number;
+  rootOverflow: string;
+  rootScrollBehavior: string;
+  bodyOverflow: string;
+  bodyPaddingRight: string;
+  bodyPosition: string;
+  bodyTop: string;
+  bodyLeft: string;
+  bodyRight: string;
+  bodyWidth: string;
+};
+
 function normalizeDrawerPath(path: string): string {
   if (path === "/") return "/";
   return path.replace(/\/+$/, "");
@@ -49,6 +64,7 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
   const shouldRestoreFocusRef = useRef(true);
+  const scrollLockSnapshotRef = useRef<DrawerScrollLockSnapshot | null>(null);
   const titleId = useId();
 
   const closeDrawer = useCallback(() => {
@@ -74,21 +90,28 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
     [closeDrawer, closeDrawerForNavigation, pathname],
   );
 
-  useEffect(() => {
-    if (!open) return;
+  const lockPageScroll = useCallback(() => {
+    if (scrollLockSnapshotRef.current) return;
+
     const root = document.documentElement;
     const body = document.body;
-    const previousOverflow = document.body.style.overflow;
-    const previousRootOverflow = root.style.overflow;
-    const previousPaddingRight = body.style.paddingRight;
-    const previousPosition = body.style.position;
-    const previousTop = body.style.top;
-    const previousLeft = body.style.left;
-    const previousRight = body.style.right;
-    const previousWidth = body.style.width;
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
     const scrollbarWidth = window.innerWidth - root.clientWidth;
+
+    scrollLockSnapshotRef.current = {
+      scrollX,
+      scrollY,
+      rootOverflow: root.style.overflow,
+      rootScrollBehavior: root.style.scrollBehavior,
+      bodyOverflow: body.style.overflow,
+      bodyPaddingRight: body.style.paddingRight,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
+    };
 
     if (scrollbarWidth > 0) {
       const currentPaddingRight = Number.parseFloat(
@@ -104,18 +127,81 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
     body.style.left = `-${scrollX}px`;
     body.style.right = "0";
     body.style.width = "100%";
-    return () => {
-      body.style.overflow = previousOverflow;
-      body.style.paddingRight = previousPaddingRight;
-      body.style.position = previousPosition;
-      body.style.top = previousTop;
-      body.style.left = previousLeft;
-      body.style.right = previousRight;
-      body.style.width = previousWidth;
-      root.style.overflow = previousRootOverflow;
-      window.scrollTo(scrollX, scrollY);
-    };
-  }, [open]);
+  }, []);
+
+  const unlockPageScroll = useCallback(() => {
+    const snapshot = scrollLockSnapshotRef.current;
+    if (!snapshot) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+    const scrollingElement = document.scrollingElement as HTMLElement | null;
+
+    body.style.overflow = snapshot.bodyOverflow;
+    body.style.paddingRight = snapshot.bodyPaddingRight;
+    body.style.position = snapshot.bodyPosition;
+    body.style.top = snapshot.bodyTop;
+    body.style.left = snapshot.bodyLeft;
+    body.style.right = snapshot.bodyRight;
+    body.style.width = snapshot.bodyWidth;
+    root.style.overflow = snapshot.rootOverflow;
+    root.style.scrollBehavior = "auto";
+
+    try {
+      window.scrollTo({
+        left: snapshot.scrollX,
+        top: snapshot.scrollY,
+        behavior: "auto",
+      });
+
+      if (scrollingElement) {
+        scrollingElement.scrollLeft = snapshot.scrollX;
+        scrollingElement.scrollTop = snapshot.scrollY;
+      }
+
+      if (
+        window.scrollX !== snapshot.scrollX ||
+        window.scrollY !== snapshot.scrollY
+      ) {
+        window.scrollTo(snapshot.scrollX, snapshot.scrollY);
+
+        if (scrollingElement) {
+          scrollingElement.scrollLeft = snapshot.scrollX;
+          scrollingElement.scrollTop = snapshot.scrollY;
+        }
+      }
+    } finally {
+      root.style.scrollBehavior = snapshot.rootScrollBehavior;
+    }
+
+    scrollLockSnapshotRef.current = null;
+  }, []);
+
+  useLayoutEffect(() => {
+    if (open) {
+      lockPageScroll();
+      wasOpenRef.current = true;
+
+      const dialog = dialogRef.current;
+      const firstFocusable = dialog ? getFocusableElements(dialog)[0] : null;
+      (closeButtonRef.current ?? firstFocusable ?? dialog)?.focus();
+
+      return () => {
+        unlockPageScroll();
+      };
+    }
+
+    if (!wasOpenRef.current) return;
+
+    unlockPageScroll();
+
+    if (shouldRestoreFocusRef.current) {
+      menuButtonRef.current?.focus({ preventScroll: true });
+    }
+
+    wasOpenRef.current = false;
+    shouldRestoreFocusRef.current = true;
+  }, [lockPageScroll, open, unlockPageScroll]);
 
   useEffect(() => {
     if (!open) return;
@@ -158,23 +244,6 @@ export function MobileNavigation({ pathname }: { pathname: string }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [closeDrawer, open]);
-
-  useEffect(() => {
-    if (open) {
-      wasOpenRef.current = true;
-      const dialog = dialogRef.current;
-      const firstFocusable = dialog ? getFocusableElements(dialog)[0] : null;
-      (closeButtonRef.current ?? firstFocusable ?? dialog)?.focus();
-      return;
-    }
-    if (wasOpenRef.current) {
-      if (shouldRestoreFocusRef.current) {
-        menuButtonRef.current?.focus({ preventScroll: true });
-      }
-      wasOpenRef.current = false;
-      shouldRestoreFocusRef.current = true;
-    }
-  }, [open]);
 
   return (
     <div className="lg:hidden">

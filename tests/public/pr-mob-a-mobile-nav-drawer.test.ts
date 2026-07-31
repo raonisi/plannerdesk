@@ -89,22 +89,61 @@ describe("PR-MOB-A global mobile nav drawer", () => {
     assert.match(drawer, /menuButtonRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
   });
 
-  it("restores the previous body overflow value during cleanup", () => {
+  it("defines an idempotent scroll-lock snapshot contract", () => {
     const drawer = read("components/navigation/mobile-nav-drawer.tsx");
-    assert.match(drawer, /const previousOverflow = document\.body\.style\.overflow/);
-    assert.match(drawer, /const previousRootOverflow = root\.style\.overflow/);
-    assert.match(drawer, /const previousPaddingRight = body\.style\.paddingRight/);
+    assert.match(drawer, /type DrawerScrollLockSnapshot = \{/);
+    assert.match(drawer, /rootScrollBehavior: string/);
+    assert.match(
+      drawer,
+      /useRef<DrawerScrollLockSnapshot \| null>\(null\)/,
+    );
+    assert.match(drawer, /if \(scrollLockSnapshotRef\.current\) return/);
+    assert.match(drawer, /const unlockPageScroll = useCallback/);
+    assert.match(drawer, /if \(!snapshot\) return/);
     assert.match(drawer, /body\.style\.overflow = "hidden"/);
     assert.match(drawer, /root\.style\.overflow = "hidden"/);
     assert.match(drawer, /body\.style\.position = "fixed"/);
     assert.match(drawer, /body\.style\.top = `-\$\{scrollY\}px`/);
-    assert.match(drawer, /body\.style\.overflow = previousOverflow/);
-    assert.match(drawer, /body\.style\.paddingRight = previousPaddingRight/);
-    assert.match(drawer, /body\.style\.position = previousPosition/);
-    assert.match(drawer, /body\.style\.top = previousTop/);
-    assert.match(drawer, /root\.style\.overflow = previousRootOverflow/);
-    assert.match(drawer, /window\.scrollTo\(scrollX, scrollY\)/);
+    assert.match(drawer, /body\.style\.overflow = snapshot\.bodyOverflow/);
+    assert.match(
+      drawer,
+      /body\.style\.paddingRight = snapshot\.bodyPaddingRight/,
+    );
+    assert.match(drawer, /body\.style\.position = snapshot\.bodyPosition/);
+    assert.match(drawer, /body\.style\.top = snapshot\.bodyTop/);
+    assert.match(drawer, /root\.style\.overflow = snapshot\.rootOverflow/);
+    assert.match(drawer, /scrollLockSnapshotRef\.current = null/);
     assert.match(drawer, /removeEventListener\("keydown", onKeyDown\)/);
+  });
+
+  it("statically contracts layout-phase scroll restore before focus return", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /useLayoutEffect/);
+    assert.match(drawer, /root\.style\.scrollBehavior = "auto"/);
+    assert.match(
+      drawer,
+      /document\.scrollingElement as HTMLElement \| null/,
+    );
+    assert.match(drawer, /behavior: "auto"/);
+    assert.match(
+      drawer,
+      /scrollingElement\.scrollTop = snapshot\.scrollY/,
+    );
+    assert.match(
+      drawer,
+      /root\.style\.scrollBehavior = snapshot\.rootScrollBehavior/,
+    );
+    assert.doesNotMatch(drawer, /setTimeout|requestAnimationFrame/);
+
+    const closedBranch = drawer.slice(
+      drawer.indexOf("if (!wasOpenRef.current) return;"),
+    );
+    const unlockIndex = closedBranch.indexOf("unlockPageScroll();");
+    const focusIndex = closedBranch.indexOf(
+      "menuButtonRef.current?.focus({ preventScroll: true });",
+    );
+    assert.ok(unlockIndex >= 0, "closed branch unlocks page scroll");
+    assert.ok(focusIndex > unlockIndex, "focus return follows scroll unlock");
   });
 
   it("lists required public routes in the mobile drawer config", () => {
