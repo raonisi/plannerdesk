@@ -210,7 +210,7 @@ export function HomeClient({
   };
 
   return (
-    <div className="mx-auto min-w-0 max-w-7xl px-5 py-6 pb-12 sm:px-8 lg:px-10">
+    <div className="mx-auto w-full min-w-0 max-w-7xl px-5 py-6 pb-12 sm:px-8 lg:px-10">
       {/* 1. 업무 시작 히어로 */}
       <section
         aria-labelledby="home-work-start-heading"

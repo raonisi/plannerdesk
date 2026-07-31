@@ -19,6 +19,14 @@ export const SEARCH_VALIDATION_MESSAGES = {
 
 export const SEARCH_EMPTY_MESSAGE = "검색 결과가 없습니다.";
 
+export const SEARCH_EMPTY_EYEBROW = "검색 결과 없음";
+
+export const SEARCH_EMPTY_DESCRIPTION =
+  "공개 정보에서 일치하는 항목을 찾지 못했습니다.";
+
+export const SEARCH_EMPTY_NEXT_STEP =
+  "검색어를 줄이거나 필터를 초기화해 주세요.";
+
 export const SEARCH_EMPTY_TIPS = [
   "보험사명, 청구서류, 공시자료처럼 짧은 업무 키워드로 다시 검색해 보세요.",
   "정보가 확인되지 않으면 공식 출처와 최신 확인일을 함께 확인해 주세요.",

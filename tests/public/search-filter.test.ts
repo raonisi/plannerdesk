@@ -22,6 +22,7 @@ const SEARCH_UI_TARGETS = [
   "lib/search/constants.ts",
   "components/search/search-empty-panel.tsx",
   "components/search/search-idle-panel.tsx",
+  "components/search/search-query-form.tsx",
   "app/search/page.tsx",
   "app/search/search-results.tsx",
 ];
@@ -33,11 +34,16 @@ describe("PR-BS-11 public search filter UI (static, no DB)", () => {
 
   it("search page uses domain filter, idle panel, and public fetch only", () => {
     const page = readFileSync(join(ROOT, "app/search/page.tsx"), "utf8");
+    const form = readFileSync(
+      join(ROOT, "components/search/search-query-form.tsx"),
+      "utf8",
+    );
     assert.match(page, /SearchDomainFilter/);
     assert.match(page, /SearchIdlePanel/);
+    assert.match(page, /SearchQueryForm/);
     assert.match(page, /searchPublicContent/);
-    assert.match(page, /SEARCH_FORM_PLACEHOLDER/);
-    assert.match(page, /SEARCH_FORM_FRESHNESS_NOTICE/);
+    assert.match(form, /SEARCH_FORM_PLACEHOLDER/);
+    assert.match(form, /SEARCH_FORM_FRESHNESS_NOTICE/);
     assert.doesNotMatch(page, /searchAdminContent/);
     assert.doesNotMatch(page, /AnswerAssistant|work-tools/i);
   });

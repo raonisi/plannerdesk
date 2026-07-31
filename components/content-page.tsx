@@ -86,10 +86,16 @@ export function PageShell({ children }: { children: ReactNode }) {
   return <main className={`min-h-[100dvh] ${surfaces.page}`}>{children}</main>;
 }
 
-export function ContentSection({ children }: { children: ReactNode }) {
+export function ContentSection({
+  children,
+  className = ""
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <section
-      className={`mx-auto max-w-7xl min-w-0 ${spacing.pageX} ${spacing.sectionY} pb-14 sm:pb-16`}
+      className={`mx-auto max-w-7xl min-w-0 ${spacing.pageX} ${spacing.sectionY} pb-14 sm:pb-16 ${className}`.trim()}
     >
       {children}
     </section>
