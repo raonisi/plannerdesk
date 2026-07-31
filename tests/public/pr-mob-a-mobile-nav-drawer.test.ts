@@ -54,9 +54,96 @@ describe("PR-MOB-A global mobile nav drawer", () => {
     assert.match(drawer, /setOpen\(false\)|closeDrawer/);
     assert.match(drawer, /aria-label=\{uiLabels\.mobileMenuClose\}/);
     assert.match(drawer, /event\.key === "Escape"/);
-    assert.match(drawer, /document\.body\.style\.overflow = "hidden"/);
+    assert.match(drawer, /body\.style\.overflow = "hidden"/);
     assert.match(drawer, /role="dialog"/);
     assert.match(drawer, /aria-modal="true"/);
+  });
+
+  it("portals only the open drawer layer to document.body", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /import \{ createPortal \} from "react-dom"/);
+    assert.match(drawer, /open\s*\? createPortal\(/);
+    assert.match(drawer, /document\.body/);
+    assert.match(drawer, /<div[\s\S]*aria-hidden="true"[\s\S]*<aside/);
+    assert.doesNotMatch(drawer, /suppressHydrationWarning|ssr:\s*false/);
+  });
+
+  it("uses viewport-sized dialog layout with nav-only scrolling", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /h-\[100dvh\]/);
+    assert.match(drawer, /max-h-\[100dvh\]/);
+    assert.match(drawer, /w-\[min\(360px,100dvw\)\]/);
+    assert.match(drawer, /min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain/);
+    assert.match(drawer, /<footer className="shrink-0/);
+  });
+
+  it("traps focus and restores focus only for dismiss actions", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /const dialogRef = useRef<HTMLElement>/);
+    assert.match(drawer, /event\.key !== "Tab"/);
+    assert.match(drawer, /event\.shiftKey/);
+    assert.match(drawer, /lastElement\.focus\(\)/);
+    assert.match(drawer, /firstElement\.focus\(\)/);
+    assert.match(drawer, /shouldRestoreFocusRef\.current/);
+    assert.match(drawer, /closeDrawerForNavigation/);
+    assert.match(drawer, /menuButtonRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
+  });
+
+  it("defines an idempotent scroll-lock snapshot contract", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /type DrawerScrollLockSnapshot = \{/);
+    assert.match(drawer, /rootScrollBehavior: string/);
+    assert.match(
+      drawer,
+      /useRef<DrawerScrollLockSnapshot \| null>\(null\)/,
+    );
+    assert.match(drawer, /if \(scrollLockSnapshotRef\.current\) return/);
+    assert.match(drawer, /const unlockPageScroll = useCallback/);
+    assert.match(drawer, /if \(!snapshot\) return/);
+    assert.match(drawer, /body\.style\.overflow = "hidden"/);
+    assert.match(drawer, /root\.style\.overflow = "hidden"/);
+    assert.match(drawer, /body\.style\.position = "fixed"/);
+    assert.match(drawer, /body\.style\.top = `-\$\{scrollY\}px`/);
+    assert.match(drawer, /body\.style\.overflow = snapshot\.bodyOverflow/);
+    assert.match(
+      drawer,
+      /body\.style\.paddingRight = snapshot\.bodyPaddingRight/,
+    );
+    assert.match(drawer, /body\.style\.position = snapshot\.bodyPosition/);
+    assert.match(drawer, /body\.style\.top = snapshot\.bodyTop/);
+    assert.match(drawer, /root\.style\.overflow = snapshot\.rootOverflow/);
+    assert.match(drawer, /scrollLockSnapshotRef\.current = null/);
+    assert.match(drawer, /removeEventListener\("keydown", onKeyDown\)/);
+  });
+
+  it("statically contracts layout-phase scroll restore before focus return", () => {
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(drawer, /useLayoutEffect/);
+    assert.match(drawer, /root\.style\.scrollBehavior = "auto"/);
+    assert.match(
+      drawer,
+      /document\.scrollingElement as HTMLElement \| null/,
+    );
+    assert.match(drawer, /behavior: "auto"/);
+    assert.match(
+      drawer,
+      /scrollingElement\.scrollTop = snapshot\.scrollY/,
+    );
+    assert.match(
+      drawer,
+      /root\.style\.scrollBehavior = snapshot\.rootScrollBehavior/,
+    );
+    assert.doesNotMatch(drawer, /setTimeout|requestAnimationFrame/);
+
+    const closedBranch = drawer.slice(
+      drawer.indexOf("if (!wasOpenRef.current) return;"),
+    );
+    const unlockIndex = closedBranch.indexOf("unlockPageScroll();");
+    const focusIndex = closedBranch.indexOf(
+      "menuButtonRef.current?.focus({ preventScroll: true });",
+    );
+    assert.ok(unlockIndex >= 0, "closed branch unlocks page scroll");
+    assert.ok(focusIndex > unlockIndex, "focus return follows scroll unlock");
   });
 
   it("lists required public routes in the mobile drawer config", () => {
@@ -84,10 +171,26 @@ describe("PR-MOB-A global mobile nav drawer", () => {
     assert.match(drawer, /isNavItemActive/);
   });
 
-  it("closes the drawer when a route link is selected", () => {
+  it("restores focus for the exact current route and preserves navigation focus otherwise", () => {
     const drawer = read("components/navigation/mobile-nav-drawer.tsx");
-    assert.match(drawer, /onNavigate=\{closeDrawer\}/);
+    assert.match(drawer, /function normalizeDrawerPath\(path: string\)/);
+    assert.match(drawer, /path\.replace\(\/\\\/\+\$\/, ""\)/);
+    assert.match(drawer, /function isSameDrawerDestination/);
+    assert.match(drawer, /isSameDrawerDestination\(pathname, href\)/);
+    assert.match(drawer, /\? closeDrawer\s*:\s*closeDrawerForNavigation/);
+    assert.match(drawer, /onNavigate=\{getDrawerNavigationHandler\(item\.href\)\}/);
     assert.match(drawer, /onClick=\{onNavigate\}/);
+  });
+
+  it("lets the brand shrink while preserving the mobile trigger touch target", () => {
+    const header = read("components/header.tsx");
+    const drawer = read("components/navigation/mobile-nav-drawer.tsx");
+    assert.match(header, /flex min-w-0 items-center gap-3 overflow-hidden rounded-lg/);
+    assert.doesNotMatch(header, /flex min-w-0 shrink-0 items-center gap-3/);
+    assert.match(header, /flex shrink-0 items-center gap-2/);
+    assert.match(header, /max-sm:hidden min-h-10 sm:inline-flex/);
+    assert.match(header, /block truncate text-xs font-semibold/);
+    assert.match(drawer, /touchTargets\.iconButton/);
   });
 
   it("does not expose forbidden copy or admin links in the public drawer", () => {
@@ -123,7 +226,7 @@ describe("PR-MOB-A global mobile nav drawer", () => {
 
   it("drawer width and touch targets meet mobile usability baseline", () => {
     const drawer = read("components/navigation/mobile-nav-drawer.tsx");
-    assert.match(drawer, /w-\[min\(360px,100vw\)\]/);
+    assert.match(drawer, /w-\[min\(360px,100dvw\)\]/);
     assert.match(drawer, /min-h-11/);
   });
 
