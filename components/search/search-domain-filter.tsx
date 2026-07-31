@@ -42,7 +42,7 @@ export function SearchDomainFilter({
         return (
           <Link
             aria-current={isActive ? "page" : undefined}
-            className={`min-h-9 shrink-0 rounded-full border px-3 text-xs font-semibold transition ${
+            className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 text-xs font-semibold transition ${
               isActive
                 ? "border-[#102235] bg-[#102235] text-white"
                 : "border-[#d9c9a8] bg-white text-[#4f5661] hover:bg-[#f7f1e5]"

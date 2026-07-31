@@ -6,16 +6,11 @@ import {
 import { SearchDomainFilter } from "@/components/search/search-domain-filter";
 import { SearchEmptyPanel } from "@/components/search/search-empty-panel";
 import { SearchIdlePanel } from "@/components/search/search-idle-panel";
-import {
-  SEARCH_FORM_FRESHNESS_NOTICE,
-  SEARCH_FORM_PLACEHOLDER,
-  SEARCH_IDLE_PII_NOTICE,
-} from "@/lib/search/constants";
+import { SearchQueryForm } from "@/components/search/search-query-form";
 import {
   SEARCH_DOMAIN_LABEL,
 } from "@/lib/search/labels";
 import {
-  domainToQueryParam,
   parsePublicSearchDomain,
 } from "@/lib/search/query-validation";
 import { getWorkToolsAccess } from "@/lib/auth/access";
@@ -38,6 +33,7 @@ export const metadata = {
 interface SearchParams {
   q?: string;
   domain?: string;
+  focus?: string;
 }
 
 export default async function SearchPage({
@@ -79,46 +75,15 @@ export default async function SearchPage({
         title="통합 검색"
       />
 
-      <ContentSection>
-        <div className="mx-auto max-w-3xl space-y-6">
+      <ContentSection className="w-full">
+        <div className="mx-auto w-full min-w-0 max-w-3xl space-y-6">
           <DataResponsibilityInlineNotice variant="search" />
 
-          <form
-            action="/search"
-            className="rounded-xl border border-[#d9c9a8] bg-white p-4 shadow-sm"
-            method="get"
-            role="search"
-          >
-            <label className="block text-sm font-semibold text-[#102235]">
-              검색어
-            </label>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <input
-                aria-label="검색어"
-                className="min-h-11 flex-1 rounded-md border border-[#d9c9a8] px-3 text-sm text-[#102235] outline-none focus-visible:border-[#aa8137] focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
-                defaultValue={rawQuery}
-                maxLength={60}
-                name="q"
-                placeholder={SEARCH_FORM_PLACEHOLDER}
-                type="search"
-              />
-              <input
-                name="domain"
-                type="hidden"
-                value={domainToQueryParam(domain)}
-              />
-              <button
-                className="min-h-11 rounded-md bg-[#102235] px-5 text-sm font-semibold text-white hover:bg-[#1b344e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F1D2E]/35 focus-visible:ring-offset-2"
-                type="submit"
-              >
-                검색
-              </button>
-            </div>
-            <p className="mt-2 text-xs leading-5 text-[#5f6670]">
-              {SEARCH_IDLE_PII_NOTICE} {SEARCH_FORM_FRESHNESS_NOTICE}{" "}
-              보험금 지급·청구 가능 여부 판단 검색은 제공하지 않습니다.
-            </p>
-          </form>
+          <SearchQueryForm
+            domain={domain}
+            focusOnMount={resolved.focus === "search" && !rawQuery}
+            query={rawQuery}
+          />
 
           <SearchDomainFilter activeDomain={domain} query={rawQuery} />
 
@@ -153,6 +118,8 @@ export default async function SearchPage({
           {showEmpty ? (
             <SearchEmptyPanel
               domainFilterLabel={emptyDomainLabel}
+              hasActiveFilter={domain !== "all"}
+              query={rawQuery}
               showWorkLinkNote={domain === "work_link" || domain === "all"}
             />
           ) : null}
